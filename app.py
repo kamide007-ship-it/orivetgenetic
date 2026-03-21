@@ -22,7 +22,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
 
 ALLOWED_PDF_EXT = {".pdf"}
-ALLOWED_IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".tiff"}
+ALLOWED_IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".heic", ".heif"}
 
 # Import analysis modules
 from poodle_genetics import (
@@ -72,8 +72,13 @@ def analyze():
 
     # --- Pedigree images ---
     pedigree_files = request.files.getlist("pedigree_files")
+    ocr_errors = []
     for f in pedigree_files:
-        if f and f.filename and allowed_file(f.filename, ALLOWED_IMG_EXT):
+        if f and f.filename:
+            if not allowed_file(f.filename, ALLOWED_IMG_EXT):
+                ext = os.path.splitext(f.filename)[1].lower()
+                ocr_errors.append(f"{f.filename}: サポートされていない画像形式です（{ext}）")
+                continue
             safe_name = f"{uuid.uuid4().hex[:8]}_{f.filename}"
             path = os.path.join(session_upload, safe_name)
             f.save(path)
@@ -83,6 +88,15 @@ def analyze():
                     ped = parse_jkc_pedigree_text(text)
                     if ped and ped.dog_name:
                         pedigrees.append(ped)
+                    else:
+                        ocr_errors.append(f"{f.filename}: 血統書データの解析に失敗しました")
+                else:
+                    ocr_errors.append(f"{f.filename}: 画像からテキストを読み取れませんでした")
+            else:
+                ocr_errors.append(f"{f.filename}: OCR機能が利用できません（pytesseract未インストール）")
+
+    for err in ocr_errors:
+        flash(err, "warning")
 
     # --- Demo pedigree option ---
     use_demo = request.form.get("use_demo")

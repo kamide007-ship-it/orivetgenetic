@@ -164,8 +164,15 @@ def try_ocr(image_path: str) -> str:
     try:
         import pytesseract
         from PIL import Image
+        try:
+            from pillow_heif import register_heif_opener
+            register_heif_opener()
+        except ImportError:
+            pass
         img = Image.open(image_path)
-        # Try both Japanese and English
+        # HEIC/WEBP等をRGBに変換してTesseractが処理できるようにする
+        if img.mode not in ("RGB", "L"):
+            img = img.convert("RGB")
         text = pytesseract.image_to_string(img, lang='jpn+eng')
         return text
     except ImportError:
