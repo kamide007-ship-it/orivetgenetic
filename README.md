@@ -101,18 +101,17 @@ python app.py
 
 ### 2. Web Service を作成
 
+Dockerfileが含まれているため、Renderは自動的にDockerランタイムを検出します。
+
 | 設定項目 | 値 |
 |---|---|
-| **Environment** | Python |
-| **Build Command** | `pip install -r requirements.txt` |
-| **Start Command** | `gunicorn app:app` |
+| **Environment** | Docker（自動検出） |
 
 ### 3. 環境変数
 
 | 環境変数 | 説明 | 設定方法 |
 |---|---|---|
 | `SECRET_KEY` | Flaskセッション用の秘密鍵 | Renderの「Generate」ボタンで自動生成 |
-| `PYTHON_VERSION` | Pythonバージョン | `3.11.0` |
 
 > `render.yaml` が含まれているため、「Blueprint」からデプロイすると上記設定が自動的に適用されます。
 
@@ -120,10 +119,7 @@ python app.py
 
 GitHubにプッシュすると自動デプロイされます。または Render ダッシュボードから手動デプロイも可能です。
 
-### 注意事項
-
-- **血統書OCR機能**はRender上では使用できません（Tesseract OCRのインストールが必要なため）。遺伝子検査PDF解析とデモ用血統書データは利用可能です。
-- OCR機能もデプロイしたい場合は、Docker環境での構築が必要です。
+Dockerイメージに Tesseract OCR（日本語・英語）が含まれているため、**血統書OCR機能もRender上で利用可能**です。
 
 ## ライセンス
 
