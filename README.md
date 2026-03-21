@@ -14,14 +14,14 @@
 
 | ファイル | 説明 |
 |---|---|
+| `app.py` | Flask Webアプリ（Render対応） |
 | `poodle_genetics.py` | 遺伝子検査＋血統分析の統合CLIツール |
 | `orivet_analyzer.py` | Orivet遺伝子検査PDFの解析モジュール |
 | `pedigree_ocr.py` | JKC血統書のOCR解析モジュール |
 | `breeding_simulator.html` | ブラウザベースの繁殖シミュレーター |
-| `orivet_report.html` | 遺伝子検査レポート（生成済みサンプル） |
-| `orivet_genetic_report.html` | 遺伝子検査詳細レポート（生成済みサンプル） |
-| `pedigree_report.html` | 血統・COIレポート（生成済みサンプル） |
-| `poodle_report.html` | 統合レポート（生成済みサンプル） |
+| `templates/` | Webアプリ用HTMLテンプレート |
+| `requirements.txt` | Python依存ライブラリ |
+| `render.yaml` | Renderデプロイ設定 |
 
 ## 必要な環境
 
@@ -83,6 +83,47 @@ python poodle_genetics.py demo
 | < 6.25% | 低（緑） |
 | 6.25% 〜 12.5% | 中（黄） |
 | > 12.5% | 高（赤） |
+
+## Webアプリ（ローカル起動）
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+ブラウザで `http://localhost:5000` を開くと、PDFや血統書画像をアップロードして解析できます。
+
+## Render へのデプロイ
+
+### 1. Render にサインアップ
+
+[Render](https://render.com) でアカウントを作成し、GitHubリポジトリを連携します。
+
+### 2. Web Service を作成
+
+| 設定項目 | 値 |
+|---|---|
+| **Environment** | Python |
+| **Build Command** | `pip install -r requirements.txt` |
+| **Start Command** | `gunicorn app:app` |
+
+### 3. 環境変数
+
+| 環境変数 | 説明 | 設定方法 |
+|---|---|---|
+| `SECRET_KEY` | Flaskセッション用の秘密鍵 | Renderの「Generate」ボタンで自動生成 |
+| `PYTHON_VERSION` | Pythonバージョン | `3.11.0` |
+
+> `render.yaml` が含まれているため、「Blueprint」からデプロイすると上記設定が自動的に適用されます。
+
+### 4. デプロイ
+
+GitHubにプッシュすると自動デプロイされます。または Render ダッシュボードから手動デプロイも可能です。
+
+### 注意事項
+
+- **血統書OCR機能**はRender上では使用できません（Tesseract OCRのインストールが必要なため）。遺伝子検査PDF解析とデモ用血統書データは利用可能です。
+- OCR機能もデプロイしたい場合は、Docker環境での構築が必要です。
 
 ## ライセンス
 
