@@ -153,6 +153,15 @@
             margin-bottom: 20px;
             font-size: 0.9em;
         }
+        .flash-warning {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            color: #92400e;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+        }
         .status-badge {
             display: inline-block;
             padding: 2px 8px;
@@ -192,7 +201,7 @@
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
-        <div class="flash-error">{{ message }}</div>
+        <div class="flash-{{ category }}">{{ message }}</div>
         {% endfor %}
         {% endwith %}
 
@@ -227,17 +236,12 @@
                 </div>
                 <p class="section-desc">JKC血統証明書の写真をアップロードしてください（複数可）</p>
                 <div class="upload-area" id="imgArea">
-                    <input type="file" name="pedigree_files" multiple accept=".jpg,.jpeg,.png,.bmp,.tiff" id="imgInput">
+                    <input type="file" name="pedigree_files" multiple accept=".jpg,.jpeg,.png,.bmp,.tiff,.webp,.heic,.heif" id="imgInput">
                     <div class="upload-icon">📷</div>
                     <div class="upload-label">画像ファイルをドロップまたはクリック</div>
-                    <div class="upload-hint">.jpg / .png / .bmp / .tiff</div>
+                    <div class="upload-hint">.jpg / .png / .heic / .webp / .bmp / .tiff</div>
                 </div>
                 <ul class="file-list" id="imgList"></ul>
-            </div>
-
-            <div class="checkbox-row">
-                <input type="checkbox" name="use_demo" value="1" id="demoCheck">
-                <label for="demoCheck">デモ用血統書データ（SMASH JP SEVEN NIGHT）を含める</label>
             </div>
 
             <div style="margin-top: 24px;">

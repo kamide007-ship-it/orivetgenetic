@@ -7,6 +7,7 @@ RUN apt-get update && \
         tesseract-ocr-jpn \
         tesseract-ocr-eng \
         libgl1 \
+        libheif-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
