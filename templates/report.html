@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>解析レポート - Poodle Genetics Suite</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+            background: #f3f4f6;
+        }
+        .toolbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .toolbar a, .toolbar button {
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toolbar a:hover, .toolbar button:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .toolbar .title {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1em;
+            border: none;
+            background: none;
+            padding: 0;
+        }
+        .report-frame {
+            width: 100%;
+            border: none;
+            min-height: calc(100vh - 52px);
+        }
+    </style>
+</head>
+<body>
+    <div class="toolbar">
+        <span class="title">Poodle Genetics Suite - レポート</span>
+        <div>
+            {% if xlsx_exists %}
+            <a href="/download/{{ session_id }}/report.xlsx">Excel ダウンロード</a>
+            {% endif %}
+            <a href="/">新しい解析</a>
+        </div>
+    </div>
+    <iframe class="report-frame" srcdoc="{{ report_html | e }}"></iframe>
+</body>
+</html>
