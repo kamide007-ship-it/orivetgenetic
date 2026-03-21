@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>トイプードル繁殖シミュレーター</title>
+<style>
+:root { --purple:#4a1a7a; --pink:#e6007e; --green:#22c55e; --yellow:#eab308; --red:#ef4444; --blue:#3b82f6; --gray:#6b7280; --bg:#f8f9fa; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif; background:var(--bg); color:#1f2937; line-height:1.6; }
+.container { max-width:1200px; margin:0 auto; padding:20px; }
+header { background:linear-gradient(135deg,var(--purple),var(--pink)); color:white; padding:24px 0; border-radius:0 0 20px 20px; margin-bottom:24px; }
+header h1 { font-size:1.6em; }
+header p { opacity:0.85; font-size:0.9em; margin-top:4px; }
+
+/* Tabs */
+.tabs { display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+.tab { padding:10px 18px; border-radius:10px 10px 0 0; cursor:pointer; font-weight:600; border:2px solid #e5e7eb; border-bottom:none; background:white; transition:all 0.2s; font-size:0.9em; }
+.tab:hover { background:#f3e8ff; } .tab.active { background:var(--purple); color:white; border-color:var(--purple); }
+.tab-content { display:none; } .tab-content.active { display:block; }
+
+/* Cards */
+.card { background:white; border-radius:16px; padding:24px; margin-bottom:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+.card h2 { color:var(--purple); font-size:1.15em; margin-bottom:16px; padding-left:10px; border-left:4px solid var(--pink); }
+.card h3 { color:var(--purple); font-size:1em; margin:16px 0 10px; }
+
+/* Forms */
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.form-group { display:flex; flex-direction:column; gap:4px; }
+.form-group label { font-weight:600; font-size:0.85em; color:var(--gray); }
+select, input { padding:10px 12px; border:2px solid #e5e7eb; border-radius:8px; font-size:0.95em; font-family:inherit; }
+select:focus, input:focus { outline:none; border-color:var(--purple); }
+.btn { background:var(--purple); color:white; border:none; padding:12px 24px; border-radius:10px; cursor:pointer; font-weight:700; font-size:1em; transition:all 0.2s; }
+.btn:hover { background:var(--pink); transform:translateY(-1px); }
+.btn-secondary { background:#6b7280; }
+.btn-secondary:hover { background:#4b5563; }
+
+/* Results */
+.result-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:12px; margin:16px 0; }
+.result-item { text-align:center; padding:16px 8px; border-radius:12px; }
+.result-item .pct { font-size:1.8em; font-weight:800; }
+.result-item .lbl { font-size:0.8em; color:var(--gray); margin-top:4px; }
+.risk-low { background:#dcfce7; } .risk-low .pct { color:#166534; }
+.risk-med { background:#fef3c7; } .risk-med .pct { color:#92400e; }
+.risk-high { background:#fee2e2; } .risk-high .pct { color:#991b1b; }
+.info-box { background:#e0e7ff; border-radius:10px; padding:12px 16px; margin:8px 0; font-size:0.9em; color:#3730a3; }
+.warn-box { background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px 16px; margin:8px 0; font-size:0.9em; color:#991b1b; }
+.ok-box { background:#dcfce7; border:1px solid #86efac; border-radius:10px; padding:12px 16px; margin:8px 0; font-size:0.9em; color:#166534; }
+
+/* Color preview */
+.color-swatch { display:inline-block; width:28px; height:28px; border-radius:50%; border:2px solid #d1d5db; vertical-align:middle; margin-right:6px; }
+.color-bar { height:30px; border-radius:8px; margin:4px 0; display:flex; overflow:hidden; }
+.color-bar div { display:flex; align-items:center; justify-content:center; font-size:0.75em; font-weight:700; color:white; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
+
+/* Pedigree tree */
+.pedigree { display:flex; gap:20px; align-items:stretch; margin:16px 0; }
+.ped-col { flex:1; display:flex; flex-direction:column; gap:8px; justify-content:space-around; }
+.ped-node { background:white; border:2px solid #e5e7eb; border-radius:10px; padding:8px 12px; font-size:0.82em; text-align:center; min-height:40px; display:flex; align-items:center; justify-content:center; }
+.ped-node input { width:100%; border:none; text-align:center; font-size:0.85em; padding:4px; background:transparent; }
+.ped-node input:focus { outline:none; background:#faf5ff; }
+.ped-node.male { border-color:#3b82f6; background:#eff6ff; }
+.ped-node.female { border-color:#ec4899; background:#fdf2f8; }
+.ped-node.subject { border-color:var(--purple); background:#f3e8ff; font-weight:700; }
+.ped-connector { flex:0 0 20px; display:flex; flex-direction:column; justify-content:space-around; align-items:center; }
+.ped-connector div { width:2px; height:100%; background:#d1d5db; }
+
+/* COI gauge */
+.coi-gauge { width:100%; height:30px; background:#e5e7eb; border-radius:15px; overflow:hidden; margin:10px 0; position:relative; }
+.coi-fill { height:100%; border-radius:15px; transition:width 0.5s; display:flex; align-items:center; justify-content:flex-end; padding-right:10px; font-weight:700; font-size:0.85em; color:white; }
+.coi-marks { display:flex; justify-content:space-between; font-size:0.75em; color:var(--gray); padding:0 4px; }
+
+/* Table */
+table { width:100%; border-collapse:collapse; font-size:0.88em; }
+th { background:var(--purple); color:white; padding:10px; text-align:left; }
+td { padding:8px 10px; border-bottom:1px solid #f3f4f6; }
+tr:hover td { background:#faf5ff; }
+
+@media (max-width:768px) { .form-row { grid-template-columns:1fr; } .pedigree { flex-direction:column; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>トイプードル 繁殖シミュレーター</h1>
+    <p>毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出</p>
+  </div>
+</header>
+
+<div class="container">
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('color')">毛色シミュレーション</div>
+    <div class="tab" onclick="showTab('health')">健康リスク分析</div>
+    <div class="tab" onclick="showTab('coi')">近親交配係数 (COI)</div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- TAB 1: COLOR SIMULATION -->
+  <!-- ================================================================ -->
+  <div id="color" class="tab-content active">
+    <div class="card">
+      <h2>交配ペア選択 — 毛色配合シミュレーション</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>父犬 (Sire)</label>
+          <select id="sire-color" onchange="runColorSim()">
+            <option value="seven">Seven (E/e, KB/ky, at/at, Bb, D/D, m/m, S/S)</option>
+            <option value="custom">カスタム入力...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>母犬 (Dam)</label>
+          <select id="dam-color" onchange="runColorSim()">
+            <option value="angel">Angel Of Music (e/e, K/K, at/at, Bb, D/D, m/m, S/S)</option>
+            <option value="phantom">White Phantom (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
+            <option value="lapi">Lapi (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
+            <option value="custom">カスタム入力...</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Custom genotype inputs (hidden by default) -->
+      <div id="custom-sire" style="display:none;" class="card" style="background:#f9fafb;">
+        <h3>父犬カスタム遺伝子型</h3>
+        <div class="form-row">
+          <div class="form-group"><label>E Locus</label><select id="cs-e"><option value="EE">E/E</option><option value="Ee" selected>E/e</option><option value="ee">e/e</option></select></div>
+          <div class="form-group"><label>K Locus</label><select id="cs-k"><option value="KBKB">KB/KB</option><option value="KBky" selected>KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>A Locus</label><select id="cs-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="atat" selected>at/at</option><option value="aa">a/a</option></select></div>
+          <div class="form-group"><label>B Locus</label><select id="cs-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>D Locus</label><select id="cs-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
+          <div class="form-group"><label>M Locus</label><select id="cs-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>S (Pied)</label><select id="cs-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
+        </div>
+      </div>
+
+      <div id="custom-dam" style="display:none;" class="card">
+        <h3>母犬カスタム遺伝子型</h3>
+        <div class="form-row">
+          <div class="form-group"><label>E Locus</label><select id="cd-e"><option value="EE">E/E</option><option value="Ee">E/e</option><option value="ee" selected>e/e</option></select></div>
+          <div class="form-group"><label>K Locus</label><select id="cd-k"><option value="KBKB" selected>KB/KB</option><option value="KBky">KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>A Locus</label><select id="cd-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="atat" selected>at/at</option><option value="aa">a/a</option></select></div>
+          <div class="form-group"><label>B Locus</label><select id="cd-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>D Locus</label><select id="cd-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
+          <div class="form-group"><label>M Locus</label><select id="cd-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>S (Pied)</label><select id="cd-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="runColorSim()">シミュレーション実行</button>
+    </div>
+
+    <div id="color-results" class="card" style="display:none;">
+      <h2>毛色予測結果</h2>
+      <div id="color-output"></div>
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- TAB 2: HEALTH RISK -->
+  <!-- ================================================================ -->
+  <div id="health" class="tab-content">
+    <div class="card">
+      <h2>健康リスク繁殖シミュレーション</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <label>父犬 (Sire)</label>
+          <select id="sire-health" onchange="runHealthSim()">
+            <option value="seven">Seven</option>
+            <option value="custom_h">カスタム入力...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>母犬 (Dam)</label>
+          <select id="dam-health" onchange="runHealthSim()">
+            <option value="angel">Angel Of Music</option>
+            <option value="phantom">White Phantom</option>
+            <option value="lapi">Lapi</option>
+            <option value="custom_h">カスタム入力...</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn" onclick="runHealthSim()">健康リスク分析</button>
+    </div>
+    <div id="health-results" class="card" style="display:none;">
+      <h2>子犬の健康リスク予測</h2>
+      <div id="health-output"></div>
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- TAB 3: COI -->
+  <!-- ================================================================ -->
+  <div id="coi" class="tab-content">
+    <div class="card">
+      <h2>近親交配係数 (COI) 算出</h2>
+      <p style="color:var(--gray); font-size:0.9em; margin-bottom:16px;">
+        3世代（曾祖父母まで）の血統情報を入力して、Wright's Coefficient of Inbreeding を算出します。<br>
+        同じ祖先が父方・母方の両方に出現する場合、COIが上昇します。
+      </p>
+
+      <h3>対象犬</h3>
+      <div class="form-row">
+        <div class="form-group"><label>対象犬の名前</label><input id="coi-name" value="計画中の子犬"></div>
+      </div>
+
+      <h3>父方 (Sire's Side)</h3>
+      <div class="pedigree">
+        <div class="ped-col">
+          <div class="ped-node male"><input id="p-sire" placeholder="父犬" value="Seven"></div>
+        </div>
+        <div class="ped-col">
+          <div class="ped-node male"><input id="p-ss" placeholder="父方祖父"></div>
+          <div class="ped-node female"><input id="p-sd" placeholder="父方祖母"></div>
+        </div>
+        <div class="ped-col">
+          <div class="ped-node male"><input id="p-sss" placeholder="父方曾祖父1"></div>
+          <div class="ped-node female"><input id="p-ssd" placeholder="父方曾祖母1"></div>
+          <div class="ped-node male"><input id="p-sds" placeholder="父方曾祖父2"></div>
+          <div class="ped-node female"><input id="p-sdd" placeholder="父方曾祖母2"></div>
+        </div>
+      </div>
+
+      <h3>母方 (Dam's Side)</h3>
+      <div class="pedigree">
+        <div class="ped-col">
+          <div class="ped-node female"><input id="p-dam" placeholder="母犬" value=""></div>
+        </div>
+        <div class="ped-col">
+          <div class="ped-node male"><input id="p-ds" placeholder="母方祖父"></div>
+          <div class="ped-node female"><input id="p-dd" placeholder="母方祖母"></div>
+        </div>
+        <div class="ped-col">
+          <div class="ped-node male"><input id="p-dss" placeholder="母方曾祖父1"></div>
+          <div class="ped-node female"><input id="p-dsd" placeholder="母方曾祖母1"></div>
+          <div class="ped-node male"><input id="p-dds" placeholder="母方曾祖父2"></div>
+          <div class="ped-node female"><input id="p-ddd" placeholder="母方曾祖母2"></div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="calcCOI()">COI算出</button>
+    </div>
+
+    <div id="coi-results" class="card" style="display:none;">
+      <h2>近親交配係数 (COI) 結果</h2>
+      <div id="coi-output"></div>
+    </div>
+
+    <div class="card">
+      <h2>COI 参考基準</h2>
+      <table>
+        <tr><th>COI値</th><th>評価</th><th>説明</th></tr>
+        <tr><td style="color:#166534;font-weight:700;">0% ~ 6.25%</td><td>良好</td><td>一般的に安全な範囲。遺伝的多様性が保たれている</td></tr>
+        <tr><td style="color:#92400e;font-weight:700;">6.25% ~ 12.5%</td><td>注意</td><td>いとこ交配レベル。健康リスクがやや上昇</td></tr>
+        <tr><td style="color:#dc2626;font-weight:700;">12.5% ~ 25%</td><td>高リスク</td><td>叔父姪/半兄妹交配レベル。免疫低下・繁殖力低下のリスク</td></tr>
+        <tr><td style="color:#dc2626;font-weight:700;">25%以上</td><td>極めて高リスク</td><td>兄妹/親子交配レベル。重大な健康問題のリスク</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// DOG DATA
+// ================================================================
+const DOGS = {
+  seven: {
+    name: "Seven", sex: "male",
+    color: { e:"Ee", k:"KBky", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "PP",
+      "Osteochondrodysplasia": "NN",
+      "CDPA": "NN",
+      "Macrothrombocytopenia": "NN",
+      "Methemoglobinemia": "NN",
+      "vWD1": "NN",
+      "DM": "NN",
+      "GM2": "NN",
+      "prcd-PRA": "NN"
+    }
+  },
+  angel: {
+    name: "Angel Of Music", sex: "female",
+    color: { e:"ee", k:"KBKB", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "PN",
+      "Osteochondrodysplasia": "NN",
+      "CDPA": "NN",
+      "Macrothrombocytopenia": "NN",
+      "Methemoglobinemia": "NN",
+      "vWD1": "NN",
+      "DM": "NN",
+      "GM2": "NN",
+      "prcd-PRA": "NN"
+    }
+  },
+  phantom: {
+    name: "White Phantom", sex: "female",
+    color: { e:"ee", k:"KBky", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "PN",
+      "Osteochondrodysplasia": "NN",
+      "CDPA": "NN",
+      "Macrothrombocytopenia": "NN",
+      "Methemoglobinemia": "NN",
+      "vWD1": "NN",
+      "DM": "NN",
+      "GM2": "NN",
+      "prcd-PRA": "NN"
+    }
+  },
+  lapi: {
+    name: "Lapi", sex: "female",
+    color: { e:"ee", k:"KBky", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "PP",
+      "Osteochondrodysplasia": "NN",
+      "CDPA": "NN",
+      "Macrothrombocytopenia": "NN",
+      "Methemoglobinemia": "NN",
+      "vWD1": "NN",
+      "DM": "NN",
+      "GM2": "NN",
+      "prcd-PRA": "NN"
+    }
+  }
+};
+
+const HEALTH_JP = {
+  "CDDY+IVDD": "軟骨異栄養症+椎間板疾患リスク",
+  "Osteochondrodysplasia": "骨軟骨異形成症",
+  "CDPA": "軟骨異形成症",
+  "Macrothrombocytopenia": "先天性巨大血小板減少症",
+  "Methemoglobinemia": "先天性メトヘモグロビン血症",
+  "vWD1": "フォンウィルブランド病 I型",
+  "DM": "変性性脊髄症",
+  "GM2": "ガングリオシドーシス GM2",
+  "prcd-PRA": "進行性網膜萎縮症"
+};
+
+// ================================================================
+// TAB SWITCHING
+// ================================================================
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ================================================================
+// MENDELIAN CROSS HELPER
+// ================================================================
+function cross(a1a2, b1b2) {
+  // Returns probability map: { "XX": 0.25, ... }
+  const a = splitAlleles(a1a2);
+  const b = splitAlleles(b1b2);
+  const results = {};
+  for (const aa of a) {
+    for (const bb of b) {
+      const sorted = [aa, bb].sort().join('');
+      results[sorted] = (results[sorted] || 0) + 0.25;
+    }
+  }
+  return results;
+}
+
+function splitAlleles(gt) {
+  // Split genotype into two alleles
+  const map = {
+    "EE":["E","E"], "Ee":["E","e"], "ee":["e","e"],
+    "DD":["D","D"], "Dd":["D","d"], "dd":["d","d"],
+    "BB":["B","B"], "Bb":["B","b"], "bb":["b","b"],
+    "SS":["S","S"], "Ssp":["S","sp"], "spsp":["sp","sp"],
+    "mm":["m","m"], "Mm":["M","m"], "MM":["M","M"],
+    "KBKB":["KB","KB"], "KBky":["KB","ky"], "KBkbr":["KB","kbr"],
+    "kyky":["ky","ky"], "kbrky":["kbr","ky"], "kbrkbr":["kbr","kbr"],
+    "ayay":["ay","ay"], "ayat":["ay","at"], "atat":["at","at"], "aa":["a","a"],
+    "NN":["N","N"], "PN":["P","N"], "PP":["P","P"],
+  };
+  return map[gt] || [gt[0], gt[1]];
+}
+
+// ================================================================
+// COLOR SIMULATION
+// ================================================================
+const COLOR_MAP = {
+  "black": { hex:"#1a1a1a", name:"ブラック" },
+  "brown": { hex:"#8B4513", name:"ブラウン/チョコレート" },
+  "blue": { hex:"#4a6fa5", name:"ブルー" },
+  "cream": { hex:"#FFF8DC", name:"クリーム/ホワイト" },
+  "apricot": { hex:"#FBCEB1", name:"アプリコット" },
+  "red": { hex:"#CD5C5C", name:"レッド" },
+  "silver": { hex:"#C0C0C0", name:"シルバー" },
+  "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ" },
+  "phantom_black": { hex:"#2d2d2d", name:"ファントム(ブラック)" },
+  "phantom_brown": { hex:"#A0522D", name:"ファントム(ブラウン)" },
+  "brindle": { hex:"#8B7355", name:"ブリンドル" },
+  "parti": { hex:"#ffffff", name:"パーティカラー" },
+  "merle": { hex:"#9FB6CD", name:"マール" },
+};
+
+function runColorSim() {
+  const sireKey = document.getElementById('sire-color').value;
+  const damKey = document.getElementById('dam-color').value;
+
+  document.getElementById('custom-sire').style.display = sireKey === 'custom' ? 'block' : 'none';
+  document.getElementById('custom-dam').style.display = damKey === 'custom' ? 'block' : 'none';
+
+  let sire, dam;
+  if (sireKey === 'custom') {
+    sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s') };
+  } else {
+    sire = DOGS[sireKey].color;
+  }
+  if (damKey === 'custom') {
+    dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s') };
+  } else {
+    dam = DOGS[damKey].color;
+  }
+
+  const eResult = cross(sire.e, dam.e);
+  const kResult = cross(sire.k, dam.k);
+  const aResult = cross(sire.a, dam.a);
+  const bResult = cross(sire.b, dam.b);
+  const dResult = cross(sire.d, dam.d);
+  const mResult = cross(sire.m, dam.m);
+  const sResult = cross(sire.s, dam.s);
+
+  // Determine phenotype probabilities
+  const phenotypes = {};
+
+  // ee = cream/apricot/white (E locus overrides everything)
+  const pEE = (eResult["EE"] || 0);
+  const pEe = (eResult["Ee"] || 0);
+  const pee = (eResult["ee"] || 0);
+
+  // Within ee dogs: color depends on B and D for shade
+  // ee + BB/Bb = cream/white, ee + bb = slightly different shade but still cream-like
+  // D/D = normal, D/d or d/d = dilute
+
+  // For E_ dogs: K locus determines if agouti shows
+  const pKBKB = kResult["KBKB"] || 0;
+  const pKBky = kResult["KBky"] || 0;
+  const pKBkbr = kResult["KBkbr"] || 0;
+  const pkyky = kResult["kyky"] || 0;
+  const pkbrky = kResult["kbrky"] || kResult["kbrky"] || 0;
+  const pkbrkbr = kResult["kbrkbr"] || 0;
+
+  const pBB = bResult["BB"] || 0;
+  const pBb = bResult["Bb"] || 0;
+  const pbb = bResult["bb"] || 0;
+  const pB_ = pBB + pBb;
+
+  const pDD = dResult["DD"] || 0;
+  const pDd = dResult["Dd"] || 0;
+  const pdd = dResult["dd"] || 0;
+  const pD_ = pDD + pDd;
+
+  const pMm = mResult["Mm"] || 0;
+  const pMM = mResult["MM"] || 0;
+  const pmm = mResult["mm"] || 0;
+
+  const pSS = sResult["SS"] || 0;
+  const pSsp = sResult["Ssp"] || sResult["Ssp"] || 0;
+  const pspsp = sResult["spsp"] || 0;
+
+  // A locus for agouti expression
+  const payay = aResult["ayay"] || 0;
+  const payat = aResult["ayat"] || 0;
+  const patat = aResult["atat"] || 0;
+  const paa = aResult["aa"] || 0;
+
+  // Solid (KB_) probability
+  const pKB_ = pKBKB + pKBky + pKBkbr;
+
+  // E_ = can express black/brown pigment
+  const pE_ = pEE + pEe;
+
+  // Calculate color outcomes
+  const results = [];
+
+  // 1. ee dogs → Cream / Apricot / White
+  if (pee > 0) {
+    const creamProb = pee;
+    // Sub-variations by B and D
+    if (pB_ > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pB_ * pD_, note:"クリーム/ホワイト/アプリコット (ee, B_, D_)" });
+    if (pB_ > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pB_ * pdd, note:"クリーム(希釈) (ee, B_, dd)" });
+    if (pbb > 0 && pD_ > 0) results.push({ color:"apricot", prob: creamProb * pbb * pD_, note:"アプリコット/クリーム (ee, bb, D_)" });
+    if (pbb > 0 && pdd > 0) results.push({ color:"cafe_au_lait", prob: creamProb * pbb * pdd, note:"薄クリーム (ee, bb, dd)" });
+  }
+
+  // 2. E_ + KB_ → Solid black or brown
+  if (pE_ > 0 && pKB_ > 0) {
+    const solidProb = pE_ * pKB_;
+    if (pB_ > 0 && pD_ > 0) results.push({ color:"black", prob: solidProb * pB_ * pD_, note:"ブラック (E_, KB_, B_, D_)" });
+    if (pB_ > 0 && pdd > 0) results.push({ color:"blue", prob: solidProb * pB_ * pdd, note:"ブルー (E_, KB_, B_, dd)" });
+    if (pbb > 0 && pD_ > 0) results.push({ color:"brown", prob: solidProb * pbb * pD_, note:"ブラウン/チョコ (E_, KB_, bb, D_)" });
+    if (pbb > 0 && pdd > 0) results.push({ color:"cafe_au_lait", prob: solidProb * pbb * pdd, note:"カフェオレ (E_, KB_, bb, dd)" });
+  }
+
+  // 3. E_ + ky/ky → Agouti shows (phantom/tan point)
+  if (pE_ > 0 && pkyky > 0) {
+    const agoutiProb = pE_ * pkyky;
+    if ((patat + paa) > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"phantom_black", prob: agoutiProb * (patat+paa) * pB_ * pD_, note:"ファントム/タンポイント(ブラック) (E_, ky/ky, at_, B_, D_)" });
+    if ((patat + paa) > 0 && pbb > 0 && pD_ > 0) results.push({ color:"phantom_brown", prob: agoutiProb * (patat+paa) * pbb * pD_, note:"ファントム(ブラウン) (E_, ky/ky, at_, bb, D_)" });
+    if ((payay + payat) > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"red", prob: agoutiProb * (payay+payat) * pB_ * pD_, note:"レッド/セーブル (E_, ky/ky, ay_, B_, D_)" });
+  }
+
+  // 4. Brindle (kbr)
+  if (pE_ > 0 && (pkbrky + pkbrkbr) > 0) {
+    const brProb = pE_ * (pkbrky + pkbrkbr);
+    if (brProb > 0) results.push({ color:"brindle", prob: brProb, note:"ブリンドル (E_, kbr_)" });
+  }
+
+  // 5. Merle modifier
+  if ((pMm + pMM) > 0) {
+    const merleProb = pMm + pMM;
+    // Add merle as modifier note
+    results.push({ color:"merle", prob: merleProb * pE_, note:"マールパターン (M_, E_) ※上記色にマールが加わる" });
+  }
+
+  // 6. Parti/Pied
+  if (pspsp > 0) {
+    results.push({ color:"parti", prob: pspsp, note:"パーティカラー (sp/sp) ※上記色+白斑パターン" });
+  }
+
+  // Filter and sort
+  const filtered = results.filter(r => r.prob > 0.001).sort((a,b) => b.prob - a.prob);
+
+  // Consolidate similar
+  const consolidated = {};
+  for (const r of filtered) {
+    if (!consolidated[r.color]) consolidated[r.color] = { prob:0, notes:[] };
+    consolidated[r.color].prob += r.prob;
+    consolidated[r.color].notes.push(`${(r.prob*100).toFixed(1)}% — ${r.note}`);
+  }
+
+  // Render
+  let html = '<div class="color-bar" style="height:50px;margin-bottom:16px;">';
+  const totalProb = Object.values(consolidated).reduce((s,c) => s + c.prob, 0);
+  for (const [key, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
+    const cm = COLOR_MAP[key];
+    const pct = (data.prob / totalProb * 100).toFixed(1);
+    const textColor = ['cream','apricot','parti','silver'].includes(key) ? '#333' : 'white';
+    html += `<div style="width:${pct}%;background:${cm.hex};color:${textColor}">${pct}%</div>`;
+  }
+  html += '</div>';
+
+  html += '<table><tr><th>毛色</th><th>確率</th><th>遺伝子型の詳細</th></tr>';
+  for (const [key, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
+    const cm = COLOR_MAP[key];
+    const pct = (data.prob / totalProb * 100).toFixed(1);
+    html += `<tr><td><span class="color-swatch" style="background:${cm.hex}"></span>${cm.name}</td>`;
+    html += `<td style="font-weight:700;font-size:1.1em">${pct}%</td>`;
+    html += `<td style="font-size:0.82em">${data.notes.join('<br>')}</td></tr>`;
+  }
+  html += '</table>';
+
+  // Genotype detail table
+  html += '<h3 style="margin-top:20px;">各遺伝子座の交配結果</h3><table>';
+  html += '<tr><th>遺伝子座</th><th>父犬</th><th>母犬</th><th>子犬の遺伝子型確率</th></tr>';
+  const loci = [
+    {name:"E Locus", s:sire.e, d:dam.e},
+    {name:"K Locus", s:sire.k, d:dam.k},
+    {name:"A Locus", s:sire.a, d:dam.a},
+    {name:"B Locus", s:sire.b, d:dam.b},
+    {name:"D Locus", s:sire.d, d:dam.d},
+    {name:"M Locus", s:sire.m, d:dam.m},
+    {name:"S (Pied)", s:sire.s, d:dam.s},
+  ];
+  for (const l of loci) {
+    const cx = cross(l.s, l.d);
+    const detail = Object.entries(cx).map(([g,p]) => `${g}: ${(p*100).toFixed(0)}%`).join(', ');
+    html += `<tr><td>${l.name}</td><td>${l.s}</td><td>${l.d}</td><td>${detail}</td></tr>`;
+  }
+  html += '</table>';
+
+  // Warnings
+  if ((pMm + pMM) > 0 && pMM > 0) {
+    html += '<div class="warn-box"><strong>警告: ダブルマール (M/M) リスク</strong><br>M/M の子犬が生まれる確率が ' + (pMM*100).toFixed(1) + '% あります。ダブルマールは聴覚・視覚障害のリスクが非常に高いため、この交配は推奨されません。</div>';
+  }
+
+  document.getElementById('color-results').style.display = 'block';
+  document.getElementById('color-output').innerHTML = html;
+}
+
+function v(id) { return document.getElementById(id).value; }
+
+// ================================================================
+// HEALTH SIMULATION
+// ================================================================
+function runHealthSim() {
+  const sireKey = document.getElementById('sire-health').value;
+  const damKey = document.getElementById('dam-health').value;
+
+  if (sireKey === 'custom_h' || damKey === 'custom_h') {
+    document.getElementById('health-results').style.display = 'block';
+    document.getElementById('health-output').innerHTML = '<div class="info-box">カスタム入力は、上の「毛色シミュレーション」タブと同様に各疾患の遺伝子型を入力する形式で、今後追加予定です。<br>現在は登録済みの4頭のデータから選択してください。</div>';
+    return;
+  }
+
+  const sire = DOGS[sireKey];
+  const dam = DOGS[damKey];
+
+  let html = `<p style="margin-bottom:16px;"><strong>${sire.name}</strong> (父) × <strong>${dam.name}</strong> (母) の交配結果予測</p>`;
+
+  html += '<table><tr><th>疾患</th><th>父犬</th><th>母犬</th><th>ノーマル (N/N)</th><th>キャリア (P/N)</th><th>ポジティブ (P/P)</th><th>評価</th></tr>';
+
+  let hasWarning = false;
+  let hasCarrierRisk = false;
+
+  for (const [disease, sireGT] of Object.entries(sire.health)) {
+    const damGT = dam.health[disease];
+    const jp = HEALTH_JP[disease] || disease;
+    const result = cross(sireGT, damGT);
+    const pNN = (result["NN"] || 0);
+    const pPN = (result["NP"] || 0) + (result["PN"] || 0);
+    const pPP = (result["PP"] || 0);
+
+    let badge = '';
+    if (pPP > 0.2) { badge = '<span style="color:#dc2626;font-weight:700;">危険</span>'; hasWarning = true; }
+    else if (pPP > 0) { badge = '<span style="color:#c2410c;font-weight:600;">注意</span>'; hasCarrierRisk = true; }
+    else if (pPN > 0) { badge = '<span style="color:#92400e;">キャリア可能性</span>'; }
+    else { badge = '<span style="color:#166534;">安全</span>'; }
+
+    const sireLabel = sireGT === "NN" ? "N/N" : sireGT === "PN" ? "P/N" : "P/P";
+    const damLabel = damGT === "NN" ? "N/N" : damGT === "PN" ? "P/N" : "P/P";
+
+    html += `<tr>
+      <td>${jp}</td>
+      <td>${sireLabel}</td>
+      <td>${damLabel}</td>
+      <td class="${pNN >= 1 ? 'risk-low' : ''}" style="text-align:center;font-weight:700;">${(pNN*100).toFixed(0)}%</td>
+      <td class="${pPN > 0 ? 'risk-med' : ''}" style="text-align:center;font-weight:700;">${(pPN*100).toFixed(0)}%</td>
+      <td class="${pPP > 0 ? 'risk-high' : ''}" style="text-align:center;font-weight:700;">${(pPP*100).toFixed(0)}%</td>
+      <td>${badge}</td>
+    </tr>`;
+  }
+  html += '</table>';
+
+  // Summary
+  if (hasWarning) {
+    html += '<div class="warn-box"><strong>警告:</strong> ポジティブ (P/P) の子犬が生まれる確率が高い項目があります。この交配は慎重に検討してください。繁殖相手のCDDY遺伝子型がN/Nの個体を探すことをお勧めします。</div>';
+  } else if (hasCarrierRisk) {
+    html += '<div class="info-box"><strong>注意:</strong> 一部の疾患でキャリアまたはポジティブの子犬が生まれる可能性があります。子犬の遺伝子検査を実施することをお勧めします。</div>';
+  } else {
+    html += '<div class="ok-box"><strong>良好:</strong> この交配組み合わせでは、検査済み疾患について全ての子犬がノーマルまたはキャリアの予測です。</div>';
+  }
+
+  document.getElementById('health-results').style.display = 'block';
+  document.getElementById('health-output').innerHTML = html;
+}
+
+// ================================================================
+// COI CALCULATION (Wright's method, 3 generations)
+// ================================================================
+function calcCOI() {
+  // Collect all ancestor names
+  const ancestors = {
+    sire: v('p-sire').trim().toLowerCase(),
+    ss: v('p-ss').trim().toLowerCase(),
+    sd: v('p-sd').trim().toLowerCase(),
+    sss: v('p-sss').trim().toLowerCase(),
+    ssd: v('p-ssd').trim().toLowerCase(),
+    sds: v('p-sds').trim().toLowerCase(),
+    sdd: v('p-sdd').trim().toLowerCase(),
+    dam: v('p-dam').trim().toLowerCase(),
+    ds: v('p-ds').trim().toLowerCase(),
+    dd: v('p-dd').trim().toLowerCase(),
+    dss: v('p-dss').trim().toLowerCase(),
+    dsd: v('p-dsd').trim().toLowerCase(),
+    dds: v('p-dds').trim().toLowerCase(),
+    ddd: v('p-ddd').trim().toLowerCase(),
+  };
+
+  // Build sire-side and dam-side ancestor lists with generation
+  const sireAncestors = [
+    { name: ancestors.sire, gen: 1 },
+    { name: ancestors.ss, gen: 2 },
+    { name: ancestors.sd, gen: 2 },
+    { name: ancestors.sss, gen: 3 },
+    { name: ancestors.ssd, gen: 3 },
+    { name: ancestors.sds, gen: 3 },
+    { name: ancestors.sdd, gen: 3 },
+  ];
+  const damAncestors = [
+    { name: ancestors.dam, gen: 1 },
+    { name: ancestors.ds, gen: 2 },
+    { name: ancestors.dd, gen: 2 },
+    { name: ancestors.dss, gen: 3 },
+    { name: ancestors.dsd, gen: 3 },
+    { name: ancestors.dds, gen: 3 },
+    { name: ancestors.ddd, gen: 3 },
+  ];
+
+  // Find common ancestors (Wright's formula: F = sum of [(1/2)^(n1+n2+1)] for each common ancestor)
+  let coi = 0;
+  const commonAncestors = [];
+
+  for (const sa of sireAncestors) {
+    if (!sa.name) continue;
+    for (const da of damAncestors) {
+      if (!da.name) continue;
+      if (sa.name === da.name) {
+        const contribution = Math.pow(0.5, sa.gen + da.gen + 1);
+        coi += contribution;
+        commonAncestors.push({
+          name: sa.name,
+          sireGen: sa.gen,
+          damGen: da.gen,
+          contribution: contribution
+        });
+      }
+    }
+  }
+
+  const coiPct = coi * 100;
+  const name = v('coi-name') || '対象犬';
+
+  let html = '';
+
+  // COI Gauge
+  let gaugeColor = '#22c55e';
+  let gaugeLabel = '良好';
+  if (coiPct > 25) { gaugeColor = '#dc2626'; gaugeLabel = '極めて高リスク'; }
+  else if (coiPct > 12.5) { gaugeColor = '#ef4444'; gaugeLabel = '高リスク'; }
+  else if (coiPct > 6.25) { gaugeColor = '#eab308'; gaugeLabel = '注意'; }
+
+  html += `<div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:2.5em;font-weight:800;color:${gaugeColor};">${coiPct.toFixed(2)}%</div>
+    <div style="font-size:1.1em;font-weight:700;color:${gaugeColor};">${gaugeLabel}</div>
+    <div style="color:var(--gray);font-size:0.9em;">${name} の近親交配係数 (Wright's COI)</div>
+  </div>`;
+
+  html += `<div class="coi-gauge"><div class="coi-fill" style="width:${Math.min(coiPct * 2, 100)}%;background:${gaugeColor};">${coiPct.toFixed(2)}%</div></div>`;
+  html += '<div class="coi-marks"><span>0%</span><span>6.25%</span><span>12.5%</span><span>25%</span><span>50%</span></div>';
+
+  // Common ancestors
+  if (commonAncestors.length > 0) {
+    html += '<h3 style="margin-top:20px;">検出された共通祖先</h3>';
+    html += '<table><tr><th>共通祖先名</th><th>父方での世代</th><th>母方での世代</th><th>COI寄与</th></tr>';
+    for (const ca of commonAncestors) {
+      html += `<tr><td style="font-weight:700;">${ca.name}</td><td>${ca.sireGen}世代前</td><td>${ca.damGen}世代前</td><td>${(ca.contribution*100).toFixed(3)}%</td></tr>`;
+    }
+    html += '</table>';
+  } else {
+    if (Object.values(ancestors).some(a => a !== '')) {
+      html += '<div class="ok-box">入力された3世代以内に共通祖先は検出されませんでした。COI = 0% です。</div>';
+    } else {
+      html += '<div class="info-box">血統情報を入力してください。父方・母方の祖先名が一致する場合にCOIが算出されます。<br>※ 名前は完全一致で判定されます。表記を統一して入力してください。</div>';
+    }
+  }
+
+  // Advice
+  if (coiPct > 12.5) {
+    html += '<div class="warn-box"><strong>推奨:</strong> COIが12.5%を超えています。免疫力低下、繁殖力低下、遺伝性疾患の発現リスクが高まります。別の交配相手を検討してください。</div>';
+  } else if (coiPct > 6.25) {
+    html += '<div class="info-box"><strong>注意:</strong> COIが6.25%を超えています。いとこ交配レベルです。健康状態を注意深く観察し、子犬の遺伝子検査を推奨します。</div>';
+  } else if (coiPct > 0) {
+    html += '<div class="ok-box"><strong>良好:</strong> COIは許容範囲内です。ただし、遺伝的多様性を維持するため、引き続き血統管理を行うことをお勧めします。</div>';
+  }
+
+  // Formula explanation
+  html += `<div class="info-box" style="margin-top:16px;">
+    <strong>算出方法:</strong> Wright's Coefficient of Inbreeding<br>
+    F = Σ [(1/2)<sup>(n₁+n₂+1)</sup>] × (1 + F<sub>A</sub>)<br>
+    n₁ = 父方での共通祖先までの世代数, n₂ = 母方での共通祖先までの世代数<br>
+    ※ 本ツールは3世代（曾祖父母）までの簡易版です。より正確な値にはさらに深い血統データが必要です。
+  </div>`;
+
+  document.getElementById('coi-results').style.display = 'block';
+  document.getElementById('coi-output').innerHTML = html;
+}
+
+// Initial run
+document.addEventListener('DOMContentLoaded', () => { runColorSim(); runHealthSim(); });
+</script>
+</body>
+</html>

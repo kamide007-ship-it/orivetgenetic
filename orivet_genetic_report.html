@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orivet 遺伝子検査レポート - Kamide Family</title>
+<style>
+:root {
+  --pink: #e6007e;
+  --purple: #4a1a7a;
+  --green: #22c55e;
+  --yellow: #eab308;
+  --red: #ef4444;
+  --orange: #f97316;
+  --blue: #3b82f6;
+  --gray: #6b7280;
+  --bg: #f8f9fa;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif; background: var(--bg); color: #1f2937; line-height: 1.6; }
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header { background: linear-gradient(135deg, var(--purple), var(--pink)); color: white; padding: 30px 0; margin-bottom: 30px; border-radius: 0 0 20px 20px; }
+header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+header h1 { font-size: 1.8em; }
+header p { opacity: 0.9; font-size: 0.95em; }
+.badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 0.85em; }
+
+/* Summary cards */
+.summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px; }
+.summary-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.summary-card .num { font-size: 2em; font-weight: 700; }
+.summary-card .label { font-size: 0.85em; color: var(--gray); margin-top: 4px; }
+.num.green { color: var(--green); }
+.num.yellow { color: var(--yellow); }
+.num.red { color: var(--red); }
+.num.blue { color: var(--blue); }
+
+/* Tab navigation */
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab { padding: 10px 20px; border-radius: 10px 10px 0 0; cursor: pointer; font-weight: 600; border: 2px solid #e5e7eb; border-bottom: none; background: white; transition: all 0.2s; font-size: 0.95em; }
+.tab:hover { background: #f3e8ff; }
+.tab.active { background: var(--purple); color: white; border-color: var(--purple); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Dog card */
+.dog-card { background: white; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.dog-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #f3f4f6; }
+.dog-name { font-size: 1.4em; font-weight: 700; color: var(--purple); }
+.dog-reg { font-size: 0.85em; color: var(--gray); }
+.dog-meta { display: flex; gap: 12px; flex-wrap: wrap; }
+.meta-tag { background: #f3f4f6; padding: 4px 12px; border-radius: 20px; font-size: 0.82em; white-space: nowrap; }
+.meta-tag.male { background: #dbeafe; color: #1e40af; }
+.meta-tag.female { background: #fce7f3; color: #be185d; }
+
+/* Section */
+.section-title { font-size: 1.1em; font-weight: 700; color: var(--purple); margin: 20px 0 12px; padding-left: 10px; border-left: 4px solid var(--pink); }
+
+/* Results table */
+.results-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.88em; }
+.results-table th { background: var(--purple); color: white; padding: 10px 12px; text-align: left; font-weight: 600; }
+.results-table th:first-child { border-radius: 8px 0 0 0; }
+.results-table th:last-child { border-radius: 0 8px 0 0; }
+.results-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+.results-table tr:hover td { background: #faf5ff; }
+.results-table tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+.results-table tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+
+/* Status badges */
+.status { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.82em; font-weight: 600; white-space: nowrap; }
+.status.normal { background: #dcfce7; color: #166534; }
+.status.carrier { background: #fef3c7; color: #92400e; }
+.status.positive { background: #fee2e2; color: #991b1b; }
+.status.trait { background: #e0e7ff; color: #3730a3; }
+
+/* Comparison table */
+.compare-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.85em; }
+.compare-table th { background: var(--purple); color: white; padding: 10px; text-align: center; position: sticky; top: 0; }
+.compare-table th:first-child { text-align: left; min-width: 200px; }
+.compare-table td { padding: 8px 10px; border-bottom: 1px solid #f3f4f6; text-align: center; }
+.compare-table td:first-child { text-align: left; font-weight: 500; }
+.compare-table tr:hover td { background: #faf5ff; }
+
+/* Legend */
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; padding: 12px 16px; background: white; border-radius: 10px; font-size: 0.85em; }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 14px; height: 14px; border-radius: 4px; }
+
+/* Tooltip */
+.info-icon { display: inline-block; width: 16px; height: 16px; background: var(--purple); color: white; border-radius: 50%; text-align: center; font-size: 11px; line-height: 16px; cursor: help; margin-left: 4px; }
+.tooltip-text { display: none; position: absolute; background: #1f2937; color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.82em; max-width: 300px; z-index: 100; line-height: 1.4; }
+
+/* Breeding advisor */
+.breed-warn { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 16px; margin: 12px 0; }
+.breed-warn.danger { background: #fef2f2; border-color: #fecaca; }
+.breed-warn .warn-title { font-weight: 700; color: #c2410c; margin-bottom: 4px; }
+.breed-warn.danger .warn-title { color: #dc2626; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  header h1 { font-size: 1.3em; }
+  .dog-header { flex-direction: column; }
+  .results-table, .compare-table { font-size: 0.78em; }
+  .compare-table { display: block; overflow-x: auto; }
+}
+
+.print-btn { background: var(--purple); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.print-btn:hover { background: var(--pink); }
+@media print {
+  .tabs, .print-btn, header { display: none !important; }
+  .tab-content { display: block !important; page-break-inside: avoid; }
+  .dog-card { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div>
+      <h1>Orivet 遺伝子検査レポート</h1>
+      <p>飼い主: Kentaro Kamide &nbsp; | &nbsp; 検査機関: Orivet Genetics (Paw Print Genetics)</p>
+      <p><span class="badge">ISO/IEC 17025準拠</span> <span class="badge">ISAG会員</span> <span class="badge">検査日: 2025年12月31日</span></p>
+    </div>
+    <button class="print-btn" onclick="window.print()">印刷</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- Summary -->
+  <div class="summary-row">
+    <div class="summary-card"><div class="num blue">4</div><div class="label">検査頭数</div></div>
+    <div class="summary-card"><div class="num green">62</div><div class="label">ノーマル項目</div></div>
+    <div class="summary-card"><div class="num yellow">2</div><div class="label">キャリア項目</div></div>
+    <div class="summary-card"><div class="num red">2</div><div class="label">ポジティブ (要注意)</div></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #166534;"></div>ノーマル (N/N) - 変異なし</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fef3c7;border:1px solid #92400e;"></div>キャリア (P/N) - 変異1コピー</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #991b1b;"></div>ポジティブ (P/P) - 変異2コピー</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e0e7ff;border:1px solid #3730a3;"></div>形質 (Trait) - 外見・毛色に関する結果</div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('overview')">全体サマリー</div>
+    <div class="tab" onclick="showTab('seven')">Seven</div>
+    <div class="tab" onclick="showTab('angel')">Angel Of Music</div>
+    <div class="tab" onclick="showTab('phantom')">White Phantom</div>
+    <div class="tab" onclick="showTab('lapi')">Lapi</div>
+    <div class="tab" onclick="showTab('compare')">比較表</div>
+    <div class="tab" onclick="showTab('breeding')">繁殖アドバイス</div>
+  </div>
+
+  <!-- ===== TAB: Overview ===== -->
+  <div id="overview" class="tab-content active">
+    <div class="dog-card">
+      <h2 class="section-title">検査対象犬の概要</h2>
+      <table class="results-table">
+        <tr>
+          <th>ペット名</th><th>登録名</th><th>犬種</th><th>性別</th><th>生年月日</th><th>マイクロチップ</th><th>ケース番号</th>
+        </tr>
+        <tr>
+          <td><strong>Seven</strong></td><td>SMASH JP SEVEN NIGHT</td><td>トイプードル</td>
+          <td><span class="meta-tag male">オス (Intact)</span></td><td>2025/4/14</td><td>392149002585861</td><td>25RU75102</td>
+        </tr>
+        <tr>
+          <td><strong>Angel Of Music</strong></td><td>BEATRIX JP ANGEL OF MUSIC</td><td>トイプードル</td>
+          <td><span class="meta-tag female">メス</span></td><td>2024/11/9</td><td>392144000913048</td><td>25RU75103</td>
+        </tr>
+        <tr>
+          <td><strong>White Phantom</strong></td><td>IMPACT JP WHITE PHANTOM</td><td>トイプードル</td>
+          <td><span class="meta-tag female">メス</span></td><td>2025/11/15</td><td>—</td><td>25RU75145</td>
+        </tr>
+        <tr>
+          <td><strong>Lapi</strong></td><td>IMPACT JP FRY THE MONN</td><td>トイプードル</td>
+          <td><span class="meta-tag female">メス</span></td><td>2023/8/8</td><td>392144000868328</td><td>25RU75195</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="dog-card">
+      <h2 class="section-title">要注意事項サマリー</h2>
+      <div class="breed-warn danger">
+        <div class="warn-title">CDDY (軟骨異栄養症 + 椎間板疾患リスク) — ポジティブ (P/P)</div>
+        <p><strong>Seven</strong> と <strong>Lapi</strong> が P/P（変異2コピー）です。椎間板ヘルニアのリスクが高まります。激しい運動や高所からのジャンプを避け、体重管理を徹底してください。定期的な獣医師の検診をお勧めします。</p>
+      </div>
+      <div class="breed-warn">
+        <div class="warn-title">CDDY (軟骨異栄養症 + 椎間板疾患リスク) — キャリア (P/N)</div>
+        <p><strong>Angel Of Music</strong> と <strong>White Phantom</strong> が P/N（変異1コピー）です。自身は発症リスクは低いですが、繁殖相手の選定に注意が必要です。P/P の個体と交配すると、子犬が全て少なくともキャリア以上になります。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: Seven ===== -->
+  <div id="seven" class="tab-content">
+    <div class="dog-card">
+      <div class="dog-header">
+        <div>
+          <div class="dog-name">Seven</div>
+          <div class="dog-reg">SMASH JP SEVEN NIGHT — 25RU75102</div>
+        </div>
+        <div class="dog-meta">
+          <span class="meta-tag male">オス (Intact Male)</span>
+          <span class="meta-tag">トイプードル</span>
+          <span class="meta-tag">2025年4月14日生</span>
+          <span class="meta-tag">MC: 392149002585861</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">健康検査結果</h3>
+      <table class="results-table">
+        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr><td>筋骨格系</td><td>CDDY + 椎間板疾患リスク</td><td><span class="status positive">ポジティブ (P/P)</span></td><td>変異2コピー検出。椎間板ヘルニアのリスクあり</td></tr>
+        <tr><td>筋骨格系</td><td>骨軟骨異形成症 (Min Poodle型)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>筋骨格系</td><td>軟骨異形成症 (CDPA)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>短脚のリスクなし</td></tr>
+        <tr><td>血液・リンパ</td><td>先天性巨大血小板減少症</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>血液・リンパ</td><td>先天性メトヘモグロビン血症</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>血液・リンパ</td><td>フォンウィルブランド病 I型</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>神経系</td><td>変性性脊髄症 (DM)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>代謝系</td><td>ガングリオシドーシス GM2</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>眼科系</td><td>進行性網膜萎縮症 (prcd-PRA)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+      </table>
+
+      <h3 class="section-title">毛色・形質検査結果</h3>
+      <table class="results-table">
+        <tr><th>遺伝子座</th><th>遺伝子型</th><th>意味</th></tr>
+        <tr><td>A Locus (アグーチ)</td><td><span class="status trait">a<sup>t</sup>/a<sup>t</sup></span></td><td>タンポイント / ブラック＆タン / トライカラー。ブリンドルの可能性あり</td></tr>
+        <tr><td>B Locus (ブラウン)</td><td><span class="status trait">Bb</span></td><td>ブラウン遺伝子のキャリア。ブラウンの子犬を産む可能性あり</td></tr>
+        <tr><td>Brown TYRP1</td><td><span class="status trait">B<sup>L</sup>/B<sup>L</sup></span></td><td>TYRP1ブラウン/レバーを保有せず</td></tr>
+        <tr><td>D Locus (ダイリュート)</td><td><span class="status trait">D/D</span></td><td>色素希釈なし。正常な色素沈着</td></tr>
+        <tr><td>E Locus (エクステンション)</td><td><span class="status trait">E/e</span></td><td>ブラック系でクリーム/レッド遺伝子をキャリー</td></tr>
+        <tr><td>EM (メラニスティックマスク)</td><td><span class="status trait">E<sup>n</sup>/E<sup>n</sup></span></td><td>メラニスティックマスクなし</td></tr>
+        <tr><td>K Locus (ドミナントブラック)</td><td><span class="status trait">KB/k<sup>y</sup> or k<sup>br</sup></span></td><td>ドミナントブラック1コピー + 非ブラック1コピー。ブリンドルの可能性あり</td></tr>
+        <tr><td>M Locus (マール)</td><td><span class="status trait">m/m [171/171bp]</span></td><td>非マール。ソリッドコート</td></tr>
+        <tr><td>Curly Coat (巻き毛)</td><td><span class="status trait">Cu/Cu</span></td><td>R151W変異陽性。カーリー（タイト）な毛質</td></tr>
+        <tr><td>Furnishings (RSPO2)</td><td><span class="status trait">F/F</span></td><td>ファーニシング2コピー。プードル特有の被毛を示す</td></tr>
+        <tr><td>Pied (パイド)</td><td><span class="status trait">S/S</span></td><td>パイボールド/ホワイトスポッティングなし</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TAB: Angel Of Music ===== -->
+  <div id="angel" class="tab-content">
+    <div class="dog-card">
+      <div class="dog-header">
+        <div>
+          <div class="dog-name">Angel Of Music</div>
+          <div class="dog-reg">BEATRIX JP ANGEL OF MUSIC — 25RU75103</div>
+        </div>
+        <div class="dog-meta">
+          <span class="meta-tag female">メス (Female)</span>
+          <span class="meta-tag">トイプードル</span>
+          <span class="meta-tag">2024年11月9日生</span>
+          <span class="meta-tag">MC: 392144000913048</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">健康検査結果</h3>
+      <table class="results-table">
+        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr><td>筋骨格系</td><td>CDDY + 椎間板疾患リスク</td><td><span class="status carrier">キャリア (P/N)</span></td><td>変異1コピー。自身は低リスクだが繁殖時に注意</td></tr>
+        <tr><td>筋骨格系</td><td>骨軟骨異形成症 (Min Poodle型)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>筋骨格系</td><td>軟骨異形成症 (CDPA)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>短脚のリスクなし</td></tr>
+        <tr><td>血液・リンパ</td><td>先天性巨大血小板減少症</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>血液・リンパ</td><td>先天性メトヘモグロビン血症</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>血液・リンパ</td><td>フォンウィルブランド病 I型</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>神経系</td><td>変性性脊髄症 (DM)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>代謝系</td><td>ガングリオシドーシス GM2</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>眼科系</td><td>進行性網膜萎縮症 (prcd-PRA)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+      </table>
+
+      <h3 class="section-title">毛色・形質検査結果</h3>
+      <table class="results-table">
+        <tr><th>遺伝子座</th><th>遺伝子型</th><th>意味</th></tr>
+        <tr><td>A Locus (アグーチ)</td><td><span class="status trait">a<sup>t</sup>/a<sup>t</sup></span></td><td>タンポイント / ブラック＆タン / トライカラー</td></tr>
+        <tr><td>B Locus (ブラウン)</td><td><span class="status trait">Bb</span></td><td>ブラウン遺伝子のキャリア。ブラウンの子犬を産む可能性あり</td></tr>
+        <tr><td>Brown TYRP1</td><td><span class="status trait">B<sup>L</sup>/B<sup>L</sup></span></td><td>TYRP1ブラウン/レバーを保有せず</td></tr>
+        <tr><td>D Locus (ダイリュート)</td><td><span class="status trait">D/D</span></td><td>色素希釈なし</td></tr>
+        <tr><td>E Locus (エクステンション)</td><td><span class="status trait">e/e</span></td><td>ホモ接合体。ホワイト/イエロー/アプリコット/ウィートンを発現</td></tr>
+        <tr><td>EM (メラニスティックマスク)</td><td><span class="status trait">E<sup>n</sup>/E<sup>n</sup></span></td><td>メラニスティックマスクなし</td></tr>
+        <tr><td>K Locus (ドミナントブラック)</td><td><span class="status trait">K/K</span></td><td>ドミナントブラック。ソリッド（ブリンドルやアグーチ発現なし）</td></tr>
+        <tr><td>M Locus (マール)</td><td><span class="status trait">m/m [171/171bp]</span></td><td>非マール。ソリッドコート</td></tr>
+        <tr><td>Curly Coat (巻き毛)</td><td><span class="status trait">Cu/Cu</span></td><td>カーリー（タイト）な毛質</td></tr>
+        <tr><td>Furnishings (RSPO2)</td><td><span class="status trait">F/F</span></td><td>ファーニシング2コピー</td></tr>
+        <tr><td>Pied (パイド)</td><td><span class="status trait">S/S</span></td><td>パイボールド/ホワイトスポッティングなし</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TAB: White Phantom ===== -->
+  <div id="phantom" class="tab-content">
+    <div class="dog-card">
+      <div class="dog-header">
+        <div>
+          <div class="dog-name">White Phantom</div>
+          <div class="dog-reg">IMPACT JP WHITE PHANTOM — 25RU75145</div>
+        </div>
+        <div class="dog-meta">
+          <span class="meta-tag female">メス (Female)</span>
+          <span class="meta-tag">トイプードル</span>
+          <span class="meta-tag">2025年11月15日生</span>
+          <span class="meta-tag">毛色: Merle</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">健康検査結果</h3>
+      <table class="results-table">
+        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr><td>筋骨格系</td><td>CDDY + 椎間板疾患リスク</td><td><span class="status carrier">キャリア (P/N)</span></td><td>変異1コピー。自身は低リスクだが繁殖時に注意</td></tr>
+        <tr><td>筋骨格系</td><td>骨軟骨異形成症 (Min Poodle型)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>筋骨格系</td><td>軟骨異形成症 (CDPA)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>短脚のリスクなし</td></tr>
+        <tr><td>血液・リンパ</td><td>先天性巨大血小板減少症</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>血液・リンパ</td><td>先天性メトヘモグロビン血症</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>血液・リンパ</td><td>フォンウィルブランド病 I型</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>神経系</td><td>変性性脊髄症 (DM)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>代謝系</td><td>ガングリオシドーシス GM2</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>眼科系</td><td>進行性網膜萎縮症 (prcd-PRA)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+      </table>
+
+      <h3 class="section-title">毛色・形質検査結果</h3>
+      <table class="results-table">
+        <tr><th>遺伝子座</th><th>遺伝子型</th><th>意味</th></tr>
+        <tr><td>A Locus (アグーチ)</td><td><span class="status trait">a<sup>t</sup>/a<sup>t</sup></span></td><td>タンポイント / ブラック＆タン / トライカラー</td></tr>
+        <tr><td>B Locus (ブラウン)</td><td><span class="status trait">BB</span></td><td>ブラウン/レッド/チョコレートを保有せず</td></tr>
+        <tr><td>Brown TYRP1</td><td><span class="status trait">B<sup>L</sup>/B<sup>L</sup></span></td><td>TYRP1ブラウン/レバーを保有せず</td></tr>
+        <tr><td>D Locus (ダイリュート)</td><td><span class="status trait">D/D</span></td><td>色素希釈なし</td></tr>
+        <tr><td>E Locus (エクステンション)</td><td><span class="status trait">e/e</span></td><td>ホモ接合体。ホワイト/イエロー/アプリコット/ウィートンを発現</td></tr>
+        <tr><td>EM (メラニスティックマスク)</td><td><span class="status trait">E<sup>n</sup>/E<sup>n</sup></span></td><td>メラニスティックマスクなし</td></tr>
+        <tr><td>K Locus (ドミナントブラック)</td><td><span class="status trait">KB/k<sup>y</sup> or k<sup>br</sup></span></td><td>ドミナントブラック1コピー + 非ブラック1コピー</td></tr>
+        <tr><td>M Locus (マール)</td><td><span class="status trait">m/m [171/171bp]</span></td><td>非マール。ソリッドコート（※毛色登録はMerleですがDNA上はm/m）</td></tr>
+        <tr><td>Curly Coat (巻き毛)</td><td><span class="status trait">Cu/Cu</span></td><td>カーリー（タイト）な毛質</td></tr>
+        <tr><td>Furnishings (RSPO2)</td><td><span class="status trait">F/F</span></td><td>ファーニシング2コピー</td></tr>
+        <tr><td>Pied (パイド)</td><td><span class="status trait">S/S</span></td><td>パイボールド/ホワイトスポッティングなし</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TAB: Lapi ===== -->
+  <div id="lapi" class="tab-content">
+    <div class="dog-card">
+      <div class="dog-header">
+        <div>
+          <div class="dog-name">Lapi</div>
+          <div class="dog-reg">IMPACT JP FRY THE MONN — 25RU75195</div>
+        </div>
+        <div class="dog-meta">
+          <span class="meta-tag female">メス (Female)</span>
+          <span class="meta-tag">トイプードル</span>
+          <span class="meta-tag">2023年8月8日生</span>
+          <span class="meta-tag">MC: 392144000868328</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">健康検査結果</h3>
+      <table class="results-table">
+        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr><td>筋骨格系</td><td>CDDY + 椎間板疾患リスク</td><td><span class="status positive">ポジティブ (P/P)</span></td><td>変異2コピー検出。椎間板ヘルニアのリスクあり</td></tr>
+        <tr><td>筋骨格系</td><td>骨軟骨異形成症 (Min Poodle型)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>筋骨格系</td><td>軟骨異形成症 (CDPA)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>短脚のリスクなし</td></tr>
+        <tr><td>血液・リンパ</td><td>先天性巨大血小板減少症</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>血液・リンパ</td><td>先天性メトヘモグロビン血症</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>血液・リンパ</td><td>フォンウィルブランド病 I型</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>神経系</td><td>変性性脊髄症 (DM)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>代謝系</td><td>ガングリオシドーシス GM2</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+        <tr><td>眼科系</td><td>進行性網膜萎縮症 (prcd-PRA)</td><td><span class="status normal">ノーマル (N/N)</span></td><td>変異なし</td></tr>
+      </table>
+
+      <h3 class="section-title">毛色・形質検査結果</h3>
+      <table class="results-table">
+        <tr><th>遺伝子座</th><th>遺伝子型</th><th>意味</th></tr>
+        <tr><td>A Locus (アグーチ)</td><td><span class="status trait">a<sup>t</sup>/a<sup>t</sup></span></td><td>タンポイント / ブラック＆タン / トライカラー</td></tr>
+        <tr><td>B Locus (ブラウン)</td><td><span class="status trait">BB</span></td><td>ブラウン/レッド/チョコレートを保有せず</td></tr>
+        <tr><td>Brown TYRP1</td><td><span class="status trait">B<sup>L</sup>/B<sup>L</sup></span></td><td>TYRP1ブラウン/レバーを保有せず</td></tr>
+        <tr><td>D Locus (ダイリュート)</td><td><span class="status trait">D/D</span></td><td>色素希釈なし</td></tr>
+        <tr><td>E Locus (エクステンション)</td><td><span class="status trait">e/e</span></td><td>ホモ接合体。ホワイト/イエロー/アプリコット/ウィートンを発現</td></tr>
+        <tr><td>EM (メラニスティックマスク)</td><td><span class="status trait">E<sup>n</sup>/E<sup>n</sup></span></td><td>メラニスティックマスクなし</td></tr>
+        <tr><td>K Locus (ドミナントブラック)</td><td><span class="status trait">KB/k<sup>y</sup> or k<sup>br</sup></span></td><td>ドミナントブラック1コピー + 非ブラック1コピー</td></tr>
+        <tr><td>M Locus (マール)</td><td><span class="status trait">m/m [171/171bp]</span></td><td>非マール。ソリッドコート</td></tr>
+        <tr><td>Curly Coat (巻き毛)</td><td><span class="status trait">Cu/Cu</span></td><td>カーリー（タイト）な毛質</td></tr>
+        <tr><td>Furnishings (RSPO2)</td><td><span class="status trait">F/F</span></td><td>ファーニシング2コピー</td></tr>
+        <tr><td>Pied (パイド)</td><td><span class="status trait">S/S</span></td><td>パイボールド/ホワイトスポッティングなし</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TAB: Compare ===== -->
+  <div id="compare" class="tab-content">
+    <div class="dog-card">
+      <h2 class="section-title">健康検査 比較表</h2>
+      <div style="overflow-x:auto;">
+      <table class="compare-table">
+        <tr><th>検査項目</th><th>Seven</th><th>Angel Of Music</th><th>White Phantom</th><th>Lapi</th></tr>
+        <tr><td>CDDY + IVDD</td><td><span class="status positive">P/P</span></td><td><span class="status carrier">P/N</span></td><td><span class="status carrier">P/N</span></td><td><span class="status positive">P/P</span></td></tr>
+        <tr><td>骨軟骨異形成症</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>軟骨異形成症 (CDPA)</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>先天性巨大血小板減少症</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>先天性メトヘモグロビン血症</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>フォンウィルブランド病 I型</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>変性性脊髄症 (DM)</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>ガングリオシドーシス GM2</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>prcd-PRA</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+      </table>
+      </div>
+
+      <h2 class="section-title">毛色・形質 比較表</h2>
+      <div style="overflow-x:auto;">
+      <table class="compare-table">
+        <tr><th>遺伝子座</th><th>Seven</th><th>Angel Of Music</th><th>White Phantom</th><th>Lapi</th></tr>
+        <tr><td>A Locus (アグーチ)</td><td>a<sup>t</sup>/a<sup>t</sup></td><td>a<sup>t</sup>/a<sup>t</sup></td><td>a<sup>t</sup>/a<sup>t</sup></td><td>a<sup>t</sup>/a<sup>t</sup></td></tr>
+        <tr><td>B Locus (ブラウン)</td><td>Bb</td><td>Bb</td><td>BB</td><td>BB</td></tr>
+        <tr><td>D Locus (ダイリュート)</td><td>D/D</td><td>D/D</td><td>D/D</td><td>D/D</td></tr>
+        <tr><td>E Locus</td><td>E/e</td><td>e/e</td><td>e/e</td><td>e/e</td></tr>
+        <tr><td>K Locus</td><td>KB/k<sup>y</sup></td><td>K/K</td><td>KB/k<sup>y</sup></td><td>KB/k<sup>y</sup></td></tr>
+        <tr><td>M Locus (マール)</td><td>m/m</td><td>m/m</td><td>m/m</td><td>m/m</td></tr>
+        <tr><td>Curly Coat</td><td>Cu/Cu</td><td>Cu/Cu</td><td>Cu/Cu</td><td>Cu/Cu</td></tr>
+        <tr><td>Furnishings</td><td>F/F</td><td>F/F</td><td>F/F</td><td>F/F</td></tr>
+        <tr><td>Pied</td><td>S/S</td><td>S/S</td><td>S/S</td><td>S/S</td></tr>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: Breeding ===== -->
+  <div id="breeding" class="tab-content">
+    <div class="dog-card">
+      <h2 class="section-title">繁殖に関するアドバイス</h2>
+      <p style="margin-bottom:16px; color: var(--gray); font-size:0.9em;">※ これは遺伝子検査データに基づく一般的な情報です。繁殖計画については必ず獣医師にご相談ください。</p>
+
+      <div class="breed-warn danger">
+        <div class="warn-title">最重要: CDDY (椎間板疾患リスク) の管理</div>
+        <p style="margin-bottom:8px;">4頭全てがCDDY変異を保有しています。これはトイプードルで比較的多く見られる変異ですが、繁殖計画では特に注意が必要です。</p>
+        <table class="results-table" style="margin-top:10px;">
+          <tr><th>交配組み合わせ</th><th>子犬の予想</th><th>リスク</th></tr>
+          <tr><td>P/P × P/P (例: Seven × Lapi)</td><td>100% P/P</td><td style="color:#dc2626;font-weight:700;">全子犬が椎間板疾患の高リスク</td></tr>
+          <tr><td>P/P × P/N (例: Seven × Angel)</td><td>50% P/P, 50% P/N</td><td style="color:#c2410c;font-weight:600;">半数が高リスク</td></tr>
+          <tr><td>P/N × P/N</td><td>25% P/P, 50% P/N, 25% N/N</td><td style="color:#92400e;">25%が高リスク</td></tr>
+          <tr><td>P/P × N/N</td><td>100% P/N</td><td style="color:#166534;">全子犬がキャリアのみ</td></tr>
+          <tr><td>P/N × N/N</td><td>50% P/N, 50% N/N</td><td style="color:#166534;">高リスク子犬なし</td></tr>
+        </table>
+        <p style="margin-top:10px;"><strong>推奨:</strong> CDDYの影響を最小化するには、交配相手として N/N の個体を選ぶことが理想的です。</p>
+      </div>
+
+      <div class="breed-warn">
+        <div class="warn-title">毛色の遺伝予測: Seven (オス) × メス候補</div>
+        <p style="margin-bottom:8px;">SevenはE/e（エクステンション）のため、e/eのメスとの交配では子犬の約半数がe/e（クリーム/アプリコット系）になる可能性があります。</p>
+        <p>SevenはBb（ブラウンキャリア）のため、Bbのメス（Angel Of Music）との交配では約25%の確率でbbブラウンの子犬が生まれる可能性があります。White PhantomとLapiはBBなのでブラウンの子犬は生まれません。</p>
+      </div>
+
+      <div class="breed-warn">
+        <div class="warn-title">良いニュース: 主要遺伝性疾患はクリア</div>
+        <p>CDDY以外の全ての検査項目（prcd-PRA、DM、vWD1、GM2など）で4頭全てがノーマル（N/N）です。これらの疾患については、この4頭間の交配で発症する子犬が生まれるリスクはありません。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

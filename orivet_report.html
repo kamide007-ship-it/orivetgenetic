@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orivet 遺伝子検査レポート</title>
+<style>
+:root { --pink:#e6007e; --purple:#4a1a7a; --green:#22c55e; --yellow:#eab308; --red:#ef4444; --gray:#6b7280; --bg:#f8f9fa; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif; background:var(--bg); color:#1f2937; line-height:1.6; }
+.container { max-width:1200px; margin:0 auto; padding:20px; }
+header { background:linear-gradient(135deg,var(--purple),var(--pink)); color:white; padding:30px 0; margin-bottom:30px; border-radius:0 0 20px 20px; }
+header .container { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+header h1 { font-size:1.8em; }
+header p { opacity:0.9; font-size:0.95em; }
+.badge { display:inline-block; background:rgba(255,255,255,0.2); padding:4px 12px; border-radius:20px; font-size:0.85em; }
+.summary-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:15px; margin-bottom:30px; }
+.summary-card { background:white; border-radius:12px; padding:20px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+.summary-card .num { font-size:2em; font-weight:700; }
+.summary-card .label { font-size:0.85em; color:var(--gray); margin-top:4px; }
+.num.green { color:var(--green); } .num.yellow { color:var(--yellow); } .num.red { color:var(--red); } .num.blue { color:#3b82f6; }
+.tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+.tab { padding:10px 20px; border-radius:10px 10px 0 0; cursor:pointer; font-weight:600; border:2px solid #e5e7eb; border-bottom:none; background:white; transition:all 0.2s; font-size:0.95em; }
+.tab:hover { background:#f3e8ff; }
+.tab.active { background:var(--purple); color:white; border-color:var(--purple); }
+.tab-content { display:none; } .tab-content.active { display:block; }
+.dog-card { background:white; border-radius:16px; padding:24px; margin-bottom:24px; box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+.dog-header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:15px; margin-bottom:20px; padding-bottom:16px; border-bottom:2px solid #f3f4f6; }
+.dog-name { font-size:1.4em; font-weight:700; color:var(--purple); }
+.dog-reg { font-size:0.85em; color:var(--gray); }
+.dog-meta { display:flex; gap:12px; flex-wrap:wrap; }
+.meta-tag { background:#f3f4f6; padding:4px 12px; border-radius:20px; font-size:0.82em; white-space:nowrap; }
+.meta-tag.male { background:#dbeafe; color:#1e40af; } .meta-tag.female { background:#fce7f3; color:#be185d; }
+.section-title { font-size:1.1em; font-weight:700; color:var(--purple); margin:20px 0 12px; padding-left:10px; border-left:4px solid var(--pink); }
+.results-table { width:100%; border-collapse:separate; border-spacing:0; font-size:0.88em; }
+.results-table th { background:var(--purple); color:white; padding:10px 12px; text-align:left; font-weight:600; }
+.results-table th:first-child { border-radius:8px 0 0 0; } .results-table th:last-child { border-radius:0 8px 0 0; }
+.results-table td { padding:10px 12px; border-bottom:1px solid #f3f4f6; vertical-align:top; }
+.results-table tr:hover td { background:#faf5ff; }
+.compare-table { width:100%; border-collapse:separate; border-spacing:0; font-size:0.85em; }
+.compare-table th { background:var(--purple); color:white; padding:10px; text-align:center; position:sticky; top:0; }
+.compare-table th:first-child { text-align:left; min-width:200px; }
+.compare-table td { padding:8px 10px; border-bottom:1px solid #f3f4f6; text-align:center; }
+.compare-table td:first-child { text-align:left; font-weight:500; }
+.compare-table tr:hover td { background:#faf5ff; }
+.status { display:inline-block; padding:3px 10px; border-radius:12px; font-size:0.82em; font-weight:600; white-space:nowrap; }
+.status.normal { background:#dcfce7; color:#166534; }
+.status.carrier { background:#fef3c7; color:#92400e; }
+.status.positive { background:#fee2e2; color:#991b1b; }
+.status.trait { background:#e0e7ff; color:#3730a3; }
+.legend { display:flex; gap:16px; flex-wrap:wrap; margin:16px 0; padding:12px 16px; background:white; border-radius:10px; font-size:0.85em; }
+.legend-item { display:flex; align-items:center; gap:6px; }
+.legend-dot { width:14px; height:14px; border-radius:4px; }
+.breed-warn { background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:16px; margin:12px 0; }
+.breed-warn.danger { background:#fef2f2; border-color:#fecaca; }
+.breed-warn .warn-title { font-weight:700; color:#c2410c; margin-bottom:4px; }
+.breed-warn.danger .warn-title { color:#dc2626; }
+.print-btn { background:var(--purple); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; }
+.print-btn:hover { background:var(--pink); }
+@media (max-width:768px) { header h1 { font-size:1.3em; } .dog-header { flex-direction:column; } .compare-table { display:block; overflow-x:auto; } }
+@media print { .tabs,.print-btn,header { display:none!important; } .tab-content { display:block!important; page-break-inside:avoid; } .dog-card { break-inside:avoid; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div>
+      <h1>Orivet 遺伝子検査レポート</h1>
+      <p>検査機関: Orivet Genetics (Paw Print Genetics) &nbsp;|&nbsp; ISO/IEC 17025準拠 &nbsp;|&nbsp; ISAG会員</p>
+      <p><span class="badge">生成日: 2026年03月22日</span> <span class="badge">4頭分</span></p>
+    </div>
+    <button class="print-btn" onclick="window.print()">印刷</button>
+  </div>
+</header>
+<div class="container">
+  <div class="summary-row">
+    <div class="summary-card"><div class="num blue">4</div><div class="label">検査頭数</div></div>
+    <div class="summary-card"><div class="num green">32</div><div class="label">ノーマル項目</div></div>
+    <div class="summary-card"><div class="num yellow">6</div><div class="label">キャリア項目</div></div>
+    <div class="summary-card"><div class="num red">6</div><div class="label">ポジティブ (要注意)</div></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #166534;"></div>ノーマル (N/N)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fef3c7;border:1px solid #92400e;"></div>キャリア (P/N)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #991b1b;"></div>ポジティブ (P/P)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e0e7ff;border:1px solid #3730a3;"></div>形質 (Trait)</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('overview')">全体サマリー</div>
+    <div class="tab" onclick="showTab('seven')">Seven</div>
+    <div class="tab" onclick="showTab('angel_of_music')">Angel Of Music</div>
+    <div class="tab" onclick="showTab('white_phantom')">White Phantom</div>
+    <div class="tab" onclick="showTab('lapi')">Lapi</div>
+
+    <div class="tab" onclick="showTab('compare')">比較表</div>
+  </div>
+
+  <!-- Overview Tab -->
+  <div id="overview" class="tab-content active">
+    <div class="dog-card">
+      <h2 class="section-title">検査対象一覧</h2>
+      <table class="results-table">
+        <tr><th>ペット名</th><th>登録名</th><th>犬種</th><th>性別</th><th>生年月日</th><th>ケース番号</th></tr>
+<tr><td><strong>Seven</strong></td><td>SMASH JP SEVEN NIGHT</td><td>Club: Not assigned</td><td>Intact Male</td><td>14th Apr 2025</td><td>25RU75102</td></tr>
+<tr><td><strong>Angel Of Music</strong></td><td>BEATRIX JP ANGEL OF MUSIC</td><td>Club: Not assigned</td><td>Female</td><td>9th Nov 2024</td><td>25RU75103</td></tr>
+<tr><td><strong>White Phantom</strong></td><td>IMPACT JP WHITE PHANTOM</td><td>Club: Not assigned</td><td>Female</td><td>15th Nov 2025</td><td>25RU75145</td></tr>
+<tr><td><strong>Lapi</strong></td><td>IMPACT JP FRY THE MONN</td><td>Club: Not assigned</td><td>Female</td><td>8th Aug 2023</td><td>25RU75195</td></tr>
+
+      </table>
+    </div>
+    <div class="dog-card">
+      <h2 class="section-title">要注意事項</h2>
+      <div class="breed-warn danger">
+        <div class="warn-title">軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD) — ポジティブ (P/P): Seven</div>
+        <p>変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。繁殖にも十分な注意が必要です。</p>
+        <p><small>原文: POSITIVE (P/P) - TWO COPIES OF THE CHONDRODYSTROPHY (CDDY)</small></p>
+      </div>
+      <div class="breed-warn">
+        <div class="warn-title">pass on any disease-causing mutation. — キャリア (P/N): Seven</div>
+        <p>変異が1コピー検出されました。自身の発症リスクは低いですが、キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。</p>
+      </div>
+      <div class="breed-warn danger">
+        <div class="warn-title">unknown then it may produce an a ected o spring. — ポジティブ (P/P): Seven</div>
+        <p>変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。繁殖にも十分な注意が必要です。</p>
+        <p><small>原文: POSITIVE (P/P) - [TWO COPIES OF THE VARIANT DETECTED]</small></p>
+      </div>
+      <div class="breed-warn">
+        <div class="warn-title">軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD) — キャリア (P/N): Angel Of Music</div>
+        <p>変異が1コピー検出されました。自身の発症リスクは低いですが、キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。</p>
+      </div>
+      <div class="breed-warn">
+        <div class="warn-title">pass on any disease-causing mutation. — キャリア (P/N): Angel Of Music</div>
+        <p>変異が1コピー検出されました。自身の発症リスクは低いですが、キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。</p>
+      </div>
+      <div class="breed-warn danger">
+        <div class="warn-title">unknown then it may produce an a ected o spring. — ポジティブ (P/P): Angel Of Music</div>
+        <p>変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。繁殖にも十分な注意が必要です。</p>
+        <p><small>原文: POSITIVE (P/P) - [TWO COPIES OF THE VARIANT DETECTED]</small></p>
+      </div>
+      <div class="breed-warn">
+        <div class="warn-title">軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD) — キャリア (P/N): White Phantom</div>
+        <p>変異が1コピー検出されました。自身の発症リスクは低いですが、キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。</p>
+      </div>
+      <div class="breed-warn">
+        <div class="warn-title">pass on any disease-causing mutation. — キャリア (P/N): White Phantom</div>
+        <p>変異が1コピー検出されました。自身の発症リスクは低いですが、キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。</p>
+      </div>
+      <div class="breed-warn danger">
+        <div class="warn-title">unknown then it may produce an a ected o spring. — ポジティブ (P/P): White Phantom</div>
+        <p>変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。繁殖にも十分な注意が必要です。</p>
+        <p><small>原文: POSITIVE (P/P) - [TWO COPIES OF THE VARIANT DETECTED]</small></p>
+      </div>
+      <div class="breed-warn danger">
+        <div class="warn-title">軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD) — ポジティブ (P/P): Lapi</div>
+        <p>変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。繁殖にも十分な注意が必要です。</p>
+        <p><small>原文: POSITIVE (P/P) - TWO COPIES OF THE CHONDRODYSTROPHY (CDDY)</small></p>
+      </div>
+      <div class="breed-warn">
+        <div class="warn-title">pass on any disease-causing mutation. — キャリア (P/N): Lapi</div>
+        <p>変異が1コピー検出されました。自身の発症リスクは低いですが、キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。</p>
+      </div>
+      <div class="breed-warn danger">
+        <div class="warn-title">unknown then it may produce an a ected o spring. — ポジティブ (P/P): Lapi</div>
+        <p>変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。繁殖にも十分な注意が必要です。</p>
+        <p><small>原文: POSITIVE (P/P) - [TWO COPIES OF THE VARIANT DETECTED]</small></p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Individual Dog Tabs -->
+
+  <div id="seven" class="tab-content">
+    <div class="dog-card">
+      <div class="dog-header">
+        <div>
+          <div class="dog-name">Seven</div>
+          <div class="dog-reg">SMASH JP SEVEN NIGHT — 25RU75102</div>
+        </div>
+        <div class="dog-meta">
+          <span class="meta-tag male">オス (Intact Male)</span>
+          <span class="meta-tag">Club: Not assigned</span>
+          <span class="meta-tag">14th Apr 2025</span>
+          <span class="meta-tag">MC: 392149002585861</span>
+          <span class="meta-tag">毛色: Sample Collection Details</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">健康検査結果 (11項目)</h3>
+      <table class="results-table">
+        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr>
+          <td>筋骨格系</td>
+          <td>軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD)<br><small style="color:#6b7280">Chondrodystrophy with Intervertebral Disc Disease</small></td>
+          <td><span class="status positive">P/P</span></td>
+          <td style="font-size:0.85em">POSITIVE (P/P) - TWO COPIES OF THE CHONDRODYSTROPHY (CDDY)</td>
+        </tr>
+        <tr>
+          <td>筋骨格系</td>
+          <td>骨軟骨異形成症<br><small style="color:#6b7280">Osteochondrodysplasia (Min Poodle Type)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>先天性巨大血小板減少症<br><small style="color:#6b7280">Congenital Macrothrombocytopenia</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>先天性メトヘモグロビン血症<br><small style="color:#6b7280">Congenital Methemoglobinemia (Poodle and</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>フォンウィルブランド病 I型<br><small style="color:#6b7280">von Willebrand's Disease Type I</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>神経系</td>
+          <td>変性性脊髄症 (DM)<br><small style="color:#6b7280">Degenerative Myelopathy</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>代謝系</td>
+          <td>ガングリオシドーシス GM2<br><small style="color:#6b7280">Gangliosidosis GM2 (Poodle Type)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>進行性網膜萎縮症 (prcd-PRA)<br><small style="color:#6b7280">Progressive Rod Cone Degeneration (prcd) - PRA</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>Glossary of Genetic Terms (Results)<br><small style="color:#6b7280">Glossary of Genetic Terms (Results)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>pass on any disease-causing mutation.<br><small style="color:#6b7280">pass on any disease-causing mutation.</small></td>
+          <td><span class="status carrier">P/N</span></td>
+          <td style="font-size:0.85em">CARRIER (P/N) - [ONE COPY OF THE VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>unknown then it may produce an a ected o spring.<br><small style="color:#6b7280">unknown then it may produce an a ected o spring.</small></td>
+          <td><span class="status positive">P/P</span></td>
+          <td style="font-size:0.85em">POSITIVE (P/P) - [TWO COPIES OF THE VARIANT DETECTED]</td>
+        </tr>
+
+      </table>
+
+      <h3 class="section-title">毛色・形質検査結果 (12項目)</h3>
+      <table class="results-table">
+        <tr><th>検査項目</th><th>遺伝子型</th><th>詳細</th></tr>
+        <tr>
+          <td>A座位 (アグーチ)<br><small style="color:#6b7280">A Locus (Agouti)</small></td>
+          <td><span class="status trait">—</span></td>
+          <td style="font-size:0.85em">LOCUS]</td>
+        </tr>
+        <tr>
+          <td>B座位 (ブラウン)<br><small style="color:#6b7280">B Locus (Brown)</small></td>
+          <td><span class="status trait">Bb</span></td>
+          <td style="font-size:0.85em">, Bs, Bc [Various Breeds] Bb [Bcbc BdBd BsBs] - CAN PRODUCE BROWN OFFSPRING</td>
+        </tr>
+        <tr>
+          <td>軟骨異形成症 (CDPA)<br><small style="color:#6b7280">Chondrodysplasia (CDPA)</small></td>
+          <td><span class="status trait">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - NO SHORTENED LEGS COMPARED TO CDPA DOGS POSITIVE FOR THE R151W (Cu/Cu) VARIANT - LIKELY TO HAVE CURLY</td>
+        </tr>
+        <tr>
+          <td>巻き毛 (Curly Coat)<br><small style="color:#6b7280">Curly Coat/Hair Variant 1</small></td>
+          <td><span class="status trait">D/D</span></td>
+          <td style="font-size:0.85em">/Hair Variant 1 (TIGHT) HAIR PHENOTYPE D (Dilute) Locus D/D - NO COPY OF MLPH-D ALLELE (DILUTE) - PIGMENT IS NORMAL</td>
+        </tr>
+        <tr>
+          <td>D座位 (ダイリュート)<br><small style="color:#6b7280">D (Dilute) Locus</small></td>
+          <td><span class="status trait">D/D</span></td>
+          <td style="font-size:0.85em">D/D - NO COPY OF MLPH-D ALLELE (DILUTE) - PIGMENT IS NORMAL</td>
+        </tr>
+        <tr>
+          <td>E座位 (エクステンション)<br><small style="color:#6b7280">E Locus (Cream/Red/Yellow)</small></td>
+          <td><span class="status trait">E/e</span></td>
+          <td style="font-size:0.85em">/Red/Yellow) E/e - BLACK CARRIES EXTENSION [YELLOW/WHITE/APRICOT/RUBY/RED] EM (MC1R) Locus - Melanistic Mask En/En - NO MELANISTIC MASK (En) EXTENSION</td>
+        </tr>
+        <tr>
+          <td>EM座位 (メラニスティックマスク)<br><small style="color:#6b7280">EM (MC1R) - Melanistic Mask</small></td>
+          <td><span class="status trait">En/En</span></td>
+          <td style="font-size:0.85em">Locus -  En/En - NO  (En) EXTENSION ALLELE</td>
+        </tr>
+        <tr>
+          <td>ファーニシング (RSPO2)<br><small style="color:#6b7280">Furnishings (RSPO2)</small></td>
+          <td><span class="status trait">F/F</span></td>
+          <td style="font-size:0.85em">F/F - TWO COPIES OF FURNISHINGS - WILL SHOW FURNISHINGS KB / ky or kbr- ONE COPY DOMINANT BLACK (KB) and ONE COPY OF NON-</td>
+        </tr>
+        <tr>
+          <td>K座位 (ドミナントブラック)<br><small style="color:#6b7280">K Locus (Dominant Black)</small></td>
+          <td><span class="status trait">m/m</span></td>
+          <td style="font-size:0.85em">Black) BLACK (ky ) dog MAY be brindled m/m [171/171bp] - NON MERLE SOLID COAT (NO CHANGE TO COAT</td>
+        </tr>
+        <tr>
+          <td>M座位 (マール/ダップル)<br><small style="color:#6b7280">M Locus (Merle/Dapple)</small></td>
+          <td><span class="status trait">—</span></td>
+          <td style="font-size:0.85em">/Dapple) COLOUR)</td>
+        </tr>
+        <tr>
+          <td>パイド (Pied)<br><small style="color:#6b7280">Pied</small></td>
+          <td><span class="status trait">S/S</span></td>
+          <td style="font-size:0.85em">and REPEAT VARIANTS) S/S - NO PIEBALD, WHITE SPOTTING, FLASH OR PARTI COAT COLOUR</td>
+        </tr>
+        <tr>
+          <td>ブラウン TYRP1<br><small style="color:#6b7280">Brown TYRP1</small></td>
+          <td><span class="status trait">BL/BL</span></td>
+          <td style="font-size:0.85em">[Lancashire Heeler Type] = Bl BL/BL - DOES NOT CARRY BROWN/LIVER [TYRP1]</td>
+        </tr>
+
+      </table>
+    </div>
+  </div>
+  <div id="angel_of_music" class="tab-content">
+    <div class="dog-card">
+      <div class="dog-header">
+        <div>
+          <div class="dog-name">Angel Of Music</div>
+          <div class="dog-reg">BEATRIX JP ANGEL OF MUSIC — 25RU75103</div>
+        </div>
+        <div class="dog-meta">
+          <span class="meta-tag male">オス (Female)</span>
+          <span class="meta-tag">Club: Not assigned</span>
+          <span class="meta-tag">9th Nov 2024</span>
+          <span class="meta-tag">MC: 392144000913048</span>
+          <span class="meta-tag">毛色: Sample Collection Details</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">健康検査結果 (11項目)</h3>
+      <table class="results-table">
+        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr>
+          <td>筋骨格系</td>
+          <td>軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD)<br><small style="color:#6b7280">Chondrodystrophy with Intervertebral Disc Disease</small></td>
+          <td><span class="status carrier">P/N</span></td>
+          <td style="font-size:0.85em">CARRIER (P/N) - ONE COPY OF THE CHONDRODYSTROPHY (CDDY)</td>
+        </tr>
+        <tr>
+          <td>筋骨格系</td>
+          <td>骨軟骨異形成症<br><small style="color:#6b7280">Osteochondrodysplasia (Min Poodle Type)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>先天性巨大血小板減少症<br><small style="color:#6b7280">Congenital Macrothrombocytopenia</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>先天性メトヘモグロビン血症<br><small style="color:#6b7280">Congenital Methemoglobinemia (Poodle and</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>フォンウィルブランド病 I型<br><small style="color:#6b7280">von Willebrand's Disease Type I</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>神経系</td>
+          <td>変性性脊髄症 (DM)<br><small style="color:#6b7280">Degenerative Myelopathy</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>代謝系</td>
+          <td>ガングリオシドーシス GM2<br><small style="color:#6b7280">Gangliosidosis GM2 (Poodle Type)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>進行性網膜萎縮症 (prcd-PRA)<br><small style="color:#6b7280">Progressive Rod Cone Degeneration (prcd) - PRA</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>Glossary of Genetic Terms (Results)<br><small style="color:#6b7280">Glossary of Genetic Terms (Results)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>pass on any disease-causing mutation.<br><small style="color:#6b7280">pass on any disease-causing mutation.</small></td>
+          <td><span class="status carrier">P/N</span></td>
+          <td style="font-size:0.85em">CARRIER (P/N) - [ONE COPY OF THE VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>unknown then it may produce an a ected o spring.<br><small style="color:#6b7280">unknown then it may produce an a ected o spring.</small></td>
+          <td><span class="status positive">P/P</span></td>
+          <td style="font-size:0.85em">POSITIVE (P/P) - [TWO COPIES OF THE VARIANT DETECTED]</td>
+        </tr>
+
+      </table>
+
+      <h3 class="section-title">毛色・形質検査結果 (12項目)</h3>
+      <table class="results-table">
+        <tr><th>検査項目</th><th>遺伝子型</th><th>詳細</th></tr>
+        <tr>
+          <td>A座位 (アグーチ)<br><small style="color:#6b7280">A Locus (Agouti)</small></td>
+          <td><span class="status trait">—</span></td>
+          <td style="font-size:0.85em">LOCUS]</td>
+        </tr>
+        <tr>
+          <td>B座位 (ブラウン)<br><small style="color:#6b7280">B Locus (Brown)</small></td>
+          <td><span class="status trait">Bb</span></td>
+          <td style="font-size:0.85em">, Bs, Bc [Various Breeds] Bb [Bcbc BdBd BsBs] - CAN PRODUCE BROWN OFFSPRING</td>
+        </tr>
+        <tr>
+          <td>軟骨異形成症 (CDPA)<br><small style="color:#6b7280">Chondrodysplasia (CDPA)</small></td>
+          <td><span class="status trait">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - NO SHORTENED LEGS COMPARED TO CDPA DOGS POSITIVE FOR THE R151W (Cu/Cu) VARIANT - LIKELY TO HAVE CURLY</td>
+        </tr>
+        <tr>
+          <td>巻き毛 (Curly Coat)<br><small style="color:#6b7280">Curly Coat/Hair Variant 1</small></td>
+          <td><span class="status trait">D/D</span></td>
+          <td style="font-size:0.85em">/Hair Variant 1 (TIGHT) HAIR PHENOTYPE D (Dilute) Locus D/D - NO COPY OF MLPH-D ALLELE (DILUTE) - PIGMENT IS NORMAL</td>
+        </tr>
+        <tr>
+          <td>D座位 (ダイリュート)<br><small style="color:#6b7280">D (Dilute) Locus</small></td>
+          <td><span class="status trait">D/D</span></td>
+          <td style="font-size:0.85em">D/D - NO COPY OF MLPH-D ALLELE (DILUTE) - PIGMENT IS NORMAL e/e - HOMOZYGOUS FOR NON-EXTENSION</td>
+        </tr>
+        <tr>
+          <td>E座位 (エクステンション)<br><small style="color:#6b7280">E Locus (Cream/Red/Yellow)</small></td>
+          <td><span class="status trait">En/En</span></td>
+          <td style="font-size:0.85em">/Red/Yellow) [WHITE/YELLOW/APRICOT/WHEATEN] EM (MC1R) Locus - Melanistic Mask En/En - NO MELANISTIC MASK (En) EXTENSION ALLELE</td>
+        </tr>
+        <tr>
+          <td>EM座位 (メラニスティックマスク)<br><small style="color:#6b7280">EM (MC1R) - Melanistic Mask</small></td>
+          <td><span class="status trait">En/En</span></td>
+          <td style="font-size:0.85em">Locus -  En/En - NO  (En) EXTENSION ALLELE</td>
+        </tr>
+        <tr>
+          <td>ファーニシング (RSPO2)<br><small style="color:#6b7280">Furnishings (RSPO2)</small></td>
+          <td><span class="status trait">K/K</span></td>
+          <td style="font-size:0.85em">F/F - TWO COPIES OF FURNISHINGS - WILL SHOW FURNISHINGS K/K - DOMINANT BLACK - SOLID [WILL NOT BE BRINDLED or EXPRESS</td>
+        </tr>
+        <tr>
+          <td>K座位 (ドミナントブラック)<br><small style="color:#6b7280">K Locus (Dominant Black)</small></td>
+          <td><span class="status trait">m/m</span></td>
+          <td style="font-size:0.85em">Black) AGOUTI] m/m [171/171bp] - NON MERLE SOLID COAT (NO CHANGE TO COAT</td>
+        </tr>
+        <tr>
+          <td>M座位 (マール/ダップル)<br><small style="color:#6b7280">M Locus (Merle/Dapple)</small></td>
+          <td><span class="status trait">—</span></td>
+          <td style="font-size:0.85em">/Dapple) COLOUR)</td>
+        </tr>
+        <tr>
+          <td>パイド (Pied)<br><small style="color:#6b7280">Pied</small></td>
+          <td><span class="status trait">S/S</span></td>
+          <td style="font-size:0.85em">and REPEAT VARIANTS) S/S - NO PIEBALD, WHITE SPOTTING, FLASH OR PARTI COAT COLOUR</td>
+        </tr>
+        <tr>
+          <td>ブラウン TYRP1<br><small style="color:#6b7280">Brown TYRP1</small></td>
+          <td><span class="status trait">BL/BL</span></td>
+          <td style="font-size:0.85em">[Lancashire Heeler Type] = Bl BL/BL - DOES NOT CARRY BROWN/LIVER [TYRP1]</td>
+        </tr>
+
+      </table>
+    </div>
+  </div>
+  <div id="white_phantom" class="tab-content">
+    <div class="dog-card">
+      <div class="dog-header">
+        <div>
+          <div class="dog-name">White Phantom</div>
+          <div class="dog-reg">IMPACT JP WHITE PHANTOM — 25RU75145</div>
+        </div>
+        <div class="dog-meta">
+          <span class="meta-tag male">オス (Female)</span>
+          <span class="meta-tag">Club: Not assigned</span>
+          <span class="meta-tag">15th Nov 2025</span>
+          
+          <span class="meta-tag">毛色: Merle</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">健康検査結果 (11項目)</h3>
+      <table class="results-table">
+        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr>
+          <td>筋骨格系</td>
+          <td>軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD)<br><small style="color:#6b7280">Chondrodystrophy with Intervertebral Disc Disease</small></td>
+          <td><span class="status carrier">P/N</span></td>
+          <td style="font-size:0.85em">CARRIER (P/N) - ONE COPY OF THE CHONDRODYSTROPHY (CDDY)</td>
+        </tr>
+        <tr>
+          <td>筋骨格系</td>
+          <td>骨軟骨異形成症<br><small style="color:#6b7280">Osteochondrodysplasia (Min Poodle Type)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>先天性巨大血小板減少症<br><small style="color:#6b7280">Congenital Macrothrombocytopenia</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>先天性メトヘモグロビン血症<br><small style="color:#6b7280">Congenital Methemoglobinemia (Poodle and</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>フォンウィルブランド病 I型<br><small style="color:#6b7280">von Willebrand's Disease Type I</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>神経系</td>
+          <td>変性性脊髄症 (DM)<br><small style="color:#6b7280">Degenerative Myelopathy</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>代謝系</td>
+          <td>ガングリオシドーシス GM2<br><small style="color:#6b7280">Gangliosidosis GM2 (Poodle Type)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>進行性網膜萎縮症 (prcd-PRA)<br><small style="color:#6b7280">Progressive Rod Cone Degeneration (prcd) - PRA</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>Glossary of Genetic Terms (Results)<br><small style="color:#6b7280">Glossary of Genetic Terms (Results)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>pass on any disease-causing mutation.<br><small style="color:#6b7280">pass on any disease-causing mutation.</small></td>
+          <td><span class="status carrier">P/N</span></td>
+          <td style="font-size:0.85em">CARRIER (P/N) - [ONE COPY OF THE VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>unknown then it may produce an a ected o spring.<br><small style="color:#6b7280">unknown then it may produce an a ected o spring.</small></td>
+          <td><span class="status positive">P/P</span></td>
+          <td style="font-size:0.85em">POSITIVE (P/P) - [TWO COPIES OF THE VARIANT DETECTED]</td>
+        </tr>
+
+      </table>
+
+      <h3 class="section-title">毛色・形質検査結果 (12項目)</h3>
+      <table class="results-table">
+        <tr><th>検査項目</th><th>遺伝子型</th><th>詳細</th></tr>
+        <tr>
+          <td>A座位 (アグーチ)<br><small style="color:#6b7280">A Locus (Agouti)</small></td>
+          <td><span class="status trait">BB</span></td>
+          <td style="font-size:0.85em">LOCUS] BB [BcBc BdBd BsBs] - DOES NOT CARRY BROWN/RED/LIVER or</td>
+        </tr>
+        <tr>
+          <td>B座位 (ブラウン)<br><small style="color:#6b7280">B Locus (Brown)</small></td>
+          <td><span class="status trait">B Locus</span></td>
+          <td style="font-size:0.85em">, Bs, Bc [Various Breeds] CHOCOLATE</td>
+        </tr>
+        <tr>
+          <td>軟骨異形成症 (CDPA)<br><small style="color:#6b7280">Chondrodysplasia (CDPA)</small></td>
+          <td><span class="status trait">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - NO SHORTENED LEGS COMPARED TO CDPA DOGS POSITIVE FOR THE R151W (Cu/Cu) VARIANT - LIKELY TO HAVE CURLY</td>
+        </tr>
+        <tr>
+          <td>巻き毛 (Curly Coat)<br><small style="color:#6b7280">Curly Coat/Hair Variant 1</small></td>
+          <td><span class="status trait">D/D</span></td>
+          <td style="font-size:0.85em">/Hair Variant 1 (TIGHT) HAIR PHENOTYPE D (Dilute) Locus D/D - NO COPY OF MLPH-D ALLELE (DILUTE) - PIGMENT IS NORMAL</td>
+        </tr>
+        <tr>
+          <td>D座位 (ダイリュート)<br><small style="color:#6b7280">D (Dilute) Locus</small></td>
+          <td><span class="status trait">D/D</span></td>
+          <td style="font-size:0.85em">D/D - NO COPY OF MLPH-D ALLELE (DILUTE) - PIGMENT IS NORMAL e/e - HOMOZYGOUS FOR NON-EXTENSION</td>
+        </tr>
+        <tr>
+          <td>E座位 (エクステンション)<br><small style="color:#6b7280">E Locus (Cream/Red/Yellow)</small></td>
+          <td><span class="status trait">En/En</span></td>
+          <td style="font-size:0.85em">/Red/Yellow) [WHITE/YELLOW/APRICOT/WHEATEN] EM (MC1R) Locus - Melanistic Mask En/En - NO MELANISTIC MASK (En) EXTENSION ALLELE</td>
+        </tr>
+        <tr>
+          <td>EM座位 (メラニスティックマスク)<br><small style="color:#6b7280">EM (MC1R) - Melanistic Mask</small></td>
+          <td><span class="status trait">En/En</span></td>
+          <td style="font-size:0.85em">Locus -  En/En - NO  (En) EXTENSION ALLELE</td>
+        </tr>
+        <tr>
+          <td>ファーニシング (RSPO2)<br><small style="color:#6b7280">Furnishings (RSPO2)</small></td>
+          <td><span class="status trait">F/F</span></td>
+          <td style="font-size:0.85em">F/F - TWO COPIES OF FURNISHINGS - WILL SHOW FURNISHINGS KB / ky or kbr- ONE COPY DOMINANT BLACK (KB) and ONE COPY OF NON-</td>
+        </tr>
+        <tr>
+          <td>K座位 (ドミナントブラック)<br><small style="color:#6b7280">K Locus (Dominant Black)</small></td>
+          <td><span class="status trait">m/m</span></td>
+          <td style="font-size:0.85em">Black) BLACK (ky ) dog MAY be brindled m/m [171/171bp] - NON MERLE SOLID COAT (NO CHANGE TO COAT</td>
+        </tr>
+        <tr>
+          <td>M座位 (マール/ダップル)<br><small style="color:#6b7280">M Locus (Merle/Dapple)</small></td>
+          <td><span class="status trait">—</span></td>
+          <td style="font-size:0.85em">/Dapple) COLOUR)</td>
+        </tr>
+        <tr>
+          <td>パイド (Pied)<br><small style="color:#6b7280">Pied</small></td>
+          <td><span class="status trait">S/S</span></td>
+          <td style="font-size:0.85em">and REPEAT VARIANTS) S/S - NO PIEBALD, WHITE SPOTTING, FLASH OR PARTI COAT COLOUR</td>
+        </tr>
+        <tr>
+          <td>ブラウン TYRP1<br><small style="color:#6b7280">Brown TYRP1</small></td>
+          <td><span class="status trait">BL/BL</span></td>
+          <td style="font-size:0.85em">[Lancashire Heeler Type] = Bl BL/BL - DOES NOT CARRY BROWN/LIVER [TYRP1]</td>
+        </tr>
+
+      </table>
+    </div>
+  </div>
+  <div id="lapi" class="tab-content">
+    <div class="dog-card">
+      <div class="dog-header">
+        <div>
+          <div class="dog-name">Lapi</div>
+          <div class="dog-reg">IMPACT JP FRY THE MONN — 25RU75195</div>
+        </div>
+        <div class="dog-meta">
+          <span class="meta-tag male">オス (Female)</span>
+          <span class="meta-tag">Club: Not assigned</span>
+          <span class="meta-tag">8th Aug 2023</span>
+          <span class="meta-tag">MC: 392144000868328</span>
+          <span class="meta-tag">毛色: Sample Collection Details</span>
+        </div>
+      </div>
+
+      <h3 class="section-title">健康検査結果 (11項目)</h3>
+      <table class="results-table">
+        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr>
+          <td>筋骨格系</td>
+          <td>軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD)<br><small style="color:#6b7280">Chondrodystrophy with Intervertebral Disc Disease</small></td>
+          <td><span class="status positive">P/P</span></td>
+          <td style="font-size:0.85em">POSITIVE (P/P) - TWO COPIES OF THE CHONDRODYSTROPHY (CDDY)</td>
+        </tr>
+        <tr>
+          <td>筋骨格系</td>
+          <td>骨軟骨異形成症<br><small style="color:#6b7280">Osteochondrodysplasia (Min Poodle Type)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>先天性巨大血小板減少症<br><small style="color:#6b7280">Congenital Macrothrombocytopenia</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>先天性メトヘモグロビン血症<br><small style="color:#6b7280">Congenital Methemoglobinemia (Poodle and</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>血液・リンパ系</td>
+          <td>フォンウィルブランド病 I型<br><small style="color:#6b7280">von Willebrand's Disease Type I</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>神経系</td>
+          <td>変性性脊髄症 (DM)<br><small style="color:#6b7280">Degenerative Myelopathy</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>代謝系</td>
+          <td>ガングリオシドーシス GM2<br><small style="color:#6b7280">Gangliosidosis GM2 (Poodle Type)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>進行性網膜萎縮症 (prcd-PRA)<br><small style="color:#6b7280">Progressive Rod Cone Degeneration (prcd) - PRA</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>Glossary of Genetic Terms (Results)<br><small style="color:#6b7280">Glossary of Genetic Terms (Results)</small></td>
+          <td><span class="status normal">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - [NO VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>pass on any disease-causing mutation.<br><small style="color:#6b7280">pass on any disease-causing mutation.</small></td>
+          <td><span class="status carrier">P/N</span></td>
+          <td style="font-size:0.85em">CARRIER (P/N) - [ONE COPY OF THE VARIANT DETECTED]</td>
+        </tr>
+        <tr>
+          <td>眼科系</td>
+          <td>unknown then it may produce an a ected o spring.<br><small style="color:#6b7280">unknown then it may produce an a ected o spring.</small></td>
+          <td><span class="status positive">P/P</span></td>
+          <td style="font-size:0.85em">POSITIVE (P/P) - [TWO COPIES OF THE VARIANT DETECTED]</td>
+        </tr>
+
+      </table>
+
+      <h3 class="section-title">毛色・形質検査結果 (12項目)</h3>
+      <table class="results-table">
+        <tr><th>検査項目</th><th>遺伝子型</th><th>詳細</th></tr>
+        <tr>
+          <td>A座位 (アグーチ)<br><small style="color:#6b7280">A Locus (Agouti)</small></td>
+          <td><span class="status trait">BB</span></td>
+          <td style="font-size:0.85em">LOCUS] BB [BcBc BdBd BsBs] - DOES NOT CARRY BROWN/RED/LIVER or</td>
+        </tr>
+        <tr>
+          <td>B座位 (ブラウン)<br><small style="color:#6b7280">B Locus (Brown)</small></td>
+          <td><span class="status trait">B Locus</span></td>
+          <td style="font-size:0.85em">, Bs, Bc [Various Breeds] CHOCOLATE</td>
+        </tr>
+        <tr>
+          <td>軟骨異形成症 (CDPA)<br><small style="color:#6b7280">Chondrodysplasia (CDPA)</small></td>
+          <td><span class="status trait">N/N</span></td>
+          <td style="font-size:0.85em">NORMAL (N/N) - NO SHORTENED LEGS COMPARED TO CDPA DOGS POSITIVE FOR THE R151W (Cu/Cu) VARIANT - LIKELY TO HAVE CURLY</td>
+        </tr>
+        <tr>
+          <td>巻き毛 (Curly Coat)<br><small style="color:#6b7280">Curly Coat/Hair Variant 1</small></td>
+          <td><span class="status trait">D/D</span></td>
+          <td style="font-size:0.85em">/Hair Variant 1 (TIGHT) HAIR PHENOTYPE D (Dilute) Locus D/D - NO COPY OF MLPH-D ALLELE (DILUTE) - PIGMENT IS NORMAL</td>
+        </tr>
+        <tr>
+          <td>D座位 (ダイリュート)<br><small style="color:#6b7280">D (Dilute) Locus</small></td>
+          <td><span class="status trait">D/D</span></td>
+          <td style="font-size:0.85em">D/D - NO COPY OF MLPH-D ALLELE (DILUTE) - PIGMENT IS NORMAL e/e - HOMOZYGOUS FOR NON-EXTENSION</td>
+        </tr>
+        <tr>
+          <td>E座位 (エクステンション)<br><small style="color:#6b7280">E Locus (Cream/Red/Yellow)</small></td>
+          <td><span class="status trait">En/En</span></td>
+          <td style="font-size:0.85em">/Red/Yellow) [WHITE/YELLOW/APRICOT/WHEATEN] EM (MC1R) Locus - Melanistic Mask En/En - NO MELANISTIC MASK (En) EXTENSION ALLELE</td>
+        </tr>
+        <tr>
+          <td>EM座位 (メラニスティックマスク)<br><small style="color:#6b7280">EM (MC1R) - Melanistic Mask</small></td>
+          <td><span class="status trait">En/En</span></td>
+          <td style="font-size:0.85em">Locus -  En/En - NO  (En) EXTENSION ALLELE</td>
+        </tr>
+        <tr>
+          <td>ファーニシング (RSPO2)<br><small style="color:#6b7280">Furnishings (RSPO2)</small></td>
+          <td><span class="status trait">F/F</span></td>
+          <td style="font-size:0.85em">F/F - TWO COPIES OF FURNISHINGS - WILL SHOW FURNISHINGS KB / ky or kbr- ONE COPY DOMINANT BLACK (KB) and ONE COPY OF NON-</td>
+        </tr>
+        <tr>
+          <td>K座位 (ドミナントブラック)<br><small style="color:#6b7280">K Locus (Dominant Black)</small></td>
+          <td><span class="status trait">m/m</span></td>
+          <td style="font-size:0.85em">Black) BLACK (ky ) dog MAY be brindled m/m [171/171bp] - NON MERLE SOLID COAT (NO CHANGE TO COAT</td>
+        </tr>
+        <tr>
+          <td>M座位 (マール/ダップル)<br><small style="color:#6b7280">M Locus (Merle/Dapple)</small></td>
+          <td><span class="status trait">—</span></td>
+          <td style="font-size:0.85em">/Dapple) COLOUR)</td>
+        </tr>
+        <tr>
+          <td>パイド (Pied)<br><small style="color:#6b7280">Pied</small></td>
+          <td><span class="status trait">S/S</span></td>
+          <td style="font-size:0.85em">and REPEAT VARIANTS) S/S - NO PIEBALD, WHITE SPOTTING, FLASH OR PARTI COAT COLOUR</td>
+        </tr>
+        <tr>
+          <td>ブラウン TYRP1<br><small style="color:#6b7280">Brown TYRP1</small></td>
+          <td><span class="status trait">BL/BL</span></td>
+          <td style="font-size:0.85em">[Lancashire Heeler Type] = Bl BL/BL - DOES NOT CARRY BROWN/LIVER [TYRP1]</td>
+        </tr>
+
+      </table>
+    </div>
+  </div>
+
+  <!-- Compare Tab -->
+  <div id="compare" class="tab-content">
+    <div class="dog-card">
+      <h2 class="section-title">健康検査 比較表</h2>
+      <div style="overflow-x:auto;">
+      <table class="compare-table">
+        <tr><th>検査項目</th><th>Seven</th><th>Angel Of Music</th><th>White Phantom</th><th>Lapi</th></tr>
+        <tr><td>軟骨異栄養症+椎間板疾患リスク (CDDY+IVDD)</td><td><span class="status positive">P/P</span></td><td><span class="status carrier">P/N</span></td><td><span class="status carrier">P/N</span></td><td><span class="status positive">P/P</span></td></tr>
+        <tr><td>骨軟骨異形成症</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>先天性巨大血小板減少症</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>先天性メトヘモグロビン血症</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>フォンウィルブランド病 I型</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>変性性脊髄症 (DM)</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>ガングリオシドーシス GM2</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>進行性網膜萎縮症 (prcd-PRA)</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>Glossary of Genetic Terms (Results)</td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td><td><span class="status normal">N/N</span></td></tr>
+        <tr><td>pass on any disease-causing mutation.</td><td><span class="status carrier">P/N</span></td><td><span class="status carrier">P/N</span></td><td><span class="status carrier">P/N</span></td><td><span class="status carrier">P/N</span></td></tr>
+        <tr><td>unknown then it may produce an a ected o spring.</td><td><span class="status positive">P/P</span></td><td><span class="status positive">P/P</span></td><td><span class="status positive">P/P</span></td><td><span class="status positive">P/P</span></td></tr>
+
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
