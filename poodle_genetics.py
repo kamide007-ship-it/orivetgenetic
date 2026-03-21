@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-プードル遺伝子総合解析ツール (Poodle Genetics Suite)
+プードル遺伝子総合解析ツール (Orivet Genetics Suite)
 =====================================================
 Orivet遺伝子検査PDFの自動解析 + JKC血統書OCR + COI算出を
 1本にまとめた統合ツール。
@@ -1458,7 +1458,7 @@ def print_usage():
 
 def main():
     print("=" * 60)
-    print("  プードル遺伝子総合解析ツール (Poodle Genetics Suite)")
+    print("  プードル遺伝子総合解析ツール (Orivet Genetics Suite)")
     print("=" * 60)
 
     if len(sys.argv) < 2:
