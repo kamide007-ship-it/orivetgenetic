@@ -9,10 +9,12 @@ import uuid
 import json
 import glob
 import shutil
+import secrets
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "orivet-genetics-default-key")
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
 REPORT_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
@@ -121,7 +123,7 @@ def index():
 @app.route("/analyze", methods=["POST"])
 def analyze():
     """PDF・血統書写真をアップロードして解析"""
-    session_id = uuid.uuid4().hex[:12]
+    session_id = uuid.uuid4().hex
     session_upload = os.path.join(UPLOAD_FOLDER, session_id)
     session_report = os.path.join(REPORT_FOLDER, session_id)
     os.makedirs(session_upload, exist_ok=True)
@@ -134,13 +136,16 @@ def analyze():
     pdf_files = request.files.getlist("pdf_files")
     for f in pdf_files:
         if f and f.filename and allowed_file(f.filename, ALLOWED_PDF_EXT):
-            safe_name = f"{uuid.uuid4().hex[:8]}_{f.filename}"
+            safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.pdf'}"
             path = os.path.join(session_upload, safe_name)
             f.save(path)
             if HAS_PDFPLUMBER:
-                dog = parse_pdf(path)
-                if dog:
-                    dogs.append(dog)
+                try:
+                    dog = parse_pdf(path)
+                    if dog:
+                        dogs.append(dog)
+                except Exception as e:
+                    flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）", "warning")
 
     # --- Pedigree images ---
     pedigree_files = request.files.getlist("pedigree_files")
@@ -151,19 +156,22 @@ def analyze():
                 ext = os.path.splitext(f.filename)[1].lower()
                 ocr_errors.append(f"{f.filename}: サポートされていない画像形式です（{ext}）")
                 continue
-            safe_name = f"{uuid.uuid4().hex[:8]}_{f.filename}"
+            safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.img'}"
             path = os.path.join(session_upload, safe_name)
             f.save(path)
             if HAS_OCR:
-                text = try_ocr(path)
-                if text:
-                    ped = parse_jkc_pedigree_text(text)
-                    if ped and ped.dog_name:
-                        pedigrees.append(ped)
+                try:
+                    text = try_ocr(path)
+                    if text:
+                        ped = parse_jkc_pedigree_text(text)
+                        if ped and ped.dog_name:
+                            pedigrees.append(ped)
+                        else:
+                            ocr_errors.append(f"{f.filename}: 血統書データの解析に失敗しました")
                     else:
-                        ocr_errors.append(f"{f.filename}: 血統書データの解析に失敗しました")
-                else:
-                    ocr_errors.append(f"{f.filename}: 画像からテキストを読み取れませんでした")
+                        ocr_errors.append(f"{f.filename}: 画像からテキストを読み取れませんでした")
+                except Exception as e:
+                    ocr_errors.append(f"{f.filename}: OCR処理中にエラーが発生しました（{type(e).__name__}）")
             else:
                 ocr_errors.append(f"{f.filename}: OCR機能が利用できません（pytesseract未インストール）")
 
@@ -186,40 +194,49 @@ def analyze():
     html_path = os.path.join(session_report, "report.html")
     xlsx_path = os.path.join(session_report, "report.xlsx")
 
-    generate_unified_html(dogs, pedigrees, html_path)
-    generate_excel(dogs, pedigrees, xlsx_path)
+    try:
+        generate_unified_html(dogs, pedigrees, html_path)
+        generate_excel(dogs, pedigrees, xlsx_path)
+    except Exception as e:
+        flash(f"レポート生成中にエラーが発生しました（{type(e).__name__}: {e}）", "error")
+        shutil.rmtree(session_upload, ignore_errors=True)
+        shutil.rmtree(session_report, ignore_errors=True)
+        return redirect(url_for("index"))
 
     # Save dog genotype data for simulator
-    if dogs:
-        sim_data = [extract_sim_data(d) for d in dogs]
-        with open(os.path.join(session_report, "dogs.json"), "w", encoding="utf-8") as f:
-            json.dump(sim_data, f, ensure_ascii=False)
+    try:
+        if dogs:
+            sim_data = [extract_sim_data(d) for d in dogs]
+            with open(os.path.join(session_report, "dogs.json"), "w", encoding="utf-8") as f:
+                json.dump(sim_data, f, ensure_ascii=False)
 
-    # Save pedigree data for simulator COI tab
-    if pedigrees:
-        ped_data = []
-        for ped in pedigrees:
-            ped_json = {
-                "dog_name": ped.dog_name,
-                "sex": ped.sex,
-                "sire": ped.sire.name if ped.sire else "",
-                "dam": ped.dam.name if ped.dam else "",
-                "ss": ped.ss.name if ped.ss else "",
-                "sd": ped.sd.name if ped.sd else "",
-                "ds": ped.ds.name if ped.ds else "",
-                "dd": ped.dd.name if ped.dd else "",
-                "sss": ped.sss.name if ped.sss else "",
-                "ssd": ped.ssd.name if ped.ssd else "",
-                "sds": ped.sds.name if ped.sds else "",
-                "sdd": ped.sdd.name if ped.sdd else "",
-                "dss": ped.dss.name if ped.dss else "",
-                "dsd": ped.dsd.name if ped.dsd else "",
-                "dds": ped.dds.name if ped.dds else "",
-                "ddd": ped.ddd.name if ped.ddd else "",
-            }
-            ped_data.append(ped_json)
-        with open(os.path.join(session_report, "pedigrees.json"), "w", encoding="utf-8") as f:
-            json.dump(ped_data, f, ensure_ascii=False)
+        # Save pedigree data for simulator COI tab
+        if pedigrees:
+            ped_data = []
+            for ped in pedigrees:
+                ped_json = {
+                    "dog_name": ped.dog_name,
+                    "sex": ped.sex,
+                    "sire": ped.sire.name if ped.sire else "",
+                    "dam": ped.dam.name if ped.dam else "",
+                    "ss": ped.ss.name if ped.ss else "",
+                    "sd": ped.sd.name if ped.sd else "",
+                    "ds": ped.ds.name if ped.ds else "",
+                    "dd": ped.dd.name if ped.dd else "",
+                    "sss": ped.sss.name if ped.sss else "",
+                    "ssd": ped.ssd.name if ped.ssd else "",
+                    "sds": ped.sds.name if ped.sds else "",
+                    "sdd": ped.sdd.name if ped.sdd else "",
+                    "dss": ped.dss.name if ped.dss else "",
+                    "dsd": ped.dsd.name if ped.dsd else "",
+                    "dds": ped.dds.name if ped.dds else "",
+                    "ddd": ped.ddd.name if ped.ddd else "",
+                }
+                ped_data.append(ped_json)
+            with open(os.path.join(session_report, "pedigrees.json"), "w", encoding="utf-8") as f:
+                json.dump(ped_data, f, ensure_ascii=False)
+    except Exception:
+        pass  # シミュレーター用データ保存失敗は非致命的
 
     # Cleanup uploaded files
     shutil.rmtree(session_upload, ignore_errors=True)
