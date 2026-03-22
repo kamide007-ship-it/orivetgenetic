@@ -802,7 +802,16 @@ def parse_health_tests(text: str) -> list:
 
         i += 1
 
-    return results
+    # 重複除去（extract_text + extract_tables で同じ結果が2回取得される場合がある）
+    seen = set()
+    unique_results = []
+    for r in results:
+        key = (r.test_name, r.status, r.genotype)
+        if key not in seen:
+            seen.add(key)
+            unique_results.append(r)
+
+    return unique_results
 
 
 def parse_trait_results_from_text(text: str) -> list:
