@@ -906,7 +906,7 @@ def try_ocr(image_path: str) -> str:
 
         # --- 写真向け前処理 ---
         # 1. 大きすぎる画像はリサイズ（Tesseractの精度向上 + 速度改善）
-        max_dim = 4000
+        max_dim = 2400
         if max(img.size) > max_dim:
             ratio = max_dim / max(img.size)
             img = img.resize((int(img.width * ratio), int(img.height * ratio)), Image.LANCZOS)
@@ -934,15 +934,20 @@ def try_ocr(image_path: str) -> str:
 
         # 複数の設定でOCRを試行し、最も良い結果を返す
         best_text = ""
+        ocr_timeout = 60  # 1回あたり最大60秒
         configs = [
             {'image': binarized, 'config': '--psm 6 --oem 3'},  # ブロックテキスト
             {'image': gray, 'config': '--psm 6 --oem 3'},       # グレースケール
-            {'image': binarized, 'config': '--psm 3 --oem 3'},  # 自動セグメント
         ]
         for cfg in configs:
-            text = pytesseract.image_to_string(
-                cfg['image'], lang='jpn+eng', config=cfg['config']
-            )
+            try:
+                text = pytesseract.image_to_string(
+                    cfg['image'], lang='jpn+eng', config=cfg['config'],
+                    timeout=ocr_timeout
+                )
+            except RuntimeError:
+                # Tesseractタイムアウト
+                continue
             if len(text) > len(best_text):
                 best_text = text
             # 十分なテキストが取れたら早期終了
