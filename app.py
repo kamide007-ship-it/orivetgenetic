@@ -151,18 +151,11 @@ def analyze():
                     dog = parse_pdf(path)
                     if dog:
                         dogs.append(dog)
-                    else:
-                        if is_dnap:
-                            flash(f"{f.filename}: DNAプロファイル（ISAG）ファイルです。遺伝子検査レポートとは別のファイルのため、解析対象外です。", "info")
-                        elif is_guide:
-                            flash(f"{f.filename}: 説明・ガイドファイルのため、解析対象外です。", "info")
-                        else:
-                            # Orivet PDFでない場合、血統書PDFとして解析を試みる
-                            ped = parse_pedigree_pdf(path)
-                            if ped:
-                                pedigrees.append(ped)
-                            else:
-                                flash(f"{f.filename}: 遺伝子検査PDFにも血統書PDFにも該当しませんでした", "warning")
+                    elif not is_dnap and not is_guide:
+                        # Orivet PDFでない場合、血統書PDFとして解析を試みる
+                        ped = parse_pedigree_pdf(path)
+                        if ped:
+                            pedigrees.append(ped)
                 except Exception as e:
                     flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）", "warning")
 
