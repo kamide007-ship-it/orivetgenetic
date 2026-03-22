@@ -339,6 +339,139 @@ def get_trait_annotation(test_name: str, genotype: str) -> str:
 
 
 # ============================================================
+# 健康検査 遺伝子型の日本語注釈
+# ============================================================
+
+def get_health_annotation(test_name: str, genotype: str, status: str) -> str:
+    """健康検査項目と遺伝子型から、分かりやすい日本語の注釈を返す"""
+    if not genotype:
+        return ""
+
+    name_lower = test_name.lower()
+
+    # CDDY+IVDD (軟骨異栄養症+椎間板疾患)
+    if "chondrodystrophy" in name_lower or "cddy" in name_lower or "ivdd" in name_lower:
+        return {
+            "N/N": "正常。椎間板疾患(IVDD)のリスクは一般レベル",
+            "P/N": "キャリア（保因犬）。CDDY因子を1つ保有。椎間板ヘルニアのリスクがやや高い。繁殖相手の選定に注意が必要",
+            "P/P": "発症リスクあり。CDDY因子を2つ保有。椎間板ヘルニアのリスクが高い。体重管理や激しい運動の制限を推奨",
+        }.get(genotype, "")
+
+    # 骨軟骨異形成症
+    if "osteochondrodysplasia" in name_lower:
+        return {
+            "N/N": "正常。骨軟骨異形成症の変異なし",
+            "P/N": "キャリア（保因犬）。繁殖時にキャリア同士の交配を避けること",
+            "P/P": "発症リスクあり。骨・軟骨の異常な発達が起こる可能性。獣医師への相談を推奨",
+        }.get(genotype, "")
+
+    # 先天性巨大血小板減少症
+    if "macrothrombocytopenia" in name_lower:
+        return {
+            "N/N": "正常。血小板に関する遺伝的異常なし",
+            "P/N": "キャリア（保因犬）。血小板が大きく数が少ない場合がある。臨床的問題は通常なし",
+            "P/P": "発症リスクあり。血小板が著しく大きく数が減少。出血傾向に注意",
+        }.get(genotype, "")
+
+    # 先天性メトヘモグロビン血症
+    if "methemoglobinemia" in name_lower:
+        return {
+            "N/N": "正常。メトヘモグロビン血症の変異なし",
+            "P/N": "キャリア（保因犬）。繁殖時にキャリア同士の交配を避けること",
+            "P/P": "発症リスクあり。チアノーゼ（皮膚や粘膜の青紫変色）が見られる可能性。獣医師への相談を推奨",
+        }.get(genotype, "")
+
+    # フォンウィルブランド病 I型
+    if "von willebrand" in name_lower:
+        return {
+            "N/N": "正常。出血性疾患のリスクなし",
+            "P/N": "キャリア（保因犬）。通常は臨床症状なし。繁殖時にキャリア同士の交配を避けること",
+            "P/P": "発症リスクあり。出血が止まりにくい傾向。手術前に獣医師に申告すること",
+        }.get(genotype, "")
+
+    # 変性性脊髄症 (DM)
+    if "degenerative myelopathy" in name_lower:
+        return {
+            "N/N": "正常。変性性脊髄症のリスクなし",
+            "P/N": "キャリア（保因犬）。通常は発症しない。繁殖時にキャリア同士の交配を避けること",
+            "P/P": "発症リスクあり。高齢期に後肢の麻痺が進行する可能性。定期的な神経学的検査を推奨",
+        }.get(genotype, "")
+
+    # ガングリオシドーシス GM2
+    if "gangliosidosis" in name_lower:
+        return {
+            "N/N": "正常。ガングリオシドーシスの変異なし",
+            "P/N": "キャリア（保因犬）。繁殖時にキャリア同士の交配を避けること",
+            "P/P": "発症リスクあり。神経系の進行性疾患。早期の獣医師への相談を推奨",
+        }.get(genotype, "")
+
+    # 進行性網膜萎縮症 (prcd-PRA)
+    if "progressive rod cone" in name_lower or "prcd" in name_lower or "progressive retinal atrophy" in name_lower:
+        return {
+            "N/N": "正常。prcd-PRAによる失明リスクなし",
+            "P/N": "キャリア（保因犬）。視力への影響なし。繁殖時にキャリア同士の交配を避けること",
+            "P/P": "発症リスクあり。進行性の視力低下・失明の可能性。定期的な眼科検査を推奨",
+        }.get(genotype, "")
+
+    # 運動誘発性虚脱 (EIC)
+    if "exercise-induced collapse" in name_lower or "eic" in name_lower:
+        return {
+            "N/N": "正常。運動誘発性虚脱のリスクなし",
+            "P/N": "キャリア（保因犬）。通常は発症しない。繁殖時にキャリア同士の交配を避けること",
+            "P/P": "発症リスクあり。激しい運動後に一過性の虚脱が起こる可能性。運動の強度に注意",
+        }.get(genotype, "")
+
+    # 新生児脳症
+    if "neonatal encephalopathy" in name_lower:
+        return {
+            "N/N": "正常。新生児脳症の変異なし",
+            "P/N": "キャリア（保因犬）。繁殖時にキャリア同士の交配を避けること",
+            "P/P": "発症リスクあり。新生児期に神経症状が出る可能性",
+        }.get(genotype, "")
+
+    # 汎用的な注釈（上記に該当しない場合）
+    if status == "normal":
+        return "正常。この疾患に関連する遺伝子変異は検出されませんでした"
+    elif status == "carrier":
+        return "キャリア（保因犬）。変異を1つ保有。通常は発症しないが、繁殖相手の選定に注意が必要"
+    elif status == "positive":
+        return "発症リスクあり。変異を2つ保有。獣医師への相談を推奨"
+
+    return ""
+
+
+# ============================================================
+# PDF解析時の不正データフィルター
+# ============================================================
+
+# PDFからの誤抽出を除外するための除外キーワード
+HEALTH_TEST_BLACKLIST = [
+    "glossary of genetic terms",
+    "pass on any disease-causing mutation",
+    "unknown then it may produce",
+    "affected offspring",
+    "genetic terms",
+    "copyright",
+    "disclaimer",
+    "page ",
+]
+
+
+def is_valid_health_test(test_name: str) -> bool:
+    """有効な健康検査項目かどうかを判定（PDFの文字化けやゴミデータを除外）"""
+    if not test_name or len(test_name) < 3:
+        return False
+    name_lower = test_name.lower()
+    for blacklisted in HEALTH_TEST_BLACKLIST:
+        if blacklisted in name_lower:
+            return False
+    # 文字化けチェック: 制御文字や置換文字が含まれている場合
+    if re.search(r'[\ufffd\x00-\x08\x0b\x0c\x0e-\x1f]', test_name):
+        return False
+    return True
+
+
+# ============================================================
 # 既知の血統書データ
 # ============================================================
 
@@ -567,10 +700,12 @@ def parse_health_tests(text: str) -> list:
                 test_name = lines[i-1].strip() if i > 0 else ""
                 result_text = line.strip()
 
+            test_name = sanitize_text(test_name)
+            result_text = sanitize_text(result_text)
             test_name = re.sub(r'^[\s\uf0b7\u2022\u25cf]+', '', test_name)
             test_name = re.sub(r'\s+', ' ', test_name).strip()
 
-            if test_name and len(test_name) > 2:
+            if test_name and len(test_name) > 2 and is_valid_health_test(test_name):
                 status = classify_result(result_text)
                 genotype = extract_genotype(result_text)
                 jp_name = get_japanese_name(test_name)
@@ -880,11 +1015,25 @@ def calc_coi_cross(sire_ped: Pedigree, dam_ped: Pedigree) -> dict:
 # PART 3: 統合HTML出力
 # ████████████████████████████████████████████████████████████
 
-def sanitize_for_excel(text: str) -> str:
-    """Excelで使えない文字を除去"""
+def sanitize_text(text: str) -> str:
+    """PDF由来の文字化け・制御文字を修正"""
     if not text:
         return text
-    return re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text)
+    # 制御文字を除去
+    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text)
+    # よくある文字化けパターンを修正
+    text = text.replace('\ufffd', '')      # 置換文字(�)を除去
+    text = re.sub(r'(?<=[a-z])\s*\ufb00\s*(?=[a-z])', 'ff', text)  # ﬀ → ff
+    text = re.sub(r'(?<=[a-z])\s*\ufb01\s*(?=[a-z])', 'fi', text)  # ﬁ → fi
+    text = re.sub(r'(?<=[a-z])\s*\ufb02\s*(?=[a-z])', 'fl', text)  # ﬂ → fl
+    text = re.sub(r'(?<=[a-z])\s*\ufb03\s*(?=[a-z])', 'ffi', text) # ﬃ → ffi
+    text = re.sub(r'(?<=[a-z])\s*\ufb04\s*(?=[a-z])', 'ffl', text) # ﬄ → ffl
+    return text
+
+
+def sanitize_for_excel(text: str) -> str:
+    """Excelで使えない文字を除去"""
+    return sanitize_text(text)
 
 
 def status_badge(status: str, text: str) -> str:
@@ -921,9 +1070,11 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
         for r in dog.health_results:
             display_name = r.japanese_name if r.japanese_name else r.test_name
             badge = status_badge(r.status, r.genotype if r.genotype else r.status.upper())
+            annotation = get_health_annotation(r.test_name, r.genotype, r.status)
+            annotation_html = f'<div style="margin-top:4px;padding:6px 8px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;font-size:0.85em;color:#374151;">{annotation}</div>' if annotation else ''
             health_rows += f"""        <tr>
           <td>{r.category}</td>
-          <td>{display_name}<br><small style="color:#6b7280">{r.test_name}</small></td>
+          <td>{display_name}<br><small style="color:#6b7280">{r.test_name}</small>{annotation_html}</td>
           <td>{badge}</td>
           <td style="font-size:0.85em">{r.result_text[:120]}</td>
         </tr>\n"""
