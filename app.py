@@ -139,18 +139,30 @@ def analyze():
             safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.pdf'}"
             path = os.path.join(session_upload, safe_name)
             f.save(path)
+
+            # DNAプロファイル（DNAP）ファイルの事前判定
+            fname_upper = (f.filename or "").upper()
+            is_dnap = "DNAP" in fname_upper or "DNA PROFILE" in fname_upper
+            # 「見方」「説明」ファイルの事前判定
+            is_guide = "見方" in (f.filename or "") or "説明" in (f.filename or "")
+
             if HAS_PDFPLUMBER:
                 try:
                     dog = parse_pdf(path)
                     if dog:
                         dogs.append(dog)
                     else:
-                        # Orivet PDFでない場合、血統書PDFとして解析を試みる
-                        ped = parse_pedigree_pdf(path)
-                        if ped:
-                            pedigrees.append(ped)
+                        if is_dnap:
+                            flash(f"{f.filename}: DNAプロファイル（ISAG）ファイルです。遺伝子検査レポートとは別のファイルのため、解析対象外です。", "info")
+                        elif is_guide:
+                            flash(f"{f.filename}: 説明・ガイドファイルのため、解析対象外です。", "info")
                         else:
-                            flash(f"{f.filename}: 遺伝子検査PDFにも血統書PDFにも該当しませんでした", "warning")
+                            # Orivet PDFでない場合、血統書PDFとして解析を試みる
+                            ped = parse_pedigree_pdf(path)
+                            if ped:
+                                pedigrees.append(ped)
+                            else:
+                                flash(f"{f.filename}: 遺伝子検査PDFにも血統書PDFにも該当しませんでした", "warning")
                 except Exception as e:
                     flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）", "warning")
 
