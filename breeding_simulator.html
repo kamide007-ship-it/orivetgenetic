@@ -10,8 +10,12 @@
 body { font-family:'Segoe UI','Hiragino Sans','Meiryo',sans-serif; background:var(--bg); color:#1f2937; line-height:1.6; }
 .container { max-width:1200px; margin:0 auto; padding:20px; }
 header { background:linear-gradient(135deg,var(--purple),var(--pink)); color:white; padding:24px 0; border-radius:0 0 20px 20px; margin-bottom:24px; }
+header .container { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
 header h1 { font-size:1.6em; }
 header p { opacity:0.85; font-size:0.9em; margin-top:4px; }
+header .nav-buttons { display:flex; gap:8px; flex-wrap:wrap; }
+header .nav-buttons a { color:#fff; text-decoration:none; padding:8px 16px; border-radius:8px; font-size:0.85em; font-weight:500; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.15); transition:background 0.2s; }
+header .nav-buttons a:hover { background:rgba(255,255,255,0.3); }
 
 /* Tabs */
 .tabs { display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
@@ -82,8 +86,15 @@ tr:hover td { background:#faf5ff; }
 
 <header>
   <div class="container">
-    <h1>Orivet Genetics Simulator</h1>
-    <p>毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出</p>
+    <div>
+      <h1>Orivet Genetics Simulator</h1>
+      <p>毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出</p>
+    </div>
+    <div class="nav-buttons">
+      <a href="javascript:history.back()">戻る</a>
+      <a href="/" id="nav-home">新しい解析</a>
+      <a href="/" id="nav-report" style="display:none;">レポートに戻る</a>
+    </div>
   </div>
 </header>
 
@@ -789,6 +800,13 @@ function loadDogsFromSession() {
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session');
   if (!sessionId) return;
+
+  // レポートへ戻るボタンを表示
+  const reportBtn = document.getElementById('nav-report');
+  if (reportBtn) {
+    reportBtn.href = '/report/' + encodeURIComponent(sessionId);
+    reportBtn.style.display = '';
+  }
 
   fetch('/api/dogs/' + encodeURIComponent(sessionId))
     .then(r => r.json())
