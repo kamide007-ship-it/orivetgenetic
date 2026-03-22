@@ -195,6 +195,32 @@ def analyze():
         with open(os.path.join(session_report, "dogs.json"), "w", encoding="utf-8") as f:
             json.dump(sim_data, f, ensure_ascii=False)
 
+    # Save pedigree data for simulator COI tab
+    if pedigrees:
+        ped_data = []
+        for ped in pedigrees:
+            ped_json = {
+                "dog_name": ped.dog_name,
+                "sex": ped.sex,
+                "sire": ped.sire.name if ped.sire else "",
+                "dam": ped.dam.name if ped.dam else "",
+                "ss": ped.ss.name if ped.ss else "",
+                "sd": ped.sd.name if ped.sd else "",
+                "ds": ped.ds.name if ped.ds else "",
+                "dd": ped.dd.name if ped.dd else "",
+                "sss": ped.sss.name if ped.sss else "",
+                "ssd": ped.ssd.name if ped.ssd else "",
+                "sds": ped.sds.name if ped.sds else "",
+                "sdd": ped.sdd.name if ped.sdd else "",
+                "dss": ped.dss.name if ped.dss else "",
+                "dsd": ped.dsd.name if ped.dsd else "",
+                "dds": ped.dds.name if ped.dds else "",
+                "ddd": ped.ddd.name if ped.ddd else "",
+            }
+            ped_data.append(ped_json)
+        with open(os.path.join(session_report, "pedigrees.json"), "w", encoding="utf-8") as f:
+            json.dump(ped_data, f, ensure_ascii=False)
+
     # Cleanup uploaded files
     shutil.rmtree(session_upload, ignore_errors=True)
 
@@ -225,6 +251,18 @@ def api_dogs(session_id):
     if ".." in session_id or "/" in session_id:
         return jsonify({"error": "不正なリクエスト"}), 400
     json_path = os.path.join(REPORT_FOLDER, session_id, "dogs.json")
+    if not os.path.exists(json_path):
+        return jsonify([])
+    with open(json_path, "r", encoding="utf-8") as f:
+        return jsonify(json.load(f))
+
+
+@app.route("/api/pedigrees/<session_id>")
+def api_pedigrees(session_id):
+    """解析済みの血統書データをJSONで返す"""
+    if ".." in session_id or "/" in session_id:
+        return jsonify({"error": "不正なリクエスト"}), 400
+    json_path = os.path.join(REPORT_FOLDER, session_id, "pedigrees.json")
     if not os.path.exists(json_path):
         return jsonify([])
     with open(json_path, "r", encoding="utf-8") as f:
