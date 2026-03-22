@@ -862,48 +862,74 @@ def try_ocr(image_path: str) -> str:
         return ""
 
 
-def parse_jkc_pedigree_text(text: str) -> Optional[Pedigree]:
-    """OCRテキストからJKC血統書を解析"""
-    if not text:
-        return None
+def detect_pedigree_format(text: str) -> str:
+    """血統書のフォーマットを自動判定"""
+    if re.search(r'JKC-PT|ジャパンケネルクラブ|JAPAN KENNEL CLUB', text, re.IGNORECASE):
+        return "jkc"
+    if re.search(r'ALAJ|Australian Labradoodle|ラブラドゥードル', text, re.IGNORECASE):
+        return "alaj"
+    if re.search(r'AKC|AMERICAN KENNEL CLUB', text, re.IGNORECASE):
+        return "akc"
+    if re.search(r'KC\b|THE KENNEL CLUB', text, re.IGNORECASE):
+        return "kc"
+    if re.search(r'SIRE|DAM|G\.SIRE|G\.DAM|PEDIGREE|血統書', text, re.IGNORECASE):
+        return "generic"
+    return "generic"
 
-    ped = Pedigree()
 
-    m = re.search(r'(?:Name of Dog|犬名)\s*\n?\s*(.+?)(?:\n|$)', text)
-    if m:
-        ped.dog_name = m.group(1).strip()
-
-    m = re.search(r'(JKC-PT\s*-?\s*\d+/\d+)', text)
-    if m:
-        ped.registration = m.group(1)
-
-    if re.search(r'MALE|オス|牡', text):
+def _extract_basic_info(text: str, ped: Pedigree):
+    """共通の基本情報を抽出"""
+    if re.search(r'\bMALE\b|オス|牡|♂|性\s*別\s*Male', text, re.IGNORECASE):
         ped.sex = "MALE"
-    elif re.search(r'FEMALE|メス|牝', text):
+    elif re.search(r'\bFEMALE\b|メス|牝|♀|性\s*別\s*Female', text, re.IGNORECASE):
         ped.sex = "FEMALE"
-
-    m = re.search(r'(?:色|Color)\s*(\w+)', text)
-    if m:
-        ped.color = m.group(1)
 
     m = re.search(r'(\d{4}年\s*\d{1,2}月\s*\d{1,2}日)', text)
     if m:
         ped.dob = m.group(1)
+    else:
+        m = re.search(r'(?:生年月日|Date of Birth|DOB|D\.O\.B)\s*[:\s]*(\d{4}[/\-]\d{1,2}[/\-]\d{1,2})', text, re.IGNORECASE)
+        if m:
+            ped.dob = m.group(1)
+        else:
+            m = re.search(r'(?:生\s*年\s*月\s*日)\s*(\d{4}/\d{1,2}/\d{1,2})', text)
+            if m:
+                ped.dob = m.group(1)
 
-    m = re.search(r'ID\s*(392\d{12,15})', text)
+    m = re.search(r'(?:毛\s*色|色|Color|Colour)\s*[:\s]*([A-Za-z\s]+?)(?:\n|$)', text, re.IGNORECASE)
+    if m:
+        ped.color = m.group(1).strip()
+
+    m = re.search(r'(?:マイクロチップ|Microchip|MC|ID)\s*[番号:\s]*(\d{10,15})', text, re.IGNORECASE)
     if m:
         ped.microchip = m.group(1)
 
+    m = re.search(r'(?:所\s*有\s*者|Owner)\s*[:\s]*(.+?)(?:\n|$)', text, re.IGNORECASE)
+    if m:
+        ped.owner = m.group(1).strip()
+
+    m = re.search(r'(?:繁殖者|Breeder)\s*[:\s]*(.+?)(?:\n|$)', text, re.IGNORECASE)
+    if m:
+        ped.breeder = m.group(1).strip()
+
+    m = re.search(r'(?:犬\s*種|Breed)\s*[:\s]*(.+?)(?:\n|$)', text, re.IGNORECASE)
+    if m:
+        ped.breed = m.group(1).strip()
+
+
+def _parse_jkc_ancestors(text: str, ped: Pedigree):
+    """JKC形式の祖先名を抽出（番号ベース）"""
     lines = text.split('\n')
     ancestors = {}
-    for i, line in enumerate(lines):
+    for line in lines:
         m = re.match(r'\s*(\d{1,2})\s*[\|\{]?\s*(.+)', line)
         if m:
             num = int(m.group(1))
             name_text = m.group(2).strip()
-            name_m = re.search(r'((?:SMASH|IMPACT|BEATRIX)\s+JP\s+[\w\s]+)', name_text, re.IGNORECASE)
-            if name_m:
-                ancestors[num] = name_m.group(1).strip()
+            name_text = re.sub(r'\s*JKC-PT.*$', '', name_text).strip()
+            name_text = re.sub(r'\s*CH/\d+.*$', '', name_text).strip()
+            if len(name_text) > 2:
+                ancestors[num] = name_text
 
     pos_map = {
         1: "sire", 2: "dam", 3: "ss", 4: "sd", 5: "ds", 6: "dd",
@@ -913,6 +939,148 @@ def parse_jkc_pedigree_text(text: str) -> Optional[Pedigree]:
     for num, name in ancestors.items():
         if num in pos_map:
             setattr(ped, pos_map[num], Ancestor(position=pos_map[num], name=name))
+
+
+def _parse_labeled_ancestors(text: str, ped: Pedigree):
+    """ラベルベースの祖先抽出（SIRE/DAM/G.SIRE/G.DAM形式 — ALAJ等）"""
+
+    def get_name_after_label(text: str, label_end: int, max_chars: int = 200) -> str:
+        remaining = text[label_end:label_end + max_chars]
+        lines = [l.strip() for l in remaining.split('\n') if l.strip()]
+        for line in lines:
+            if re.match(r'^(?:SIRE|DAM|G\.?SIRE|G\.?DAM|GG|父犬|母犬|祖父|祖母|曾祖|犬種|性別|サイズ|毛色|生年月日|所有者)', line, re.IGNORECASE):
+                continue
+            cleaned = re.sub(r'^\d+\s*', '', line).strip()
+            if len(cleaned) >= 3 and not re.match(r'^\d{4}[/\-]', cleaned):
+                return cleaned
+        return ""
+
+    sire_match = re.search(r'(?:^|\n)\s*SIRE\b', text, re.IGNORECASE)
+    dam_match = re.search(r'(?:^|\n)\s*DAM\b', text, re.IGNORECASE)
+
+    gsire_positions = [(m.start(), m.end()) for m in re.finditer(r'G\.?SIRE\b|父方祖父|祖父犬', text, re.IGNORECASE)]
+    gdam_positions = [(m.start(), m.end()) for m in re.finditer(r'G\.?DAM\b|父方祖母|祖母犬', text, re.IGNORECASE)]
+
+    if sire_match:
+        name = get_name_after_label(text, sire_match.end())
+        if name:
+            ped.sire = Ancestor(position="sire", name=name)
+
+    if dam_match:
+        name = get_name_after_label(text, dam_match.end())
+        if name:
+            ped.dam = Ancestor(position="dam", name=name)
+
+    dam_pos = dam_match.start() if dam_match else len(text) // 2
+
+    sire_gsires = [p for p in gsire_positions if p[0] < dam_pos]
+    sire_gdams = [p for p in gdam_positions if p[0] < dam_pos]
+    dam_gsires = [p for p in gsire_positions if p[0] >= dam_pos]
+    dam_gdams = [p for p in gdam_positions if p[0] >= dam_pos]
+
+    if sire_gsires:
+        name = get_name_after_label(text, sire_gsires[0][1])
+        if name:
+            ped.ss = Ancestor(position="ss", name=name)
+    if sire_gdams:
+        name = get_name_after_label(text, sire_gdams[0][1])
+        if name:
+            ped.sd = Ancestor(position="sd", name=name)
+    if dam_gsires:
+        name = get_name_after_label(text, dam_gsires[0][1])
+        if name:
+            ped.ds = Ancestor(position="ds", name=name)
+    if dam_gdams:
+        name = get_name_after_label(text, dam_gdams[0][1])
+        if name:
+            ped.dd = Ancestor(position="dd", name=name)
+
+    gg_sire_positions = [(m.start(), m.end()) for m in re.finditer(r'GG\.?SIRE\b|G\.G\.SIRE|曾祖父', text, re.IGNORECASE)]
+    gg_dam_positions = [(m.start(), m.end()) for m in re.finditer(r'GG\.?DAM\b|G\.G\.DAM|曾祖母', text, re.IGNORECASE)]
+
+    gg_sire_fields = ["sss", "sds", "dss", "dds"]
+    gg_dam_fields = ["ssd", "sdd", "dsd", "ddd"]
+
+    for idx, (start, end) in enumerate(gg_sire_positions):
+        if idx < len(gg_sire_fields):
+            name = get_name_after_label(text, end)
+            if name:
+                setattr(ped, gg_sire_fields[idx], Ancestor(position=gg_sire_fields[idx], name=name))
+
+    for idx, (start, end) in enumerate(gg_dam_positions):
+        if idx < len(gg_dam_fields):
+            name = get_name_after_label(text, end)
+            if name:
+                setattr(ped, gg_dam_fields[idx], Ancestor(position=gg_dam_fields[idx], name=name))
+
+
+def parse_jkc_pedigree_text(text: str) -> Optional[Pedigree]:
+    """OCRテキストから血統書を解析（全フォーマット自動対応）"""
+    return parse_pedigree_text(text)
+
+
+def parse_pedigree_text(text: str) -> Optional[Pedigree]:
+    """OCRテキストから血統書を解析（全フォーマット自動対応）"""
+    if not text:
+        return None
+
+    ped = Pedigree()
+    fmt = detect_pedigree_format(text)
+
+    _extract_basic_info(text, ped)
+
+    if fmt == "jkc":
+        m = re.search(r'(?:Name of Dog|犬名)\s*\n?\s*(.+?)(?:\n|$)', text)
+        if m:
+            ped.dog_name = m.group(1).strip()
+        m = re.search(r'(JKC-PT\s*-?\s*\d+/\d+)', text)
+        if m:
+            ped.registration = m.group(1)
+        _parse_jkc_ancestors(text, ped)
+
+    elif fmt == "alaj":
+        lines = [l.strip() for l in text.split('\n') if l.strip()]
+        if lines:
+            for i, line in enumerate(lines):
+                if re.search(r'PEDIGREE|血統書', line, re.IGNORECASE):
+                    # 犬名がPEDIGREEと同じ行にある場合
+                    name_on_line = re.sub(r'\s*PEDIGREE\s*', '', line, flags=re.IGNORECASE).strip()
+                    name_on_line = re.sub(r'\s*血統書\s*', '', name_on_line).strip()
+                    if len(name_on_line) > 3:
+                        ped.dog_name = name_on_line
+                    elif i > 0:
+                        ped.dog_name = lines[i-1].strip()
+                    break
+            if not ped.dog_name and lines:
+                ped.dog_name = lines[0].strip()
+
+        m = re.search(r'(?:登\s*録\s*番\s*号|Registration)\s*[:\s]*([A-Z]{2,}\d+)', text, re.IGNORECASE)
+        if m:
+            ped.registration = m.group(1)
+
+        _parse_labeled_ancestors(text, ped)
+
+    else:
+        m = re.search(r'(?:Name of Dog|犬名|Dog Name|名前)\s*[:\s]*\n?\s*(.+?)(?:\n|$)', text, re.IGNORECASE)
+        if m:
+            ped.dog_name = m.group(1).strip()
+        else:
+            lines = [l.strip() for l in text.split('\n') if l.strip()]
+            if lines:
+                ped.dog_name = lines[0]
+
+        m = re.search(r'(?:登録番号|Registration|Reg\.?\s*No\.?)\s*[:\s]*([A-Z0-9\-/]+)', text, re.IGNORECASE)
+        if m:
+            ped.registration = m.group(1)
+
+        _parse_labeled_ancestors(text, ped)
+        if not ped.sire:
+            _parse_jkc_ancestors(text, ped)
+
+    if not ped.dog_name:
+        lines = [l.strip() for l in text.split('\n') if l.strip() and len(l.strip()) > 5]
+        if lines:
+            ped.dog_name = lines[0]
 
     return ped
 
