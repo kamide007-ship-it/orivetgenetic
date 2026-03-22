@@ -946,14 +946,21 @@ def try_ocr(image_path: str) -> str:
         print("  + Tesseract OCR本体: sudo apt install tesseract-ocr tesseract-ocr-jpn")
         return ""
     try:
+        from PIL import ImageEnhance, ImageFilter, ImageOps
         img = Image.open(image_path)
         # HEIC/WEBP等をRGBに変換
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
 
+        # EXIF回転情報を適用（写真の向き補正）
+        try:
+            img = ImageOps.exif_transpose(img)
+        except Exception:
+            pass
+
         # --- 写真向け前処理 ---
-        # 1. 大きすぎる画像はリサイズ（Tesseractの精度向上 + 速度改善）
-        max_dim = 2400
+        # 1. リサイズ（速度改善 + Tesseract最適解像度）
+        max_dim = 2000
         if max(img.size) > max_dim:
             ratio = max_dim / max(img.size)
             img = img.resize((int(img.width * ratio), int(img.height * ratio)), Image.LANCZOS)
@@ -961,46 +968,49 @@ def try_ocr(image_path: str) -> str:
         # 2. グレースケール変換
         gray = img.convert("L")
 
-        # 3. コントラスト強化（CLAHE的な効果）
+        # 3. コントラスト・シャープネス強化
+        gray = ImageEnhance.Contrast(gray).enhance(2.0)
+        gray = ImageEnhance.Sharpness(gray).enhance(2.0)
+
+        # 4. 軽いノイズ除去（MedianFilter）
+        gray = gray.filter(ImageFilter.MedianFilter(size=3))
+
+        # 5. 適応的二値化（ブロック平均ベース）
+        # numpy不要の簡易実装: 全体平均から閾値を決定
+        stat = gray.resize((1, 1), Image.LANCZOS).getpixel((0, 0))
+        threshold = max(stat - 30, 80)
+        binarized = gray.point(lambda x: 255 if x > threshold else 0)
+
+        # OCR実行（1パスで高速化）
+        # 血統書の主要情報は英語表記が多いため eng+jpn 順で優先
+        ocr_timeout = 90
+        best_text = ""
+
+        # パス1: 英語優先（高速・血統書の構造テキストに最適）
         try:
-            from PIL import ImageEnhance, ImageFilter
-            # コントラスト強化
-            enhancer = ImageEnhance.Contrast(gray)
-            gray = enhancer.enhance(1.8)
-            # シャープネス強化
-            enhancer = ImageEnhance.Sharpness(gray)
-            gray = enhancer.enhance(2.0)
-        except ImportError:
+            text = pytesseract.image_to_string(
+                binarized, lang='eng+jpn', config='--psm 6 --oem 3',
+                timeout=ocr_timeout
+            )
+            if text:
+                best_text = text
+        except RuntimeError:
             pass
 
-        # 4. 二値化（適応的しきい値の簡易版）
-        # まずOtsu的な二値化を試みる
-        pixels = list(gray.getdata())
-        threshold = sum(pixels) // len(pixels)  # 平均値ベースの閾値
-        binarized = gray.point(lambda x: 255 if x > threshold - 30 else 0)
+        # 十分なテキストが取れた場合は早期終了
+        if len(best_text) > 300 and re.search(r'SIRE|DAM|JKC|PEDIGREE|血統', best_text, re.IGNORECASE):
+            return best_text
 
-        # 複数の設定でOCRを試行し、最も良い結果を返す
-        best_text = ""
-        ocr_timeout = 60  # 1回あたり最大60秒
-        configs = [
-            {'image': binarized, 'config': '--psm 6 --oem 3'},  # ブロックテキスト
-            {'image': gray, 'config': '--psm 6 --oem 3'},       # グレースケール
-        ]
-        for cfg in configs:
-            try:
-                text = pytesseract.image_to_string(
-                    cfg['image'], lang='jpn+eng', config=cfg['config'],
-                    timeout=ocr_timeout
-                )
-            except RuntimeError:
-                # Tesseractタイムアウト
-                continue
+        # パス2: フォールバック（グレースケール + 日本語優先）
+        try:
+            text = pytesseract.image_to_string(
+                gray, lang='jpn+eng', config='--psm 6 --oem 3',
+                timeout=ocr_timeout
+            )
             if len(text) > len(best_text):
                 best_text = text
-            # 十分なテキストが取れたら早期終了
-            if len(text) > 500 and re.search(r'SIRE|DAM|JKC|PEDIGREE|血統', text, re.IGNORECASE):
-                best_text = text
-                break
+        except RuntimeError:
+            pass
 
         return best_text
     except Exception as e:
