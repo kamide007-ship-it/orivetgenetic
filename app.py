@@ -29,7 +29,7 @@ ALLOWED_IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".heic", "
 
 # Import analysis modules
 from poodle_genetics import (
-    parse_pdf, KNOWN_PEDIGREES, calc_coi_3gen,
+    parse_pdf, parse_pedigree_pdf, KNOWN_PEDIGREES, calc_coi_3gen,
     generate_unified_html, generate_excel,
     HAS_PDFPLUMBER, HAS_OCR,
 )
@@ -144,6 +144,11 @@ def analyze():
                     dog = parse_pdf(path)
                     if dog:
                         dogs.append(dog)
+                    else:
+                        # Orivet PDFでない場合、血統書PDFとして解析を試みる
+                        ped = parse_pedigree_pdf(path)
+                        if ped:
+                            pedigrees.append(ped)
                 except Exception as e:
                     flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）", "warning")
 
