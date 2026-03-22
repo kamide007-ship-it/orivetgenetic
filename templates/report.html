@@ -53,6 +53,7 @@
     <div class="toolbar">
         <span class="title">Orivet Genetics Suite - レポート</span>
         <div>
+            <a href="/simulator?session={{ session_id }}">シミュレーターで使う</a>
             {% if xlsx_exists %}
             <a href="/download/{{ session_id }}/report.xlsx">Excel ダウンロード</a>
             {% endif %}

@@ -607,7 +607,7 @@ function runHealthSim() {
 
   if (sireKey === 'custom_h' || damKey === 'custom_h') {
     document.getElementById('health-results').style.display = 'block';
-    document.getElementById('health-output').innerHTML = '<div class="info-box">カスタム入力は、上の「毛色シミュレーション」タブと同様に各疾患の遺伝子型を入力する形式で、今後追加予定です。<br>現在は登録済みの4頭のデータから選択してください。</div>';
+    document.getElementById('health-output').innerHTML = '<div class="info-box">カスタム入力は今後追加予定です。<br>PDF解析データまたはサンプルデータから選択してください。</div>';
     return;
   }
 
@@ -784,8 +784,79 @@ function calcCOI() {
   document.getElementById('coi-output').innerHTML = html;
 }
 
+// PDF解析データからシミュレーターに自動反映
+function loadDogsFromSession() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session');
+  if (!sessionId) return;
+
+  fetch('/api/dogs/' + encodeURIComponent(sessionId))
+    .then(r => r.json())
+    .then(dogs => {
+      if (!dogs || dogs.length === 0) return;
+
+      // 各犬をDOGSに登録し、セレクトボックスに追加
+      dogs.forEach((dog, idx) => {
+        const key = 'pdf_' + idx;
+        DOGS[key] = {
+          name: dog.name,
+          sex: dog.sex,
+          color: dog.color || {},
+          health: dog.health || {}
+        };
+
+        // 毛色シミュレーター用セレクトに追加
+        const colorLabel = dog.name + ' (' + Object.values(dog.color || {}).join(', ') + ')';
+        const sireColor = document.getElementById('sire-color');
+        const damColor = document.getElementById('dam-color');
+        const opt1 = new Option(colorLabel, key);
+        const opt2 = new Option(colorLabel, key);
+        sireColor.insertBefore(opt1, sireColor.firstChild);
+        damColor.insertBefore(opt2, damColor.firstChild);
+
+        // 健康リスク用セレクトに追加
+        const sireHealth = document.getElementById('sire-health');
+        const damHealth = document.getElementById('dam-health');
+        const opt3 = new Option(dog.name, key);
+        const opt4 = new Option(dog.name, key);
+        sireHealth.insertBefore(opt3, sireHealth.firstChild);
+        damHealth.insertBefore(opt4, damHealth.firstChild);
+      });
+
+      // 最初の犬を自動選択
+      if (dogs.length >= 1) {
+        const maleIdx = dogs.findIndex(d => d.sex === 'male');
+        const femaleIdx = dogs.findIndex(d => d.sex === 'female');
+
+        if (maleIdx >= 0) {
+          document.getElementById('sire-color').value = 'pdf_' + maleIdx;
+          document.getElementById('sire-health').value = 'pdf_' + maleIdx;
+        } else {
+          document.getElementById('sire-color').value = 'pdf_0';
+          document.getElementById('sire-health').value = 'pdf_0';
+        }
+
+        if (femaleIdx >= 0) {
+          document.getElementById('dam-color').value = 'pdf_' + femaleIdx;
+          document.getElementById('dam-health').value = 'pdf_' + femaleIdx;
+        } else if (dogs.length >= 2) {
+          document.getElementById('dam-color').value = 'pdf_1';
+          document.getElementById('dam-health').value = 'pdf_1';
+        }
+      }
+
+      runColorSim();
+      runHealthSim();
+    })
+    .catch(err => console.warn('犬データの読み込みに失敗:', err));
+}
+
 // Initial run
-document.addEventListener('DOMContentLoaded', () => { runColorSim(); runHealthSim(); });
+document.addEventListener('DOMContentLoaded', () => {
+  loadDogsFromSession();
+  runColorSim();
+  runHealthSim();
+});
 </script>
 </body>
 </html>
