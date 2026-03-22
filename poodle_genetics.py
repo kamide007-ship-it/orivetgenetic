@@ -1020,6 +1020,7 @@ def try_ocr(image_path: str) -> str:
 
 def detect_pedigree_format(text: str) -> str:
     """血統書のフォーマットを自動判定"""
+    text = _clean_ocr_text(text)
     if re.search(r'JKC-PT|ジャパンケネルクラブ|JAPAN KENNEL CLUB', text, re.IGNORECASE):
         return "jkc"
     if re.search(r'ALAJ|Australian Labradoodle|ラブラドゥードル', text, re.IGNORECASE):
@@ -1315,10 +1316,36 @@ def parse_jkc_pedigree_text(text: str) -> Optional[Pedigree]:
     return parse_pedigree_text(text)
 
 
+def _clean_ocr_text(text: str) -> str:
+    """OCR特有の文字化けを補正"""
+    # 行ごとに処理（犬名等の固有名詞はそのまま、ラベル部分のみ補正）
+    label_fixes = {
+        # よくあるOCR誤認識パターン（ラベル・キーワード向け）
+        'KENNE1': 'KENNEL', 'KENNE!': 'KENNEL',
+        'C1UB': 'CLUB', 'CIUB': 'CLUB',
+        'J@PAN': 'JAPAN', 'JAP@N': 'JAPAN',
+        'P00DLE': 'POODLE', 'P0ODLE': 'POODLE',
+        'MA1E': 'MALE', 'MAIE': 'MALE',
+        'FEMA1E': 'FEMALE', 'FEMAIE': 'FEMALE',
+        'PEDI6REE': 'PEDIGREE', 'PEDIGR3E': 'PEDIGREE',
+        'S1RE': 'SIRE', 'SlRE': 'SIRE',
+        'Nam3': 'Name', 'Narne': 'Name',
+        'D0g': 'Dog',
+        'Br33d': 'Breed', 'Bre3d': 'Breed',
+        'C0lor': 'Color', 'Col0r': 'Color',
+        'Bi rth': 'Birth',
+    }
+    for wrong, right in label_fixes.items():
+        text = text.replace(wrong, right)
+    return text
+
+
 def parse_pedigree_text(text: str) -> Optional[Pedigree]:
     """OCRテキストから血統書を解析（全フォーマット自動対応）"""
     if not text:
         return None
+
+    text = _clean_ocr_text(text)
 
     ped = Pedigree()
     fmt = detect_pedigree_format(text)
@@ -1395,9 +1422,17 @@ def parse_pedigree_text(text: str) -> Optional[Pedigree]:
             _parse_jkc_ancestors(text, ped)
 
     if not ped.dog_name:
+        # フォールバック：ラベル行やOCRノイズを除外して犬名候補を探す
+        skip_patterns = re.compile(
+            r'^(?:JAPAN|JKC|ALAJ|AKC|KENNEL|CLUB|PEDIGREE|BREED|SIRE|DAM|Name|犬名|犬種|血統|登録|'
+            r'Date|所有者|繁殖者|Owner|Breeder|Microchip|マイクロ|性別|毛色|Color|生年月日)',
+            re.IGNORECASE
+        )
         lines = [l.strip() for l in text.split('\n') if l.strip() and len(l.strip()) > 5]
-        if lines:
-            ped.dog_name = lines[0]
+        for line in lines:
+            if not skip_patterns.search(line):
+                ped.dog_name = line
+                break
 
     return ped
 
