@@ -1052,7 +1052,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>プードル遺伝子総合レポート</title>
+<title>Orivet Genetics Report</title>
 <style>
 :root {{ --pink:#e6007e; --purple:#4a1a7a; --green:#22c55e; --yellow:#eab308; --red:#ef4444; --gray:#6b7280; --bg:#f8f9fa; }}
 * {{ margin:0; padding:0; box-sizing:border-box; }}
@@ -1115,7 +1115,7 @@ header p {{ opacity:0.9; font-size:0.95em; }}
 <header>
   <div class="container">
     <div>
-      <h1>プードル遺伝子総合レポート</h1>
+      <h1>Orivet Genetics Report</h1>
       <p>{subtitle} &nbsp;|&nbsp; 生成日: {now_str}</p>
       <p><span class="badge">Orivet Genetics</span> <span class="badge">JKC血統書</span> <span class="badge">Wright's COI</span></p>
     </div>
