@@ -644,13 +644,19 @@ def extract_genotype(result_text: str, test_name: str = "") -> str:
         "em ": [r'(En/En|EM/EM|EM/En|EM/e)'],
         "mc1r": [r'(En/En|EM/EM|EM/En|EM/e)'],
         "melanistic mask": [r'(En/En|EM/EM|EM/En|EM/e)'],
-        "k locus": [r'(KB\s*/\s*KB|K/K|KB\s*/\s*ky|KB\s*/\s*kbr|ky\s*/\s*ky|kbr\s*/\s*ky|kbr\s*/\s*kbr)'],
+        "k locus": [
+            r'(KB\s*/\s*KB|K/K|KB\s*/\s*ky|KB\s*/\s*kbr|ky\s*/\s*ky|kbr\s*/\s*ky|kbr\s*/\s*kbr)',
+            # OCR連結テキストで "ONE COPY DOMINANT BLACK (KB)" + "(ky)" のようなパターン
+            r'DOMINANT\s+BLACK\s*\(KB\).*?\b(ky|kbr)\b',
+            # "(ky )" 単独 — K Locus コンテキスト内
+            r'\b(KB|ky|kbr)\s*\)',
+        ],
         "m locus": [r'(m/m|M/m|M/M)'],
         "merle": [r'(m/m|M/m|M/M)'],
         "curly": [r'(Cu/Cu|Cu/N|N/N)'],
         "furnishings": [r'(F/F|F/f|f/f)'],
         "rspo2": [r'(F/F|F/f|f/f)'],
-        "pied": [r'(S/S|S/sp|sp/sp)'],
+        "pied": [r'(sp/sp|S/sp|S/S)'],
         "brown tyrp1": [r'(BL/BL|BL/bs|bs/bs)'],
         "tyrp1": [r'(BL/BL|BL/bs|bs/bs)'],
         "cdpa": [r'\b([PN])/([PN])\b'],
@@ -658,8 +664,10 @@ def extract_genotype(result_text: str, test_name: str = "") -> str:
     }
 
     # 検査名に特化したパターンを優先的に試行
+    matched_specific = False
     for key, patterns in specific_patterns.items():
         if key in name_lower:
+            matched_specific = True
             for p in patterns:
                 m = re.search(p, result_text, re.IGNORECASE)
                 if m:
@@ -669,7 +677,12 @@ def extract_genotype(result_text: str, test_name: str = "") -> str:
                     return re.sub(r'\s*/\s*', '/', m.group(1)).strip()
             break
 
-    # 汎用パターン（フォールバック）
+    # 検査名固有パターンに一致するキーがあったが遺伝子型が取れなかった場合、
+    # 汎用フォールバックで他の検査の遺伝子型を誤取得しないよう空を返す
+    if matched_specific:
+        return ""
+
+    # 汎用パターン（フォールバック — 検査名が未知の場合のみ）
     m = re.search(r'\b([PN])/([PN])\b', result_text)
     if m:
         return f"{m.group(1)}/{m.group(2)}"
@@ -684,7 +697,7 @@ def extract_genotype(result_text: str, test_name: str = "") -> str:
         r'(m/m|M/m|M/M)',
         r'(Cu/Cu|Cu/N|N/N)',
         r'(F/F|F/f|f/f)',
-        r'(S/S|S/sp|sp/sp)',
+        r'(sp/sp|S/sp|S/S)',
         r'(BL/BL|BL/bs|bs/bs)',
     ]
     for p in generic_patterns:
@@ -775,7 +788,7 @@ def parse_trait_results_from_text(text: str) -> list:
 
     trait_items = [
         ("A Locus (Agouti)", r"A\s+Locus\s*\(Agouti\)"),
-        ("B Locus (Brown)", r"B\s+Locus\s*[-–]?\s*(?:Bd|Bs|Bc|Various)"),
+        ("B Locus (Brown)", r"B\s+Locus\s*[-–(]?\s*(?:Brown|Bd|Bs|Bc|Various)"),
         ("Chondrodysplasia (CDPA)", r"Chondrodysplasia\s*\(CDPA\)"),
         ("Curly Coat/Hair Variant 1", r"Curly\s+Coat"),
         ("D (Dilute) Locus", r"D\s*\(?Dilute\)?\s+Locus"),
@@ -810,6 +823,23 @@ def parse_trait_results_from_text(text: str) -> list:
                             result_text += " " + next_line
                         else:
                             break
+
+                # 同一行に他の検査項目が連結されている場合、手前で切り取る
+                # 例: "D/D - NORMAL...E座位 (エクステンション) E Locus..." → D Locusの部分のみ
+                other_trait_boundary = re.compile(
+                    r'(?:A座位|B座位|D座位|E座位|EM座位|K座位|M座位|パイド|ブラウン\s*TYRP|ファーニシング|'
+                    r'巻き毛|軟骨異形成|Chondrodysplasia|Curly\s+Coat|Furnishings|'
+                    r'(?<![A-Z])A\s+Locus|(?<![A-Z])B\s+Locus|(?<![A-Z])D\s*\(Dilute\)|(?<![A-Z])E\s+Locus|'
+                    r'EM\s*\(MC1R\)|(?<![A-Z])K\s+Locus|(?<![A-Z])M\s+Locus|'
+                    r'(?<![A-Za-z])Pied(?![A-Za-z])|Brown\s+TYRP1)',
+                    re.IGNORECASE
+                )
+                # result_textの先頭（自分自身のマッチ）以降で、次の検査項目の開始位置を探す
+                first_match = re.search(pattern, result_text, re.IGNORECASE)
+                search_start = first_match.end() if first_match else 0
+                boundary_match = other_trait_boundary.search(result_text, search_start)
+                if boundary_match:
+                    result_text = result_text[:boundary_match.start()].strip()
 
                 result_clean = re.sub(pattern, '', result_text, flags=re.IGNORECASE).strip()
                 result_clean = re.sub(r'^[\s\-–:]+', '', result_clean).strip()
