@@ -104,17 +104,17 @@ tr:hover td { background:#faf5ff; }
         <div class="form-group">
           <label>父犬 (Sire)</label>
           <select id="sire-color" onchange="runColorSim()">
-            <option value="seven">Seven (E/e, KB/ky, at/at, Bb, D/D, m/m, S/S)</option>
             <option value="custom">カスタム入力...</option>
+            <option value="exA">（例）犬A (E/e, KB/ky, at/at, Bb, D/D, m/m, S/S)</option>
           </select>
         </div>
         <div class="form-group">
           <label>母犬 (Dam)</label>
           <select id="dam-color" onchange="runColorSim()">
-            <option value="angel">Angel Of Music (e/e, K/K, at/at, Bb, D/D, m/m, S/S)</option>
-            <option value="phantom">White Phantom (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
-            <option value="lapi">Lapi (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
             <option value="custom">カスタム入力...</option>
+            <option value="exB">（例）犬B (e/e, K/K, at/at, Bb, D/D, m/m, S/S)</option>
+            <option value="exC">（例）犬C (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
+            <option value="exD">（例）犬D (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
           </select>
         </div>
       </div>
@@ -177,17 +177,17 @@ tr:hover td { background:#faf5ff; }
         <div class="form-group">
           <label>父犬 (Sire)</label>
           <select id="sire-health" onchange="runHealthSim()">
-            <option value="seven">Seven</option>
             <option value="custom_h">カスタム入力...</option>
+            <option value="exA">（例）犬A</option>
           </select>
         </div>
         <div class="form-group">
           <label>母犬 (Dam)</label>
           <select id="dam-health" onchange="runHealthSim()">
-            <option value="angel">Angel Of Music</option>
-            <option value="phantom">White Phantom</option>
-            <option value="lapi">Lapi</option>
             <option value="custom_h">カスタム入力...</option>
+            <option value="exB">（例）犬B</option>
+            <option value="exC">（例）犬C</option>
+            <option value="exD">（例）犬D</option>
           </select>
         </div>
       </div>
@@ -218,7 +218,7 @@ tr:hover td { background:#faf5ff; }
       <h3>父方 (Sire's Side)</h3>
       <div class="pedigree">
         <div class="ped-col">
-          <div class="ped-node male"><input id="p-sire" placeholder="父犬" value="Seven"></div>
+          <div class="ped-node male"><input id="p-sire" placeholder="父犬"></div>
         </div>
         <div class="ped-col">
           <div class="ped-node male"><input id="p-ss" placeholder="父方祖父"></div>
@@ -275,8 +275,8 @@ tr:hover td { background:#faf5ff; }
 // DOG DATA
 // ================================================================
 const DOGS = {
-  seven: {
-    name: "Seven", sex: "male",
+  exA: {
+    name: "犬A", sex: "male",
     color: { e:"Ee", k:"KBky", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PP",
@@ -290,8 +290,8 @@ const DOGS = {
       "prcd-PRA": "NN"
     }
   },
-  angel: {
-    name: "Angel Of Music", sex: "female",
+  exB: {
+    name: "犬B", sex: "female",
     color: { e:"ee", k:"KBKB", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PN",
@@ -305,8 +305,8 @@ const DOGS = {
       "prcd-PRA": "NN"
     }
   },
-  phantom: {
-    name: "White Phantom", sex: "female",
+  exC: {
+    name: "犬C", sex: "female",
     color: { e:"ee", k:"KBky", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PN",
@@ -320,8 +320,8 @@ const DOGS = {
       "prcd-PRA": "NN"
     }
   },
-  lapi: {
-    name: "Lapi", sex: "female",
+  exD: {
+    name: "犬D", sex: "female",
     color: { e:"ee", k:"KBky", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PP",
