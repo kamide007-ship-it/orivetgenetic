@@ -152,14 +152,34 @@ def analyze():
                 except Exception as e:
                     flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）", "warning")
 
-    # --- Pedigree images ---
+    # --- Pedigree files (PDF + images) ---
     pedigree_files = request.files.getlist("pedigree_files")
     ocr_errors = []
     for f in pedigree_files:
         if f and f.filename:
+            ext = os.path.splitext(f.filename)[1].lower()
+
+            # 血統書PDF
+            if ext == ".pdf":
+                if HAS_PDFPLUMBER:
+                    safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.pdf'}"
+                    path = os.path.join(session_upload, safe_name)
+                    f.save(path)
+                    try:
+                        ped = parse_pedigree_pdf(path)
+                        if ped:
+                            pedigrees.append(ped)
+                        else:
+                            ocr_errors.append(f"{f.filename}: 血統書PDFとして解析できませんでした")
+                    except Exception as e:
+                        ocr_errors.append(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）")
+                else:
+                    ocr_errors.append(f"{f.filename}: PDF解析機能が利用できません（pdfplumber未インストール）")
+                continue
+
+            # 血統書画像
             if not allowed_file(f.filename, ALLOWED_IMG_EXT):
-                ext = os.path.splitext(f.filename)[1].lower()
-                ocr_errors.append(f"{f.filename}: サポートされていない画像形式です（{ext}）")
+                ocr_errors.append(f"{f.filename}: サポートされていない形式です（{ext}）")
                 continue
             safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.img'}"
             path = os.path.join(session_upload, safe_name)

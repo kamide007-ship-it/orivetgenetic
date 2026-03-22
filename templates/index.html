@@ -276,19 +276,22 @@
 
             <div class="section">
                 <div class="section-title">
-                    <span data-i18n="sec_pedigree">血統書写真（JKC・ALAJ・AKC等）</span>
+                    <span data-i18n="sec_pedigree">血統書（JKC・ALAJ・AKC等）</span>
+                    {% if has_pdfplumber %}
+                    <span class="status-badge badge-ok" data-i18n="badge_pdf_ok">PDF対応</span>
+                    {% endif %}
                     {% if has_ocr %}
                     <span class="status-badge badge-ok" data-i18n="badge_ocr_ok">OCR対応</span>
                     {% else %}
                     <span class="status-badge badge-ng" data-i18n="badge_ocr_ng">OCR未対応</span>
                     {% endif %}
                 </div>
-                <p class="section-desc" data-i18n="sec_pedigree_desc">血統証明書の写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）</p>
+                <p class="section-desc" data-i18n="sec_pedigree_desc">血統証明書のPDFまたは写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）</p>
                 <div class="upload-area" id="imgArea">
-                    <input type="file" name="pedigree_files" multiple accept=".jpg,.jpeg,.png,.bmp,.tiff,.webp,.heic,.heif" id="imgInput">
-                    <div class="upload-icon">📷</div>
-                    <div class="upload-label" data-i18n="img_drop">画像ファイルをドロップまたはクリック</div>
-                    <div class="upload-hint">.jpg / .png / .heic / .webp / .bmp / .tiff</div>
+                    <input type="file" name="pedigree_files" multiple accept=".pdf,.jpg,.jpeg,.png,.bmp,.tiff,.webp,.heic,.heif" id="imgInput">
+                    <div class="upload-icon">📄📷</div>
+                    <div class="upload-label" data-i18n="img_drop">PDF・画像ファイルをドロップまたはクリック</div>
+                    <div class="upload-hint" data-i18n="img_hint">.pdf / .jpg / .png / .heic / .webp / .bmp / .tiff</div>
                 </div>
                 <ul class="file-list" id="imgList"></ul>
             </div>
@@ -365,11 +368,13 @@
                 sec_pdf_desc: "Upload Orivet genetic test PDF or pedigree certificate PDF (all breeds supported, multiple files OK, auto-detected)",
                 pdf_drop: "Drop or click to select PDF files",
                 pdf_hint: ".pdf (multiple files OK)",
-                sec_pedigree: "Pedigree Photos (JKC, ALAJ, AKC, etc.)",
+                sec_pedigree: "Pedigree (JKC, ALAJ, AKC, etc.)",
+                badge_pdf_ok: "PDF Supported",
                 badge_ocr_ok: "OCR Supported",
                 badge_ocr_ng: "OCR Not Supported",
-                sec_pedigree_desc: "Upload pedigree certificate photos (auto-detects JKC, ALAJ, AKC and other formats, multiple files OK)",
-                img_drop: "Drop or click to select image files",
+                sec_pedigree_desc: "Upload pedigree certificate PDF or photos (auto-detects JKC, ALAJ, AKC and other formats, multiple files OK)",
+                img_drop: "Drop or click to select PDF / image files",
+                img_hint: ".pdf / .jpg / .png / .heic / .webp / .bmp / .tiff",
                 submit_btn: "Run Analysis",
                 loading_msg: "Analyzing... Please wait.",
                 open_sim: "Open Breeding Simulator"
@@ -390,11 +395,13 @@
                 sec_pdf_desc: "Orivet 遺伝子検査PDF または 血統書PDF をアップロードしてください（全犬種対応・複数可・自動判別）",
                 pdf_drop: "PDF ファイルをドロップまたはクリック",
                 pdf_hint: ".pdf（複数選択可）",
-                sec_pedigree: "血統書写真（JKC・ALAJ・AKC等）",
+                sec_pedigree: "血統書（JKC・ALAJ・AKC等）",
+                badge_pdf_ok: "PDF対応",
                 badge_ocr_ok: "OCR対応",
                 badge_ocr_ng: "OCR未対応",
-                sec_pedigree_desc: "血統証明書の写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）",
-                img_drop: "画像ファイルをドロップまたはクリック",
+                sec_pedigree_desc: "血統証明書のPDFまたは写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）",
+                img_drop: "PDF・画像ファイルをドロップまたはクリック",
+                img_hint: ".pdf / .jpg / .png / .heic / .webp / .bmp / .tiff",
                 submit_btn: "解析を実行",
                 loading_msg: "解析中です。しばらくお待ちください...",
                 open_sim: "繁殖シミュレーターを開く"
