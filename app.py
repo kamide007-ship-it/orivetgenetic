@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-プードル遺伝子総合解析 Webアプリ
+オリベット遺伝子解析 Webアプリ（全犬種対応）
 Flask ベースの Web インターフェース
 """
 
@@ -12,7 +12,7 @@ import shutil
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "poodle-genetics-default-key")
+app.secret_key = os.environ.get("SECRET_KEY", "orivet-genetics-default-key")
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
 REPORT_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")

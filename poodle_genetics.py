@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-プードル遺伝子総合解析ツール (Orivet Genetics Suite)
+オリベット遺伝子解析ツール — 全犬種対応
 =====================================================
 Orivet遺伝子検査PDFの自動解析 + JKC血統書OCR + COI算出を
-1本にまとめた統合ツール。
+1本にまとめた統合ツール。全犬種のOrivetレポートに対応。
 
 コマンド:
     # 遺伝子検査PDFだけ解析
@@ -19,8 +19,8 @@ Orivet遺伝子検査PDFの自動解析 + JKC血統書OCR + COI算出を
     python poodle_genetics.py demo
 
 出力:
-    - poodle_report.html  (統合HTMLレポート: 遺伝子 + 血統 + COI)
-    - poodle_report.xlsx  (Excelスプレッドシート)
+    - orivet_report.html  (統合HTMLレポート: 遺伝子 + 血統 + COI)
+    - orivet_report.xlsx  (Excelスプレッドシート)
 
 必要ライブラリ:
     pip install pdfplumber openpyxl
@@ -306,7 +306,7 @@ def get_trait_annotation(test_name: str, genotype: str) -> str:
     # Furnishings (RSPO2)
     if "furnishings" in name_lower or "rspo2" in name_lower:
         return {
-            "F/F": "ファーニシング因子を2つ保有。眉毛・ヒゲ・足の飾り毛あり（プードルらしい外見）",
+            "F/F": "ファーニシング因子を2つ保有。眉毛・ヒゲ・足の飾り毛あり（プードル・シュナウザー等の特徴的な外見）",
             "F/f": "ファーニシング因子を1つ保有。ファーニシングあり。抜け毛のある子が出る可能性",
             "f/f": "ファーニシング因子なし。ファーニシングなし（スムースフェイス）。抜け毛が多い傾向",
         }.get(genotype, "")
@@ -1736,7 +1736,7 @@ def print_usage():
 
 def main():
     print("=" * 60)
-    print("  プードル遺伝子総合解析ツール (Orivet Genetics Suite)")
+    print("  オリベット遺伝子解析ツール — 全犬種対応")
     print("=" * 60)
 
     if len(sys.argv) < 2:
@@ -1877,8 +1877,8 @@ def main():
             result = calc_coi_3gen(ped)
             print(f"  {ped.dog_name}: COI = {result['coi_pct']:.2f}%")
 
-    html_path = os.path.join(output_dir, "poodle_report.html")
-    xlsx_path = os.path.join(output_dir, "poodle_report.xlsx")
+    html_path = os.path.join(output_dir, "orivet_report.html")
+    xlsx_path = os.path.join(output_dir, "orivet_report.xlsx")
 
     generate_unified_html(dogs, pedigrees, html_path)
     generate_excel(dogs, pedigrees, xlsx_path)

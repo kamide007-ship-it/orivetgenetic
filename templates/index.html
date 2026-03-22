@@ -197,7 +197,7 @@
 <body>
     <div class="container">
         <h1>オリベット遺伝子解析アプリケーション</h1>
-        <p class="subtitle">Orivet遺伝子検査PDFとJKC血統書写真をアップロードするだけで、<br>毛色・健康リスク・近親交配係数を自動解析しレポートを生成します</p>
+        <p class="subtitle">全犬種対応 — Orivet遺伝子検査PDFとJKC血統書写真をアップロードするだけで、<br>毛色・健康リスク・近親交配係数を自動解析しレポートを生成します</p>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
@@ -215,7 +215,7 @@
                     <span class="status-badge badge-ng">未対応</span>
                     {% endif %}
                 </div>
-                <p class="section-desc">Orivet (Paw Print Genetics) の Genetic Summary Report PDF をアップロードしてください（複数可）</p>
+                <p class="section-desc">Orivet (Paw Print Genetics) の Genetic Summary Report PDF をアップロードしてください（全犬種対応・複数可）</p>
                 <div class="upload-area" id="pdfArea">
                     <input type="file" name="pdf_files" multiple accept=".pdf" id="pdfInput">
                     <div class="upload-icon">📄</div>

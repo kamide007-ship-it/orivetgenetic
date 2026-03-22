@@ -88,7 +88,7 @@ tr:hover td { background:#faf5ff; }
   <div class="container">
     <div>
       <h1>オリベット遺伝子解析シミュレーター</h1>
-      <p>毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出</p>
+      <p>全犬種対応 — 毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出</p>
     </div>
     <div class="nav-buttons">
       <a href="javascript:history.back()">戻る</a>
@@ -116,16 +116,18 @@ tr:hover td { background:#faf5ff; }
           <label>父犬 (Sire)</label>
           <select id="sire-color" onchange="runColorSim()">
             <option value="custom">カスタム入力...</option>
-            <option value="exA">（例）犬A (E/e, KB/ky, at/at, Bb, D/D, m/m, S/S)</option>
+            <option value="exA">トイプードル ♂ ブラック (E/e, KB/ky, at/at, Bb)</option>
+            <option value="exC">ラブラドール ♂ チョコレート (E/E, KB/KB, ay/ay, bb)</option>
+            <option value="exE">柴犬 ♂ 赤 (E/E, ky/ky, ay/ay, BB)</option>
           </select>
         </div>
         <div class="form-group">
           <label>母犬 (Dam)</label>
           <select id="dam-color" onchange="runColorSim()">
             <option value="custom">カスタム入力...</option>
-            <option value="exB">（例）犬B (e/e, K/K, at/at, Bb, D/D, m/m, S/S)</option>
-            <option value="exC">（例）犬C (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
-            <option value="exD">（例）犬D (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
+            <option value="exB">トイプードル ♀ クリーム (e/e, KB/KB, at/at, Bb)</option>
+            <option value="exD">ラブラドール ♀ イエロー (e/e, KB/KB, ay/ay, Bb)</option>
+            <option value="exF">ボーダーコリー ♀ ブルーマール (E/E, ky/ky, at/at, M/m)</option>
           </select>
         </div>
       </div>
@@ -189,16 +191,18 @@ tr:hover td { background:#faf5ff; }
           <label>父犬 (Sire)</label>
           <select id="sire-health" onchange="runHealthSim()">
             <option value="custom_h">カスタム入力...</option>
-            <option value="exA">（例）犬A</option>
+            <option value="exA">トイプードル ♂ ブラック</option>
+            <option value="exC">ラブラドール ♂ チョコレート</option>
+            <option value="exE">柴犬 ♂ 赤</option>
           </select>
         </div>
         <div class="form-group">
           <label>母犬 (Dam)</label>
           <select id="dam-health" onchange="runHealthSim()">
             <option value="custom_h">カスタム入力...</option>
-            <option value="exB">（例）犬B</option>
-            <option value="exC">（例）犬C</option>
-            <option value="exD">（例）犬D</option>
+            <option value="exB">トイプードル ♀ クリーム</option>
+            <option value="exD">ラブラドール ♀ イエロー</option>
+            <option value="exF">ボーダーコリー ♀ ブルーマール</option>
           </select>
         </div>
       </div>
@@ -297,10 +301,10 @@ tr:hover td { background:#faf5ff; }
 // ================================================================
 const DOGS = {
   exA: {
-    name: "犬A", sex: "male",
+    name: "（例）トイプードル ♂ ブラック", sex: "male",
     color: { e:"Ee", k:"KBky", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
     health: {
-      "CDDY+IVDD": "PP",
+      "CDDY+IVDD": "PN",
       "Osteochondrodysplasia": "NN",
       "CDPA": "NN",
       "Macrothrombocytopenia": "NN",
@@ -312,7 +316,7 @@ const DOGS = {
     }
   },
   exB: {
-    name: "犬B", sex: "female",
+    name: "（例）トイプードル ♀ クリーム", sex: "female",
     color: { e:"ee", k:"KBKB", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PN",
@@ -327,10 +331,25 @@ const DOGS = {
     }
   },
   exC: {
-    name: "犬C", sex: "female",
-    color: { e:"ee", k:"KBky", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS" },
+    name: "（例）ラブラドール ♂ チョコレート", sex: "male",
+    color: { e:"EE", k:"KBKB", a:"ayay", b:"bb", d:"DD", m:"mm", s:"SS" },
     health: {
-      "CDDY+IVDD": "PN",
+      "CDDY+IVDD": "NN",
+      "Osteochondrodysplasia": "NN",
+      "CDPA": "NN",
+      "Macrothrombocytopenia": "NN",
+      "Methemoglobinemia": "NN",
+      "vWD1": "NN",
+      "DM": "PN",
+      "GM2": "NN",
+      "prcd-PRA": "PN"
+    }
+  },
+  exD: {
+    name: "（例）ラブラドール ♀ イエロー", sex: "female",
+    color: { e:"ee", k:"KBKB", a:"ayay", b:"Bb", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "NN",
       "Osteochondrodysplasia": "NN",
       "CDPA": "NN",
       "Macrothrombocytopenia": "NN",
@@ -338,14 +357,29 @@ const DOGS = {
       "vWD1": "NN",
       "DM": "NN",
       "GM2": "NN",
+      "prcd-PRA": "PN"
+    }
+  },
+  exE: {
+    name: "（例）柴犬 ♂ 赤", sex: "male",
+    color: { e:"EE", k:"kyky", a:"ayay", b:"BB", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "NN",
+      "Osteochondrodysplasia": "NN",
+      "CDPA": "NN",
+      "Macrothrombocytopenia": "NN",
+      "Methemoglobinemia": "NN",
+      "vWD1": "NN",
+      "DM": "PN",
+      "GM2": "NN",
       "prcd-PRA": "NN"
     }
   },
-  exD: {
-    name: "犬D", sex: "female",
-    color: { e:"ee", k:"KBky", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS" },
+  exF: {
+    name: "（例）ボーダーコリー ♀ ブルーマール", sex: "female",
+    color: { e:"EE", k:"kyky", a:"atat", b:"BB", d:"DD", m:"Mm", s:"Ssp" },
     health: {
-      "CDDY+IVDD": "PP",
+      "CDDY+IVDD": "NN",
       "Osteochondrodysplasia": "NN",
       "CDPA": "NN",
       "Macrothrombocytopenia": "NN",
