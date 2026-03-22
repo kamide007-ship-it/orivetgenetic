@@ -223,6 +223,122 @@ TEST_NAME_JP = {
 
 
 # ============================================================
+# 毛色・形質 遺伝子型の日本語注釈
+# ============================================================
+
+def get_trait_annotation(test_name: str, genotype: str) -> str:
+    """検査項目と遺伝子型から、分かりやすい日本語の注釈を返す"""
+    if not genotype or genotype == "—":
+        return ""
+
+    name_lower = test_name.lower()
+
+    # E Locus (エクステンション / クリーム)
+    if "e locus" in name_lower:
+        return {
+            "E/E": "クリーム因子なし。ブラック/ブラウン等の濃い毛色",
+            "E/e": "クリーム因子を1つ保有（キャリア）。見た目は濃い色だが、子犬にクリーム/ホワイトが出る可能性あり",
+            "e/e": "クリーム因子を2つ保有。クリーム/ホワイト/アプリコット/レッドの毛色になる",
+        }.get(genotype, "")
+
+    # K Locus (ドミナントブラック)
+    if "k locus" in name_lower:
+        mapping = {
+            "KB/KB": "ドミナントブラックを2つ保有。全身が単色（ブラックまたはブラウン）",
+            "K/K": "ドミナントブラックを2つ保有。全身が単色（ブラックまたはブラウン）",
+            "KB/ky": "ドミナントブラック1つ保有。見た目は単色だが、ファントム/タンポイントの子が出る可能性あり",
+            "KB/kbr": "ドミナントブラック1つ + ブリンドル1つ保有。見た目は単色",
+            "ky/ky": "ドミナントブラックなし。アグーチ座位の模様（ファントム/セーブル等）が発現する",
+            "kbr/ky": "ブリンドル因子あり。ブリンドル模様が出る可能性あり",
+            "kbr/kbr": "ブリンドル因子を2つ保有。ブリンドル模様が発現する",
+        }
+        return mapping.get(genotype, "")
+
+    # A Locus (アグーチ)
+    if "a locus" in name_lower:
+        return {
+            "ay/ay": "セーブル（毛先が黒い明るい毛色）。ky/kyの場合に発現する",
+            "ay/at": "セーブルだが、ファントム/タンポイントの子が出る可能性あり",
+            "at/at": "ファントム/タンポイント（目の上・足先等に明るい斑点）。ky/kyの場合に発現する",
+            "a/a": "リセッシブブラック。アグーチ模様なし",
+        }.get(genotype, "")
+
+    # B Locus (ブラウン)
+    if "b locus" in name_lower:
+        return {
+            "BB": "ブラウン因子なし。鼻・肉球はブラック",
+            "Bb": "ブラウン因子を1つ保有（キャリア）。見た目はブラックだが、ブラウンの子が出る可能性あり",
+            "bb": "ブラウン因子を2つ保有。ブラウン（チョコレート）の毛色。鼻・肉球もブラウン",
+        }.get(genotype, "")
+
+    # D Locus (ダイリュート / 希釈)
+    if "d locus" in name_lower or "dilute" in name_lower:
+        return {
+            "D/D": "希釈因子なし。色素は通常通り発現する",
+            "D/d": "希釈因子を1つ保有（キャリア）。見た目は通常色だが、希釈色の子が出る可能性あり",
+            "d/d": "希釈因子を2つ保有。ブラック→ブルー、ブラウン→カフェオレに希釈される",
+        }.get(genotype, "")
+
+    # M Locus (マール)
+    if "m locus" in name_lower or "merle" in name_lower:
+        return {
+            "m/m": "マール因子なし。単色（ソリッドカラー）",
+            "M/m": "マール因子を1つ保有。マール模様（まだら）が出る可能性あり",
+            "M/M": "マール因子を2つ保有（ダブルマール）。健康リスク（聴覚・視覚障害）あり",
+        }.get(genotype, "")
+
+    # S Locus (パイド / 白斑)
+    if "pied" in name_lower:
+        return {
+            "S/S": "パイド因子なし。白斑模様は出ない",
+            "S/sp": "パイド因子を1つ保有（キャリア）。わずかな白斑が出ることがある",
+            "sp/sp": "パイド因子を2つ保有。パーティカラー（大きな白斑模様）になる",
+        }.get(genotype, "")
+
+    # EM Locus (メラニスティックマスク)
+    if "em" in name_lower or "mc1r" in name_lower or "melanistic mask" in name_lower:
+        return {
+            "En/En": "マスク因子なし。顔にメラニスティックマスクは出ない",
+            "EM/EM": "マスク因子を2つ保有。顔周りに黒いマスク模様が出る",
+            "EM/En": "マスク因子を1つ保有。マスク模様が出る可能性あり",
+        }.get(genotype, "")
+
+    # Furnishings (RSPO2)
+    if "furnishings" in name_lower or "rspo2" in name_lower:
+        return {
+            "F/F": "ファーニシング因子を2つ保有。眉毛・ヒゲ・足の飾り毛あり（プードルらしい外見）",
+            "F/f": "ファーニシング因子を1つ保有。ファーニシングあり。抜け毛のある子が出る可能性",
+            "f/f": "ファーニシング因子なし。ファーニシングなし（スムースフェイス）。抜け毛が多い傾向",
+        }.get(genotype, "")
+
+    # Curly Coat
+    if "curly coat" in name_lower:
+        return {
+            "Cu/Cu": "巻き毛因子を2つ保有。しっかりとしたカーリーコート",
+            "Cu/N": "巻き毛因子を1つ保有。ウェーブがかった被毛",
+            "N/N": "巻き毛因子なし。ストレートな被毛",
+        }.get(genotype, "")
+
+    # Brown TYRP1
+    if "brown tyrp1" in name_lower:
+        return {
+            "BL/BL": "TYRP1ブラウン因子なし。ブラウン/レバーにならない",
+            "BL/bs": "TYRP1ブラウン因子を1つ保有（キャリア）",
+            "bs/bs": "TYRP1ブラウン因子を2つ保有。ブラウン/レバーの毛色に影響する可能性",
+        }.get(genotype, "")
+
+    # CDPA (形質として出ることもある)
+    if "chondrodysplasia" in name_lower or "cdpa" in name_lower:
+        return {
+            "N/N": "正常。短足因子(CDPA)なし",
+            "P/N": "キャリア。短足因子を1つ保有",
+            "P/P": "短足因子を2つ保有。脚が短くなる可能性",
+        }.get(genotype, "")
+
+    return ""
+
+
+# ============================================================
 # 既知の血統書データ
 # ============================================================
 
@@ -816,10 +932,12 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
         for r in dog.trait_results:
             display_name = r.japanese_name if r.japanese_name else r.test_name
             badge = status_badge("trait", r.genotype if r.genotype else "—")
+            annotation = get_trait_annotation(r.test_name, r.genotype)
+            annotation_html = f'<div style="margin-top:4px;padding:6px 8px;background:#f0f4ff;border-left:3px solid #667eea;border-radius:4px;font-size:0.85em;color:#374151;">{annotation}</div>' if annotation else ''
             trait_rows += f"""        <tr>
           <td>{display_name}<br><small style="color:#6b7280">{r.test_name}</small></td>
           <td>{badge}</td>
-          <td style="font-size:0.85em">{r.result_text[:150]}</td>
+          <td style="font-size:0.85em">{r.result_text[:150]}{annotation_html}</td>
         </tr>\n"""
 
         tab_contents += f"""
