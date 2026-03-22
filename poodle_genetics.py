@@ -259,9 +259,12 @@ def get_trait_annotation(test_name: str, genotype: str) -> str:
         return {
             "ay/ay": "セーブル（毛先が黒い明るい毛色）。ky/kyの場合に発現する",
             "ay/at": "セーブルだが、ファントム/タンポイントの子が出る可能性あり",
+            "ay/aw": "セーブルとワイルドタイプのアグーチ。ky/kyの場合に発現する",
             "at/at": "ファントム/タンポイント（目の上・足先等に明るい斑点）。ky/kyの場合に発現する",
+            "aw/at": "ワイルドタイプアグーチだが、ファントム/タンポイントの子が出る可能性あり",
+            "aw/aw": "ワイルドタイプアグーチ。ウルフセーブル等の毛色パターン",
             "a/a": "リセッシブブラック。アグーチ模様なし",
-        }.get(genotype, "")
+        }.get(genotype, "A座位（アグーチ）: 毛色の模様パターンを決定する遺伝子座。K座位がky/kyの場合に模様が発現する")
 
     # B Locus (ブラウン)
     if "b locus" in name_lower:
@@ -269,7 +272,7 @@ def get_trait_annotation(test_name: str, genotype: str) -> str:
             "BB": "ブラウン因子なし。鼻・肉球はブラック",
             "Bb": "ブラウン因子を1つ保有（キャリア）。見た目はブラックだが、ブラウンの子が出る可能性あり",
             "bb": "ブラウン因子を2つ保有。ブラウン（チョコレート）の毛色。鼻・肉球もブラウン",
-        }.get(genotype, "")
+        }.get(genotype, "B座位（ブラウン）: ブラウン/チョコレート/レバーの毛色を決定する遺伝子座")
 
     # D Locus (ダイリュート / 希釈)
     if "d locus" in name_lower or "dilute" in name_lower:
@@ -627,26 +630,64 @@ def get_category_jp(category: str) -> str:
     return category
 
 
-def extract_genotype(result_text: str) -> str:
-    """結果テキストから遺伝子型を抽出"""
+def extract_genotype(result_text: str, test_name: str = "") -> str:
+    """結果テキストから遺伝子型を抽出（検査名に応じた優先順位付き）"""
+    name_lower = test_name.lower() if test_name else ""
+
+    # 検査名に特化した遺伝子型パターン（優先）
+    specific_patterns = {
+        "a locus": [r'(at/at|ay/at|ay/ay|a/a|aw/at|aw/aw|ay/aw)'],
+        "b locus": [r'(Bb|BB|bb)\b'],
+        "d locus": [r'(D/D|D/d|d/d)\b'],
+        "dilute": [r'(D/D|D/d|d/d)\b'],
+        "e locus": [r'(E/e|e/e|E/E|Em/E|Em/e)\b'],
+        "em ": [r'(En/En|EM/EM|EM/En|EM/e)'],
+        "mc1r": [r'(En/En|EM/EM|EM/En|EM/e)'],
+        "melanistic mask": [r'(En/En|EM/EM|EM/En|EM/e)'],
+        "k locus": [r'(KB\s*/\s*KB|K/K|KB\s*/\s*ky|KB\s*/\s*kbr|ky\s*/\s*ky|kbr\s*/\s*ky|kbr\s*/\s*kbr)'],
+        "m locus": [r'(m/m|M/m|M/M)'],
+        "merle": [r'(m/m|M/m|M/M)'],
+        "curly": [r'(Cu/Cu|Cu/N|N/N)'],
+        "furnishings": [r'(F/F|F/f|f/f)'],
+        "rspo2": [r'(F/F|F/f|f/f)'],
+        "pied": [r'(S/S|S/sp|sp/sp)'],
+        "brown tyrp1": [r'(BL/BL|BL/bs|bs/bs)'],
+        "tyrp1": [r'(BL/BL|BL/bs|bs/bs)'],
+        "cdpa": [r'\b([PN])/([PN])\b'],
+        "chondrodysplasia": [r'\b([PN])/([PN])\b'],
+    }
+
+    # 検査名に特化したパターンを優先的に試行
+    for key, patterns in specific_patterns.items():
+        if key in name_lower:
+            for p in patterns:
+                m = re.search(p, result_text, re.IGNORECASE)
+                if m:
+                    if m.lastindex and m.lastindex >= 2:
+                        return f"{m.group(1)}/{m.group(2)}"
+                    # スペースを除去して正規化（"KB / ky" → "KB/ky"）
+                    return re.sub(r'\s*/\s*', '/', m.group(1)).strip()
+            break
+
+    # 汎用パターン（フォールバック）
     m = re.search(r'\b([PN])/([PN])\b', result_text)
     if m:
         return f"{m.group(1)}/{m.group(2)}"
 
-    patterns = [
+    generic_patterns = [
         r'(at/at|ay/at|ay/ay|a/a|aw/at)',
         r'(Bb|BB|bb)\b',
         r'(D/D|D/d|d/d)\b',
         r'(E/e|e/e|E/E|Em/E|Em/e)\b',
         r'(En/En|EM/EM)',
-        r'(K/K|KB/ky|KB/kbr|ky/ky|kbr/ky)',
+        r'(KB/KB|K/K|KB/ky|KB/kbr|ky/ky|kbr/ky)',
         r'(m/m|M/m|M/M)',
         r'(Cu/Cu|Cu/N|N/N)',
         r'(F/F|F/f|f/f)',
         r'(S/S|S/sp|sp/sp)',
         r'(BL/BL|BL/bs|bs/bs)',
     ]
-    for p in patterns:
+    for p in generic_patterns:
         m = re.search(p, result_text, re.IGNORECASE)
         if m:
             return m.group(1)
@@ -707,7 +748,7 @@ def parse_health_tests(text: str) -> list:
 
             if test_name and len(test_name) > 2 and is_valid_health_test(test_name):
                 status = classify_result(result_text)
-                genotype = extract_genotype(result_text)
+                genotype = extract_genotype(result_text, test_name)
                 jp_name = get_japanese_name(test_name)
                 cat_jp = get_category_jp(current_category)
 
@@ -743,7 +784,7 @@ def parse_trait_results_from_text(text: str) -> list:
         ("Furnishings (RSPO2)", r"Furnishings\s*\(RSPO2\)"),
         ("K Locus (Dominant Black)", r"K\s+Locus\s*\(Dominant"),
         ("M Locus (Merle/Dapple)", r"M\s+Locus\s*\(Merle"),
-        ("Pied", r"Pied\s*\(BOTH\s+SINE"),
+        ("Pied", r"Pied\b"),
         ("Brown TYRP1", r"Brown\s+TYRP1"),
         ("Improper Coat", r"Improper\s+Coat"),
         ("Coat Length", r"Coat\s+Length"),
@@ -758,7 +799,14 @@ def parse_trait_results_from_text(text: str) -> list:
                 for j in range(1, 3):
                     if i + j < len(lines):
                         next_line = lines[i + j].strip()
-                        if next_line and not re.search(r'^[A-Z]\s+Locus|^Breed|^Owner|^Microchip|^Pied|^Brown|^Curly|^Furnish|^Chondro', next_line):
+                        # 他の形質・健康検査のヘッダー行は取り込まない
+                        if next_line and not re.search(
+                            r'^[A-Z]\s+Locus|^[ABDEKMS]\s*\(|^Breed|^Owner|^Microchip'
+                            r'|^Pied|^Brown\s+TYRP|^Curly\s+Coat|^Furnish|^Chondro'
+                            r'|^Improper|^Coat\s+Length|^EM\s*\(MC1R\)|^Melanistic'
+                            r'|LOCUS\]|^\d+\.\s',
+                            next_line, re.IGNORECASE
+                        ):
                             result_text += " " + next_line
                         else:
                             break
@@ -766,7 +814,7 @@ def parse_trait_results_from_text(text: str) -> list:
                 result_clean = re.sub(pattern, '', result_text, flags=re.IGNORECASE).strip()
                 result_clean = re.sub(r'^[\s\-–:]+', '', result_clean).strip()
 
-                genotype = extract_genotype(result_text)
+                genotype = extract_genotype(result_text, test_name)
                 status = classify_result(result_text)
                 if status == "normal" and test_name != "Chondrodysplasia (CDPA)":
                     status = "trait"
@@ -844,7 +892,7 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
 # ████████████████████████████████████████████████████████████
 
 def try_ocr(image_path: str) -> str:
-    """画像からテキストを抽出（Tesseract OCR）"""
+    """画像からテキストを抽出（Tesseract OCR）— 写真向け前処理付き"""
     if not HAS_OCR:
         print("  pytesseract が未インストールです。")
         print("  pip install pytesseract Pillow")
@@ -852,11 +900,57 @@ def try_ocr(image_path: str) -> str:
         return ""
     try:
         img = Image.open(image_path)
-        # HEIC/WEBP等をRGBに変換してTesseractが処理できるようにする
+        # HEIC/WEBP等をRGBに変換
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
-        text = pytesseract.image_to_string(img, lang='jpn+eng')
-        return text
+
+        # --- 写真向け前処理 ---
+        # 1. 大きすぎる画像はリサイズ（Tesseractの精度向上 + 速度改善）
+        max_dim = 4000
+        if max(img.size) > max_dim:
+            ratio = max_dim / max(img.size)
+            img = img.resize((int(img.width * ratio), int(img.height * ratio)), Image.LANCZOS)
+
+        # 2. グレースケール変換
+        gray = img.convert("L")
+
+        # 3. コントラスト強化（CLAHE的な効果）
+        try:
+            from PIL import ImageEnhance, ImageFilter
+            # コントラスト強化
+            enhancer = ImageEnhance.Contrast(gray)
+            gray = enhancer.enhance(1.8)
+            # シャープネス強化
+            enhancer = ImageEnhance.Sharpness(gray)
+            gray = enhancer.enhance(2.0)
+        except ImportError:
+            pass
+
+        # 4. 二値化（適応的しきい値の簡易版）
+        # まずOtsu的な二値化を試みる
+        pixels = list(gray.getdata())
+        threshold = sum(pixels) // len(pixels)  # 平均値ベースの閾値
+        binarized = gray.point(lambda x: 255 if x > threshold - 30 else 0)
+
+        # 複数の設定でOCRを試行し、最も良い結果を返す
+        best_text = ""
+        configs = [
+            {'image': binarized, 'config': '--psm 6 --oem 3'},  # ブロックテキスト
+            {'image': gray, 'config': '--psm 6 --oem 3'},       # グレースケール
+            {'image': binarized, 'config': '--psm 3 --oem 3'},  # 自動セグメント
+        ]
+        for cfg in configs:
+            text = pytesseract.image_to_string(
+                cfg['image'], lang='jpn+eng', config=cfg['config']
+            )
+            if len(text) > len(best_text):
+                best_text = text
+            # 十分なテキストが取れたら早期終了
+            if len(text) > 500 and re.search(r'SIRE|DAM|JKC|PEDIGREE|血統', text, re.IGNORECASE):
+                best_text = text
+                break
+
+        return best_text
     except Exception as e:
         print(f"  OCRエラー: {e}")
         return ""
@@ -917,19 +1011,69 @@ def _extract_basic_info(text: str, ped: Pedigree):
         ped.breed = m.group(1).strip()
 
 
+def _extract_jkc_dog_name_from_line(text_after: str) -> tuple:
+    """JKCラベル直後のテキストから犬名・登録番号・毛色・DNA番号を抽出"""
+    name = ""
+    registration = ""
+    color = ""
+    dna = ""
+    lines = [l.strip() for l in text_after.split('\n') if l.strip()]
+    for line in lines:
+        # ラベル行（SIRE/DAM等）自体はスキップ
+        if re.match(r'^(?:SIRE|DAM|G\.\s*(?:G\.\s*)?(?:SIRE|DAM)|父|母|祖父|祖母|曾祖父|曾祖母)\b', line, re.IGNORECASE):
+            continue
+        # CH/タイトル + 犬名行
+        if not name:
+            # タイトル(CH/xx.xx)を除いた犬名を取得
+            cleaned = re.sub(r'^(?:CH/[\d.]+\s*,?\s*)*', '', line).strip()
+            # "SMASH JP ..." のようなケネル名パターン
+            m_name = re.search(r'([A-Z][A-Z\s]+(?:JP|OF|DE|VAN|VON)\s+[A-Z][A-Z\s]+)', cleaned)
+            if m_name:
+                name = m_name.group(1).strip()
+                continue
+            # 英字3文字以上で犬名とみなす
+            cleaned = re.sub(r'\s*JKC-PT.*$', '', cleaned).strip()
+            cleaned = re.sub(r'\s*CD\d*\s*$', '', cleaned).strip()
+            if len(cleaned) >= 3 and re.search(r'[A-Z]', cleaned):
+                name = cleaned
+                continue
+        # JKC-PT 登録番号
+        m_reg = re.search(r'(JKC-PT\s*-?\s*\d+/\d+)', line)
+        if m_reg:
+            registration = m_reg.group(1)
+        # DNA番号
+        m_dna = re.search(r'(DNA\s*JP\d+/\d+)', line)
+        if m_dna:
+            dna = m_dna.group(1)
+        # 毛色
+        m_color = re.search(r'\b(BLK|BLACK|WH|WHITE|BR|BROWN|RED|APR|APRICOT|CR|CREAM|SV|SILVER|BL|BLUE|CAFE|GOLD|FAWN|SABLE|BRINDLE|MERLE|PARTI|BEIGE)\b', line, re.IGNORECASE)
+        if m_color and not color:
+            color = m_color.group(1).upper()
+        # 4行で十分
+        if name and registration:
+            break
+    return name, registration, color, dna
+
+
 def _parse_jkc_ancestors(text: str, ped: Pedigree):
-    """JKC形式の祖先名を抽出（番号ベース）"""
+    """JKC形式の祖先名を抽出（番号ベース + ラベルベース）"""
+    # --- 方法1: 番号ベース ---
     lines = text.split('\n')
     ancestors = {}
     for line in lines:
-        m = re.match(r'\s*(\d{1,2})\s*[\|\{]?\s*(.+)', line)
+        m = re.match(r'\s*(\d{1,2})\s*[\|\{(]?\s*(.+)', line)
         if m:
             num = int(m.group(1))
-            name_text = m.group(2).strip()
-            name_text = re.sub(r'\s*JKC-PT.*$', '', name_text).strip()
-            name_text = re.sub(r'\s*CH/\d+.*$', '', name_text).strip()
-            if len(name_text) > 2:
-                ancestors[num] = name_text
+            if 1 <= num <= 14:
+                name_text = m.group(2).strip()
+                # ラベル部分を除去（"G.SIRE 祖父" 等）
+                name_text = re.sub(r'^(?:G\.?\s*G\.?\s*)?(?:SIRE|DAM)\s*', '', name_text, flags=re.IGNORECASE).strip()
+                name_text = re.sub(r'^(?:父|母|祖父|祖母|曾祖父|曾祖母)\s*', '', name_text).strip()
+                name_text = re.sub(r'\s*JKC-PT.*$', '', name_text).strip()
+                name_text = re.sub(r'\s*CH/\d+.*$', '', name_text).strip()
+                name_text = re.sub(r'\s*CD\d*\s*$', '', name_text).strip()
+                if len(name_text) > 2:
+                    ancestors[num] = name_text
 
     pos_map = {
         1: "sire", 2: "dam", 3: "ss", 4: "sd", 5: "ds", 6: "dd",
@@ -939,6 +1083,96 @@ def _parse_jkc_ancestors(text: str, ped: Pedigree):
     for num, name in ancestors.items():
         if num in pos_map:
             setattr(ped, pos_map[num], Ancestor(position=pos_map[num], name=name))
+
+    # --- 方法2: ラベルベース（番号ベースで取れなかったものを補完）---
+    # JKC血統書のラベルパターン: "G.G.SIRE 曾祖父" / "G.SIRE 祖父" / "SIRE 父"
+    label_patterns = [
+        # (regex, position, priority) — longer patterns first to avoid partial matches
+        (r'G\.?\s*G\.?\s*SIRE\s*(?:曾祖父)?', 'sss', 7),  # 曾祖父 positions: 7,9,11,13
+        (r'G\.?\s*G\.?\s*DAM\s*(?:曾祖母)?', 'ssd', 8),    # 曾祖母 positions: 8,10,12,14
+        (r'G\.?\s*SIRE\s*(?:祖父)?', 'ss', 3),               # 祖父 positions: 3,5
+        (r'G\.?\s*DAM\s*(?:祖母)?', 'sd', 4),                 # 祖母 positions: 4,6
+        (r'\bSIRE\s*(?:父)?', 'sire', 1),
+        (r'\bDAM\s*(?:母)?', 'dam', 2),
+    ]
+
+    # G.G.SIRE/G.G.DAM の位置を順番に割り当てるためのカウンター
+    gg_sire_slots = ['sss', 'sds', 'dss', 'dds']
+    gg_dam_slots = ['ssd', 'sdd', 'dsd', 'ddd']
+    g_sire_slots = ['ss', 'ds']
+    g_dam_slots = ['sd', 'dd']
+    gg_sire_idx = 0
+    gg_dam_idx = 0
+    g_sire_idx = 0
+    g_dam_idx = 0
+
+    # G.G.SIRE / G.G.DAM を検索
+    for m in re.finditer(r'G\.?\s*G\.?\s*SIRE\s*(?:曾祖父)?', text, re.IGNORECASE):
+        pos_after = m.end()
+        remaining = text[pos_after:pos_after + 300]
+        name, reg, color, dna = _extract_jkc_dog_name_from_line(remaining)
+        if name and gg_sire_idx < len(gg_sire_slots):
+            slot = gg_sire_slots[gg_sire_idx]
+            if not getattr(ped, slot):
+                setattr(ped, slot, Ancestor(position=slot, name=name, registration=reg, color=color, dna_number=dna))
+            gg_sire_idx += 1
+
+    for m in re.finditer(r'G\.?\s*G\.?\s*DAM\s*(?:曾祖母)?', text, re.IGNORECASE):
+        pos_after = m.end()
+        remaining = text[pos_after:pos_after + 300]
+        name, reg, color, dna = _extract_jkc_dog_name_from_line(remaining)
+        if name and gg_dam_idx < len(gg_dam_slots):
+            slot = gg_dam_slots[gg_dam_idx]
+            if not getattr(ped, slot):
+                setattr(ped, slot, Ancestor(position=slot, name=name, registration=reg, color=color, dna_number=dna))
+            gg_dam_idx += 1
+
+    # G.SIRE / G.DAM（G.G.を除外）
+    for m in re.finditer(r'(?<!G\.?\s)G\.?\s*SIRE\s*(?:祖父)?', text, re.IGNORECASE):
+        # G.G.SIREにマッチしていないか確認
+        start = m.start()
+        prefix = text[max(0, start - 3):start]
+        if re.search(r'G\.?$', prefix):
+            continue
+        pos_after = m.end()
+        remaining = text[pos_after:pos_after + 300]
+        name, reg, color, dna = _extract_jkc_dog_name_from_line(remaining)
+        if name and g_sire_idx < len(g_sire_slots):
+            slot = g_sire_slots[g_sire_idx]
+            if not getattr(ped, slot):
+                setattr(ped, slot, Ancestor(position=slot, name=name, registration=reg, color=color, dna_number=dna))
+            g_sire_idx += 1
+
+    for m in re.finditer(r'(?<!G\.?\s)G\.?\s*DAM\s*(?:祖母)?', text, re.IGNORECASE):
+        start = m.start()
+        prefix = text[max(0, start - 3):start]
+        if re.search(r'G\.?$', prefix):
+            continue
+        pos_after = m.end()
+        remaining = text[pos_after:pos_after + 300]
+        name, reg, color, dna = _extract_jkc_dog_name_from_line(remaining)
+        if name and g_dam_idx < len(g_dam_slots):
+            slot = g_dam_slots[g_dam_idx]
+            if not getattr(ped, slot):
+                setattr(ped, slot, Ancestor(position=slot, name=name, registration=reg, color=color, dna_number=dna))
+            g_dam_idx += 1
+
+    # SIRE / DAM（G.SIRE/G.DAMを除外）
+    if not ped.sire:
+        m = re.search(r'(?<![G.])\bSIRE\s*(?:父)?', text, re.IGNORECASE)
+        if m:
+            remaining = text[m.end():m.end() + 300]
+            name, reg, color, dna = _extract_jkc_dog_name_from_line(remaining)
+            if name:
+                ped.sire = Ancestor(position="sire", name=name, registration=reg, color=color, dna_number=dna)
+
+    if not ped.dam:
+        m = re.search(r'(?<![G.])\bDAM\s*(?:母)?', text, re.IGNORECASE)
+        if m:
+            remaining = text[m.end():m.end() + 300]
+            name, reg, color, dna = _extract_jkc_dog_name_from_line(remaining)
+            if name:
+                ped.dam = Ancestor(position="dam", name=name, registration=reg, color=color, dna_number=dna)
 
 
 def _parse_labeled_ancestors(text: str, ped: Pedigree):
@@ -1030,9 +1264,30 @@ def parse_pedigree_text(text: str) -> Optional[Pedigree]:
     _extract_basic_info(text, ped)
 
     if fmt == "jkc":
-        m = re.search(r'(?:Name of Dog|犬名)\s*\n?\s*(.+?)(?:\n|$)', text)
+        # 犬名抽出: "Name of Dog" / "犬名" の後
+        m = re.search(r'(?:Name of Dog|犬\s*名)\s*\n?\s*(.+?)(?:\n|$)', text)
         if m:
-            ped.dog_name = m.group(1).strip()
+            candidate = m.group(1).strip()
+            # "Name of Dog" 自体の残りやラベルだけの場合はスキップして次の行を探す
+            if len(candidate) < 3 or re.match(r'^(?:Name|犬名|犬\s*名)', candidate, re.IGNORECASE):
+                # 次の非空行を犬名として取る
+                after = text[m.end():]
+                for line in after.split('\n'):
+                    line = line.strip()
+                    if line and len(line) >= 3 and not re.match(r'^(?:Breed|犬\s*種|登録|スマ)', line, re.IGNORECASE):
+                        # カタカナ読み行はスキップ
+                        if re.match(r'^[ァ-ヴー\s゛゜]+$', line):
+                            continue
+                        ped.dog_name = line
+                        break
+            else:
+                ped.dog_name = candidate
+        # 犬名が取れなかった場合、大文字ケネル名パターンで探す
+        if not ped.dog_name:
+            m_name = re.search(r'([A-Z][A-Z\s]+(?:JP|OF|DE|VAN|VON)\s+[A-Z][A-Z\s]+)\s*\n', text)
+            if m_name:
+                ped.dog_name = m_name.group(1).strip()
+
         m = re.search(r'(JKC-PT\s*-?\s*\d+/\d+)', text)
         if m:
             ped.registration = m.group(1)
