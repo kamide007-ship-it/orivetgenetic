@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-オリベット遺伝子解析 Webアプリ（全犬種対応）
+Orivet 遺伝子解析 Webアプリ（全犬種対応）
 Flask ベースの Web インターフェース
 """
 
