@@ -1493,6 +1493,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     # ── Dog tabs (Orivet) ──
     tab_buttons = ""
     tab_contents = ""
+    sex_i18n_en = {}  # per-dog sex translations for JS
 
     for idx, dog in enumerate(dogs):
         name = dog.pet_name or dog.registered_name or f"犬{idx+1}"
@@ -1502,6 +1503,8 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
 
         sex_class = "male" if "male" in dog.sex.lower() else "female"
         sex_label = "オス" if "male" in dog.sex.lower() else "メス"
+        sex_label_en = "Male" if "male" in dog.sex.lower() else "Female"
+        sex_i18n_en[f"sex_{safe_id}"] = sex_label_en
 
         health_rows = ""
         for r in dog.health_results:
@@ -1537,23 +1540,23 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
           <div class="dog-reg">{_h(dog.registered_name)} — {_h(dog.case_number)}</div>
         </div>
         <div class="dog-meta">
-          <span class="meta-tag {sex_class}">{_h(sex_label)} ({_h(dog.sex)})</span>
+          <span class="meta-tag {sex_class}"><span data-i18n="sex_{safe_id}">{_h(sex_label)}</span> ({_h(dog.sex)})</span>
           <span class="meta-tag">{_h(dog.breed)}</span>
           <span class="meta-tag">{_h(dog.dob)}</span>
           {'<span class="meta-tag">MC: ' + _h(dog.microchip) + '</span>' if dog.microchip else ''}
-          {'<span class="meta-tag">毛色: ' + _h(dog.colour) + '</span>' if dog.colour else ''}
+          {'<span class="meta-tag"><span data-i18n="lbl_colour">毛色</span>: ' + _h(dog.colour) + '</span>' if dog.colour else ''}
         </div>
       </div>
 
-      <h3 class="section-title">健康検査結果 ({len(dog.health_results)}項目)</h3>
+      <h3 class="section-title"><span data-i18n="health_results">健康検査結果</span> ({len(dog.health_results)}<span data-i18n="items_suffix">項目</span>)</h3>
       <table class="results-table">
-        <tr><th>カテゴリー</th><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+        <tr><th data-i18n="th_category">カテゴリー</th><th data-i18n="th_test">検査項目</th><th data-i18n="th_result">結果</th><th data-i18n="th_detail">詳細</th></tr>
 {health_rows}
       </table>
 
-      <h3 class="section-title">毛色・形質検査結果 ({len(dog.trait_results)}項目)</h3>
+      <h3 class="section-title"><span data-i18n="trait_results">毛色・形質検査結果</span> ({len(dog.trait_results)}<span data-i18n="items_suffix">項目</span>)</h3>
       <table class="results-table">
-        <tr><th>検査項目</th><th>遺伝子型</th><th>詳細</th></tr>
+        <tr><th data-i18n="th_test">検査項目</th><th data-i18n="th_genotype">遺伝子型</th><th data-i18n="th_detail">詳細</th></tr>
 {trait_rows}
       </table>
     </div>
@@ -1570,7 +1573,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
                 if key not in all_tests:
                     all_tests[key] = {"jp": r.japanese_name or r.test_name, "name": r.test_name}
 
-        compare_header = "<th>検査項目</th>"
+        compare_header = '<th data-i18n="th_test">検査項目</th>'
         for dog in dogs:
             compare_header += f"<th>{_h(dog.pet_name or dog.registered_name)}</th>"
 
@@ -1589,10 +1592,10 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
                     row += "<td>—</td>"
             compare_health_rows += f"        <tr>{row}</tr>\n"
 
-        compare_tab_button = '<div class="tab" onclick="showTab(\'compare\')">比較表</div>'
+        compare_tab_button = '<div class="tab" onclick="showTab(\'compare\')"><span data-i18n="tab_compare">比較表</span></div>'
         compare_tab_html = f"""<div id="compare" class="tab-content">
     <div class="dog-card">
-      <h2 class="section-title">健康検査 比較表</h2>
+      <h2 class="section-title" data-i18n="health_compare">健康検査 比較表</h2>
       <div style="overflow-x:auto;">
       <table class="compare-table">
         <tr>{compare_header}</tr>
@@ -1610,18 +1613,18 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             display_name = _h(r.japanese_name if r.japanese_name else r.test_name)
             if r.status == "positive":
                 alerts_html += f"""      <div class="breed-warn danger">
-        <div class="warn-title">{display_name} — ポジティブ (P/P): {name}</div>
-        <p>変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。</p>
-        <p><small>原文: {_h(r.result_text[:200])}</small></p>
+        <div class="warn-title">{display_name} — <span data-i18n="lbl_positive">ポジティブ</span> (P/P): {name}</div>
+        <p data-i18n="alert_positive">変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。</p>
+        <p><small><span data-i18n="lbl_original">原文</span>: {_h(r.result_text[:200])}</small></p>
       </div>\n"""
             elif r.status == "carrier":
                 alerts_html += f"""      <div class="breed-warn">
-        <div class="warn-title">{display_name} — キャリア (P/N): {name}</div>
-        <p>変異が1コピー検出されました。キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。</p>
+        <div class="warn-title">{display_name} — <span data-i18n="lbl_carrier">キャリア</span> (P/N): {name}</div>
+        <p data-i18n="alert_carrier">変異が1コピー検出されました。キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。</p>
       </div>\n"""
 
     if not alerts_html and has_orivet:
-        alerts_html = '<div class="breed-warn" style="background:#dcfce7;border-color:#86efac;"><div class="warn-title" style="color:#166534;">全頭クリア</div><p>全ての健康検査項目でノーマル（変異なし）でした。</p></div>'
+        alerts_html = '<div class="breed-warn" style="background:#dcfce7;border-color:#86efac;"><div class="warn-title" style="color:#166534;" data-i18n="all_clear">全頭クリア</div><p data-i18n="all_clear_desc">全ての健康検査項目でノーマル（変異なし）でした。</p></div>'
 
     # ── Overview table rows ──
     overview_table_rows = ""
@@ -1632,7 +1635,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     pedigree_tab_button = ""
     pedigree_tab_html = ""
     if has_pedigree:
-        pedigree_tab_button = '<div class="tab" onclick="showTab(\'pedigree\')">血統書 + COI</div>'
+        pedigree_tab_button = '<div class="tab" onclick="showTab(\'pedigree\')"><span data-i18n="tab_pedigree">血統書 + COI</span></div>'
 
         ped_parts = []
         for ped in pedigrees:
@@ -1681,34 +1684,34 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             common_text = ""
             if coi_result['common_ancestors']:
                 names = ", ".join([_h(c['name']) for c in coi_result['common_ancestors']])
-                common_text = f"<p>共通祖先: {names}</p>"
+                common_text = f'<p><span data-i18n="lbl_common_ancestors">共通祖先</span>: {names}</p>'
             else:
-                common_text = "<p>3世代以内に共通祖先は検出されませんでした。</p>"
+                common_text = '<p data-i18n="no_common_ancestors">3世代以内に共通祖先は検出されませんでした。</p>'
 
             ped_parts.append(f"""
         <div class="dog-card">
             <h2 class="section-title">{_h(ped.dog_name)}</h2>
             <div class="info-grid">
-                <div><strong>犬種:</strong> {_h(ped.breed)}</div>
-                <div><strong>登録番号:</strong> {_h(ped.registration)}</div>
-                <div><strong>性別:</strong> {_h(ped.sex)}</div>
-                <div><strong>生年月日:</strong> {_h(ped.dob)}</div>
-                <div><strong>毛色:</strong> {_h(ped.color)}</div>
-                <div><strong>マイクロチップ:</strong> {_h(ped.microchip)}</div>
-                <div><strong>ブリーダー:</strong> {_h(ped.breeder)}</div>
-                <div><strong>オーナー:</strong> {_h(ped.owner)}</div>
+                <div><strong data-i18n="lbl_breed">犬種</strong>: {_h(ped.breed)}</div>
+                <div><strong data-i18n="lbl_reg_no">登録番号</strong>: {_h(ped.registration)}</div>
+                <div><strong data-i18n="lbl_sex">性別</strong>: {_h(ped.sex)}</div>
+                <div><strong data-i18n="lbl_dob">生年月日</strong>: {_h(ped.dob)}</div>
+                <div><strong data-i18n="lbl_colour">毛色</strong>: {_h(ped.color)}</div>
+                <div><strong data-i18n="lbl_microchip">マイクロチップ</strong>: {_h(ped.microchip)}</div>
+                <div><strong data-i18n="lbl_breeder">ブリーダー</strong>: {_h(ped.breeder)}</div>
+                <div><strong data-i18n="lbl_owner">オーナー</strong>: {_h(ped.owner)}</div>
             </div>
 
-            <h3 class="section-title">3世代血統表</h3>
+            <h3 class="section-title" data-i18n="ped_3gen">3世代血統表</h3>
             <table class="results-table">
-                <tr><th>位置</th><th>犬名</th><th>登録番号</th><th>毛色</th><th>タイトル</th><th>DNA番号</th></tr>
+                <tr><th data-i18n="th_position">位置</th><th data-i18n="th_dog_name">犬名</th><th data-i18n="th_reg_no">登録番号</th><th data-i18n="th_colour">毛色</th><th data-i18n="th_title">タイトル</th><th data-i18n="th_dna">DNA番号</th></tr>
                 {ancestors_html}
             </table>
 
-            <h3 class="section-title">近親交配係数 (COI) — 個体分析</h3>
+            <h3 class="section-title" data-i18n="coi_individual">近親交配係数 (COI) — 個体分析</h3>
             <div style="text-align:center;margin:20px 0;">
                 <div style="font-size:3em;font-weight:800;color:{coi_color};">{coi_result['coi_pct']:.2f}%</div>
-                <div style="color:#6b7280;">Wright's COI (3世代)</div>
+                <div style="color:#6b7280;" data-i18n="coi_wright">Wright's COI (3世代)</div>
             </div>
             {common_text}
         </div>""")
@@ -1722,17 +1725,17 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             if cross_result['common_ancestors']:
                 items = ""
                 for c in cross_result['common_ancestors']:
-                    items += f"<li>{_h(c['name'])} (父方{c['sire_gen']}世代 / 母方{c['dam_gen']}世代 → 寄与: {c['contribution']*100:.3f}%)</li>"
-                cross_common = f"<h3>共通祖先</h3><ul>{items}</ul>"
+                    items += f"<li>{_h(c['name'])} (<span data-i18n='lbl_sire_side'>父方</span>{c['sire_gen']}<span data-i18n='lbl_gen'>世代</span> / <span data-i18n='lbl_dam_side'>母方</span>{c['dam_gen']}<span data-i18n='lbl_gen'>世代</span> → <span data-i18n='lbl_contribution'>寄与</span>: {c['contribution']*100:.3f}%)</li>"
+                cross_common = f'<h3 data-i18n="lbl_common_ancestors">共通祖先</h3><ul>{items}</ul>'
             else:
-                cross_common = "<p>共通祖先は検出されませんでした。</p>"
+                cross_common = '<p data-i18n="no_common_detected">共通祖先は検出されませんでした。</p>'
 
             cross_html = f"""
         <div class="dog-card">
-            <h2 class="section-title">交配COI予測: {_h(pedigrees[0].dog_name)} × {_h(pedigrees[1].dog_name)}</h2>
+            <h2 class="section-title"><span data-i18n="cross_coi_title">交配COI予測</span>: {_h(pedigrees[0].dog_name)} × {_h(pedigrees[1].dog_name)}</h2>
             <div style="text-align:center;margin:20px 0;">
                 <div style="font-size:3em;font-weight:800;color:{cross_color};">{cross_result['coi_pct']:.2f}%</div>
-                <div style="color:#6b7280;">予想される子犬のCOI</div>
+                <div style="color:#6b7280;" data-i18n="expected_puppy_coi">予想される子犬のCOI</div>
             </div>
             {cross_common}
         </div>"""
@@ -1746,32 +1749,37 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     summary_html = ""
     if has_orivet:
         summary_html = f"""  <div class="summary-row">
-    <div class="summary-card"><div class="num blue">{len(dogs)}</div><div class="label">検査頭数</div></div>
-    <div class="summary-card"><div class="num green">{total_normal}</div><div class="label">ノーマル項目</div></div>
-    <div class="summary-card"><div class="num yellow">{total_carrier}</div><div class="label">キャリア項目</div></div>
-    <div class="summary-card"><div class="num red">{total_positive}</div><div class="label">ポジティブ (要注意)</div></div>
-    {'<div class="summary-card"><div class="num" style="color:#4a1a7a;">' + str(len(pedigrees)) + '</div><div class="label">血統書データ</div></div>' if has_pedigree else ''}
+    <div class="summary-card"><div class="num blue">{len(dogs)}</div><div class="label" data-i18n="sum_tested">検査頭数</div></div>
+    <div class="summary-card"><div class="num green">{total_normal}</div><div class="label" data-i18n="sum_normal">ノーマル項目</div></div>
+    <div class="summary-card"><div class="num yellow">{total_carrier}</div><div class="label" data-i18n="sum_carrier">キャリア項目</div></div>
+    <div class="summary-card"><div class="num red">{total_positive}</div><div class="label" data-i18n="sum_positive">ポジティブ (要注意)</div></div>
+    {'<div class="summary-card"><div class="num" style="color:#4a1a7a;">' + str(len(pedigrees)) + '</div><div class="label" data-i18n="sum_pedigree">血統書データ</div></div>' if has_pedigree else ''}
   </div>"""
     elif has_pedigree:
         summary_html = f"""  <div class="summary-row">
-    <div class="summary-card"><div class="num" style="color:#4a1a7a;">{len(pedigrees)}</div><div class="label">血統書データ</div></div>
+    <div class="summary-card"><div class="num" style="color:#4a1a7a;">{len(pedigrees)}</div><div class="label" data-i18n="sum_pedigree">血統書データ</div></div>
   </div>"""
 
     # ── Subtitle ──
     features = []
+    features_en = []
     if has_orivet:
         features.append("遺伝子検査")
+        features_en.append("Genetic Test")
     if has_pedigree:
         features.append("血統書")
         features.append("COI算出")
+        features_en.append("Pedigree")
+        features_en.append("COI Calculation")
     subtitle = " + ".join(features)
+    subtitle_en = " + ".join(features_en)
 
     # ── Pre-build conditional sections (avoid backslash in f-string) ──
-    overview_tab_button = '<div class="tab active" onclick="showTab(\'overview\')">全体サマリー</div>' if has_orivet else ''
+    overview_tab_button = '<div class="tab active" onclick="showTab(\'overview\')"><span data-i18n="tab_overview">全体サマリー</span></div>' if has_orivet else ''
 
     if has_orivet:
-        overview_table_html = '<div class="dog-card"><h2 class="section-title">検査対象一覧</h2><table class="results-table"><tr><th>ペット名</th><th>登録名</th><th>犬種</th><th>性別</th><th>生年月日</th><th>ケース番号</th></tr>' + overview_table_rows + '</table></div>'
-        alerts_section = '<div class="dog-card"><h2 class="section-title">要注意事項</h2>' + alerts_html + '</div>'
+        overview_table_html = '<div class="dog-card"><h2 class="section-title" data-i18n="test_subjects">検査対象一覧</h2><table class="results-table"><tr><th data-i18n="th_pet_name">ペット名</th><th data-i18n="th_reg_name">登録名</th><th data-i18n="lbl_breed">犬種</th><th data-i18n="lbl_sex">性別</th><th data-i18n="lbl_dob">生年月日</th><th data-i18n="th_case_no">ケース番号</th></tr>' + overview_table_rows + '</table></div>'
+        alerts_section = '<div class="dog-card"><h2 class="section-title" data-i18n="alerts_title">要注意事項</h2>' + alerts_html + '</div>'
         overview_section = '<!-- Overview Tab -->\n  <div id="overview" class="tab-content active">\n  ' + overview_table_html + '\n  ' + alerts_section + '\n  </div>'
     else:
         overview_section = ''
@@ -1848,19 +1856,19 @@ header p {{ opacity:0.9; font-size:0.95em; }}
   <div class="container">
     <div>
       <h1>Orivet Genetics Report</h1>
-      <p>{subtitle} &nbsp;|&nbsp; 生成日: {now_str}</p>
-      <p><span class="badge">Orivet Genetics</span> <span class="badge">JKC血統書</span> <span class="badge">Wright's COI</span></p>
+      <p><span data-i18n="report_subtitle">{subtitle}</span> &nbsp;|&nbsp; <span data-i18n="generated_on">生成日</span>: {now_str}</p>
+      <p><span class="badge">Orivet Genetics</span> <span class="badge" data-i18n="badge_pedigree">JKC血統書</span> <span class="badge">Wright's COI</span></p>
     </div>
-    <button class="print-btn" onclick="window.print()">印刷</button>
+    <button class="print-btn" onclick="window.print()" data-i18n="btn_print">印刷</button>
   </div>
 </header>
 <div class="container">
 {summary_html}
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #166534;"></div>ノーマル (N/N)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#fef3c7;border:1px solid #92400e;"></div>キャリア (P/N)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #991b1b;"></div>ポジティブ (P/P)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#e0e7ff;border:1px solid #3730a3;"></div>形質 (Trait)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1px solid #166534;"></div><span data-i18n="leg_normal">ノーマル (N/N)</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fef3c7;border:1px solid #92400e;"></div><span data-i18n="leg_carrier">キャリア (P/N)</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fee2e2;border:1px solid #991b1b;"></div><span data-i18n="leg_positive">ポジティブ (P/P)</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e0e7ff;border:1px solid #3730a3;"></div><span data-i18n="leg_trait">形質 (Trait)</span></div>
   </div>
 
   <div class="tabs">
@@ -1888,6 +1896,169 @@ function showTab(id) {{
   document.getElementById(id).classList.add('active');
   event.target.classList.add('active');
 }}
+
+// ── Language toggle ──
+var REPORT_I18N = {{
+  en: Object.assign({{
+    report_subtitle: "{subtitle_en}",
+    generated_on: "Generated",
+    badge_pedigree: "Pedigree",
+    btn_print: "Print",
+    sum_tested: "Dogs Tested",
+    sum_normal: "Normal",
+    sum_carrier: "Carrier",
+    sum_positive: "Positive (Attention)",
+    sum_pedigree: "Pedigree Data",
+    leg_normal: "Normal (N/N)",
+    leg_carrier: "Carrier (P/N)",
+    leg_positive: "Positive (P/P)",
+    leg_trait: "Trait",
+    tab_overview: "Summary",
+    tab_compare: "Comparison",
+    tab_pedigree: "Pedigree + COI",
+    test_subjects: "Test Subjects",
+    th_pet_name: "Pet Name",
+    th_reg_name: "Registered Name",
+    lbl_breed: "Breed",
+    lbl_sex: "Sex",
+    lbl_dob: "Date of Birth",
+    th_case_no: "Case No.",
+    alerts_title: "Alerts",
+    health_results: "Health Test Results",
+    items_suffix: " items",
+    th_category: "Category",
+    th_test: "Test",
+    th_result: "Result",
+    th_detail: "Details",
+    trait_results: "Coat Color & Trait Results",
+    th_genotype: "Genotype",
+    lbl_colour: "Color",
+    lbl_positive: "Positive",
+    lbl_carrier: "Carrier",
+    alert_positive: "Two copies of the mutation detected. There is a risk of developing the condition. Please consult your veterinarian for appropriate care.",
+    alert_carrier: "One copy of the mutation detected. Breeding with a carrier or positive individual may produce affected puppies.",
+    lbl_original: "Original",
+    all_clear: "All Clear",
+    all_clear_desc: "All health test results are normal (no mutations detected).",
+    health_compare: "Health Test Comparison",
+    lbl_reg_no: "Registration No.",
+    lbl_microchip: "Microchip",
+    lbl_breeder: "Breeder",
+    lbl_owner: "Owner",
+    ped_3gen: "3-Generation Pedigree",
+    th_position: "Position",
+    th_dog_name: "Dog Name",
+    th_reg_no: "Reg. No.",
+    th_colour: "Color",
+    th_title: "Titles",
+    th_dna: "DNA No.",
+    coi_individual: "Coefficient of Inbreeding (COI) — Individual",
+    coi_wright: "Wright's COI (3 generations)",
+    lbl_common_ancestors: "Common Ancestors",
+    no_common_ancestors: "No common ancestors detected within 3 generations.",
+    no_common_detected: "No common ancestors detected.",
+    cross_coi_title: "Breeding COI Prediction",
+    expected_puppy_coi: "Expected Puppy COI",
+    lbl_sire_side: "Sire",
+    lbl_dam_side: "Dam",
+    lbl_gen: " gen",
+    lbl_contribution: "Contribution"
+  }}, {json.dumps(sex_i18n_en, ensure_ascii=False)}),
+  ja: {{
+    report_subtitle: "{subtitle}",
+    generated_on: "生成日",
+    badge_pedigree: "JKC血統書",
+    btn_print: "印刷",
+    sum_tested: "検査頭数",
+    sum_normal: "ノーマル項目",
+    sum_carrier: "キャリア項目",
+    sum_positive: "ポジティブ (要注意)",
+    sum_pedigree: "血統書データ",
+    leg_normal: "ノーマル (N/N)",
+    leg_carrier: "キャリア (P/N)",
+    leg_positive: "ポジティブ (P/P)",
+    leg_trait: "形質 (Trait)",
+    tab_overview: "全体サマリー",
+    tab_compare: "比較表",
+    tab_pedigree: "血統書 + COI",
+    test_subjects: "検査対象一覧",
+    th_pet_name: "ペット名",
+    th_reg_name: "登録名",
+    lbl_breed: "犬種",
+    lbl_sex: "性別",
+    lbl_dob: "生年月日",
+    th_case_no: "ケース番号",
+    alerts_title: "要注意事項",
+    health_results: "健康検査結果",
+    items_suffix: "項目",
+    th_category: "カテゴリー",
+    th_test: "検査項目",
+    th_result: "結果",
+    th_detail: "詳細",
+    trait_results: "毛色・形質検査結果",
+    th_genotype: "遺伝子型",
+    lbl_colour: "毛色",
+    lbl_positive: "ポジティブ",
+    lbl_carrier: "キャリア",
+    alert_positive: "変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。",
+    alert_carrier: "変異が1コピー検出されました。キャリアまたはポジティブの個体との交配で発症する子犬が生まれる可能性があります。",
+    lbl_original: "原文",
+    all_clear: "全頭クリア",
+    all_clear_desc: "全ての健康検査項目でノーマル（変異なし）でした。",
+    health_compare: "健康検査 比較表",
+    lbl_reg_no: "登録番号",
+    lbl_microchip: "マイクロチップ",
+    lbl_breeder: "ブリーダー",
+    lbl_owner: "オーナー",
+    ped_3gen: "3世代血統表",
+    th_position: "位置",
+    th_dog_name: "犬名",
+    th_reg_no: "登録番号",
+    th_colour: "毛色",
+    th_title: "タイトル",
+    th_dna: "DNA番号",
+    coi_individual: "近親交配係数 (COI) — 個体分析",
+    coi_wright: "Wright's COI (3世代)",
+    lbl_common_ancestors: "共通祖先",
+    no_common_ancestors: "3世代以内に共通祖先は検出されませんでした。",
+    no_common_detected: "共通祖先は検出されませんでした。",
+    cross_coi_title: "交配COI予測",
+    expected_puppy_coi: "予想される子犬のCOI",
+    lbl_sire_side: "父方",
+    lbl_dam_side: "母方",
+    lbl_gen: "世代",
+    lbl_contribution: "寄与"
+  }}
+}};
+
+// Store per-dog sex labels for ja
+(function() {{
+  var jaExtra = {json.dumps({f"sex_{re.sub(r'[^a-zA-Z0-9]', '_', (d.pet_name or d.registered_name or f'犬{i+1}').lower())}": "オス" if "male" in d.sex.lower() else "メス" for i, d in enumerate(dogs)}, ensure_ascii=False)};
+  Object.assign(REPORT_I18N.ja, jaExtra);
+}})();
+
+function __applyLang(lang) {{
+  var dict = REPORT_I18N[lang];
+  if (!dict) return;
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {{
+    var key = el.getAttribute('data-i18n');
+    if (dict[key] !== undefined) el.innerHTML = dict[key];
+  }});
+  document.documentElement.lang = lang;
+}}
+
+// Expose for parent iframe access
+document.__applyLang = __applyLang;
+window.__applyLang = __applyLang;
+
+// Auto-apply saved language
+(function() {{
+  try {{
+    var lang = (window.parent !== window) ? null : localStorage.getItem('appLang');
+    if (lang) __applyLang(lang);
+  }} catch(e) {{}}
+}})();
+
 {auto_activate_js}
 </script>
 </body>

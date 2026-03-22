@@ -51,15 +51,69 @@
 </head>
 <body>
     <div class="toolbar">
-        <span class="title">Orivet Genetics Suite - レポート</span>
+        <span class="title" id="toolbarTitle">Orivet Genetics Suite - レポート</span>
         <div>
-            <a href="/simulator?session={{ session_id }}">シミュレーターで使う</a>
+            <button type="button" id="langToggle" onclick="toggleLang()">English</button>
+            <a href="/simulator?session={{ session_id }}" id="linkSim">シミュレーターで使う</a>
             {% if xlsx_exists %}
-            <a href="/download/{{ session_id }}/report.xlsx">Excel ダウンロード</a>
+            <a href="/download/{{ session_id }}/report.xlsx" id="linkXlsx">Excel ダウンロード</a>
             {% endif %}
-            <a href="/">新しい解析</a>
+            <a href="/" id="linkNew">新しい解析</a>
         </div>
     </div>
-    <iframe class="report-frame" srcdoc="{{ report_html | e }}"></iframe>
+    <iframe class="report-frame" id="reportFrame" srcdoc="{{ report_html | e }}"></iframe>
+    <script>
+        const TOOLBAR_I18N = {
+            en: {
+                toolbarTitle: "Orivet Genetics Suite - Report",
+                linkSim: "Use in Simulator",
+                linkXlsx: "Download Excel",
+                linkNew: "New Analysis"
+            },
+            ja: {
+                toolbarTitle: "Orivet Genetics Suite - レポート",
+                linkSim: "シミュレーターで使う",
+                linkXlsx: "Excel ダウンロード",
+                linkNew: "新しい解析"
+            }
+        };
+
+        let currentLang = localStorage.getItem('appLang') || 'ja';
+
+        function applyToolbarLang(lang) {
+            const dict = TOOLBAR_I18N[lang];
+            for (const [id, text] of Object.entries(dict)) {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            }
+            document.getElementById('langToggle').textContent = lang === 'ja' ? 'English' : '日本語';
+            document.title = lang === 'en' ? 'Analysis Report - Orivet Genetics Suite' : '解析レポート - Orivet Genetics Suite';
+        }
+
+        function applyIframeLang(lang) {
+            const iframe = document.getElementById('reportFrame');
+            try {
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (iframeDoc && typeof iframeDoc.__applyLang === 'function') {
+                    iframeDoc.__applyLang(lang);
+                } else if (iframe.contentWindow && typeof iframe.contentWindow.__applyLang === 'function') {
+                    iframe.contentWindow.__applyLang(lang);
+                }
+            } catch (e) {}
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'ja' ? 'en' : 'ja';
+            localStorage.setItem('appLang', currentLang);
+            applyToolbarLang(currentLang);
+            applyIframeLang(currentLang);
+        }
+
+        applyToolbarLang(currentLang);
+
+        document.getElementById('reportFrame').addEventListener('load', function() {
+            applyIframeLang(currentLang);
+        });
+    </script>
 </body>
 </html>

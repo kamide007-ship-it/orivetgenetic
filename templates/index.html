@@ -226,22 +226,25 @@
 </head>
 <body>
     <div class="container">
-        <h1>Orivet 遺伝子解析アプリケーション</h1>
-        <p class="subtitle">検査結果と血統書をアップロードするだけで、<br>愛犬の遺伝情報をわかりやすいレポートにまとめます</p>
-        <p class="subtitle-sub">全犬種対応 / Orivet 遺伝子検査PDF + 各種血統書（JKC・ALAJ・AKC等）</p>
+        <div style="text-align:right;margin-bottom:8px;">
+            <button type="button" id="langToggle" onclick="toggleLang()" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.85em;font-weight:600;">English</button>
+        </div>
+        <h1 data-i18n="title">Orivet 遺伝子解析アプリケーション</h1>
+        <p class="subtitle" data-i18n="subtitle">検査結果と血統書をアップロードするだけで、<br>愛犬の遺伝情報をわかりやすいレポートにまとめます</p>
+        <p class="subtitle-sub" data-i18n="subtitle_sub">全犬種対応 / Orivet 遺伝子検査PDF + 各種血統書（JKC・ALAJ・AKC等）</p>
 
         <div class="feature-cards">
             <div class="feature-card">
-                <div class="fc-title">毛色の遺伝子型</div>
-                <div class="fc-desc">どんな毛色の子犬が<br>生まれる可能性があるか<br>ひと目でわかります</div>
+                <div class="fc-title" data-i18n="fc_coat">毛色の遺伝子型</div>
+                <div class="fc-desc" data-i18n="fc_coat_desc">どんな毛色の子犬が<br>生まれる可能性があるか<br>ひと目でわかります</div>
             </div>
             <div class="feature-card">
-                <div class="fc-title">健康リスク</div>
-                <div class="fc-desc">遺伝性疾患の<br>キャリア状態を<br>わかりやすく表示</div>
+                <div class="fc-title" data-i18n="fc_health">健康リスク</div>
+                <div class="fc-desc" data-i18n="fc_health_desc">遺伝性疾患の<br>キャリア状態を<br>わかりやすく表示</div>
             </div>
             <div class="feature-card">
-                <div class="fc-title">近親交配チェック</div>
-                <div class="fc-desc">血統書から近親度を<br>自動計算し、<br>安全な交配を支援</div>
+                <div class="fc-title" data-i18n="fc_inbreeding">近親交配チェック</div>
+                <div class="fc-desc" data-i18n="fc_inbreeding_desc">血統書から近親度を<br>自動計算し、<br>安全な交配を支援</div>
             </div>
         </div>
 
@@ -254,53 +257,53 @@
         <form id="analyzeForm" action="/analyze" method="post" enctype="multipart/form-data">
             <div class="section">
                 <div class="section-title">
-                    Orivet 遺伝子検査PDF
+                    <span data-i18n="sec_pdf">Orivet 遺伝子検査PDF</span>
                     {% if has_pdfplumber %}
-                    <span class="status-badge badge-ok">対応</span>
+                    <span class="status-badge badge-ok" data-i18n="badge_ok">対応</span>
                     {% else %}
-                    <span class="status-badge badge-ng">未対応</span>
+                    <span class="status-badge badge-ng" data-i18n="badge_ng">未対応</span>
                     {% endif %}
                 </div>
-                <p class="section-desc">Orivet (Paw Print Genetics) の Genetic Summary Report PDF をアップロードしてください（全犬種対応・複数可）</p>
+                <p class="section-desc" data-i18n="sec_pdf_desc">Orivet (Paw Print Genetics) の Genetic Summary Report PDF をアップロードしてください（全犬種対応・複数可）</p>
                 <div class="upload-area" id="pdfArea">
                     <input type="file" name="pdf_files" multiple accept=".pdf" id="pdfInput">
                     <div class="upload-icon">📄</div>
-                    <div class="upload-label">PDF ファイルをドロップまたはクリック</div>
-                    <div class="upload-hint">.pdf（複数選択可）</div>
+                    <div class="upload-label" data-i18n="pdf_drop">PDF ファイルをドロップまたはクリック</div>
+                    <div class="upload-hint" data-i18n="pdf_hint">.pdf（複数選択可）</div>
                 </div>
                 <ul class="file-list" id="pdfList"></ul>
             </div>
 
             <div class="section">
                 <div class="section-title">
-                    血統書写真（JKC・ALAJ・AKC等）
+                    <span data-i18n="sec_pedigree">血統書写真（JKC・ALAJ・AKC等）</span>
                     {% if has_ocr %}
-                    <span class="status-badge badge-ok">OCR対応</span>
+                    <span class="status-badge badge-ok" data-i18n="badge_ocr_ok">OCR対応</span>
                     {% else %}
-                    <span class="status-badge badge-ng">OCR未対応</span>
+                    <span class="status-badge badge-ng" data-i18n="badge_ocr_ng">OCR未対応</span>
                     {% endif %}
                 </div>
-                <p class="section-desc">血統証明書の写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）</p>
+                <p class="section-desc" data-i18n="sec_pedigree_desc">血統証明書の写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）</p>
                 <div class="upload-area" id="imgArea">
                     <input type="file" name="pedigree_files" multiple accept=".jpg,.jpeg,.png,.bmp,.tiff,.webp,.heic,.heif" id="imgInput">
                     <div class="upload-icon">📷</div>
-                    <div class="upload-label">画像ファイルをドロップまたはクリック</div>
+                    <div class="upload-label" data-i18n="img_drop">画像ファイルをドロップまたはクリック</div>
                     <div class="upload-hint">.jpg / .png / .heic / .webp / .bmp / .tiff</div>
                 </div>
                 <ul class="file-list" id="imgList"></ul>
             </div>
 
             <div style="margin-top: 24px;">
-                <button type="submit" class="btn btn-primary" id="submitBtn">解析を実行</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn" data-i18n="submit_btn">解析を実行</button>
             </div>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p style="margin-top: 12px; color: #6b7280;">解析中です。しばらくお待ちください...</p>
+                <p style="margin-top: 12px; color: #6b7280;" data-i18n="loading_msg">解析中です。しばらくお待ちください...</p>
             </div>
         </form>
 
-        <a href="/simulator" class="btn btn-secondary">繁殖シミュレーターを開く</a>
+        <a href="/simulator" class="btn btn-secondary" data-i18n="open_sim">繁殖シミュレーターを開く</a>
 
         <div class="env-info">
             pdfplumber: {{ "OK" if has_pdfplumber else "未インストール" }} /
@@ -343,6 +346,82 @@
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('loading').style.display = 'block';
         });
+
+        // ── Language toggle ──
+        const TRANSLATIONS = {
+            en: {
+                title: "Orivet Genetic Analysis Application",
+                subtitle: "Simply upload test results and pedigree documents<br>to generate an easy-to-read genetic report for your dog",
+                subtitle_sub: "All breeds supported / Orivet Genetic Test PDF + Pedigree Certificates (JKC, ALAJ, AKC, etc.)",
+                fc_coat: "Coat Color Genotype",
+                fc_coat_desc: "See at a glance what<br>coat colors may appear<br>in puppies",
+                fc_health: "Health Risks",
+                fc_health_desc: "Clear display of<br>hereditary disease<br>carrier status",
+                fc_inbreeding: "Inbreeding Check",
+                fc_inbreeding_desc: "Automatically calculates<br>COI from pedigree to<br>support safe breeding",
+                sec_pdf: "Orivet Genetic Test PDF",
+                badge_ok: "Supported",
+                badge_ng: "Not Supported",
+                sec_pdf_desc: "Upload Orivet (Paw Print Genetics) Genetic Summary Report PDF (all breeds supported, multiple files OK)",
+                pdf_drop: "Drop or click to select PDF files",
+                pdf_hint: ".pdf (multiple files OK)",
+                sec_pedigree: "Pedigree Photos (JKC, ALAJ, AKC, etc.)",
+                badge_ocr_ok: "OCR Supported",
+                badge_ocr_ng: "OCR Not Supported",
+                sec_pedigree_desc: "Upload pedigree certificate photos (auto-detects JKC, ALAJ, AKC and other formats, multiple files OK)",
+                img_drop: "Drop or click to select image files",
+                submit_btn: "Run Analysis",
+                loading_msg: "Analyzing... Please wait.",
+                open_sim: "Open Breeding Simulator"
+            },
+            ja: {
+                title: "Orivet 遺伝子解析アプリケーション",
+                subtitle: "検査結果と血統書をアップロードするだけで、<br>愛犬の遺伝情報をわかりやすいレポートにまとめます",
+                subtitle_sub: "全犬種対応 / Orivet 遺伝子検査PDF + 各種血統書（JKC・ALAJ・AKC等）",
+                fc_coat: "毛色の遺伝子型",
+                fc_coat_desc: "どんな毛色の子犬が<br>生まれる可能性があるか<br>ひと目でわかります",
+                fc_health: "健康リスク",
+                fc_health_desc: "遺伝性疾患の<br>キャリア状態を<br>わかりやすく表示",
+                fc_inbreeding: "近親交配チェック",
+                fc_inbreeding_desc: "血統書から近親度を<br>自動計算し、<br>安全な交配を支援",
+                sec_pdf: "Orivet 遺伝子検査PDF",
+                badge_ok: "対応",
+                badge_ng: "未対応",
+                sec_pdf_desc: "Orivet (Paw Print Genetics) の Genetic Summary Report PDF をアップロードしてください（全犬種対応・複数可）",
+                pdf_drop: "PDF ファイルをドロップまたはクリック",
+                pdf_hint: ".pdf（複数選択可）",
+                sec_pedigree: "血統書写真（JKC・ALAJ・AKC等）",
+                badge_ocr_ok: "OCR対応",
+                badge_ocr_ng: "OCR未対応",
+                sec_pedigree_desc: "血統証明書の写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）",
+                img_drop: "画像ファイルをドロップまたはクリック",
+                submit_btn: "解析を実行",
+                loading_msg: "解析中です。しばらくお待ちください...",
+                open_sim: "繁殖シミュレーターを開く"
+            }
+        };
+
+        let currentLang = localStorage.getItem('appLang') || 'ja';
+
+        function applyLang(lang) {
+            const dict = TRANSLATIONS[lang];
+            if (!dict) return;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key] !== undefined) el.innerHTML = dict[key];
+            });
+            document.documentElement.lang = lang;
+            document.getElementById('langToggle').textContent = lang === 'ja' ? 'English' : '日本語';
+            document.title = lang === 'en' ? 'Orivet Genetic Analysis Application' : 'Orivet 遺伝子解析アプリケーション';
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'ja' ? 'en' : 'ja';
+            localStorage.setItem('appLang', currentLang);
+            applyLang(currentLang);
+        }
+
+        applyLang(currentLang);
     </script>
 </body>
 </html>
