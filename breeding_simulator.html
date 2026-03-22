@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Orivet Genetics Simulator</title>
+<title>オリベット遺伝子解析シミュレーター</title>
 <style>
 :root { --purple:#4a1a7a; --pink:#e6007e; --green:#22c55e; --yellow:#eab308; --red:#ef4444; --blue:#3b82f6; --gray:#6b7280; --bg:#f8f9fa; }
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -87,7 +87,7 @@ tr:hover td { background:#faf5ff; }
 <header>
   <div class="container">
     <div>
-      <h1>Orivet Genetics Simulator</h1>
+      <h1>オリベット遺伝子解析シミュレーター</h1>
       <p>毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出</p>
     </div>
     <div class="nav-buttons">
@@ -220,6 +220,16 @@ tr:hover td { background:#faf5ff; }
         3世代（曾祖父母まで）の血統情報を入力して、Wright's Coefficient of Inbreeding を算出します。<br>
         同じ祖先が父方・母方の両方に出現する場合、COIが上昇します。
       </p>
+
+      <div id="ped-loader" style="display:none; margin-bottom:16px; padding:12px 16px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px;">
+        <strong style="color:#166534;">血統書データが見つかりました</strong>
+        <p style="font-size:0.85em; color:#374151; margin:6px 0 8px;">OCR解析済みの血統書から自動入力できます。</p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <select id="ped-select" style="padding:6px 10px; border-radius:6px; border:1px solid #d1d5db; font-size:0.9em;"></select>
+          <button class="btn" onclick="fillPedigreeFromData()" style="padding:6px 16px; font-size:0.9em;">自動入力</button>
+          <button onclick="clearPedigreeInputs()" style="padding:6px 12px; border-radius:6px; border:1px solid #d1d5db; background:#fff; cursor:pointer; font-size:0.85em;">クリア</button>
+        </div>
+      </div>
 
       <h3>対象犬</h3>
       <div class="form-row">
@@ -869,9 +879,82 @@ function loadDogsFromSession() {
     .catch(err => console.warn('犬データの読み込みに失敗:', err));
 }
 
+// ================================================================
+// PEDIGREE DATA (COI自動入力)
+// ================================================================
+let PEDIGREE_DATA = [];
+
+function loadPedigreesFromSession() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session');
+  if (!sessionId) return;
+
+  fetch('/api/pedigrees/' + encodeURIComponent(sessionId))
+    .then(r => r.json())
+    .then(pedigrees => {
+      if (!pedigrees || pedigrees.length === 0) return;
+      PEDIGREE_DATA = pedigrees;
+
+      const loader = document.getElementById('ped-loader');
+      const select = document.getElementById('ped-select');
+      loader.style.display = 'block';
+
+      pedigrees.forEach((ped, idx) => {
+        const opt = new Option(ped.dog_name || ('血統書 ' + (idx + 1)), idx);
+        select.appendChild(opt);
+      });
+
+      // 自動入力（1つだけなら即反映）
+      if (pedigrees.length === 1) {
+        fillPedigreeFromData();
+        calcCOI();
+      }
+    })
+    .catch(err => console.warn('血統書データの読み込みに失敗:', err));
+}
+
+function fillPedigreeFromData() {
+  const select = document.getElementById('ped-select');
+  const idx = parseInt(select.value);
+  const ped = PEDIGREE_DATA[idx];
+  if (!ped) return;
+
+  document.getElementById('coi-name').value = ped.dog_name || '計画中の子犬';
+
+  // 父方
+  document.getElementById('p-sire').value = ped.sire || '';
+  document.getElementById('p-ss').value = ped.ss || '';
+  document.getElementById('p-sd').value = ped.sd || '';
+  document.getElementById('p-sss').value = ped.sss || '';
+  document.getElementById('p-ssd').value = ped.ssd || '';
+  document.getElementById('p-sds').value = ped.sds || '';
+  document.getElementById('p-sdd').value = ped.sdd || '';
+
+  // 母方
+  document.getElementById('p-dam').value = ped.dam || '';
+  document.getElementById('p-ds').value = ped.ds || '';
+  document.getElementById('p-dd').value = ped.dd || '';
+  document.getElementById('p-dss').value = ped.dss || '';
+  document.getElementById('p-dsd').value = ped.dsd || '';
+  document.getElementById('p-dds').value = ped.dds || '';
+  document.getElementById('p-ddd').value = ped.ddd || '';
+
+  // 自動でCOIを算出
+  calcCOI();
+}
+
+function clearPedigreeInputs() {
+  const ids = ['coi-name','p-sire','p-ss','p-sd','p-sss','p-ssd','p-sds','p-sdd',
+               'p-dam','p-ds','p-dd','p-dss','p-dsd','p-dds','p-ddd'];
+  ids.forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('coi-name').value = '計画中の子犬';
+  document.getElementById('coi-results').style.display = 'none';
+}
+
 // Initial run
 document.addEventListener('DOMContentLoaded', () => {
   loadDogsFromSession();
+  loadPedigreesFromSession();
   runColorSim();
   runHealthSim();
 });
