@@ -887,6 +887,53 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
     return dog
 
 
+def is_pedigree_pdf(text: str) -> bool:
+    """PDFテキストが血統書かどうかを判定"""
+    # Orivet遺伝子レポートは除外
+    if "Genetic Summary Report" in text or "Health Tests Reported" in text:
+        return False
+    # 血統書キーワードの検出
+    pedigree_keywords = [
+        r'JKC-PT|ジャパンケネルクラブ|JAPAN KENNEL CLUB',
+        r'ALAJ|Australian Labradoodle',
+        r'AKC|AMERICAN KENNEL CLUB',
+        r'PEDIGREE|血統書|血統証明',
+        r'SIRE.*DAM|DAM.*SIRE',
+        r'G\.?\s*SIRE|G\.?\s*DAM',
+        r'犬\s*名.*犬\s*種|犬\s*種.*犬\s*名',
+        r'Name of Dog',
+    ]
+    score = sum(1 for p in pedigree_keywords if re.search(p, text, re.IGNORECASE))
+    return score >= 1
+
+
+def parse_pedigree_pdf(pdf_path: str) -> Optional[Pedigree]:
+    """血統書PDFからPedigreeデータを抽出"""
+    if not HAS_PDFPLUMBER:
+        return None
+
+    basename = os.path.basename(pdf_path)
+    print(f"  血統書PDF解析中: {basename}")
+
+    try:
+        text = extract_all_text(pdf_path)
+    except Exception as e:
+        print(f"  → PDF読み取りエラー: {e}")
+        return None
+
+    if not text or not is_pedigree_pdf(text):
+        return None
+
+    ped = parse_pedigree_text(text)
+    if ped and ped.dog_name:
+        ped.source_file = basename
+        print(f"  → 血統書PDF検出: {ped.dog_name}")
+        return ped
+    else:
+        print(f"  → 血統書データの解析に失敗しました")
+        return None
+
+
 # ████████████████████████████████████████████████████████████
 # PART 2: 血統書 OCR + COI 算出
 # ████████████████████████████████████████████████████████████
@@ -1133,7 +1180,7 @@ def _parse_jkc_ancestors(text: str, ped: Pedigree):
             gg_dam_idx += 1
 
     # G.SIRE / G.DAM（G.G.を除外）
-    for m in re.finditer(r'(?<!G\.?\s)G\.?\s*SIRE\s*(?:祖父)?', text, re.IGNORECASE):
+    for m in re.finditer(r'G\.?\s*SIRE\s*(?:祖父)?', text, re.IGNORECASE):
         # G.G.SIREにマッチしていないか確認
         start = m.start()
         prefix = text[max(0, start - 3):start]
@@ -1148,7 +1195,7 @@ def _parse_jkc_ancestors(text: str, ped: Pedigree):
                 setattr(ped, slot, Ancestor(position=slot, name=name, registration=reg, color=color, dna_number=dna))
             g_sire_idx += 1
 
-    for m in re.finditer(r'(?<!G\.?\s)G\.?\s*DAM\s*(?:祖母)?', text, re.IGNORECASE):
+    for m in re.finditer(r'G\.?\s*DAM\s*(?:祖母)?', text, re.IGNORECASE):
         start = m.start()
         prefix = text[max(0, start - 3):start]
         if re.search(r'G\.?$', prefix):

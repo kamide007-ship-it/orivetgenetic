@@ -257,14 +257,14 @@
         <form id="analyzeForm" action="/analyze" method="post" enctype="multipart/form-data">
             <div class="section">
                 <div class="section-title">
-                    <span data-i18n="sec_pdf">Orivet 遺伝子検査PDF</span>
+                    <span data-i18n="sec_pdf">遺伝子検査PDF / 血統書PDF</span>
                     {% if has_pdfplumber %}
                     <span class="status-badge badge-ok" data-i18n="badge_ok">対応</span>
                     {% else %}
                     <span class="status-badge badge-ng" data-i18n="badge_ng">未対応</span>
                     {% endif %}
                 </div>
-                <p class="section-desc" data-i18n="sec_pdf_desc">Orivet (Paw Print Genetics) の Genetic Summary Report PDF をアップロードしてください（全犬種対応・複数可）</p>
+                <p class="section-desc" data-i18n="sec_pdf_desc">Orivet 遺伝子検査PDF または 血統書PDF をアップロードしてください（全犬種対応・複数可・自動判別）</p>
                 <div class="upload-area" id="pdfArea">
                     <input type="file" name="pdf_files" multiple accept=".pdf" id="pdfInput">
                     <div class="upload-icon">📄</div>
@@ -276,19 +276,22 @@
 
             <div class="section">
                 <div class="section-title">
-                    <span data-i18n="sec_pedigree">血統書写真（JKC・ALAJ・AKC等）</span>
+                    <span data-i18n="sec_pedigree">血統書（JKC・ALAJ・AKC等）</span>
+                    {% if has_pdfplumber %}
+                    <span class="status-badge badge-ok" data-i18n="badge_pdf_ok">PDF対応</span>
+                    {% endif %}
                     {% if has_ocr %}
                     <span class="status-badge badge-ok" data-i18n="badge_ocr_ok">OCR対応</span>
                     {% else %}
                     <span class="status-badge badge-ng" data-i18n="badge_ocr_ng">OCR未対応</span>
                     {% endif %}
                 </div>
-                <p class="section-desc" data-i18n="sec_pedigree_desc">血統証明書の写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）</p>
+                <p class="section-desc" data-i18n="sec_pedigree_desc">血統証明書のPDFまたは写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）</p>
                 <div class="upload-area" id="imgArea">
-                    <input type="file" name="pedigree_files" multiple accept=".jpg,.jpeg,.png,.bmp,.tiff,.webp,.heic,.heif" id="imgInput">
-                    <div class="upload-icon">📷</div>
-                    <div class="upload-label" data-i18n="img_drop">画像ファイルをドロップまたはクリック</div>
-                    <div class="upload-hint">.jpg / .png / .heic / .webp / .bmp / .tiff</div>
+                    <input type="file" name="pedigree_files" multiple accept=".pdf,.jpg,.jpeg,.png,.bmp,.tiff,.webp,.heic,.heif" id="imgInput">
+                    <div class="upload-icon">📄📷</div>
+                    <div class="upload-label" data-i18n="img_drop">PDF・画像ファイルをドロップまたはクリック</div>
+                    <div class="upload-hint" data-i18n="img_hint">.pdf / .jpg / .png / .heic / .webp / .bmp / .tiff</div>
                 </div>
                 <ul class="file-list" id="imgList"></ul>
             </div>
@@ -359,17 +362,19 @@
                 fc_health_desc: "Clear display of<br>hereditary disease<br>carrier status",
                 fc_inbreeding: "Inbreeding Check",
                 fc_inbreeding_desc: "Automatically calculates<br>COI from pedigree to<br>support safe breeding",
-                sec_pdf: "Orivet Genetic Test PDF",
+                sec_pdf: "Genetic Test PDF / Pedigree PDF",
                 badge_ok: "Supported",
                 badge_ng: "Not Supported",
-                sec_pdf_desc: "Upload Orivet (Paw Print Genetics) Genetic Summary Report PDF (all breeds supported, multiple files OK)",
+                sec_pdf_desc: "Upload Orivet genetic test PDF or pedigree certificate PDF (all breeds supported, multiple files OK, auto-detected)",
                 pdf_drop: "Drop or click to select PDF files",
                 pdf_hint: ".pdf (multiple files OK)",
-                sec_pedigree: "Pedigree Photos (JKC, ALAJ, AKC, etc.)",
+                sec_pedigree: "Pedigree (JKC, ALAJ, AKC, etc.)",
+                badge_pdf_ok: "PDF Supported",
                 badge_ocr_ok: "OCR Supported",
                 badge_ocr_ng: "OCR Not Supported",
-                sec_pedigree_desc: "Upload pedigree certificate photos (auto-detects JKC, ALAJ, AKC and other formats, multiple files OK)",
-                img_drop: "Drop or click to select image files",
+                sec_pedigree_desc: "Upload pedigree certificate PDF or photos (auto-detects JKC, ALAJ, AKC and other formats, multiple files OK)",
+                img_drop: "Drop or click to select PDF / image files",
+                img_hint: ".pdf / .jpg / .png / .heic / .webp / .bmp / .tiff",
                 submit_btn: "Run Analysis",
                 loading_msg: "Analyzing... Please wait.",
                 open_sim: "Open Breeding Simulator"
@@ -384,17 +389,19 @@
                 fc_health_desc: "遺伝性疾患の<br>キャリア状態を<br>わかりやすく表示",
                 fc_inbreeding: "近親交配チェック",
                 fc_inbreeding_desc: "血統書から近親度を<br>自動計算し、<br>安全な交配を支援",
-                sec_pdf: "Orivet 遺伝子検査PDF",
+                sec_pdf: "遺伝子検査PDF / 血統書PDF",
                 badge_ok: "対応",
                 badge_ng: "未対応",
-                sec_pdf_desc: "Orivet (Paw Print Genetics) の Genetic Summary Report PDF をアップロードしてください（全犬種対応・複数可）",
+                sec_pdf_desc: "Orivet 遺伝子検査PDF または 血統書PDF をアップロードしてください（全犬種対応・複数可・自動判別）",
                 pdf_drop: "PDF ファイルをドロップまたはクリック",
                 pdf_hint: ".pdf（複数選択可）",
-                sec_pedigree: "血統書写真（JKC・ALAJ・AKC等）",
+                sec_pedigree: "血統書（JKC・ALAJ・AKC等）",
+                badge_pdf_ok: "PDF対応",
                 badge_ocr_ok: "OCR対応",
                 badge_ocr_ng: "OCR未対応",
-                sec_pedigree_desc: "血統証明書の写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）",
-                img_drop: "画像ファイルをドロップまたはクリック",
+                sec_pedigree_desc: "血統証明書のPDFまたは写真をアップロードしてください（JKC・ALAJ・AKC等の各種フォーマットに自動対応・複数可）",
+                img_drop: "PDF・画像ファイルをドロップまたはクリック",
+                img_hint: ".pdf / .jpg / .png / .heic / .webp / .bmp / .tiff",
                 submit_btn: "解析を実行",
                 loading_msg: "解析中です。しばらくお待ちください...",
                 open_sim: "繁殖シミュレーターを開く"
