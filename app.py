@@ -149,6 +149,8 @@ def analyze():
                         ped = parse_pedigree_pdf(path)
                         if ped:
                             pedigrees.append(ped)
+                        else:
+                            flash(f"{f.filename}: 遺伝子検査PDFにも血統書PDFにも該当しませんでした", "warning")
                 except Exception as e:
                     flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）", "warning")
 
