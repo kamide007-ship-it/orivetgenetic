@@ -598,12 +598,37 @@ def generate_pedigree_html(pedigrees: list, output_path: str):
         ancestors_html = ""
         for label, anc in ped.all_ancestors():
             if anc:
-                color_dot = {"BLK":"#1a1a1a","WH":"#e5e7eb","BR":"#8B4513","RED":"#CD5C5C"}.get(anc.color, "#9ca3af")
+                _color_map = {
+                    "BLK": "#1a1a1a", "BLACK": "#1a1a1a",
+                    "WH": "#f5f5f5", "WHITE": "#f5f5f5",
+                    "BR": "#8B4513", "BROWN": "#8B4513", "CHOCO": "#5C3317",
+                    "RED": "#CD5C5C",
+                    "APR": "#FBCEB1", "APRICOT": "#FBCEB1",
+                    "CR": "#FFF8DC", "CREAM": "#FFF8DC",
+                    "SV": "#C0C0C0", "SILVER": "#C0C0C0",
+                    "BL": "#4a6fa5", "BLUE": "#4a6fa5",
+                    "CAFE": "#A67B5B", "CAFE AU LAIT": "#A67B5B",
+                    "GR": "#DAA520", "GOLD": "#DAA520", "GOLDEN": "#DAA520",
+                    "F": "#D2B48C", "FAWN": "#D2B48C",
+                    "SBL": "#D2691E", "SABLE": "#D2691E",
+                    "BRN": "#CD853F", "BRINDLE": "#8B7355",
+                    "MERLE": "#9FB6CD",
+                    "PARTI": "#ffffff",
+                    "TAN": "#D2B48C",
+                    "BEIGE": "#F5F5DC",
+                }
+                _c = (anc.color or "").strip().upper()
+                color_dot = _color_map.get(_c, "#9ca3af")
+                if color_dot == "#9ca3af" and _c:
+                    for k, v in _color_map.items():
+                        if k in _c or _c in k:
+                            color_dot = v
+                            break
                 ancestors_html += f"""<tr>
                     <td>{label}</td>
                     <td style="font-weight:700;">{anc.name}</td>
                     <td>{anc.registration}</td>
-                    <td><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:{color_dot};border:1px solid #999;vertical-align:middle;margin-right:4px;"></span>{anc.color}</td>
+                    <td><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:{color_dot};border:1px solid #bbb;vertical-align:middle;margin-right:6px;"></span>{anc.color}</td>
                     <td style="font-size:0.8em;">{anc.titles}</td>
                     <td style="font-size:0.8em;">{anc.dna_number}</td>
                 </tr>"""
