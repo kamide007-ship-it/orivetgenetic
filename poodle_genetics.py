@@ -542,14 +542,37 @@ KNOWN_PEDIGREES = {
 # ████████████████████████████████████████████████████████████
 
 def extract_all_text(pdf_path: str) -> str:
-    """PDFから全ページのテキストを抽出"""
+    """PDFから全ページのテキストを抽出（テーブル抽出も併用）
+
+    pdfplumber の extract_text() はテーブルセル境界で文字が
+    失われることがある（例: at/at → —）。extract_tables() で
+    セル単位のデータも取得し、テキスト末尾に追加することで
+    後処理での遺伝子型補完を可能にする。
+    """
     texts = []
+    table_texts = []
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
             text = page.extract_text()
             if text:
                 texts.append(text)
-    return "\n\n".join(texts)
+            # テーブルデータもセル単位で抽出して補完用テキストに追加
+            try:
+                tables = page.extract_tables()
+                if tables:
+                    for table in tables:
+                        for row in table:
+                            if row:
+                                cells = [str(c).strip() for c in row if c]
+                                if cells:
+                                    table_texts.append(" | ".join(cells))
+            except Exception:
+                pass  # テーブル抽出失敗時はextract_textのみで続行
+
+    result = "\n\n".join(texts)
+    if table_texts:
+        result += "\n\n--- TABLE DATA ---\n" + "\n".join(table_texts)
+    return result
 
 
 def parse_animal_details(text: str) -> dict:
@@ -871,6 +894,31 @@ def parse_trait_results_from_text(text: str) -> list:
         genotype_found = extract_genotype(full_text, r.test_name)
         if genotype_found:
             r.genotype = genotype_found
+
+    # A Locus 特別処理: extract_text() でセル境界の at/at 等が
+    # 失われるケースに対応。結果テキストのキーワードから推論する
+    for r in results:
+        if "a locus" in r.test_name.lower() and not r.genotype:
+            # 全文から A Locus 遺伝子型を再検索
+            m = re.search(r'\b(at/at|ay/at|ay/ay|a/a|aw/at|aw/aw|ay/aw)\b', full_text, re.IGNORECASE)
+            if m:
+                r.genotype = m.group(1)
+            else:
+                # 結果テキストのキーワードから遺伝子型を推論
+                rt = r.result_text.upper() if r.result_text else ""
+                ft = full_text.upper()
+                # "TAN POINT" / "PHANTOM" → at/at
+                if re.search(r'TAN\s*POINT|PHANTOM', rt) or re.search(r'A\s*LOCUS.*TAN\s*POINT|A\s*LOCUS.*PHANTOM', ft):
+                    r.genotype = "at/at"
+                # "SABLE" → ay/ay or ay/at
+                elif re.search(r'SABLE', rt):
+                    if re.search(r'CARRIER|CARRIES', rt):
+                        r.genotype = "ay/at"
+                    else:
+                        r.genotype = "ay/ay"
+                # "RECESSIVE BLACK" → a/a
+                elif re.search(r'RECESSIVE\s+BLACK', rt):
+                    r.genotype = "a/a"
 
     # K Locus 特別処理: 全文から KB/ky パターンを探す
     for r in results:
