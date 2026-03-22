@@ -161,21 +161,58 @@ KNOWN_PEDIGREES = {
 # ============================================================
 
 def try_ocr(image_path: str) -> str:
-    """画像からテキストを抽出（Tesseract OCR）"""
+    """画像からテキストを抽出（Tesseract OCR）— 写真向け前処理付き"""
     try:
         import pytesseract
-        from PIL import Image
+        import re as _re
+        from PIL import Image, ImageEnhance, ImageFilter
         try:
             from pillow_heif import register_heif_opener
             register_heif_opener()
         except ImportError:
             pass
         img = Image.open(image_path)
-        # HEIC/WEBP等をRGBに変換してTesseractが処理できるようにする
+        # HEIC/WEBP等をRGBに変換
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
-        text = pytesseract.image_to_string(img, lang='jpn+eng')
-        return text
+
+        # --- 写真向け前処理 ---
+        max_dim = 4000
+        if max(img.size) > max_dim:
+            ratio = max_dim / max(img.size)
+            img = img.resize((int(img.width * ratio), int(img.height * ratio)), Image.LANCZOS)
+
+        gray = img.convert("L")
+
+        # コントラスト・シャープネス強化
+        enhancer = ImageEnhance.Contrast(gray)
+        gray = enhancer.enhance(1.8)
+        enhancer = ImageEnhance.Sharpness(gray)
+        gray = enhancer.enhance(2.0)
+
+        # 二値化（平均値ベースの閾値）
+        pixels = list(gray.getdata())
+        threshold = sum(pixels) // len(pixels)
+        binarized = gray.point(lambda x: 255 if x > threshold - 30 else 0)
+
+        # 複数設定でOCR試行
+        best_text = ""
+        configs = [
+            {'image': binarized, 'config': '--psm 6 --oem 3'},
+            {'image': gray, 'config': '--psm 6 --oem 3'},
+            {'image': binarized, 'config': '--psm 3 --oem 3'},
+        ]
+        for cfg in configs:
+            text = pytesseract.image_to_string(
+                cfg['image'], lang='jpn+eng', config=cfg['config']
+            )
+            if len(text) > len(best_text):
+                best_text = text
+            if len(text) > 500 and _re.search(r'SIRE|DAM|JKC|PEDIGREE|血統', text, _re.IGNORECASE):
+                best_text = text
+                break
+
+        return best_text
     except ImportError:
         print("  pytesseract が未インストールです。")
         print("  pip install pytesseract Pillow")
