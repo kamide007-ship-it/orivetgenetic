@@ -33,7 +33,37 @@
             text-align: center;
             color: #6b7280;
             font-size: 0.95em;
-            margin-bottom: 30px;
+            margin-bottom: 12px;
+        }
+        .subtitle-sub {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.82em;
+            margin-bottom: 20px;
+        }
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .feature-card {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 14px 10px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        .feature-card .fc-title {
+            font-size: 0.82em;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+        .feature-card .fc-desc {
+            font-size: 0.72em;
+            color: #9ca3af;
+            line-height: 1.4;
         }
         .section {
             margin-bottom: 28px;
@@ -197,7 +227,23 @@
 <body>
     <div class="container">
         <h1>Orivet 遺伝子解析アプリケーション</h1>
-        <p class="subtitle">全犬種対応 — Orivet遺伝子検査PDFとJKC血統書写真をアップロードするだけで、<br>毛色・健康リスク・近親交配係数を自動解析しレポートを生成します</p>
+        <p class="subtitle">検査結果と血統書をアップロードするだけで、<br>愛犬の遺伝情報をわかりやすいレポートにまとめます</p>
+        <p class="subtitle-sub">全犬種対応 / Orivet 遺伝子検査PDF + 各種血統書（JKC・ALAJ・AKC等）</p>
+
+        <div class="feature-cards">
+            <div class="feature-card">
+                <div class="fc-title">毛色の遺伝子型</div>
+                <div class="fc-desc">どんな毛色の子犬が<br>生まれる可能性があるか<br>ひと目でわかります</div>
+            </div>
+            <div class="feature-card">
+                <div class="fc-title">健康リスク</div>
+                <div class="fc-desc">遺伝性疾患の<br>キャリア状態を<br>わかりやすく表示</div>
+            </div>
+            <div class="feature-card">
+                <div class="fc-title">近親交配チェック</div>
+                <div class="fc-desc">血統書から近親度を<br>自動計算し、<br>安全な交配を支援</div>
+            </div>
+        </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
