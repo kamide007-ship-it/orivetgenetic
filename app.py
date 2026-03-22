@@ -139,13 +139,23 @@ def analyze():
             safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.pdf'}"
             path = os.path.join(session_upload, safe_name)
             f.save(path)
+
+            # DNAプロファイル（DNAP）ファイルの事前判定
+            fname_upper = (f.filename or "").upper()
+            is_dnap = "DNAP" in fname_upper or "DNA PROFILE" in fname_upper
+            # 「見方」「説明」ファイルの事前判定
+            is_guide = "見方" in (f.filename or "") or "説明" in (f.filename or "")
+
             if HAS_PDFPLUMBER:
                 try:
                     dog = parse_pdf(path)
                     if dog:
                         dogs.append(dog)
+                    elif is_dnap or is_guide:
+                        # DNAプロファイル・説明ファイルは静かにスキップ
+                        pass
                     else:
-                        # Orivet PDFでない場合、血統書PDFとして解析を試みる
+                        # Orivet遺伝子検査PDFでない場合、血統書PDFとして解析を試みる
                         ped = parse_pedigree_pdf(path)
                         if ped:
                             pedigrees.append(ped)
