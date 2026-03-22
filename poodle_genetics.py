@@ -653,7 +653,7 @@ def extract_genotype(result_text: str, test_name: str = "") -> str:
         ],
         "m locus": [r'(m/m|M/m|M/M)'],
         "merle": [r'(m/m|M/m|M/M)'],
-        "curly": [r'(Cu/Cu|Cu/N|N/N)'],
+        "curly": [r'(Cu/Cu|Cu/N)', r'(N/N)'],
         "furnishings": [r'(F/F|F/f|f/f)'],
         "rspo2": [r'(F/F|F/f|f/f)'],
         "pied": [r'(sp/sp|S/sp|S/S)'],
@@ -860,6 +860,29 @@ def parse_trait_results_from_text(text: str) -> list:
                     japanese_name=jp_name,
                 ))
                 break
+
+    # --- 後処理: 遺伝子型が空の項目を全文から補完 ---
+    # PDF抽出でセル境界が崩れ、遺伝子型が隣の検査項目テキストに
+    # 紛れ込んでいるケースに対応
+    full_text = text  # 全文を使って再検索
+    for r in results:
+        if r.genotype:
+            continue
+        genotype_found = extract_genotype(full_text, r.test_name)
+        if genotype_found:
+            r.genotype = genotype_found
+
+    # K Locus 特別処理: 全文から KB/ky パターンを探す
+    for r in results:
+        if "k locus" in r.test_name.lower() and (not r.genotype or len(r.genotype) <= 3):
+            m = re.search(r'KB\s*/\s*(ky|kbr)', full_text, re.IGNORECASE)
+            if m:
+                r.genotype = f"KB/{m.group(1)}"
+            elif not r.genotype:
+                # "ONE COPY DOMINANT BLACK" + "ky" or "kbr" のパターン
+                m = re.search(r'ONE\s+COPY\s+DOMINANT\s+BLACK.*?\b(ky|kbr)\b', full_text, re.IGNORECASE)
+                if m:
+                    r.genotype = f"KB/{m.group(1)}"
 
     return results
 
