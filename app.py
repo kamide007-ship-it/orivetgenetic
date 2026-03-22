@@ -6,9 +6,10 @@ Flask ベースの Web インターフェース
 
 import os
 import uuid
+import json
 import glob
 import shutil
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "poodle-genetics-default-key")
@@ -39,6 +40,77 @@ except ImportError:
 
 def allowed_file(filename, extensions):
     return os.path.splitext(filename)[1].lower() in extensions
+
+
+# 遺伝子型テスト名 → シミュレーター用キーのマッピング
+_TRAIT_TO_SIM_KEY = {
+    "E Locus (Cream/Red/Yellow)": "e",
+    "K Locus (Dominant Black)": "k",
+    "A Locus (Agouti)": "a",
+    "B Locus (Brown)": "b",
+    "D (Dilute) Locus": "d",
+    "M Locus (Merle/Dapple)": "m",
+    "Pied": "s",
+}
+
+# 遺伝子型表記 → シミュレーターselect value のマッピング
+_GENOTYPE_TO_SELECT = {
+    # E locus
+    "E/E": "EE", "E/e": "Ee", "e/e": "ee",
+    # K locus
+    "KB/KB": "KBKB", "K/K": "KBKB", "KB/ky": "KBky", "KB/kbr": "KBkbr",
+    "ky/ky": "kyky", "kbr/ky": "kbrky", "kbr/kbr": "kbrkbr",
+    # A locus
+    "ay/ay": "ayay", "ay/at": "ayat", "at/at": "atat", "a/a": "aa",
+    # B locus
+    "BB": "BB", "Bb": "Bb", "bb": "bb",
+    # D locus
+    "D/D": "DD", "D/d": "Dd", "d/d": "dd",
+    # M locus
+    "m/m": "mm", "M/m": "Mm", "M/M": "MM",
+    # S (Pied) locus
+    "S/S": "SS", "S/sp": "Ssp", "sp/sp": "spsp",
+}
+
+# 健康検査名 → シミュレーターキーのマッピング
+_HEALTH_TO_SIM_KEY = {
+    "Chondrodystrophy and Intervertebral Disc Disease": "CDDY+IVDD",
+    "CDDY+IVDD": "CDDY+IVDD",
+    "Osteochondrodysplasia": "Osteochondrodysplasia",
+    "Chondrodysplasia (CDPA)": "CDPA",
+    "Macrothrombocytopenia": "Macrothrombocytopenia",
+    "Methemoglobinemia": "Methemoglobinemia",
+    "Von Willebrand's Disease Type 1": "vWD1",
+    "Degenerative Myelopathy": "DM",
+    "GM2 Gangliosidosis": "GM2",
+    "Progressive Retinal Atrophy - prcd": "prcd-PRA",
+}
+
+
+def extract_sim_data(dog):
+    """DogProfileからシミュレーター用の遺伝子型データを抽出"""
+    name = dog.pet_name or dog.registered_name or ""
+    sex = "male" if "male" in dog.sex.lower() else "female"
+
+    color = {}
+    for r in dog.trait_results:
+        sim_key = _TRAIT_TO_SIM_KEY.get(r.test_name)
+        if sim_key and r.genotype:
+            select_val = _GENOTYPE_TO_SELECT.get(r.genotype, r.genotype)
+            color[sim_key] = select_val
+
+    health = {}
+    for r in dog.health_results:
+        sim_key = _HEALTH_TO_SIM_KEY.get(r.test_name)
+        if sim_key and r.genotype:
+            health[sim_key] = r.genotype.replace("/", "")
+
+    return {
+        "name": name,
+        "sex": sex,
+        "color": color,
+        "health": health,
+    }
 
 
 @app.route("/")
@@ -117,6 +189,12 @@ def analyze():
     generate_unified_html(dogs, pedigrees, html_path)
     generate_excel(dogs, pedigrees, xlsx_path)
 
+    # Save dog genotype data for simulator
+    if dogs:
+        sim_data = [extract_sim_data(d) for d in dogs]
+        with open(os.path.join(session_report, "dogs.json"), "w", encoding="utf-8") as f:
+            json.dump(sim_data, f, ensure_ascii=False)
+
     # Cleanup uploaded files
     shutil.rmtree(session_upload, ignore_errors=True)
 
@@ -141,6 +219,18 @@ def report(session_id):
                            session_id=session_id, xlsx_exists=xlsx_exists)
 
 
+@app.route("/api/dogs/<session_id>")
+def api_dogs(session_id):
+    """解析済みの犬の遺伝子型データをJSONで返す"""
+    if ".." in session_id or "/" in session_id:
+        return jsonify({"error": "不正なリクエスト"}), 400
+    json_path = os.path.join(REPORT_FOLDER, session_id, "dogs.json")
+    if not os.path.exists(json_path):
+        return jsonify([])
+    with open(json_path, "r", encoding="utf-8") as f:
+        return jsonify(json.load(f))
+
+
 @app.route("/download/<session_id>/<filename>")
 def download(session_id, filename):
     """Excel ファイルのダウンロード"""
@@ -156,6 +246,7 @@ def download(session_id, filename):
 @app.route("/simulator")
 def simulator():
     """繁殖シミュレーター"""
+    session_id = request.args.get("session")
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)),
                                "breeding_simulator.html")
 

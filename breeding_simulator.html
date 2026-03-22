@@ -104,17 +104,17 @@ tr:hover td { background:#faf5ff; }
         <div class="form-group">
           <label>父犬 (Sire)</label>
           <select id="sire-color" onchange="runColorSim()">
-            <option value="seven">Seven (E/e, KB/ky, at/at, Bb, D/D, m/m, S/S)</option>
             <option value="custom">カスタム入力...</option>
+            <option value="exA">（例）犬A (E/e, KB/ky, at/at, Bb, D/D, m/m, S/S)</option>
           </select>
         </div>
         <div class="form-group">
           <label>母犬 (Dam)</label>
           <select id="dam-color" onchange="runColorSim()">
-            <option value="angel">Angel Of Music (e/e, K/K, at/at, Bb, D/D, m/m, S/S)</option>
-            <option value="phantom">White Phantom (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
-            <option value="lapi">Lapi (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
             <option value="custom">カスタム入力...</option>
+            <option value="exB">（例）犬B (e/e, K/K, at/at, Bb, D/D, m/m, S/S)</option>
+            <option value="exC">（例）犬C (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
+            <option value="exD">（例）犬D (e/e, KB/ky, at/at, BB, D/D, m/m, S/S)</option>
           </select>
         </div>
       </div>
@@ -177,17 +177,17 @@ tr:hover td { background:#faf5ff; }
         <div class="form-group">
           <label>父犬 (Sire)</label>
           <select id="sire-health" onchange="runHealthSim()">
-            <option value="seven">Seven</option>
             <option value="custom_h">カスタム入力...</option>
+            <option value="exA">（例）犬A</option>
           </select>
         </div>
         <div class="form-group">
           <label>母犬 (Dam)</label>
           <select id="dam-health" onchange="runHealthSim()">
-            <option value="angel">Angel Of Music</option>
-            <option value="phantom">White Phantom</option>
-            <option value="lapi">Lapi</option>
             <option value="custom_h">カスタム入力...</option>
+            <option value="exB">（例）犬B</option>
+            <option value="exC">（例）犬C</option>
+            <option value="exD">（例）犬D</option>
           </select>
         </div>
       </div>
@@ -218,7 +218,7 @@ tr:hover td { background:#faf5ff; }
       <h3>父方 (Sire's Side)</h3>
       <div class="pedigree">
         <div class="ped-col">
-          <div class="ped-node male"><input id="p-sire" placeholder="父犬" value="Seven"></div>
+          <div class="ped-node male"><input id="p-sire" placeholder="父犬"></div>
         </div>
         <div class="ped-col">
           <div class="ped-node male"><input id="p-ss" placeholder="父方祖父"></div>
@@ -275,8 +275,8 @@ tr:hover td { background:#faf5ff; }
 // DOG DATA
 // ================================================================
 const DOGS = {
-  seven: {
-    name: "Seven", sex: "male",
+  exA: {
+    name: "犬A", sex: "male",
     color: { e:"Ee", k:"KBky", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PP",
@@ -290,8 +290,8 @@ const DOGS = {
       "prcd-PRA": "NN"
     }
   },
-  angel: {
-    name: "Angel Of Music", sex: "female",
+  exB: {
+    name: "犬B", sex: "female",
     color: { e:"ee", k:"KBKB", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PN",
@@ -305,8 +305,8 @@ const DOGS = {
       "prcd-PRA": "NN"
     }
   },
-  phantom: {
-    name: "White Phantom", sex: "female",
+  exC: {
+    name: "犬C", sex: "female",
     color: { e:"ee", k:"KBky", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PN",
@@ -320,8 +320,8 @@ const DOGS = {
       "prcd-PRA": "NN"
     }
   },
-  lapi: {
-    name: "Lapi", sex: "female",
+  exD: {
+    name: "犬D", sex: "female",
     color: { e:"ee", k:"KBky", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS" },
     health: {
       "CDDY+IVDD": "PP",
@@ -607,7 +607,7 @@ function runHealthSim() {
 
   if (sireKey === 'custom_h' || damKey === 'custom_h') {
     document.getElementById('health-results').style.display = 'block';
-    document.getElementById('health-output').innerHTML = '<div class="info-box">カスタム入力は、上の「毛色シミュレーション」タブと同様に各疾患の遺伝子型を入力する形式で、今後追加予定です。<br>現在は登録済みの4頭のデータから選択してください。</div>';
+    document.getElementById('health-output').innerHTML = '<div class="info-box">カスタム入力は今後追加予定です。<br>PDF解析データまたはサンプルデータから選択してください。</div>';
     return;
   }
 
@@ -784,8 +784,79 @@ function calcCOI() {
   document.getElementById('coi-output').innerHTML = html;
 }
 
+// PDF解析データからシミュレーターに自動反映
+function loadDogsFromSession() {
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session');
+  if (!sessionId) return;
+
+  fetch('/api/dogs/' + encodeURIComponent(sessionId))
+    .then(r => r.json())
+    .then(dogs => {
+      if (!dogs || dogs.length === 0) return;
+
+      // 各犬をDOGSに登録し、セレクトボックスに追加
+      dogs.forEach((dog, idx) => {
+        const key = 'pdf_' + idx;
+        DOGS[key] = {
+          name: dog.name,
+          sex: dog.sex,
+          color: dog.color || {},
+          health: dog.health || {}
+        };
+
+        // 毛色シミュレーター用セレクトに追加
+        const colorLabel = dog.name + ' (' + Object.values(dog.color || {}).join(', ') + ')';
+        const sireColor = document.getElementById('sire-color');
+        const damColor = document.getElementById('dam-color');
+        const opt1 = new Option(colorLabel, key);
+        const opt2 = new Option(colorLabel, key);
+        sireColor.insertBefore(opt1, sireColor.firstChild);
+        damColor.insertBefore(opt2, damColor.firstChild);
+
+        // 健康リスク用セレクトに追加
+        const sireHealth = document.getElementById('sire-health');
+        const damHealth = document.getElementById('dam-health');
+        const opt3 = new Option(dog.name, key);
+        const opt4 = new Option(dog.name, key);
+        sireHealth.insertBefore(opt3, sireHealth.firstChild);
+        damHealth.insertBefore(opt4, damHealth.firstChild);
+      });
+
+      // 最初の犬を自動選択
+      if (dogs.length >= 1) {
+        const maleIdx = dogs.findIndex(d => d.sex === 'male');
+        const femaleIdx = dogs.findIndex(d => d.sex === 'female');
+
+        if (maleIdx >= 0) {
+          document.getElementById('sire-color').value = 'pdf_' + maleIdx;
+          document.getElementById('sire-health').value = 'pdf_' + maleIdx;
+        } else {
+          document.getElementById('sire-color').value = 'pdf_0';
+          document.getElementById('sire-health').value = 'pdf_0';
+        }
+
+        if (femaleIdx >= 0) {
+          document.getElementById('dam-color').value = 'pdf_' + femaleIdx;
+          document.getElementById('dam-health').value = 'pdf_' + femaleIdx;
+        } else if (dogs.length >= 2) {
+          document.getElementById('dam-color').value = 'pdf_1';
+          document.getElementById('dam-health').value = 'pdf_1';
+        }
+      }
+
+      runColorSim();
+      runHealthSim();
+    })
+    .catch(err => console.warn('犬データの読み込みに失敗:', err));
+}
+
 // Initial run
-document.addEventListener('DOMContentLoaded', () => { runColorSim(); runHealthSim(); });
+document.addEventListener('DOMContentLoaded', () => {
+  loadDogsFromSession();
+  runColorSim();
+  runHealthSim();
+});
 </script>
 </body>
 </html>
