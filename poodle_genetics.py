@@ -1090,9 +1090,13 @@ def calc_coi_3gen(ped: Pedigree) -> dict:
     sire_ancestors = []
     dam_ancestors = []
 
+    def _normalize_name(name):
+        """スペースの揺れを正規化して比較精度を向上"""
+        return re.sub(r'\s+', ' ', name.strip().upper())
+
     def add_if_exists(lst, ancestor, gen):
         if ancestor and ancestor.name:
-            lst.append({"name": ancestor.name.strip().upper(), "gen": gen})
+            lst.append({"name": _normalize_name(ancestor.name), "gen": gen})
 
     add_if_exists(sire_ancestors, ped.sire, 1)
     add_if_exists(sire_ancestors, ped.ss, 2)
@@ -1145,11 +1149,13 @@ def calc_coi_cross(sire_ped: Pedigree, dam_ped: Pedigree) -> dict:
             (ped.sss, 3), (ped.ssd, 3), (ped.sds, 3), (ped.sdd, 3),
             (ped.dss, 3), (ped.dsd, 3), (ped.dds, 3), (ped.ddd, 3),
         ]
+        def _norm(n):
+            return re.sub(r'\s+', ' ', n.strip().upper())
         if ped.dog_name:
-            lst.append({"name": ped.dog_name.strip().upper(), "gen": base_gen})
+            lst.append({"name": _norm(ped.dog_name), "gen": base_gen})
         for anc, gen in ancestors_data:
             if anc and anc.name:
-                lst.append({"name": anc.name.strip().upper(), "gen": base_gen + gen})
+                lst.append({"name": _norm(anc.name), "gen": base_gen + gen})
 
     collect(sire_all, sire_ped, 0)
     collect(dam_all, dam_ped, 0)
@@ -1204,8 +1210,16 @@ def sanitize_for_excel(text: str) -> str:
     return sanitize_text(text)
 
 
+def _h(text) -> str:
+    """HTMLエスケープ（XSS対策）"""
+    if text is None:
+        return ""
+    s = str(text)
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#x27;")
+
+
 def status_badge(status: str, text: str) -> str:
-    return f'<span class="status {status}">{text}</span>'
+    return f'<span class="status {status}">{_h(text)}</span>'
 
 
 def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
@@ -1229,34 +1243,34 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
         name = dog.pet_name or dog.registered_name or f"犬{idx+1}"
         safe_id = re.sub(r'[^a-zA-Z0-9]', '_', name.lower())
 
-        tab_buttons += f'    <div class="tab" onclick="showTab(\'{safe_id}\')">{name}</div>\n'
+        tab_buttons += f'    <div class="tab" onclick="showTab(\'{safe_id}\')">{_h(name)}</div>\n'
 
         sex_class = "male" if "male" in dog.sex.lower() else "female"
         sex_label = "オス" if "male" in dog.sex.lower() else "メス"
 
         health_rows = ""
         for r in dog.health_results:
-            display_name = r.japanese_name if r.japanese_name else r.test_name
+            display_name = _h(r.japanese_name if r.japanese_name else r.test_name)
             badge = status_badge(r.status, r.genotype if r.genotype else r.status.upper())
             annotation = get_health_annotation(r.test_name, r.genotype, r.status)
-            annotation_html = f'<div style="margin-top:4px;padding:6px 8px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;font-size:0.85em;color:#374151;">{annotation}</div>' if annotation else ''
+            annotation_html = f'<div style="margin-top:4px;padding:6px 8px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;font-size:0.85em;color:#374151;">{_h(annotation)}</div>' if annotation else ''
             health_rows += f"""        <tr>
-          <td>{r.category}</td>
-          <td>{display_name}<br><small style="color:#6b7280">{r.test_name}</small>{annotation_html}</td>
+          <td>{_h(r.category)}</td>
+          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{annotation_html}</td>
           <td>{badge}</td>
-          <td style="font-size:0.85em">{r.result_text[:120]}</td>
+          <td style="font-size:0.85em">{_h(r.result_text[:120])}</td>
         </tr>\n"""
 
         trait_rows = ""
         for r in dog.trait_results:
-            display_name = r.japanese_name if r.japanese_name else r.test_name
+            display_name = _h(r.japanese_name if r.japanese_name else r.test_name)
             badge = status_badge("trait", r.genotype if r.genotype else "—")
             annotation = get_trait_annotation(r.test_name, r.genotype)
-            annotation_html = f'<div style="margin-top:4px;padding:6px 8px;background:#f0f4ff;border-left:3px solid #667eea;border-radius:4px;font-size:0.85em;color:#374151;">{annotation}</div>' if annotation else ''
+            annotation_html = f'<div style="margin-top:4px;padding:6px 8px;background:#f0f4ff;border-left:3px solid #667eea;border-radius:4px;font-size:0.85em;color:#374151;">{_h(annotation)}</div>' if annotation else ''
             trait_rows += f"""        <tr>
-          <td>{display_name}<br><small style="color:#6b7280">{r.test_name}</small></td>
+          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small></td>
           <td>{badge}</td>
-          <td style="font-size:0.85em">{r.result_text[:150]}{annotation_html}</td>
+          <td style="font-size:0.85em">{_h(r.result_text[:150])}{annotation_html}</td>
         </tr>\n"""
 
         tab_contents += f"""
@@ -1264,15 +1278,15 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     <div class="dog-card">
       <div class="dog-header">
         <div>
-          <div class="dog-name">{name}</div>
-          <div class="dog-reg">{dog.registered_name} — {dog.case_number}</div>
+          <div class="dog-name">{_h(name)}</div>
+          <div class="dog-reg">{_h(dog.registered_name)} — {_h(dog.case_number)}</div>
         </div>
         <div class="dog-meta">
-          <span class="meta-tag {sex_class}">{sex_label} ({dog.sex})</span>
-          <span class="meta-tag">{dog.breed}</span>
-          <span class="meta-tag">{dog.dob}</span>
-          {'<span class="meta-tag">MC: ' + dog.microchip + '</span>' if dog.microchip else ''}
-          {'<span class="meta-tag">毛色: ' + dog.colour + '</span>' if dog.colour else ''}
+          <span class="meta-tag {sex_class}">{_h(sex_label)} ({_h(dog.sex)})</span>
+          <span class="meta-tag">{_h(dog.breed)}</span>
+          <span class="meta-tag">{_h(dog.dob)}</span>
+          {'<span class="meta-tag">MC: ' + _h(dog.microchip) + '</span>' if dog.microchip else ''}
+          {'<span class="meta-tag">毛色: ' + _h(dog.colour) + '</span>' if dog.colour else ''}
         </div>
       </div>
 
@@ -1303,7 +1317,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
 
         compare_header = "<th>検査項目</th>"
         for dog in dogs:
-            compare_header += f"<th>{dog.pet_name or dog.registered_name}</th>"
+            compare_header += f"<th>{_h(dog.pet_name or dog.registered_name)}</th>"
 
         compare_health_rows = ""
         for test_key, test_info in all_tests.items():
@@ -1337,13 +1351,13 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     alerts_html = ""
     for dog in dogs:
         for r in dog.health_results:
-            name = dog.pet_name or dog.registered_name
-            display_name = r.japanese_name if r.japanese_name else r.test_name
+            name = _h(dog.pet_name or dog.registered_name)
+            display_name = _h(r.japanese_name if r.japanese_name else r.test_name)
             if r.status == "positive":
                 alerts_html += f"""      <div class="breed-warn danger">
         <div class="warn-title">{display_name} — ポジティブ (P/P): {name}</div>
         <p>変異が2コピー検出されました。発症リスクがあります。獣医師にご相談の上、適切なケアをお願いいたします。</p>
-        <p><small>原文: {r.result_text[:200]}</small></p>
+        <p><small>原文: {_h(r.result_text[:200])}</small></p>
       </div>\n"""
             elif r.status == "carrier":
                 alerts_html += f"""      <div class="breed-warn">
@@ -1357,7 +1371,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     # ── Overview table rows ──
     overview_table_rows = ""
     for d in dogs:
-        overview_table_rows += f"<tr><td><strong>{d.pet_name}</strong></td><td>{d.registered_name}</td><td>{d.breed}</td><td>{d.sex}</td><td>{d.dob}</td><td>{d.case_number}</td></tr>\n"
+        overview_table_rows += f"<tr><td><strong>{_h(d.pet_name)}</strong></td><td>{_h(d.registered_name)}</td><td>{_h(d.breed)}</td><td>{_h(d.sex)}</td><td>{_h(d.dob)}</td><td>{_h(d.case_number)}</td></tr>\n"
 
     # ── Pedigree section ──
     pedigree_tab_button = ""
@@ -1400,34 +1414,34 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
                                 color_dot = v
                                 break
                     ancestors_html += f"""<tr>
-                        <td>{label}</td>
-                        <td style="font-weight:700;">{anc.name}</td>
-                        <td>{anc.registration}</td>
-                        <td><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:{color_dot};border:1px solid #bbb;vertical-align:middle;margin-right:6px;"></span>{anc.color}</td>
-                        <td style="font-size:0.8em;">{anc.titles}</td>
-                        <td style="font-size:0.8em;">{anc.dna_number}</td>
+                        <td>{_h(label)}</td>
+                        <td style="font-weight:700;">{_h(anc.name)}</td>
+                        <td>{_h(anc.registration)}</td>
+                        <td><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:{color_dot};border:1px solid #bbb;vertical-align:middle;margin-right:6px;"></span>{_h(anc.color)}</td>
+                        <td style="font-size:0.8em;">{_h(anc.titles)}</td>
+                        <td style="font-size:0.8em;">{_h(anc.dna_number)}</td>
                     </tr>"""
 
             coi_color = '#22c55e' if coi_result['coi_pct'] < 6.25 else '#eab308' if coi_result['coi_pct'] < 12.5 else '#ef4444'
             common_text = ""
             if coi_result['common_ancestors']:
-                names = ", ".join([c['name'] for c in coi_result['common_ancestors']])
+                names = ", ".join([_h(c['name']) for c in coi_result['common_ancestors']])
                 common_text = f"<p>共通祖先: {names}</p>"
             else:
                 common_text = "<p>3世代以内に共通祖先は検出されませんでした。</p>"
 
             ped_parts.append(f"""
         <div class="dog-card">
-            <h2 class="section-title">{ped.dog_name}</h2>
+            <h2 class="section-title">{_h(ped.dog_name)}</h2>
             <div class="info-grid">
-                <div><strong>犬種:</strong> {ped.breed}</div>
-                <div><strong>登録番号:</strong> {ped.registration}</div>
-                <div><strong>性別:</strong> {ped.sex}</div>
-                <div><strong>生年月日:</strong> {ped.dob}</div>
-                <div><strong>毛色:</strong> {ped.color}</div>
-                <div><strong>マイクロチップ:</strong> {ped.microchip}</div>
-                <div><strong>ブリーダー:</strong> {ped.breeder}</div>
-                <div><strong>オーナー:</strong> {ped.owner}</div>
+                <div><strong>犬種:</strong> {_h(ped.breed)}</div>
+                <div><strong>登録番号:</strong> {_h(ped.registration)}</div>
+                <div><strong>性別:</strong> {_h(ped.sex)}</div>
+                <div><strong>生年月日:</strong> {_h(ped.dob)}</div>
+                <div><strong>毛色:</strong> {_h(ped.color)}</div>
+                <div><strong>マイクロチップ:</strong> {_h(ped.microchip)}</div>
+                <div><strong>ブリーダー:</strong> {_h(ped.breeder)}</div>
+                <div><strong>オーナー:</strong> {_h(ped.owner)}</div>
             </div>
 
             <h3 class="section-title">3世代血統表</h3>
@@ -1453,14 +1467,14 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             if cross_result['common_ancestors']:
                 items = ""
                 for c in cross_result['common_ancestors']:
-                    items += f"<li>{c['name']} (父方{c['sire_gen']}世代 / 母方{c['dam_gen']}世代 → 寄与: {c['contribution']*100:.3f}%)</li>"
+                    items += f"<li>{_h(c['name'])} (父方{c['sire_gen']}世代 / 母方{c['dam_gen']}世代 → 寄与: {c['contribution']*100:.3f}%)</li>"
                 cross_common = f"<h3>共通祖先</h3><ul>{items}</ul>"
             else:
                 cross_common = "<p>共通祖先は検出されませんでした。</p>"
 
             cross_html = f"""
         <div class="dog-card">
-            <h2 class="section-title">交配COI予測: {pedigrees[0].dog_name} × {pedigrees[1].dog_name}</h2>
+            <h2 class="section-title">交配COI予測: {_h(pedigrees[0].dog_name)} × {_h(pedigrees[1].dog_name)}</h2>
             <div style="text-align:center;margin:20px 0;">
                 <div style="font-size:3em;font-weight:800;color:{cross_color};">{cross_result['coi_pct']:.2f}%</div>
                 <div style="color:#6b7280;">予想される子犬のCOI</div>

@@ -528,7 +528,7 @@ function runColorSim() {
   const pmm = mResult["mm"] || 0;
 
   const pSS = sResult["SS"] || 0;
-  const pSsp = sResult["Ssp"] || sResult["Ssp"] || 0;
+  const pSsp = sResult["Ssp"] || 0;
   const pspsp = sResult["spsp"] || 0;
 
   // A locus for agouti expression
@@ -604,7 +604,7 @@ function runColorSim() {
 
   // Render
   let html = '<div class="color-bar" style="height:50px;margin-bottom:16px;">';
-  const totalProb = Object.values(consolidated).reduce((s,c) => s + c.prob, 0);
+  const totalProb = Object.values(consolidated).reduce((s,c) => s + c.prob, 0) || 1;
   for (const [key, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
     const cm = COLOR_MAP[key];
     const pct = (data.prob / totalProb * 100).toFixed(1);

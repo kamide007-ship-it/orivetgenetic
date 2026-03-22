@@ -588,6 +588,14 @@ def calc_coi_cross(sire_ped: Pedigree, dam_ped: Pedigree) -> dict:
 # レポート出力
 # ============================================================
 
+def _h(text) -> str:
+    """HTMLエスケープ（XSS対策）"""
+    if text is None:
+        return ""
+    s = str(text)
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&#x27;")
+
+
 def generate_pedigree_html(pedigrees: list, output_path: str):
     """血統書データ + COI結果のHTMLレポートを生成"""
     html_parts = []
@@ -625,26 +633,26 @@ def generate_pedigree_html(pedigrees: list, output_path: str):
                             color_dot = v
                             break
                 ancestors_html += f"""<tr>
-                    <td>{label}</td>
-                    <td style="font-weight:700;">{anc.name}</td>
-                    <td>{anc.registration}</td>
-                    <td><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:{color_dot};border:1px solid #bbb;vertical-align:middle;margin-right:6px;"></span>{anc.color}</td>
-                    <td style="font-size:0.8em;">{anc.titles}</td>
-                    <td style="font-size:0.8em;">{anc.dna_number}</td>
+                    <td>{_h(label)}</td>
+                    <td style="font-weight:700;">{_h(anc.name)}</td>
+                    <td>{_h(anc.registration)}</td>
+                    <td><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:{color_dot};border:1px solid #bbb;vertical-align:middle;margin-right:6px;"></span>{_h(anc.color)}</td>
+                    <td style="font-size:0.8em;">{_h(anc.titles)}</td>
+                    <td style="font-size:0.8em;">{_h(anc.dna_number)}</td>
                 </tr>"""
 
         html_parts.append(f"""
         <div class="card">
-            <h2>{ped.dog_name}</h2>
+            <h2>{_h(ped.dog_name)}</h2>
             <div class="info-grid">
-                <div><strong>犬種:</strong> {ped.breed}</div>
-                <div><strong>登録番号:</strong> {ped.registration}</div>
-                <div><strong>性別:</strong> {ped.sex}</div>
-                <div><strong>生年月日:</strong> {ped.dob}</div>
-                <div><strong>毛色:</strong> {ped.color}</div>
-                <div><strong>マイクロチップ:</strong> {ped.microchip}</div>
-                <div><strong>ブリーダー:</strong> {ped.breeder}</div>
-                <div><strong>オーナー:</strong> {ped.owner}</div>
+                <div><strong>犬種:</strong> {_h(ped.breed)}</div>
+                <div><strong>登録番号:</strong> {_h(ped.registration)}</div>
+                <div><strong>性別:</strong> {_h(ped.sex)}</div>
+                <div><strong>生年月日:</strong> {_h(ped.dob)}</div>
+                <div><strong>毛色:</strong> {_h(ped.color)}</div>
+                <div><strong>マイクロチップ:</strong> {_h(ped.microchip)}</div>
+                <div><strong>ブリーダー:</strong> {_h(ped.breeder)}</div>
+                <div><strong>オーナー:</strong> {_h(ped.owner)}</div>
             </div>
 
             <h3>3世代血統表</h3>
