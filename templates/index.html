@@ -9,7 +9,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            min-height: 100dvh; /* iOS Safari: 100vh はアドレスバー分の計算バグあり */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -222,12 +222,21 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         a { color: #7c3aed; }
+        /* アクセシビリティ: フォーカスリング（キーボード操作・スクリーンリーダー向け） */
+        :focus-visible {
+            outline: 3px solid #7c3aed;
+            outline-offset: 2px;
+        }
+        /* コントラスト改善: #9ca3af(2.5:1 不適合) → #6b7280(4.6:1 AA適合) */
+        .upload-hint, .env-info, .feature-card .fc-desc {
+            color: #6b7280;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div style="text-align:right;margin-bottom:8px;">
-            <button type="button" id="langToggle" onclick="toggleLang()" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.85em;font-weight:600;">English</button>
+            <button type="button" id="langToggle" onclick="toggleLang()" aria-label="言語切替" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.85em;font-weight:600;">English</button>
         </div>
         <h1 data-i18n="title">Orivet 遺伝子解析アプリケーション</h1>
         <p class="subtitle" data-i18n="subtitle">検査結果と血統書をアップロードするだけで、<br>愛犬の遺伝情報をわかりやすいレポートにまとめます</p>
@@ -298,7 +307,7 @@
             </div>
 
             <div style="margin-top: 24px;">
-                <button type="submit" class="btn btn-primary" id="submitBtn" data-i18n="submit_btn">解析を実行</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn" data-i18n="submit_btn" aria-label="解析を実行">解析を実行</button>
             </div>
 
             <div class="loading" id="loading">
@@ -345,10 +354,21 @@
             });
         });
 
-        // Loading state
+        // Loading state + ネットワーク失敗時のスピナー解除
         document.getElementById('analyzeForm').addEventListener('submit', function() {
             document.getElementById('submitBtn').disabled = true;
             document.getElementById('loading').style.display = 'block';
+
+            // フォーム送信後にページ離脱で「解析中」のまま残るのを防ぐ
+            // ブラウザのback/closeで戻ったとき、次回送信が可能な状態にリセット
+            window.addEventListener('pageshow', function onPageShow(e) {
+                // bfcache から復元された場合（iOSでよく起きる）
+                if (e.persisted) {
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('loading').style.display = 'none';
+                }
+                window.removeEventListener('pageshow', onPageShow);
+            });
         });
 
         // ── Language toggle ──

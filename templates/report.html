@@ -45,7 +45,7 @@
         .report-frame {
             width: 100%;
             border: none;
-            min-height: calc(100vh - 52px);
+            min-height: calc(100dvh - 52px); /* iOS Safari 100vh バグ回避 */
         }
     </style>
 </head>
