@@ -242,6 +242,56 @@ class TestAllowedFile:
 # 6. ルーティング存在確認
 # ===========================================================================
 
+# ===========================================================================
+# 7. マジックバイト検証
+# ===========================================================================
+
+class TestMagicBytes:
+    def _write(self, tmp_path, content: bytes) -> str:
+        path = os.path.join(tmp_path, "test_file")
+        with open(path, "wb") as fp:
+            fp.write(content)
+        return path
+
+    def setup_method(self):
+        self.tmp = tempfile.mkdtemp()
+
+    def teardown_method(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_valid_pdf(self):
+        path = self._write(self.tmp, b"%PDF-1.4 fake content")
+        assert _app._is_valid_pdf(path)
+
+    def test_invalid_pdf(self):
+        path = self._write(self.tmp, b"MZ\x90\x00 this is an exe")
+        assert not _app._is_valid_pdf(path)
+
+    def test_empty_file_is_invalid_pdf(self):
+        path = self._write(self.tmp, b"")
+        assert not _app._is_valid_pdf(path)
+
+    def test_valid_jpeg(self):
+        path = self._write(self.tmp, b"\xff\xd8\xff\xe0 fake jpeg")
+        assert _app._is_valid_image(path)
+
+    def test_valid_png(self):
+        path = self._write(self.tmp, b"\x89PNG\r\n\x1a\n fake png")
+        assert _app._is_valid_image(path)
+
+    def test_valid_webp(self):
+        path = self._write(self.tmp, b"RIFFxxxxWEBP fake webp")
+        assert _app._is_valid_image(path)
+
+    def test_invalid_image(self):
+        path = self._write(self.tmp, b"%PDF-1.4 this is a pdf not an image")
+        assert not _app._is_valid_image(path)
+
+    def test_nonexistent_path_returns_false(self):
+        assert not _app._is_valid_pdf("/nonexistent_xyz_file.pdf")
+        assert not _app._is_valid_image("/nonexistent_xyz_image.jpg")
+
+
 class TestRoutes:
     EXPECTED = ["/", "/analyze", "/report/<session_id>",
                 "/api/dogs/<session_id>", "/api/pedigrees/<session_id>",

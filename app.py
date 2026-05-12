@@ -62,6 +62,37 @@ app.logger.info(
 ALLOWED_PDF_EXT = {".pdf"}
 ALLOWED_IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".heic", ".heif"}
 
+# マジックバイト検証 — 拡張子偽装された悪意あるファイルを弾く
+_PDF_MAGIC = b"%PDF-"
+_IMG_MAGICS = (
+    b"\xff\xd8\xff",           # JPEG
+    b"\x89PNG\r\n\x1a\n",      # PNG
+    b"GIF8",                   # GIF
+    b"BM",                     # BMP
+    b"II*\x00", b"MM\x00*",    # TIFF (little/big endian)
+    b"RIFF",                   # WEBP (RIFF container)
+    b"ftypheic", b"ftypheix",  # HEIC
+    b"ftypmif1", b"ftypmsf1",  # HEIF
+)
+
+
+def _is_valid_pdf(path: str) -> bool:
+    try:
+        with open(path, "rb") as fp:
+            return fp.read(5) == _PDF_MAGIC
+    except OSError:
+        return False
+
+
+def _is_valid_image(path: str) -> bool:
+    try:
+        with open(path, "rb") as fp:
+            head = fp.read(16)
+        return any(head[: len(m)] == m for m in _IMG_MAGICS)
+    except OSError:
+        return False
+
+
 # Import analysis modules
 from poodle_genetics import (
     parse_pdf, parse_pedigree_pdf, KNOWN_PEDIGREES, calc_coi_3gen,
@@ -192,6 +223,12 @@ def analyze():
             path = os.path.join(session_upload, safe_name)
             f.save(path)
 
+            # マジックバイト検証（拡張子偽装対策）
+            if not _is_valid_pdf(path):
+                os.remove(path)
+                flash(f"{f.filename}: PDFファイルとして認識できませんでした（ファイルが壊れているか形式が異なります）", "warning")
+                continue
+
             # DNAプロファイル（DNAP）ファイルの事前判定
             fname_upper = (f.filename or "").upper()
             is_dnap = "DNAP" in fname_upper or "DNA PROFILE" in fname_upper
@@ -229,6 +266,10 @@ def analyze():
                     safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.pdf'}"
                     path = os.path.join(session_upload, safe_name)
                     f.save(path)
+                    if not _is_valid_pdf(path):
+                        os.remove(path)
+                        ocr_errors.append(f"{f.filename}: PDFファイルとして認識できませんでした（ファイルが壊れているか形式が異なります）")
+                        continue
                     try:
                         ped = parse_pedigree_pdf(path)
                         if ped:
@@ -248,6 +289,10 @@ def analyze():
             safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.img'}"
             path = os.path.join(session_upload, safe_name)
             f.save(path)
+            if not _is_valid_image(path):
+                os.remove(path)
+                ocr_errors.append(f"{f.filename}: 画像ファイルとして認識できませんでした（ファイルが壊れているか形式が異なります）")
+                continue
             if HAS_OCR:
                 try:
                     text = try_ocr(path)
