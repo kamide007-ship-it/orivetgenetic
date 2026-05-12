@@ -1093,7 +1093,7 @@ def try_ocr(image_path: str) -> str:
 
         # OCR実行（1パスで高速化）
         # 血統書の主要情報は英語表記が多いため eng+jpn 順で優先
-        ocr_timeout = 90
+        ocr_timeout = 120
         best_text = ""
 
         # パス1: 英語優先（高速・血統書の構造テキストに最適）

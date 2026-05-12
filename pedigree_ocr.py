@@ -203,9 +203,14 @@ def try_ocr(image_path: str) -> str:
             {'image': binarized, 'config': '--psm 3 --oem 3'},
         ]
         for cfg in configs:
-            text = pytesseract.image_to_string(
-                cfg['image'], lang='jpn+eng', config=cfg['config']
-            )
+            try:
+                text = pytesseract.image_to_string(
+                    cfg['image'], lang='jpn+eng', config=cfg['config'],
+                    timeout=120,
+                )
+            except RuntimeError:
+                # tesseract timeout / runtime error: 次の設定にフォールバック
+                continue
             if len(text) > len(best_text):
                 best_text = text
             if len(text) > 500 and _re.search(r'SIRE|DAM|JKC|PEDIGREE|血統', text, _re.IGNORECASE):

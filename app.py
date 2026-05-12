@@ -5,16 +5,19 @@ Flask ベースの Web インターフェース
 """
 
 import os
+import time
 import uuid
 import json
 import glob
 import shutil
+import logging
 import secrets
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
 REPORT_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reports")
@@ -23,6 +26,38 @@ os.makedirs(REPORT_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50MB
+
+# セッションディレクトリの自動クリーンアップ（ディスク枯渇防止）
+# REPORT_TTL_HOURS 環境変数で上書き可能（デフォルト24h）
+SESSION_TTL_SECONDS = int(os.environ.get("REPORT_TTL_HOURS", "24")) * 3600
+
+
+def _cleanup_old_session_dirs(folder: str, ttl_seconds: int = SESSION_TTL_SECONDS) -> int:
+    """folder直下のサブディレクトリのうち mtime が ttl 超過のものを削除。削除数を返す。"""
+    if not os.path.isdir(folder):
+        return 0
+    now = time.time()
+    removed = 0
+    for name in os.listdir(folder):
+        path = os.path.join(folder, name)
+        if not os.path.isdir(path):
+            continue
+        try:
+            if (now - os.path.getmtime(path)) > ttl_seconds:
+                shutil.rmtree(path, ignore_errors=True)
+                removed += 1
+        except OSError as e:
+            app.logger.warning("cleanup_skip path=%s err=%s", path, e)
+    return removed
+
+
+# 起動時に一度だけ実行（worker毎に走るが多重削除は冪等）
+_removed_reports = _cleanup_old_session_dirs(REPORT_FOLDER)
+_removed_uploads = _cleanup_old_session_dirs(UPLOAD_FOLDER)
+app.logger.info(
+    "startup_cleanup ttl_seconds=%d removed_reports=%d removed_uploads=%d",
+    SESSION_TTL_SECONDS, _removed_reports, _removed_uploads,
+)
 
 ALLOWED_PDF_EXT = {".pdf"}
 ALLOWED_IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".webp", ".heic", ".heif"}
@@ -113,6 +148,23 @@ def extract_sim_data(dog):
         "color": color,
         "health": health,
     }
+
+
+@app.route("/healthz")
+def healthz():
+    """軽量ヘルスチェック（Render等の死活監視用、テンプレ描画なし）"""
+    return jsonify({
+        "status": "ok",
+        "pdfplumber": HAS_PDFPLUMBER,
+        "ocr": HAS_OCR,
+    }), 200
+
+
+@app.errorhandler(413)
+def request_entity_too_large(_e):
+    """50MB超過時のユーザー向けメッセージ"""
+    flash("ファイルサイズが上限（50MB）を超えています。サイズを下げて再度お試しください。", "error")
+    return redirect(url_for("index")), 303
 
 
 @app.route("/")
@@ -272,8 +324,13 @@ def analyze():
                 ped_data.append(ped_json)
             with open(os.path.join(session_report, "pedigrees.json"), "w", encoding="utf-8") as f:
                 json.dump(ped_data, f, ensure_ascii=False)
-    except Exception:
-        pass  # シミュレーター用データ保存失敗は非致命的
+    except Exception as e:
+        # シミュレーター用データ保存失敗は非致命的だが、原因追跡のため必ずログに残す
+        error_id = uuid.uuid4().hex[:8]
+        app.logger.warning(
+            "simulator_data_save_failed error_id=%s session=%s err_type=%s err=%s",
+            error_id, session_id, type(e).__name__, e,
+        )
 
     # Cleanup uploaded files
     shutil.rmtree(session_upload, ignore_errors=True)
