@@ -86,7 +86,7 @@ tr:hover td { background:#faf5ff; }
   .card { overflow-x:auto; }
 }
 /* キーボードフォーカスリング（既存の outline:none を :focus-visible で上書き、マウス操作には影響しない） */
-select:focus-visible, input:focus-visible, .ped-node input:focus-visible {
+select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:focus-visible {
   outline:3px solid var(--purple); outline-offset:2px;
 }
 </style>
@@ -108,10 +108,10 @@ select:focus-visible, input:focus-visible, .ped-node input:focus-visible {
 </header>
 
 <div class="container">
-  <div class="tabs">
-    <div class="tab active" onclick="showTab('color')">毛色シミュレーション</div>
-    <div class="tab" onclick="showTab('health')">健康リスク分析</div>
-    <div class="tab" onclick="showTab('coi')">近親交配係数 (COI)</div>
+  <div class="tabs" role="tablist">
+    <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="color" onclick="showTab('color')">毛色シミュレーション</div>
+    <div class="tab" role="tab" tabindex="0" aria-selected="false" aria-controls="health" onclick="showTab('health')">健康リスク分析</div>
+    <div class="tab" role="tab" tabindex="0" aria-selected="false" aria-controls="coi" onclick="showTab('coi')">近親交配係数 (COI)</div>
   </div>
 
   <!-- ================================================================ -->
@@ -418,9 +418,18 @@ const HEALTH_JP = {
 // ================================================================
 function showTab(id) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  event.target.classList.add('active');
+  document.querySelectorAll('.tab').forEach(el => {
+    el.classList.remove('active');
+    el.setAttribute('aria-selected', 'false');
+  });
+  const content = document.getElementById(id);
+  if (content) content.classList.add('active');
+  // aria-controls で対応タブを特定（旧来の event.target 依存を撤廃）
+  const tab = document.querySelector('.tab[aria-controls="' + id + '"]');
+  if (tab) {
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+  }
 }
 
 // ================================================================
@@ -995,7 +1004,27 @@ function clearPedigreeInputs() {
 }
 
 // Initial run
+// タブのキーボード操作: Enter/Space で起動、ArrowLeft/Right で移動
+function installTabKeyboardHandlers() {
+  const tabs = Array.from(document.querySelectorAll('.tab[role="tab"]'));
+  tabs.forEach((tab, idx) => {
+    tab.addEventListener('keydown', (e) => {
+      const key = e.key;
+      if (key === 'Enter' || key === ' ' || key === 'Spacebar') {
+        e.preventDefault();
+        const id = tab.getAttribute('aria-controls');
+        if (id) showTab(id);
+      } else if (key === 'ArrowRight' || key === 'ArrowLeft') {
+        e.preventDefault();
+        const next = key === 'ArrowRight' ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+        tabs[next].focus();
+      }
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+  installTabKeyboardHandlers();
   loadDogsFromSession();
   loadPedigreesFromSession();
   runColorSim();
