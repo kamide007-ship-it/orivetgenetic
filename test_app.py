@@ -478,11 +478,7 @@ class TestStatusBadge:
 
 @pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
 class TestSanitizeForExcel:
-    """sanitize_for_excel は sanitize_text の別名。
-    現在の実装は『制御文字・合字・置換文字の除去』のみで、
-    Excel formula injection 対策（=/+/-/@ 先頭の無害化）は未実装。
-    formula injection は [BUG-006] として MEMORY.md に記録。
-    """
+    """sanitize_for_excel: 制御文字除去 + CSV/Excel formula injection 対策（[BUG-006] 修正済）"""
 
     def test_strips_control_chars(self):
         # ASCII制御文字（BEL=0x07）が除去される
@@ -496,11 +492,9 @@ class TestSanitizeForExcel:
         assert sanitize_for_excel("good�text") == "goodtext"
 
     def test_preserves_japanese(self):
-        # 日本語は素通し
         assert sanitize_for_excel("ジャパンケネルクラブ") == "ジャパンケネルクラブ"
 
     def test_preserves_tab_and_newline(self):
-        # 0x09 (TAB) と 0x0a (LF) は許容範囲外の制御文字パターンに含まれない
         assert "\t" in sanitize_for_excel("a\tb")
         assert "\n" in sanitize_for_excel("a\nb")
 
@@ -509,6 +503,36 @@ class TestSanitizeForExcel:
 
     def test_empty_string(self):
         assert sanitize_for_excel("") == ""
+
+    # --- [BUG-006] formula injection 対策の検証 ---
+    def test_escapes_equals_prefix(self):
+        # =SUM(...) は Excel 起動時に評価される → ' プレフィックスで無害化
+        assert sanitize_for_excel("=SUM(A1)") == "'=SUM(A1)"
+
+    def test_escapes_plus_prefix(self):
+        assert sanitize_for_excel("+cmd|'/c calc'!A1") == "'+cmd|'/c calc'!A1"
+
+    def test_escapes_minus_prefix(self):
+        assert sanitize_for_excel("-2+3") == "'-2+3"
+
+    def test_escapes_at_prefix(self):
+        # @SUM (Lotus 1-2-3 互換シンタックス, Excel でも評価される)
+        assert sanitize_for_excel("@SUM(A1)") == "'@SUM(A1)"
+
+    def test_does_not_escape_middle_equals(self):
+        # 文字列中の = は安全（先頭のみが式として解釈される）
+        assert sanitize_for_excel("a=b") == "a=b"
+
+    def test_does_not_escape_normal_genotype(self):
+        # 遺伝子型「E/e」等は影響を受けない
+        assert sanitize_for_excel("E/e") == "E/e"
+        assert sanitize_for_excel("Bb") == "Bb"
+        assert sanitize_for_excel("Clear (N/N)") == "Clear (N/N)"
+
+    def test_escapes_after_control_char_strip(self):
+        # 制御文字を除去した結果として先頭が = になるケース
+        # \x07=EVIL → =EVIL → '=EVIL
+        assert sanitize_for_excel("\x07=EVIL") == "'=EVIL"
 
 
 class TestRoutes:
