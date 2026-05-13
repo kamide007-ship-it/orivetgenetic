@@ -292,6 +292,46 @@ class TestMagicBytes:
         assert not _app._is_valid_image("/nonexistent_xyz_image.jpg")
 
 
+# ===========================================================================
+# 8. _log_exc 構造化ログヘルパー
+# ===========================================================================
+
+class TestLogExc:
+    def test_returns_8char_hex_id(self):
+        try:
+            raise ValueError("boom")
+        except ValueError as e:
+            eid = _app._log_exc("test_stage", "test.pdf", e)
+        assert isinstance(eid, str)
+        assert len(eid) == 8
+        # uuid hex は 16進数字のみ
+        int(eid, 16)
+
+    def test_unique_ids(self):
+        ids = set()
+        for _ in range(50):
+            try:
+                raise RuntimeError("x")
+            except RuntimeError as e:
+                ids.add(_app._log_exc("s", "f", e))
+        # 50回呼んで全部ユニークである（衝突は uuid4 上ほぼあり得ない）
+        assert len(ids) == 50
+
+    def test_logs_to_app_logger(self, caplog):
+        import logging
+        with caplog.at_level(logging.ERROR, logger=_app.app.logger.name):
+            try:
+                raise KeyError("missing")
+            except KeyError as e:
+                eid = _app._log_exc("parse_pdf", "evil.pdf", e)
+        # ログレコードに error_id, stage, file, exc_type が含まれるか
+        log_text = caplog.text
+        assert eid in log_text
+        assert "parse_pdf" in log_text
+        assert "evil.pdf" in log_text
+        assert "KeyError" in log_text
+
+
 class TestRoutes:
     EXPECTED = ["/", "/analyze", "/report/<session_id>",
                 "/api/dogs/<session_id>", "/api/pedigrees/<session_id>",

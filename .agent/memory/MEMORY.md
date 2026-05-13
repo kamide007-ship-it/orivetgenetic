@@ -27,6 +27,13 @@
 - **症状**: 解析送信後「戻る」→ submitBtn が disabled のまま再送信不能
 - **修正**: `pageshow(persisted)` リスナーで disabled/loading をリセット（PR #28）
 
+### [BUG-005] エラーログとユーザー報告の紐付け不能
+- **症状**: ユーザーが「PDF解析失敗」と報告しても、バックエンドログから該当エラーを引けない
+- **修正**: `_log_exc()` ヘルパーで `error_id` を発行し、`app.logger.exception` に構造化記録
+  ユーザー向け flash メッセージにも `error_id=xxxxxxxx` を含める
+- **ログ書式**: `analyze_error error_id=xxxxxxxx stage=xxx file=xxx exc_type=xxx`
+- **検索**: Render ログから `grep "error_id=xxxxxxxx"` で完全特定可能
+
 ### [BUG-004] 100vh iOS アドレスバー干渉
 - **症状**: iOS Safari でボタンがアドレスバーの裏に隠れる
 - **修正**: `min-height: 100vh` → `min-height: 100dvh`（PR #28）

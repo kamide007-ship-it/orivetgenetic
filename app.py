@@ -93,6 +93,20 @@ def _is_valid_image(path: str) -> bool:
         return False
 
 
+def _log_exc(stage: str, filename: str, exc: Exception) -> str:
+    """例外を構造化ログに記録し、ユーザー提示用の error_id を返す。
+
+    error_id をユーザー向けメッセージに含めることで、サポート問い合わせ時に
+    バックエンドログから該当エラーを Grep 可能にする。
+    """
+    error_id = uuid.uuid4().hex[:8]
+    app.logger.exception(
+        "analyze_error error_id=%s stage=%s file=%s exc_type=%s",
+        error_id, stage, filename, type(exc).__name__,
+    )
+    return error_id
+
+
 # Import analysis modules
 from poodle_genetics import (
     parse_pdf, parse_pedigree_pdf, KNOWN_PEDIGREES, calc_coi_3gen,
@@ -251,7 +265,8 @@ def analyze():
                         else:
                             flash(f"{f.filename}: 遺伝子検査PDFにも血統書PDFにも該当しませんでした", "warning")
                 except Exception as e:
-                    flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）", "warning")
+                    eid = _log_exc("parse_pdf", f.filename, e)
+                    flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__} / error_id={eid}）", "warning")
 
     # --- Pedigree files (PDF + images) ---
     pedigree_files = request.files.getlist("pedigree_files")
@@ -277,7 +292,8 @@ def analyze():
                         else:
                             ocr_errors.append(f"{f.filename}: 血統書PDFとして解析できませんでした")
                     except Exception as e:
-                        ocr_errors.append(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__}）")
+                        eid = _log_exc("parse_pedigree_pdf", f.filename, e)
+                        ocr_errors.append(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__} / error_id={eid}）")
                 else:
                     ocr_errors.append(f"{f.filename}: PDF解析機能が利用できません（pdfplumber未インストール）")
                 continue
@@ -305,7 +321,8 @@ def analyze():
                     else:
                         ocr_errors.append(f"{f.filename}: 画像からテキストを読み取れませんでした")
                 except Exception as e:
-                    ocr_errors.append(f"{f.filename}: OCR処理中にエラーが発生しました（{type(e).__name__}）")
+                    eid = _log_exc("ocr", f.filename, e)
+                    ocr_errors.append(f"{f.filename}: OCR処理中にエラーが発生しました（{type(e).__name__} / error_id={eid}）")
             else:
                 ocr_errors.append(f"{f.filename}: OCR機能が利用できません（pytesseract未インストール）")
 
@@ -332,7 +349,8 @@ def analyze():
         generate_unified_html(dogs, pedigrees, html_path)
         generate_excel(dogs, pedigrees, xlsx_path)
     except Exception as e:
-        flash(f"レポート生成中にエラーが発生しました（{type(e).__name__}: {e}）", "error")
+        eid = _log_exc("generate_report", "report.html/xlsx", e)
+        flash(f"レポート生成中にエラーが発生しました（{type(e).__name__} / error_id={eid}）", "error")
         shutil.rmtree(session_upload, ignore_errors=True)
         shutil.rmtree(session_report, ignore_errors=True)
         return redirect(url_for("index"))

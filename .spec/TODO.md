@@ -19,7 +19,8 @@
 | T006 | iOS Safari UX（100dvh・aria-label・コントラスト・bfcache） | 中 | S | #28 |
 | T007 | pytest テストスイート（33件） | 高 | M | #28 |
 | T008 | GitHub Actions CI workflow | 中 | S | — |
-| T005b | マジックバイト検証（PDF・画像） | 中 | S | — |
+| T005b | マジックバイト検証（PDF・画像） | 中 | S | #29 |
+| T017 | error_id 付き構造化ログ（/analyze） | 中 | S | (TBD) |
 
 ---
 
