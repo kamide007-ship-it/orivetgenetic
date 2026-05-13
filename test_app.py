@@ -331,6 +331,25 @@ class TestLogExc:
         assert "evil.pdf" in log_text
         assert "KeyError" in log_text
 
+    def test_request_id_appears_when_passed(self, caplog):
+        import logging
+        with caplog.at_level(logging.ERROR, logger=_app.app.logger.name):
+            try:
+                raise ValueError("x")
+            except ValueError as e:
+                _app._log_exc("ocr", "img.jpg", e, request_id="abc12345")
+        assert "request_id=abc12345" in caplog.text
+
+    def test_request_id_dash_when_omitted(self, caplog):
+        import logging
+        with caplog.at_level(logging.ERROR, logger=_app.app.logger.name):
+            try:
+                raise ValueError("x")
+            except ValueError as e:
+                _app._log_exc("ocr", "img.jpg", e)
+        # 後方互換: request_id 省略時は "-" を出力する
+        assert "request_id=-" in caplog.text
+
 
 # ===========================================================================
 # 9. パーサー純関数（合成テキストで code path をカバー）

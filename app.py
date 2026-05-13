@@ -93,16 +93,17 @@ def _is_valid_image(path: str) -> bool:
         return False
 
 
-def _log_exc(stage: str, filename: str, exc: Exception) -> str:
+def _log_exc(stage: str, filename: str, exc: Exception, request_id: str = "") -> str:
     """例外を構造化ログに記録し、ユーザー提示用の error_id を返す。
 
     error_id をユーザー向けメッセージに含めることで、サポート問い合わせ時に
     バックエンドログから該当エラーを Grep 可能にする。
+    request_id を渡すと analyze_start/success ログとも紐付け可能。
     """
     error_id = uuid.uuid4().hex[:8]
     app.logger.exception(
-        "analyze_error error_id=%s stage=%s file=%s exc_type=%s",
-        error_id, stage, filename, type(exc).__name__,
+        "analyze_error error_id=%s request_id=%s stage=%s file=%s exc_type=%s",
+        error_id, request_id or "-", stage, filename, type(exc).__name__,
     )
     return error_id
 
@@ -220,11 +221,20 @@ def index():
 @app.route("/analyze", methods=["POST"])
 def analyze():
     """PDF・血統書写真をアップロードして解析"""
+    request_id = uuid.uuid4().hex[:8]
+    request_start = time.perf_counter()
     session_id = uuid.uuid4().hex
     session_upload = os.path.join(UPLOAD_FOLDER, session_id)
     session_report = os.path.join(REPORT_FOLDER, session_id)
     os.makedirs(session_upload, exist_ok=True)
     os.makedirs(session_report, exist_ok=True)
+
+    pdf_count = len([f for f in request.files.getlist("pdf_files") if f and f.filename])
+    img_count = len([f for f in request.files.getlist("pedigree_files") if f and f.filename])
+    app.logger.info(
+        "analyze_start request_id=%s session_id=%s pdf_files=%d pedigree_files=%d",
+        request_id, session_id, pdf_count, img_count,
+    )
 
     dogs = []
     pedigrees = []
@@ -265,7 +275,7 @@ def analyze():
                         else:
                             flash(f"{f.filename}: 遺伝子検査PDFにも血統書PDFにも該当しませんでした", "warning")
                 except Exception as e:
-                    eid = _log_exc("parse_pdf", f.filename, e)
+                    eid = _log_exc("parse_pdf", f.filename, e, request_id)
                     flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__} / error_id={eid}）", "warning")
 
     # --- Pedigree files (PDF + images) ---
@@ -292,7 +302,7 @@ def analyze():
                         else:
                             ocr_errors.append(f"{f.filename}: 血統書PDFとして解析できませんでした")
                     except Exception as e:
-                        eid = _log_exc("parse_pedigree_pdf", f.filename, e)
+                        eid = _log_exc("parse_pedigree_pdf", f.filename, e, request_id)
                         ocr_errors.append(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__} / error_id={eid}）")
                 else:
                     ocr_errors.append(f"{f.filename}: PDF解析機能が利用できません（pdfplumber未インストール）")
@@ -321,7 +331,7 @@ def analyze():
                     else:
                         ocr_errors.append(f"{f.filename}: 画像からテキストを読み取れませんでした")
                 except Exception as e:
-                    eid = _log_exc("ocr", f.filename, e)
+                    eid = _log_exc("ocr", f.filename, e, request_id)
                     ocr_errors.append(f"{f.filename}: OCR処理中にエラーが発生しました（{type(e).__name__} / error_id={eid}）")
             else:
                 ocr_errors.append(f"{f.filename}: OCR機能が利用できません（pytesseract未インストール）")
@@ -336,6 +346,10 @@ def analyze():
 
     if not dogs and not pedigrees:
         flash("解析可能なデータがありませんでした。PDFまたは血統書画像をアップロードしてください。", "error")
+        app.logger.info(
+            "analyze_empty request_id=%s session_id=%s pdf_files=%d pedigree_files=%d",
+            request_id, session_id, pdf_count, img_count,
+        )
         # cleanup
         shutil.rmtree(session_upload, ignore_errors=True)
         shutil.rmtree(session_report, ignore_errors=True)
@@ -349,7 +363,7 @@ def analyze():
         generate_unified_html(dogs, pedigrees, html_path)
         generate_excel(dogs, pedigrees, xlsx_path)
     except Exception as e:
-        eid = _log_exc("generate_report", "report.html/xlsx", e)
+        eid = _log_exc("generate_report", "report.html/xlsx", e, request_id)
         flash(f"レポート生成中にエラーが発生しました（{type(e).__name__} / error_id={eid}）", "error")
         shutil.rmtree(session_upload, ignore_errors=True)
         shutil.rmtree(session_report, ignore_errors=True)
@@ -397,6 +411,12 @@ def analyze():
 
     # Cleanup uploaded files
     shutil.rmtree(session_upload, ignore_errors=True)
+
+    elapsed_ms = int((time.perf_counter() - request_start) * 1000)
+    app.logger.info(
+        "analyze_success request_id=%s session_id=%s dogs=%d pedigrees=%d elapsed_ms=%d",
+        request_id, session_id, len(dogs), len(pedigrees), elapsed_ms,
+    )
 
     return redirect(url_for("report", session_id=session_id))
 
