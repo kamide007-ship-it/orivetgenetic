@@ -710,7 +710,7 @@ header p {{ opacity:0.9; font-size:0.95em; }}
 .breed-warn.danger .warn-title {{ color:#dc2626; }}
 .print-btn {{ background:var(--purple); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; }}
 .print-btn:hover {{ background:var(--pink); }}
-@media (max-width:768px) {{ header h1 {{ font-size:1.3em; }} .dog-header {{ flex-direction:column; }} .compare-table {{ display:block; overflow-x:auto; }} }}
+@media (max-width:768px) {{ header h1 {{ font-size:1.3em; }} .dog-header {{ flex-direction:column; }} .compare-table,.results-table {{ display:block; overflow-x:auto; }} }}
 @media print {{ .tabs,.print-btn,header {{ display:none!important; }} .tab-content {{ display:block!important; page-break-inside:avoid; }} .dog-card {{ break-inside:avoid; }} }}
 </style>
 </head>
