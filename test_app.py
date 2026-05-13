@@ -357,7 +357,7 @@ class TestLogExc:
 
 try:
     from poodle_genetics import (
-        classify_result, get_japanese_name, get_category_jp,
+        classify_result,
         detect_pedigree_format, _clean_ocr_text, _h, status_badge,
         sanitize_for_excel,
     )

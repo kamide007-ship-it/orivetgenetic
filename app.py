@@ -8,7 +8,6 @@ import os
 import time
 import uuid
 import json
-import glob
 import shutil
 import logging
 import secrets
@@ -110,7 +109,7 @@ def _log_exc(stage: str, filename: str, exc: Exception, request_id: str = "") ->
 
 # Import analysis modules
 from poodle_genetics import (
-    parse_pdf, parse_pedigree_pdf, KNOWN_PEDIGREES, calc_coi_3gen,
+    parse_pdf, parse_pedigree_pdf, KNOWN_PEDIGREES,
     generate_unified_html, generate_excel,
     HAS_PDFPLUMBER, HAS_OCR,
 )
@@ -477,8 +476,8 @@ def download(session_id, filename):
 
 @app.route("/simulator")
 def simulator():
-    """繁殖シミュレーター"""
-    session_id = request.args.get("session")
+    """繁殖シミュレーター（静的HTML。session_id はクライアント側JS が
+    window.location.search から取り出して /api/dogs|pedigrees を呼ぶ）"""
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)),
                                "breeding_simulator.html")
 
