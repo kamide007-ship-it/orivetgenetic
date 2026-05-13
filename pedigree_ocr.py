@@ -777,6 +777,7 @@ header h1 {{ font-size:1.5em; margin:0 20px; }}
 table {{ width:100%; border-collapse:collapse; font-size:0.85em; margin:10px 0; }}
 th {{ background:#4a1a7a; color:white; padding:8px 10px; text-align:left; }}
 td {{ padding:6px 10px; border-bottom:1px solid #f3f4f6; }}
+@media (max-width:768px) {{ table {{ display:block; overflow-x:auto; }} .info-grid {{ grid-template-columns:1fr; }} }}
 .coi-display {{ text-align:center; margin:20px 0; }}
 .coi-value {{ font-size:3em; font-weight:800; }}
 .coi-label {{ color:#6b7280; }}
