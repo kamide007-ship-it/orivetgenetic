@@ -27,6 +27,19 @@
 - **症状**: 解析送信後「戻る」→ submitBtn が disabled のまま再送信不能
 - **修正**: `pageshow(persisted)` リスナーで disabled/loading をリセット（PR #28）
 
+## ログ構造（観測性）
+
+### /analyze ログイベント
+- `analyze_start request_id=XXX session_id=YYY pdf_files=N pedigree_files=M`
+- `analyze_empty request_id=XXX session_id=YYY ...`（解析可能データなし）
+- `analyze_success request_id=XXX session_id=YYY dogs=N pedigrees=M elapsed_ms=T`
+- `analyze_error error_id=ZZ request_id=XXX stage=... file=... exc_type=...`
+
+### 検索例
+- 特定ユーザーの「結果が変」報告: `grep "request_id=xxxxxxxx"` で start→success まで全足跡
+- 特定エラー: `grep "error_id=xxxxxxxx"` で例外＋親リクエスト特定
+- パフォーマンス分析: `grep "analyze_success" | awk -F'elapsed_ms=' '{...}'`
+
 ### [BUG-006] Excel formula injection（修正済 PR #TBD）
 - **症状**: `sanitize_for_excel` は制御文字除去のみで、CSV/Excel formula injection
   （先頭 `=`, `+`, `-`, `@` の式注入）を無害化していなかった
