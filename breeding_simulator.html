@@ -79,7 +79,16 @@ th { background:var(--purple); color:white; padding:10px; text-align:left; }
 td { padding:8px 10px; border-bottom:1px solid #f3f4f6; }
 tr:hover td { background:#faf5ff; }
 
-@media (max-width:768px) { .form-row { grid-template-columns:1fr; } .pedigree { flex-direction:column; } }
+@media (max-width:768px) {
+  .form-row { grid-template-columns:1fr; }
+  .pedigree { flex-direction:column; }
+  /* JS生成テーブル（毛色予測・健康リスク・COI寄与）の横スクロール対応 */
+  .card { overflow-x:auto; }
+}
+/* キーボードフォーカスリング（既存の outline:none を :focus-visible で上書き、マウス操作には影響しない） */
+select:focus-visible, input:focus-visible, .ped-node input:focus-visible {
+  outline:3px solid var(--purple); outline-offset:2px;
+}
 </style>
 </head>
 <body>
