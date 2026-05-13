@@ -1668,8 +1668,16 @@ def sanitize_text(text: str) -> str:
 
 
 def sanitize_for_excel(text: str) -> str:
-    """Excelで使えない文字を除去"""
-    return sanitize_text(text)
+    """Excel出力用: 制御文字除去 + CSV/Excel formula injection 対策。
+
+    OWASP CSV Injection: 先頭が =/+/-/@ のセルは Excel/LibreOffice で
+    式として評価され、外部URL取得や任意関数実行のリスクがある。
+    先頭に ' をプレフィックスして文字列扱いを強制する（[BUG-006]）。
+    """
+    text = sanitize_text(text)
+    if isinstance(text, str) and text and text[0] in ('=', '+', '-', '@'):
+        text = "'" + text
+    return text
 
 
 def _h(text) -> str:

@@ -27,15 +27,17 @@
 - **症状**: 解析送信後「戻る」→ submitBtn が disabled のまま再送信不能
 - **修正**: `pageshow(persisted)` リスナーで disabled/loading をリセット（PR #28）
 
-### [BUG-006] Excel formula injection 未対策（未修正）
-- **症状**: `sanitize_for_excel` / `sanitize_text` は制御文字・合字の除去のみで、
-  Excel formula injection（先頭 `=`, `+`, `-`, `@` の式注入）を**無害化していない**
-- **影響**: 悪意ある PDF/血統書から抽出されたテキストが Excel 起動時に式として評価される
-- **対策案**: 先頭が `=/+/-/@` の場合に `'` をプレフィックスして文字列扱いを強制
-- **修正していない理由**: 実挙動の変更を伴うため、現状運用への影響評価が必要。
-  またユーザー報告の実例がないため優先度は中
-- **テスト**: `test_app.py::TestSanitizeForExcel` で**現状の挙動**を凍結
-  （つまり formula injection が起きうることを Test that documents reality）
+### [BUG-006] Excel formula injection（修正済 PR #TBD）
+- **症状**: `sanitize_for_excel` は制御文字除去のみで、CSV/Excel formula injection
+  （先頭 `=`, `+`, `-`, `@` の式注入）を無害化していなかった
+- **影響**: 悪意ある PDF/血統書から抽出されたテキストが Excel 起動時に式として評価
+- **修正**: `sanitize_for_excel` を `sanitize_text` の単純別名から拡張。
+  制御文字除去後、先頭が `=/+/-/@` なら `'` プレフィックスを付与。
+  HTML 側で使われる `sanitize_text` は変更せず、Excel パスだけに影響を局所化。
+- **影響範囲確認**: Excel cells に書き込まれる内容（category/test_name/genotype/
+  result_text/jp_name）には負数や式始まりの正常データは含まれないことを確認済
+- **テスト**: `test_app.py::TestSanitizeForExcel` に7件追加（=,+,-,@ 各プレフィックス、
+  文字列中の = は素通し、遺伝子型は素通し、制御文字除去後の二次防御）
 
 ### [BUG-005] エラーログとユーザー報告の紐付け不能
 - **症状**: ユーザーが「PDF解析失敗」と報告しても、バックエンドログから該当エラーを引けない

@@ -787,12 +787,20 @@ function showTab(id) {{
 # ============================================================
 
 def sanitize_for_excel(text: str) -> str:
-    """Excelで使えない文字を除去"""
+    """Excelで使えない文字を除去 + CSV/Excel formula injection 対策。
+
+    OWASP CSV Injection: 先頭が =/+/-/@ のセルは Excel/LibreOffice で
+    式として評価され、外部URL取得や任意関数実行のリスクがある。
+    先頭に ' をプレフィックスして文字列扱いを強制する（[BUG-006]）。
+    """
     if not text:
         return text
     import re as _re
     # Remove control characters except tab, newline, carriage return
-    return _re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text)
+    text = _re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text)
+    if text and text[0] in ('=', '+', '-', '@'):
+        text = "'" + text
+    return text
 
 def generate_excel(dogs: list, output_path: str):
     """Excelスプレッドシートを生成"""

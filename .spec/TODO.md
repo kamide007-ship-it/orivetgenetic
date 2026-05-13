@@ -48,4 +48,4 @@
 | T013 | COI (1+F_A) 完全 Wright 公式対応 | 低 | M | 現在の簡易式は許容範囲 |
 | T014 | レポート PDF 出力 | 低 | L | 日本語フォント埋め込み必要 |
 | T015 | ユーザー認証・履歴保存 | 低 | XL | DB設計・個人情報ポリシー必要 |
-| T022 | Excel formula injection 対策（[BUG-006]） | 中 | S | 既存出力への影響評価が必要 |
+| T022 | Excel formula injection 対策（[BUG-006]） | 中 | S | (TBD) ✅ 完了 |
