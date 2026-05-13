@@ -20,7 +20,12 @@
 | T007 | pytest テストスイート（33件） | 高 | M | #28 |
 | T008 | GitHub Actions CI workflow | 中 | S | — |
 | T005b | マジックバイト検証（PDF・画像） | 中 | S | #29 |
-| T017 | error_id 付き構造化ログ（/analyze） | 中 | S | (TBD) |
+| T017 | error_id 付き構造化ログ（/analyze） | 中 | S | #30 |
+| T018 | breeding_simulator モバイル/フォーカス | 中 | S | #31 |
+| T011 | レポートHTML テーブル モバイル対応 | 中 | S | #32 |
+| T019 | breeding_simulator タブのキーボード対応 | 中 | S | #33 |
+| T020 | README 運用機能反映（CIバッジ・/healthz・error_id） | 低 | S | #33 |
+| T021 | 合成テキストパーサーテスト（+39件、計75件） | 中 | M | (TBD) |
 
 ---
 
@@ -43,4 +48,4 @@
 | T013 | COI (1+F_A) 完全 Wright 公式対応 | 低 | M | 現在の簡易式は許容範囲 |
 | T014 | レポート PDF 出力 | 低 | L | 日本語フォント埋め込み必要 |
 | T015 | ユーザー認証・履歴保存 | 低 | XL | DB設計・個人情報ポリシー必要 |
-| T016 | KNOWLEDGE.md 作成 | 低 | S | PDFフォーマット構造文書化 |
+| T022 | Excel formula injection 対策（[BUG-006]） | 中 | S | 既存出力への影響評価が必要 |

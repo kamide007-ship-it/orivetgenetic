@@ -27,6 +27,16 @@
 - **症状**: 解析送信後「戻る」→ submitBtn が disabled のまま再送信不能
 - **修正**: `pageshow(persisted)` リスナーで disabled/loading をリセット（PR #28）
 
+### [BUG-006] Excel formula injection 未対策（未修正）
+- **症状**: `sanitize_for_excel` / `sanitize_text` は制御文字・合字の除去のみで、
+  Excel formula injection（先頭 `=`, `+`, `-`, `@` の式注入）を**無害化していない**
+- **影響**: 悪意ある PDF/血統書から抽出されたテキストが Excel 起動時に式として評価される
+- **対策案**: 先頭が `=/+/-/@` の場合に `'` をプレフィックスして文字列扱いを強制
+- **修正していない理由**: 実挙動の変更を伴うため、現状運用への影響評価が必要。
+  またユーザー報告の実例がないため優先度は中
+- **テスト**: `test_app.py::TestSanitizeForExcel` で**現状の挙動**を凍結
+  （つまり formula injection が起きうることを Test that documents reality）
+
 ### [BUG-005] エラーログとユーザー報告の紐付け不能
 - **症状**: ユーザーが「PDF解析失敗」と報告しても、バックエンドログから該当エラーを引けない
 - **修正**: `_log_exc()` ヘルパーで `error_id` を発行し、`app.logger.exception` に構造化記録
