@@ -332,6 +332,185 @@ class TestLogExc:
         assert "KeyError" in log_text
 
 
+# ===========================================================================
+# 9. パーサー純関数（合成テキストで code path をカバー）
+# ===========================================================================
+
+try:
+    from poodle_genetics import (
+        classify_result, get_japanese_name, get_category_jp,
+        detect_pedigree_format, _clean_ocr_text, _h, status_badge,
+        sanitize_for_excel,
+    )
+    _HAS_PARSERS = True
+except Exception:
+    _HAS_PARSERS = False
+
+
+@pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
+class TestClassifyResult:
+    def test_positive_pp(self):
+        assert classify_result("POSITIVE (P/P)") == "positive"
+
+    def test_two_copies(self):
+        assert classify_result("Dog has two copies of the variant") == "positive"
+
+    def test_carrier_pn(self):
+        assert classify_result("CARRIER (P/N)") == "carrier"
+
+    def test_one_copy(self):
+        assert classify_result("Dog has one copy of the variant") == "carrier"
+
+    def test_normal_nn(self):
+        assert classify_result("NORMAL (N/N)") == "normal"
+
+    def test_no_variant(self):
+        assert classify_result("No variant detected") == "normal"
+
+    def test_positive_heterozygous_is_carrier(self):
+        # POSITIVE HETEROZYGOUS は carrier 扱い（PR #25 で修正された分類）
+        assert classify_result("POSITIVE HETEROZYGOUS") == "carrier"
+
+    def test_unknown_falls_back_to_trait(self):
+        assert classify_result("ay/ay (E Locus)") == "trait"
+
+    def test_case_insensitive(self):
+        assert classify_result("normal (n/n)") == "normal"
+
+
+@pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
+class TestDetectPedigreeFormat:
+    def test_jkc(self):
+        assert detect_pedigree_format("ジャパンケネルクラブ 血統書") == "jkc"
+        assert detect_pedigree_format("JKC-PT-12345") == "jkc"
+        assert detect_pedigree_format("JAPAN KENNEL CLUB") == "jkc"
+
+    def test_alaj(self):
+        assert detect_pedigree_format("Australian Labradoodle Association") == "alaj"
+        assert detect_pedigree_format("ALAJ Registry") == "alaj"
+
+    def test_akc(self):
+        assert detect_pedigree_format("AMERICAN KENNEL CLUB") == "akc"
+        assert detect_pedigree_format("AKC Registry") == "akc"
+
+    def test_kc(self):
+        assert detect_pedigree_format("THE KENNEL CLUB") == "kc"
+
+    def test_generic_fallback(self):
+        assert detect_pedigree_format("SIRE: REX  DAM: LUNA  PEDIGREE") == "generic"
+
+    def test_unknown_returns_generic(self):
+        assert detect_pedigree_format("random text without keywords") == "generic"
+
+    def test_jkc_wins_over_kc(self):
+        # JKC-PT が含まれていれば JKC を優先（KC 単独より先にマッチ）
+        text = "JKC-PT THE KENNEL CLUB"
+        assert detect_pedigree_format(text) == "jkc"
+
+
+@pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
+class TestCleanOcrText:
+    def test_kennel_misread(self):
+        assert "KENNEL" in _clean_ocr_text("KENNE1 CLUB")
+        assert "KENNEL" in _clean_ocr_text("KENNE! CLUB")
+
+    def test_club_misread(self):
+        assert "CLUB" in _clean_ocr_text("KENNEL C1UB")
+        assert "CLUB" in _clean_ocr_text("KENNEL CIUB")
+
+    def test_japan_misread(self):
+        assert "JAPAN" in _clean_ocr_text("J@PAN KENNEL")
+
+    def test_poodle_misread(self):
+        assert "POODLE" in _clean_ocr_text("P00DLE breed")
+
+    def test_sire_misread(self):
+        assert "SIRE" in _clean_ocr_text("S1RE: REX")
+
+    def test_empty_string(self):
+        assert _clean_ocr_text("") == ""
+
+    def test_no_change_when_clean(self):
+        original = "JAPAN KENNEL CLUB POODLE"
+        assert _clean_ocr_text(original) == original
+
+
+@pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
+class TestHtmlEscape:
+    def test_escapes_lt_gt(self):
+        assert _h("<script>") == "&lt;script&gt;"
+
+    def test_escapes_quote(self):
+        assert _h('"x"') == "&quot;x&quot;"
+
+    def test_escapes_apostrophe(self):
+        assert _h("it's") == "it&#x27;s"
+
+    def test_escapes_ampersand_first(self):
+        # & を先にエスケープしないと <script> → &lt;script&gt; が &amp;lt;... になる
+        assert _h("a & b") == "a &amp; b"
+        assert _h("<&>") == "&lt;&amp;&gt;"
+
+    def test_none_returns_empty(self):
+        assert _h(None) == ""
+
+    def test_int_input(self):
+        assert _h(42) == "42"
+
+    def test_xss_payload(self):
+        payload = '<img src=x onerror="alert(1)">'
+        escaped = _h(payload)
+        assert "<" not in escaped
+        assert ">" not in escaped
+        assert '"' not in escaped
+
+
+@pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
+class TestStatusBadge:
+    def test_normal(self):
+        assert status_badge("normal", "正常") == '<span class="status normal">正常</span>'
+
+    def test_escapes_text(self):
+        result = status_badge("positive", "<script>")
+        assert "&lt;script&gt;" in result
+        assert "<script>" not in result
+
+
+@pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
+class TestSanitizeForExcel:
+    """sanitize_for_excel は sanitize_text の別名。
+    現在の実装は『制御文字・合字・置換文字の除去』のみで、
+    Excel formula injection 対策（=/+/-/@ 先頭の無害化）は未実装。
+    formula injection は [BUG-006] として MEMORY.md に記録。
+    """
+
+    def test_strips_control_chars(self):
+        # ASCII制御文字（BEL=0x07）が除去される
+        assert sanitize_for_excel("AB\x07CD") == "ABCD"
+
+    def test_strips_null_byte(self):
+        assert sanitize_for_excel("X\x00Y") == "XY"
+
+    def test_strips_replacement_char(self):
+        # U+FFFD（PDF の文字化けで頻出）が除去される
+        assert sanitize_for_excel("good�text") == "goodtext"
+
+    def test_preserves_japanese(self):
+        # 日本語は素通し
+        assert sanitize_for_excel("ジャパンケネルクラブ") == "ジャパンケネルクラブ"
+
+    def test_preserves_tab_and_newline(self):
+        # 0x09 (TAB) と 0x0a (LF) は許容範囲外の制御文字パターンに含まれない
+        assert "\t" in sanitize_for_excel("a\tb")
+        assert "\n" in sanitize_for_excel("a\nb")
+
+    def test_passes_normal_text(self):
+        assert sanitize_for_excel("Regular text") == "Regular text"
+
+    def test_empty_string(self):
+        assert sanitize_for_excel("") == ""
+
+
 class TestRoutes:
     EXPECTED = ["/", "/analyze", "/report/<session_id>",
                 "/api/dogs/<session_id>", "/api/pedigrees/<session_id>",
