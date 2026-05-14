@@ -449,8 +449,28 @@ function showTab(id) {
 // ================================================================
 // MENDELIAN CROSS HELPER
 // ================================================================
+/**
+ * Mendelian 1座位交配を確率マップで返す。
+ *
+ * ⚠️ 重要 (歴史的バグ [BUG-009] の教訓):
+ *   結果キーは [allele_a, allele_b].sort().join('') 形式で**常にアルファベット順**。
+ *   呼び出し側は sort 後の form でキーを引かないと値が取れず脱落する。
+ *
+ *   例:
+ *     cross("ayat", "atat") → { "atay": 0.5, "atat": 0.5 }
+ *     // ⚠️ result["ayat"] は undefined (常に 0)
+ *     // ✓  result["atay"] が正しい
+ *
+ *   sort 衝突の判定:
+ *     - 大文字 vs 小文字: 大文字が必ず先 (例: 'E' < 'e')
+ *     - 同じ第1文字の小文字 multi-letter: 第2文字以降で比較
+ *       (例: "ay" vs "at" → 't' < 'y' → "at" が先 → "atay")
+ *
+ * @param {string} a1a2 - 親A の遺伝子型（splitAlleles 対応の形式）
+ * @param {string} b1b2 - 親B の遺伝子型
+ * @returns {Object} { sorted_genotype_key: probability, ... }
+ */
 function cross(a1a2, b1b2) {
-  // Returns probability map: { "XX": 0.25, ... }
   const a = splitAlleles(a1a2);
   const b = splitAlleles(b1b2);
   const results = {};
