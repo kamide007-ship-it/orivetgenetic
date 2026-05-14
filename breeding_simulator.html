@@ -475,9 +475,56 @@ function splitAlleles(gt) {
     "kyky":["ky","ky"], "kbrky":["kbr","ky"], "kbrkbr":["kbr","kbr"],
     "ayay":["ay","ay"], "ayat":["ay","at"], "atat":["at","at"], "aa":["a","a"],
     "GG":["G","G"], "Gg":["G","g"], "gg":["g","g"],
+    // KITLG (Intensity) 座位 — 将来対応 T026。今はフォーム未公開だが
+    // splitAlleles マッピングだけ事前定義しておき、KITLG_SUPPORTED を true に
+    // するだけで cross() が機能するようにしておく。
+    "II":["I","I"], "Ii":["I","i"], "ii":["i","i"],
     "NN":["N","N"], "PN":["P","N"], "PP":["P","P"],
   };
   return map[gt] || [gt[0], gt[1]];
+}
+
+// ================================================================
+// KITLG (Intensity) 座位 対応スイッチ — 将来 T026 で true にして反映
+// ================================================================
+//   false: ee の coat 色は一律「クリーム〜ホワイト」と表記。
+//          アプリコット/レッドは「KITLG 検査が必要」と注記のみ。
+//   true:  cross(sire.i, dam.i) で II/Ii/ii の確率を取り、
+//          II→クリーム/ホワイト、Ii→アプリコット、ii→レッド と
+//          確率分割して results に追加。
+// 将来手順 (T026):
+//   1. KITLG_SUPPORTED を true に変更
+//   2. 両親フォームに <select id="cs-i"/cd-i"> を追加（既に splitAlleles 対応済み）
+//   3. DOGS 例犬に i:'II'/'Ii'/'ii' を追加
+//   4. 下記 computeEePhenotypes() の TODO ブロック内のコメントを外す
+const KITLG_SUPPORTED = false;
+
+// ee 表現型の coat 色ラベルと note を生成する関数。
+// KITLG_SUPPORTED 切替時にここだけ修正すれば他に波及しない。
+function computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam) {
+  const out = [];
+  // 共通の coat 色キー（KITLG 未対応時）。
+  // KITLG 対応後はここを intensity allele 確率で分岐する。
+  const coatColor = "cream";
+  const coatBase = "クリーム〜ホワイト";
+
+  // TODO(T026): KITLG_SUPPORTED が true のときの実装例
+  // if (KITLG_SUPPORTED && sire.i && dam.i) {
+  //   const iResult = cross(sire.i, dam.i);
+  //   const pII = iResult["II"]||0, pIi = iResult["Ii"]||0, pii = iResult["ii"]||0;
+  //   const intensityMix = (n) => {
+  //     // n: { color:..., prob:..., note:... } の coat 部分
+  //     // 各 intensity allele 確率で color を分割した array を返す
+  //   };
+  //   // ee + B_ D_ など各分岐ごとに intensityMix を適用
+  // }
+
+  const intensityHint = " ※アプリコット/レッド判定には KITLG 検査が必要";
+  if (pB_ > 0 && pD_ > 0) out.push({ color:coatColor, prob: creamProb * pB_ * pD_, note:`${coatBase} (ee, B_ D_) — 鼻・パッドは黒色素${intensityHint}` });
+  if (pB_ > 0 && pdd > 0) out.push({ color:coatColor, prob: creamProb * pB_ * pdd, note:`${coatBase} ※希釈時はシャンパンと呼ばれる (ee, B_ dd) — 鼻・パッドは希釈黒色素(ブルー系)` });
+  if (pbb > 0 && pD_ > 0) out.push({ color:coatColor, prob: creamProb * pbb * pD_, note:`${coatBase} (ee, bb D_) — 鼻・パッドはブラウン色素(リバー)` });
+  if (pbb > 0 && pdd > 0) out.push({ color:coatColor, prob: creamProb * pbb * pdd, note:`${coatBase} ※希釈時はシャンパンと呼ばれる (ee, bb dd) — 鼻・パッドはイザベラ(ライラック)` });
+  return out;
 }
 
 // ================================================================
@@ -594,15 +641,11 @@ function runColorSim() {
   // 1. ee dogs → Cream / White（コート色は B/D 座に影響されない）
   // 遺伝学的事実: e/e は coat に eumelanin を作れない。B 座（黒vs茶）も D 座（希釈）も
   // coat 色には影響せず、鼻・パッド・アイリムの色素にのみ影響する。
-  // コート色は基本「クリーム〜ホワイト」。アプリコット/レッド/ベージュは
-  // KITLG (Intensity) 座位の検査が必要（現在未対応・T026）。
-  // 4ブランチで coat 色は同じだが、points（鼻・パッド）色素のみ異なる。
+  // KITLG (Intensity) 未対応のため coat 表記は「クリーム〜ホワイト」固定。
+  // 詳細は computeEePhenotypes() の TODO(T026) ブロック参照。
   if (pee > 0) {
-    const creamProb = pee;
-    if (pB_ > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pB_ * pD_, note:"クリーム〜ホワイト (ee, B_ D_) — 鼻・パッドは黒色素 ※アプリコット/レッド判定には KITLG 検査が必要" });
-    if (pB_ > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pB_ * pdd, note:"クリーム〜ホワイト ※希釈時はシャンパンと呼ばれる (ee, B_ dd) — 鼻・パッドは希釈黒色素(ブルー系)" });
-    if (pbb > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pbb * pD_, note:"クリーム〜ホワイト (ee, bb D_) — 鼻・パッドはブラウン色素(リバー)" });
-    if (pbb > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pbb * pdd, note:"クリーム〜ホワイト ※希釈時はシャンパンと呼ばれる (ee, bb dd) — 鼻・パッドはイザベラ(ライラック)" });
+    const eePhenotypes = computeEePhenotypes(pee, pB_, pdd, pD_, pbb, sire, dam);
+    for (const p of eePhenotypes) results.push(p);
   }
 
   // 2. E_ + KB_ → Solid black or brown（G_ なら成犬で退色 → silver / silver beige）

@@ -45,7 +45,7 @@
 
 | ID | タイトル | 必要性 | 備考 |
 |---|---|---|---|
-| T026 | KITLG (Intensity) 座位対応 | 中 | クリーム vs アプリコット vs レッドの濃淡を決定 |
+| T026 | KITLG (Intensity) 座位対応 | 中 | クリーム vs アプリコット vs レッドの濃淡を決定。**スキャフォルド済**: `KITLG_SUPPORTED=true` 変更＋form `<select>` 追加＋例犬への `i` キー追加で動作。詳細は `computeEePhenotypes()` 内 TODO ブロック参照 |
 | T027 | G座位 select 化（GG/Gg/gg 3択） | 低 | 現在はチェックボックス=Gg ヘテロ仮定 |
 
 ## バックログ（承認後に設計フェーズ開始）
