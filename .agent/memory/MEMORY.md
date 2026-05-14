@@ -94,6 +94,25 @@
   - `aw` = Wild Sable（4番目の A 座位アレル、現行コード未対応）
 - 記事に G 座位（Greying）の記載は **無い** が、PCAで認知された色
 
+### [DESIGN-001] KITLG 拡張ポイント（T026 future-ready）
+- `breeding_simulator.html` に `KITLG_SUPPORTED` boolean を追加（現在 false）
+- `computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam)` 関数に
+  ee 表現型決定ロジックを抽出。intensity 対応時はこの関数内のみ修正
+- `splitAlleles` に `II/Ii/ii` を**事前定義済み** → cross() で即動作
+- 将来手順（4ステップ）:
+  1. `KITLG_SUPPORTED = true`
+  2. 両親フォームに `<select id="cs-i"/cd-i">` 追加
+  3. 例犬 DOGS に `i:'II'` 等を追加（または Object.assign デフォルト `'II'`）
+  4. computeEePhenotypes 内 TODO ブロックを有効化
+
+### [REF-002] ee 表現型は「クリーム〜ホワイト」が基本
+- `e/e` の coat 色は **本質的にクリーム〜ホワイト**
+- アプリコット・レッド・ベージュ等は **KITLG (Intensity) 座位**が決定する
+- KITLG は Orivet 12項目には**含まれていない** → 検査結果からは不明
+- よってシミュレーターは KITLG 未対応の前提で「クリーム〜ホワイト」表記し、
+  アプリコット/レッド判定には KITLG 検査が必要と注記
+- 将来 T026 で KITLG 対応時に変更予定
+
 ### [BUG-008] cafe_au_lait の語彙ミス（修正済 PR #TBD）
 - **症状**: `bb dd KB_ E_` をシミュレーターで「カフェオレ」表示していた
 - **正しい用語**: 「ライラック/イザベラ」（dilute brown）
