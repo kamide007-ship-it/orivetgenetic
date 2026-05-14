@@ -82,6 +82,26 @@
 
 ## 獣医遺伝学知識
 
+### [REF-001] プードル毛色用語の参考ソース
+- <https://www.wisconsindesignerdoodles.com/coat-genetics-in-poodles>
+- 主な定義:
+  - `bb dd KB_ E_` = **Lilac/Isabella**（dilute brown）
+  - `bb D_ KB_ E_ G_` = Café au lait / Silver Beige（born brown, fades）
+  - `ee dd` = **Champagne**（dilute yellow）
+  - `ay_ ky/ky` = **Fawn/Sable**（×レッド）
+  - `at/at` = Black-and-Tan / Tricolor
+  - `a/a` = Recessive Black（aa = solid black の劣性形）
+  - `aw` = Wild Sable（4番目の A 座位アレル、現行コード未対応）
+- 記事に G 座位（Greying）の記載は **無い** が、PCAで認知された色
+
+### [BUG-008] cafe_au_lait の語彙ミス（修正済 PR #TBD）
+- **症状**: `bb dd KB_ E_` をシミュレーターで「カフェオレ」表示していた
+- **正しい用語**: 「ライラック/イザベラ」（dilute brown）
+- 「カフェオレ」は本来 `bb` + Greying 遺伝子（成犬で退色する場合の名称）
+- **修正**: 新色キー `lilac` を追加して bb dd gg をライラック表示に。
+  cafe_au_lait はラベルを「カフェオレ（bb + Greying）」に明確化して残置
+
+
 ### [BUG-007] 繁殖シミュレーターの ee + B/D 分岐が誤り（修正済 PR #TBD）
 - **症状**: `bb ee` がコート色「アプリコット」、`bb ee dd` が「カフェオレ」と表示されていた
 - **遺伝学的事実**:

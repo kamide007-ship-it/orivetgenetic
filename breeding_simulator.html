@@ -492,7 +492,9 @@ const COLOR_MAP = {
   "red": { hex:"#CD5C5C", name:"レッド" },
   "silver": { hex:"#C0C0C0", name:"シルバー（成犬で退色）" },
   "silver_beige": { hex:"#A89F92", name:"シルバービーグ（成犬で退色）" },
-  "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ" },
+  "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ（bb + Greying）" },
+  "lilac": { hex:"#C8A2C8", name:"ライラック/イザベラ" },
+  "fawn": { hex:"#E5AA70", name:"フォーン" },
   "phantom_black": { hex:"#2d2d2d", name:"ファントム(ブラック)" },
   "phantom_brown": { hex:"#A0522D", name:"ファントム(ブラウン)" },
   "brindle": { hex:"#8B7355", name:"ブリンドル" },
@@ -597,9 +599,9 @@ function runColorSim() {
   if (pee > 0) {
     const creamProb = pee;
     if (pB_ > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pB_ * pD_, note:"クリーム/アプリコット/レッド (ee, B_ D_: 黒色素の鼻・パッド)" });
-    if (pB_ > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pB_ * pdd, note:"クリーム/アプリコット/レッド (ee, B_ dd: 希釈黒色素=ブルー系の鼻・パッド)" });
+    if (pB_ > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pB_ * pdd, note:"クリーム/アプリコット/レッド ※希釈時はシャンパンと呼ばれる (ee, B_ dd: 希釈黒色素=ブルー系の鼻・パッド)" });
     if (pbb > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pbb * pD_, note:"クリーム/アプリコット/レッド (ee, bb D_: ブラウン色素=リバー鼻・パッド)" });
-    if (pbb > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pbb * pdd, note:"クリーム/アプリコット/レッド (ee, bb dd: イザベラ=ライラック鼻・パッド)" });
+    if (pbb > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pbb * pdd, note:"クリーム/アプリコット/レッド ※希釈時はシャンパンと呼ばれる (ee, bb dd: イザベラ=ライラック鼻・パッド)" });
   }
 
   // 2. E_ + KB_ → Solid black or brown（G_ なら成犬で退色 → silver / silver beige）
@@ -624,7 +626,9 @@ function runColorSim() {
     }
     if (pbb > 0 && pdd > 0) {
       const p = solidProb * pbb * pdd;
-      if (pgg > 0) results.push({ color:"cafe_au_lait", prob: p * pgg, note:"カフェオレ (E_, KB_, bb, dd, gg)" });
+      // 参考: bb + dd は遺伝学上「ライラック/イザベラ」(diluted brown)。
+      // カフェオレ表記は本来 bb + Greying（成犬で退色）の方
+      if (pgg > 0) results.push({ color:"lilac", prob: p * pgg, note:"ライラック/イザベラ (E_, KB_, bb, dd, gg)" });
       if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"シルバービーグ（淡） (E_, KB_, bb, dd, G_: 成犬で退色)" });
     }
   }
@@ -634,7 +638,7 @@ function runColorSim() {
     const agoutiProb = pE_ * pkyky;
     if ((patat + paa) > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"phantom_black", prob: agoutiProb * (patat+paa) * pB_ * pD_, note:"ファントム/タンポイント(ブラック) (E_, ky/ky, at_, B_, D_)" });
     if ((patat + paa) > 0 && pbb > 0 && pD_ > 0) results.push({ color:"phantom_brown", prob: agoutiProb * (patat+paa) * pbb * pD_, note:"ファントム(ブラウン) (E_, ky/ky, at_, bb, D_)" });
-    if ((payay + payat) > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"red", prob: agoutiProb * (payay+payat) * pB_ * pD_, note:"レッド/セーブル (E_, ky/ky, ay_, B_, D_)" });
+    if ((payay + payat) > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"fawn", prob: agoutiProb * (payay+payat) * pB_ * pD_, note:"フォーン/セーブル (E_, ky/ky, ay_, B_, D_)" });
   }
 
   // 4. Brindle (kbr)
