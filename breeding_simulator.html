@@ -128,6 +128,8 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
             <option value="exA">トイプードル ♂ ブラック (E/e, KB/ky, at/at, Bb)</option>
             <option value="exC">ラブラドール ♂ チョコレート (E/E, KB/KB, ay/ay, bb)</option>
             <option value="exE">柴犬 ♂ 赤 (E/E, ky/ky, ay/ay, BB)</option>
+            <option value="exG">スタンダードプードル ♂ シルバー (G/g 退色)</option>
+            <option value="exH">ジャーマンシェパード ♂ ワイルドセーブル (aw)</option>
           </select>
         </div>
         <div class="form-group">
@@ -137,6 +139,7 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
             <option value="exB">トイプードル ♀ クリーム (e/e, KB/KB, at/at, Bb)</option>
             <option value="exD">ラブラドール ♀ イエロー (e/e, KB/KB, ay/ay, Bb)</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール (E/E, ky/ky, at/at, M/m)</option>
+            <option value="exI">ラブラドール ♀ リセッシブブラック (a/a)</option>
           </select>
         </div>
       </div>
@@ -217,6 +220,8 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
             <option value="exA">トイプードル ♂ ブラック</option>
             <option value="exC">ラブラドール ♂ チョコレート</option>
             <option value="exE">柴犬 ♂ 赤</option>
+            <option value="exG">スタンダードプードル ♂ シルバー</option>
+            <option value="exH">ジャーマンシェパード ♂ ワイルドセーブル</option>
           </select>
         </div>
         <div class="form-group">
@@ -226,6 +231,7 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
             <option value="exB">トイプードル ♀ クリーム</option>
             <option value="exD">ラブラドール ♀ イエロー</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール</option>
+            <option value="exI">ラブラドール ♀ リセッシブブラック</option>
           </select>
         </div>
       </div>
@@ -412,6 +418,34 @@ const DOGS = {
       "GM2": "NN",
       "prcd-PRA": "NN"
     }
+  },
+  // 新色機能のデモ用例犬 (PR #40, #41 で追加した aw / a/a / G 系を試せる)
+  exG: {
+    name: "（例）スタンダードプードル ♂ シルバー (G/g 退色)", sex: "male",
+    color: { e:"EE", k:"KBKB", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS", g:"Gg" },
+    health: {
+      "CDDY+IVDD": "NN", "Osteochondrodysplasia": "NN", "CDPA": "NN",
+      "Macrothrombocytopenia": "NN", "Methemoglobinemia": "NN",
+      "vWD1": "NN", "DM": "NN", "GM2": "NN", "prcd-PRA": "NN"
+    }
+  },
+  exH: {
+    name: "（例）ジャーマンシェパード ♂ ワイルドセーブル (aw)", sex: "male",
+    color: { e:"EE", k:"kyky", a:"awaw", b:"BB", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "NN", "Osteochondrodysplasia": "NN", "CDPA": "NN",
+      "Macrothrombocytopenia": "NN", "Methemoglobinemia": "NN",
+      "vWD1": "NN", "DM": "NN", "GM2": "NN", "prcd-PRA": "NN"
+    }
+  },
+  exI: {
+    name: "（例）ラブラドール ♀ リセッシブブラック (a/a)", sex: "female",
+    color: { e:"EE", k:"kyky", a:"aa", b:"BB", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "NN", "Osteochondrodysplasia": "NN", "CDPA": "NN",
+      "Macrothrombocytopenia": "NN", "Methemoglobinemia": "NN",
+      "vWD1": "NN", "DM": "NN", "GM2": "NN", "prcd-PRA": "NN"
+    }
   }
 };
 
@@ -449,8 +483,28 @@ function showTab(id) {
 // ================================================================
 // MENDELIAN CROSS HELPER
 // ================================================================
+/**
+ * Mendelian 1座位交配を確率マップで返す。
+ *
+ * ⚠️ 重要 (歴史的バグ [BUG-009] の教訓):
+ *   結果キーは [allele_a, allele_b].sort().join('') 形式で**常にアルファベット順**。
+ *   呼び出し側は sort 後の form でキーを引かないと値が取れず脱落する。
+ *
+ *   例:
+ *     cross("ayat", "atat") → { "atay": 0.5, "atat": 0.5 }
+ *     // ⚠️ result["ayat"] は undefined (常に 0)
+ *     // ✓  result["atay"] が正しい
+ *
+ *   sort 衝突の判定:
+ *     - 大文字 vs 小文字: 大文字が必ず先 (例: 'E' < 'e')
+ *     - 同じ第1文字の小文字 multi-letter: 第2文字以降で比較
+ *       (例: "ay" vs "at" → 't' < 'y' → "at" が先 → "atay")
+ *
+ * @param {string} a1a2 - 親A の遺伝子型（splitAlleles 対応の形式）
+ * @param {string} b1b2 - 親B の遺伝子型
+ * @returns {Object} { sorted_genotype_key: probability, ... }
+ */
 function cross(a1a2, b1b2) {
-  // Returns probability map: { "XX": 0.25, ... }
   const a = splitAlleles(a1a2);
   const b = splitAlleles(b1b2);
   const results = {};
