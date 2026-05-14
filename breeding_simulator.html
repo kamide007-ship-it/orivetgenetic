@@ -149,7 +149,7 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
           <div class="form-group"><label>K Locus</label><select id="cs-k"><option value="KBKB">KB/KB</option><option value="KBky" selected>KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>A Locus</label><select id="cs-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="atat" selected>at/at</option><option value="aa">a/a</option></select></div>
+          <div class="form-group"><label>A Locus</label><select id="cs-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
           <div class="form-group"><label>B Locus</label><select id="cs-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
         </div>
         <div class="form-row">
@@ -175,7 +175,7 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
           <div class="form-group"><label>K Locus</label><select id="cd-k"><option value="KBKB" selected>KB/KB</option><option value="KBky">KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>A Locus</label><select id="cd-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="atat" selected>at/at</option><option value="aa">a/a</option></select></div>
+          <div class="form-group"><label>A Locus</label><select id="cd-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
           <div class="form-group"><label>B Locus</label><select id="cd-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
         </div>
         <div class="form-row">
@@ -474,6 +474,16 @@ function splitAlleles(gt) {
     "KBKB":["KB","KB"], "KBky":["KB","ky"], "KBkbr":["KB","kbr"],
     "kyky":["ky","ky"], "kbrky":["kbr","ky"], "kbrkbr":["kbr","kbr"],
     "ayay":["ay","ay"], "ayat":["ay","at"], "atat":["at","at"], "aa":["a","a"],
+    // A locus: aw (Wild Sable) アレルと sorted-form alias を追加。
+    // cross() は alleles を alphabetic sort してキー化するため、ヘテロは
+    // sorted form (例: "atay" = at+ay) で結果が出る。lookup 時は sorted form を使う。
+    "atay":["at","ay"],          // alias for "ayat" (cross()出力に対応)
+    "awaw":["aw","aw"],          // ホモ aw
+    "ataw":["at","aw"],          // aw/at (sorted: at < aw)
+    "away":["aw","ay"],          // ay/aw (sorted: aw < ay)
+    "aaw":["a","aw"],            // a/aw (sorted: a < aw)
+    "aay":["a","ay"],            // a/ay (sorted: a < ay)
+    "aat":["a","at"],            // a/at (sorted: a < at)
     "GG":["G","G"], "Gg":["G","g"], "gg":["g","g"],
     // KITLG (Intensity) 座位 — 将来対応 T026。今はフォーム未公開だが
     // splitAlleles マッピングだけ事前定義しておき、KITLG_SUPPORTED を true に
@@ -541,7 +551,9 @@ const COLOR_MAP = {
   "silver_beige": { hex:"#A89F92", name:"シルバービーグ（成犬で退色）" },
   "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ（bb + Greying）" },
   "lilac": { hex:"#C8A2C8", name:"ライラック/イザベラ" },
-  "fawn": { hex:"#E5AA70", name:"フォーン" },
+  "fawn": { hex:"#E5AA70", name:"フォーン/セーブル (ay_)" },
+  "wild_sable": { hex:"#9B7E48", name:"ワイルドセーブル (aw_)" },
+  "recessive_black": { hex:"#0a0a0a", name:"リセッシブブラック (a/a)" },
   "phantom_black": { hex:"#2d2d2d", name:"ファントム(ブラック)" },
   "phantom_brown": { hex:"#A0522D", name:"ファントム(ブラウン)" },
   "brindle": { hex:"#8B7355", name:"ブリンドル" },
@@ -624,10 +636,26 @@ function runColorSim() {
   const pspsp = sResult["spsp"] || 0;
 
   // A locus for agouti expression
+  // A locus 確率抽出
+  // [BUG-009] cross() は alleles をアルファベット sort してキー化するため、
+  // ヘテロ ay/at は "ayat" ではなく "atay" がキー。旧コードは "ayat" で
+  // lookup していたためヘテロ確率が完全脱落 → 結果合計が 100% にならない問題があった。
+  // sorted form ("atay" 等) を使用するよう全 lookup を修正済み。
   const payay = aResult["ayay"] || 0;
-  const payat = aResult["ayat"] || 0;
+  const payat = aResult["atay"] || 0;       // FIX: "ayat" → "atay"（sorted form）
+  const payaw = aResult["away"] || 0;       // ay/aw（aw < ay）
+  const paya = aResult["aay"] || 0;         // a/ay（a < ay）
+  const pawaw = aResult["awaw"] || 0;
+  const pawat = aResult["ataw"] || 0;       // aw/at（at < aw）
+  const pawa = aResult["aaw"] || 0;         // a/aw（a < aw）
   const patat = aResult["atat"] || 0;
+  const pata = aResult["aat"] || 0;         // a/at（a < at）
   const paa = aResult["aa"] || 0;
+  // 表現型カテゴリ（ay > aw > at > a の優性関係）
+  const pay_ = payay + payat + payaw + paya;  // フォーン/セーブル
+  const paw_ = pawaw + pawat + pawa;          // ワイルドセーブル（ayが無い）
+  const pat_ = patat + pata;                  // ブラックタン/トライカラー（ay/awが無い）
+  const pa_a = paa;                           // リセッシブブラック
 
   // Solid (KB_) probability
   const pKB_ = pKBKB + pKBky + pKBkbr;
@@ -677,12 +705,23 @@ function runColorSim() {
     }
   }
 
-  // 3. E_ + ky/ky → Agouti shows (phantom/tan point)
+  // 3. E_ + ky/ky → A 座位の表現型が表出
+  // 記事準拠: ay_=フォーン/セーブル, aw_=ワイルドセーブル,
+  //          at_=ブラックタン/トライカラー, a/a=リセッシブブラック
   if (pE_ > 0 && pkyky > 0) {
     const agoutiProb = pE_ * pkyky;
-    if ((patat + paa) > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"phantom_black", prob: agoutiProb * (patat+paa) * pB_ * pD_, note:"ファントム/タンポイント(ブラック) (E_, ky/ky, at_, B_, D_)" });
-    if ((patat + paa) > 0 && pbb > 0 && pD_ > 0) results.push({ color:"phantom_brown", prob: agoutiProb * (patat+paa) * pbb * pD_, note:"ファントム(ブラウン) (E_, ky/ky, at_, bb, D_)" });
-    if ((payay + payat) > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"fawn", prob: agoutiProb * (payay+payat) * pB_ * pD_, note:"フォーン/セーブル (E_, ky/ky, ay_, B_, D_)" });
+    // フォーン/セーブル (ay_)
+    if (pay_ > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"fawn", prob: agoutiProb * pay_ * pB_ * pD_, note:"フォーン/セーブル (E_, ky/ky, ay_, B_, D_)" });
+    if (pay_ > 0 && pbb > 0 && pD_ > 0) results.push({ color:"fawn", prob: agoutiProb * pay_ * pbb * pD_, note:"フォーン/セーブル (ブラウン色素) (E_, ky/ky, ay_, bb, D_)" });
+    // ワイルドセーブル (aw_)
+    if (paw_ > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"wild_sable", prob: agoutiProb * paw_ * pB_ * pD_, note:"ワイルドセーブル (E_, ky/ky, aw_, B_, D_)" });
+    if (paw_ > 0 && pbb > 0 && pD_ > 0) results.push({ color:"wild_sable", prob: agoutiProb * paw_ * pbb * pD_, note:"ワイルドセーブル (ブラウン色素) (E_, ky/ky, aw_, bb, D_)" });
+    // ブラックタン/トライカラー (at_) — at/at と at/a を含む（a/a は除外）
+    if (pat_ > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"phantom_black", prob: agoutiProb * pat_ * pB_ * pD_, note:"ブラックタン/トライカラー (E_, ky/ky, at_, B_, D_)" });
+    if (pat_ > 0 && pbb > 0 && pD_ > 0) results.push({ color:"phantom_brown", prob: agoutiProb * pat_ * pbb * pD_, note:"ブラックタン/トライカラー(ブラウン) (E_, ky/ky, at_, bb, D_)" });
+    // リセッシブブラック (a/a) — at_ と分離
+    if (pa_a > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"recessive_black", prob: agoutiProb * pa_a * pB_ * pD_, note:"リセッシブブラック (E_, ky/ky, a/a, B_, D_)" });
+    if (pa_a > 0 && pbb > 0 && pD_ > 0) results.push({ color:"brown", prob: agoutiProb * pa_a * pbb * pD_, note:"リセッシブブラウン (E_, ky/ky, a/a, bb, D_)" });
   }
 
   // 4. Brindle (kbr)

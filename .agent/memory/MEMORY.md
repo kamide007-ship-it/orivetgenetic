@@ -94,6 +94,16 @@
   - `aw` = Wild Sable（4番目の A 座位アレル、現行コード未対応）
 - 記事に G 座位（Greying）の記載は **無い** が、PCAで認知された色
 
+### [BUG-009] A 座位の cross() 結果キーが lookup と不一致（修正済 PR #TBD）
+- **症状**: `cross()` は alleles を `[a,b].sort().join('')` でキー化するため、
+  ay/at ヘテロは "ayat" ではなく **"atay"** がキー（'at' < 'ay'）
+- 旧コード: `aResult["ayat"]` → 常に 0 → ヘテロ確率が完全脱落
+- ユーザー視点: 結果テーブルの確率合計が 100% にならない場合があった
+- **修正**: A 座位 lookup を全て sorted form に統一
+  - `aResult["ayat"]` → `aResult["atay"]`
+  - aw/a 系も sorted form 使用 (away/aaw/aay/ataw/aat)
+- **教訓**: cross() の結果キーは常に `[a,b].sort().join('')` 形式と認識すること
+
 ### [DESIGN-001] KITLG 拡張ポイント（T026 future-ready）
 - `breeding_simulator.html` に `KITLG_SUPPORTED` boolean を追加（現在 false）
 - `computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam)` 関数に
