@@ -158,6 +158,13 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
         </div>
         <div class="form-row">
           <div class="form-group"><label>S (Pied)</label><select id="cs-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
+          <div class="form-group">
+            <label>G (Greying / 退色)</label>
+            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
+              <input type="checkbox" id="cs-g" onchange="runColorSim()">
+              Greying遺伝子を持つ（G/g 想定）
+            </label>
+          </div>
         </div>
       </div>
 
@@ -177,6 +184,13 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
         </div>
         <div class="form-row">
           <div class="form-group"><label>S (Pied)</label><select id="cd-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
+          <div class="form-group">
+            <label>G (Greying / 退色)</label>
+            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
+              <input type="checkbox" id="cd-g" onchange="runColorSim()">
+              Greying遺伝子を持つ（G/g 想定）
+            </label>
+          </div>
         </div>
       </div>
 
@@ -460,6 +474,7 @@ function splitAlleles(gt) {
     "KBKB":["KB","KB"], "KBky":["KB","ky"], "KBkbr":["KB","kbr"],
     "kyky":["ky","ky"], "kbrky":["kbr","ky"], "kbrkbr":["kbr","kbr"],
     "ayay":["ay","ay"], "ayat":["ay","at"], "atat":["at","at"], "aa":["a","a"],
+    "GG":["G","G"], "Gg":["G","g"], "gg":["g","g"],
     "NN":["N","N"], "PN":["P","N"], "PP":["P","P"],
   };
   return map[gt] || [gt[0], gt[1]];
@@ -475,7 +490,8 @@ const COLOR_MAP = {
   "cream": { hex:"#FFF8DC", name:"クリーム/ホワイト" },
   "apricot": { hex:"#FBCEB1", name:"アプリコット" },
   "red": { hex:"#CD5C5C", name:"レッド" },
-  "silver": { hex:"#C0C0C0", name:"シルバー" },
+  "silver": { hex:"#C0C0C0", name:"シルバー（成犬で退色）" },
+  "silver_beige": { hex:"#A89F92", name:"シルバービーグ（成犬で退色）" },
   "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ" },
   "phantom_black": { hex:"#2d2d2d", name:"ファントム(ブラック)" },
   "phantom_brown": { hex:"#A0522D", name:"ファントム(ブラウン)" },
@@ -491,16 +507,21 @@ function runColorSim() {
   document.getElementById('custom-sire').style.display = sireKey === 'custom' ? 'block' : 'none';
   document.getElementById('custom-dam').style.display = damKey === 'custom' ? 'block' : 'none';
 
+  // G座位 (Greying) チェックボックス: チェック = G/g（ヘテロ）と仮定
+  // ホモG/G にしたい場合は将来 select 化を検討
+  const sireG = (document.getElementById('cs-g') || {}).checked ? 'Gg' : 'gg';
+  const damG  = (document.getElementById('cd-g') || {}).checked ? 'Gg' : 'gg';
+
   let sire, dam;
   if (sireKey === 'custom') {
-    sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s') };
+    sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s'), g: sireG };
   } else {
-    sire = DOGS[sireKey].color;
+    sire = Object.assign({ g: 'gg' }, DOGS[sireKey].color);  // 既存例犬は G なし扱い
   }
   if (damKey === 'custom') {
-    dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s') };
+    dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s'), g: damG };
   } else {
-    dam = DOGS[damKey].color;
+    dam = Object.assign({ g: 'gg' }, DOGS[damKey].color);
   }
 
   const eResult = cross(sire.e, dam.e);
@@ -510,6 +531,10 @@ function runColorSim() {
   const dResult = cross(sire.d, dam.d);
   const mResult = cross(sire.m, dam.m);
   const sResult = cross(sire.s, dam.s);
+  const gResult = cross(sire.g, dam.g);
+  // Greying (G_) は子犬期は色付き → 成犬で退色。G_ ホモでも G/g でも表現型は同じ
+  const pG_ = (gResult["GG"] || 0) + (gResult["Gg"] || 0);
+  const pgg = gResult["gg"] || 0;
 
   // Determine phenotype probabilities
   const phenotypes = {};
@@ -564,23 +589,44 @@ function runColorSim() {
   // Calculate color outcomes
   const results = [];
 
-  // 1. ee dogs → Cream / Apricot / White
+  // 1. ee dogs → Cream / Apricot / Red（コート色は B/D 座に影響されない）
+  // 遺伝学的事実: e/e は coat に eumelanin を作れない。B 座（黒vs茶）も D 座（希釈）も
+  // coat 色には影響せず、鼻・パッド・アイリムの色素にのみ影響する。
+  // よって全 ee 組み合わせで coat 色は同じ（クリーム/アプリコット/レッド）に統一し、
+  // 注記で points の色素タイプを示す。Intensity 座は未対応のため範囲表示。
   if (pee > 0) {
     const creamProb = pee;
-    // Sub-variations by B and D
-    if (pB_ > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pB_ * pD_, note:"クリーム/ホワイト/アプリコット (ee, B_, D_)" });
-    if (pB_ > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pB_ * pdd, note:"クリーム(希釈) (ee, B_, dd)" });
-    if (pbb > 0 && pD_ > 0) results.push({ color:"apricot", prob: creamProb * pbb * pD_, note:"アプリコット/クリーム (ee, bb, D_)" });
-    if (pbb > 0 && pdd > 0) results.push({ color:"cafe_au_lait", prob: creamProb * pbb * pdd, note:"薄クリーム (ee, bb, dd)" });
+    if (pB_ > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pB_ * pD_, note:"クリーム/アプリコット/レッド (ee, B_ D_: 黒色素の鼻・パッド)" });
+    if (pB_ > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pB_ * pdd, note:"クリーム/アプリコット/レッド (ee, B_ dd: 希釈黒色素=ブルー系の鼻・パッド)" });
+    if (pbb > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pbb * pD_, note:"クリーム/アプリコット/レッド (ee, bb D_: ブラウン色素=リバー鼻・パッド)" });
+    if (pbb > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pbb * pdd, note:"クリーム/アプリコット/レッド (ee, bb dd: イザベラ=ライラック鼻・パッド)" });
   }
 
-  // 2. E_ + KB_ → Solid black or brown
+  // 2. E_ + KB_ → Solid black or brown（G_ なら成犬で退色 → silver / silver beige）
+  // 子犬出生色は G の有無に関わらず同じ。G_ は成犬期に eumelanin を退色させる。
+  // pgg / pG_ で確率を分割し、ベース色とシルバー系を別エントリで提示する。
   if (pE_ > 0 && pKB_ > 0) {
     const solidProb = pE_ * pKB_;
-    if (pB_ > 0 && pD_ > 0) results.push({ color:"black", prob: solidProb * pB_ * pD_, note:"ブラック (E_, KB_, B_, D_)" });
-    if (pB_ > 0 && pdd > 0) results.push({ color:"blue", prob: solidProb * pB_ * pdd, note:"ブルー (E_, KB_, B_, dd)" });
-    if (pbb > 0 && pD_ > 0) results.push({ color:"brown", prob: solidProb * pbb * pD_, note:"ブラウン/チョコ (E_, KB_, bb, D_)" });
-    if (pbb > 0 && pdd > 0) results.push({ color:"cafe_au_lait", prob: solidProb * pbb * pdd, note:"カフェオレ (E_, KB_, bb, dd)" });
+    if (pB_ > 0 && pD_ > 0) {
+      const p = solidProb * pB_ * pD_;
+      if (pgg > 0) results.push({ color:"black", prob: p * pgg, note:"ブラック (E_, KB_, B_, D_, gg)" });
+      if (pG_ > 0) results.push({ color:"silver", prob: p * pG_, note:"シルバー (E_, KB_, B_, D_, G_: 成犬で退色)" });
+    }
+    if (pB_ > 0 && pdd > 0) {
+      const p = solidProb * pB_ * pdd;
+      if (pgg > 0) results.push({ color:"blue", prob: p * pgg, note:"ブルー (E_, KB_, B_, dd, gg)" });
+      if (pG_ > 0) results.push({ color:"silver", prob: p * pG_, note:"シルバー（淡） (E_, KB_, B_, dd, G_: 成犬で退色)" });
+    }
+    if (pbb > 0 && pD_ > 0) {
+      const p = solidProb * pbb * pD_;
+      if (pgg > 0) results.push({ color:"brown", prob: p * pgg, note:"ブラウン/チョコ (E_, KB_, bb, D_, gg)" });
+      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"シルバービーグ (E_, KB_, bb, D_, G_: 成犬で退色)" });
+    }
+    if (pbb > 0 && pdd > 0) {
+      const p = solidProb * pbb * pdd;
+      if (pgg > 0) results.push({ color:"cafe_au_lait", prob: p * pgg, note:"カフェオレ (E_, KB_, bb, dd, gg)" });
+      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"シルバービーグ（淡） (E_, KB_, bb, dd, G_: 成犬で退色)" });
+    }
   }
 
   // 3. E_ + ky/ky → Agouti shows (phantom/tan point)
