@@ -487,9 +487,9 @@ const COLOR_MAP = {
   "black": { hex:"#1a1a1a", name:"ブラック" },
   "brown": { hex:"#8B4513", name:"ブラウン/チョコレート" },
   "blue": { hex:"#4a6fa5", name:"ブルー" },
-  "cream": { hex:"#FFF8DC", name:"クリーム/ホワイト" },
-  "apricot": { hex:"#FBCEB1", name:"アプリコット" },
-  "red": { hex:"#CD5C5C", name:"レッド" },
+  "cream": { hex:"#FFF8DC", name:"クリーム〜ホワイト (ee 基本表現型)" },
+  "apricot": { hex:"#FBCEB1", name:"アプリコット (KITLG 中 intensity)" },
+  "red": { hex:"#CD5C5C", name:"レッド (KITLG 高 intensity)" },
   "silver": { hex:"#C0C0C0", name:"シルバー（成犬で退色）" },
   "silver_beige": { hex:"#A89F92", name:"シルバービーグ（成犬で退色）" },
   "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ（bb + Greying）" },
@@ -591,17 +591,18 @@ function runColorSim() {
   // Calculate color outcomes
   const results = [];
 
-  // 1. ee dogs → Cream / Apricot / Red（コート色は B/D 座に影響されない）
+  // 1. ee dogs → Cream / White（コート色は B/D 座に影響されない）
   // 遺伝学的事実: e/e は coat に eumelanin を作れない。B 座（黒vs茶）も D 座（希釈）も
   // coat 色には影響せず、鼻・パッド・アイリムの色素にのみ影響する。
-  // よって全 ee 組み合わせで coat 色は同じ（クリーム/アプリコット/レッド）に統一し、
-  // 注記で points の色素タイプを示す。Intensity 座は未対応のため範囲表示。
+  // コート色は基本「クリーム〜ホワイト」。アプリコット/レッド/ベージュは
+  // KITLG (Intensity) 座位の検査が必要（現在未対応・T026）。
+  // 4ブランチで coat 色は同じだが、points（鼻・パッド）色素のみ異なる。
   if (pee > 0) {
     const creamProb = pee;
-    if (pB_ > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pB_ * pD_, note:"クリーム/アプリコット/レッド (ee, B_ D_: 黒色素の鼻・パッド)" });
-    if (pB_ > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pB_ * pdd, note:"クリーム/アプリコット/レッド ※希釈時はシャンパンと呼ばれる (ee, B_ dd: 希釈黒色素=ブルー系の鼻・パッド)" });
-    if (pbb > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pbb * pD_, note:"クリーム/アプリコット/レッド (ee, bb D_: ブラウン色素=リバー鼻・パッド)" });
-    if (pbb > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pbb * pdd, note:"クリーム/アプリコット/レッド ※希釈時はシャンパンと呼ばれる (ee, bb dd: イザベラ=ライラック鼻・パッド)" });
+    if (pB_ > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pB_ * pD_, note:"クリーム〜ホワイト (ee, B_ D_) — 鼻・パッドは黒色素 ※アプリコット/レッド判定には KITLG 検査が必要" });
+    if (pB_ > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pB_ * pdd, note:"クリーム〜ホワイト ※希釈時はシャンパンと呼ばれる (ee, B_ dd) — 鼻・パッドは希釈黒色素(ブルー系)" });
+    if (pbb > 0 && pD_ > 0) results.push({ color:"cream", prob: creamProb * pbb * pD_, note:"クリーム〜ホワイト (ee, bb D_) — 鼻・パッドはブラウン色素(リバー)" });
+    if (pbb > 0 && pdd > 0) results.push({ color:"cream", prob: creamProb * pbb * pdd, note:"クリーム〜ホワイト ※希釈時はシャンパンと呼ばれる (ee, bb dd) — 鼻・パッドはイザベラ(ライラック)" });
   }
 
   // 2. E_ + KB_ → Solid black or brown（G_ なら成犬で退色 → silver / silver beige）
