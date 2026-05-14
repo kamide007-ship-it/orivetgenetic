@@ -128,6 +128,8 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
             <option value="exA">トイプードル ♂ ブラック (E/e, KB/ky, at/at, Bb)</option>
             <option value="exC">ラブラドール ♂ チョコレート (E/E, KB/KB, ay/ay, bb)</option>
             <option value="exE">柴犬 ♂ 赤 (E/E, ky/ky, ay/ay, BB)</option>
+            <option value="exG">スタンダードプードル ♂ シルバー (G/g 退色)</option>
+            <option value="exH">ジャーマンシェパード ♂ ワイルドセーブル (aw)</option>
           </select>
         </div>
         <div class="form-group">
@@ -137,6 +139,7 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
             <option value="exB">トイプードル ♀ クリーム (e/e, KB/KB, at/at, Bb)</option>
             <option value="exD">ラブラドール ♀ イエロー (e/e, KB/KB, ay/ay, Bb)</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール (E/E, ky/ky, at/at, M/m)</option>
+            <option value="exI">ラブラドール ♀ リセッシブブラック (a/a)</option>
           </select>
         </div>
       </div>
@@ -217,6 +220,8 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
             <option value="exA">トイプードル ♂ ブラック</option>
             <option value="exC">ラブラドール ♂ チョコレート</option>
             <option value="exE">柴犬 ♂ 赤</option>
+            <option value="exG">スタンダードプードル ♂ シルバー</option>
+            <option value="exH">ジャーマンシェパード ♂ ワイルドセーブル</option>
           </select>
         </div>
         <div class="form-group">
@@ -226,6 +231,7 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
             <option value="exB">トイプードル ♀ クリーム</option>
             <option value="exD">ラブラドール ♀ イエロー</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール</option>
+            <option value="exI">ラブラドール ♀ リセッシブブラック</option>
           </select>
         </div>
       </div>
@@ -411,6 +417,34 @@ const DOGS = {
       "DM": "NN",
       "GM2": "NN",
       "prcd-PRA": "NN"
+    }
+  },
+  // 新色機能のデモ用例犬 (PR #40, #41 で追加した aw / a/a / G 系を試せる)
+  exG: {
+    name: "（例）スタンダードプードル ♂ シルバー (G/g 退色)", sex: "male",
+    color: { e:"EE", k:"KBKB", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS", g:"Gg" },
+    health: {
+      "CDDY+IVDD": "NN", "Osteochondrodysplasia": "NN", "CDPA": "NN",
+      "Macrothrombocytopenia": "NN", "Methemoglobinemia": "NN",
+      "vWD1": "NN", "DM": "NN", "GM2": "NN", "prcd-PRA": "NN"
+    }
+  },
+  exH: {
+    name: "（例）ジャーマンシェパード ♂ ワイルドセーブル (aw)", sex: "male",
+    color: { e:"EE", k:"kyky", a:"awaw", b:"BB", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "NN", "Osteochondrodysplasia": "NN", "CDPA": "NN",
+      "Macrothrombocytopenia": "NN", "Methemoglobinemia": "NN",
+      "vWD1": "NN", "DM": "NN", "GM2": "NN", "prcd-PRA": "NN"
+    }
+  },
+  exI: {
+    name: "（例）ラブラドール ♀ リセッシブブラック (a/a)", sex: "female",
+    color: { e:"EE", k:"kyky", a:"aa", b:"BB", d:"DD", m:"mm", s:"SS" },
+    health: {
+      "CDDY+IVDD": "NN", "Osteochondrodysplasia": "NN", "CDPA": "NN",
+      "Macrothrombocytopenia": "NN", "Methemoglobinemia": "NN",
+      "vWD1": "NN", "DM": "NN", "GM2": "NN", "prcd-PRA": "NN"
     }
   }
 };
