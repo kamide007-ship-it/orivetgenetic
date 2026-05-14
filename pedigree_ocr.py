@@ -23,10 +23,8 @@
 import sys
 import os
 import re
-import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
-from datetime import datetime
 
 # ============================================================
 # データ構造
@@ -165,7 +163,7 @@ def try_ocr(image_path: str) -> str:
     try:
         import pytesseract
         import re as _re
-        from PIL import Image, ImageEnhance, ImageFilter
+        from PIL import Image, ImageEnhance
         try:
             from pillow_heif import register_heif_opener
             register_heif_opener()
