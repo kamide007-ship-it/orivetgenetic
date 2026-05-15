@@ -90,6 +90,17 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
   outline:3px solid var(--purple); outline-offset:2px;
 }
 
+/* === 疾患名リンクボタン（健康シミュ table 内） === */
+.disease-link {
+  background:none; border:none; padding:0; font-family:inherit; font-size:inherit;
+  color:var(--purple); cursor:pointer; text-align:left;
+  text-decoration:underline; text-decoration-style:dotted; text-decoration-thickness:1px;
+  text-underline-offset:3px;
+}
+.disease-link:hover { color:var(--pink); }
+.disease-link .kb-icon { opacity:0.55; font-size:0.85em; margin-left:2px; }
+.disease-link:focus-visible { outline:2px solid var(--purple); outline-offset:2px; border-radius:3px; }
+
 /* === 座位ヘルプボタン（理解できるコンセプト） === */
 .kb-help {
   display:inline-flex; align-items:center; justify-content:center;
@@ -945,8 +956,9 @@ function runHealthSim() {
     const sireLabel = sireGT === "NN" ? "N/N" : sireGT === "PN" ? "P/N" : "P/P";
     const damLabel = damGT === "NN" ? "N/N" : damGT === "PN" ? "P/N" : "P/P";
 
+    // ↓ 疾患名をクリックで KB モーダル
     html += `<tr>
-      <td>${jp}</td>
+      <td><button type="button" class="disease-link" onclick="showDiseaseInfo('${disease.replace(/'/g, "\\'")}')">${jp} <span class="kb-icon">📖</span></button></td>
       <td>${sireLabel}</td>
       <td>${damLabel}</td>
       <td class="${pNN >= 1 ? 'risk-low' : ''}" style="text-align:center;font-weight:700;">${(pNN*100).toFixed(0)}%</td>
@@ -1347,6 +1359,77 @@ function closeLocusModal() {
   const modal = document.getElementById('locusModal');
   if (typeof modal.close === 'function') modal.close();
   else modal.removeAttribute('open');
+}
+
+// === 疾患KB モーダル: /api/glossary から DISEASE_KB を遅延ロード ===
+let DISEASE_KB_CACHE = null;
+async function loadDiseaseKbOnce() {
+  if (DISEASE_KB_CACHE) return DISEASE_KB_CACHE;
+  try {
+    const res = await fetch('/api/glossary');
+    if (!res.ok) throw new Error('fetch failed: ' + res.status);
+    const data = await res.json();
+    DISEASE_KB_CACHE = Array.isArray(data.diseases) ? data.diseases : [];
+  } catch (e) {
+    console.warn('Disease KB load failed:', e);
+    DISEASE_KB_CACHE = [];
+  }
+  return DISEASE_KB_CACHE;
+}
+
+function _findDiseaseEntry(kb, key) {
+  // 検査名 key (例: "CDDY+IVDD") に該当する KB エントリを探す
+  const norm = String(key || '').toLowerCase().replace(/[-_]/g, ' ');
+  for (const e of kb) {
+    for (const pat of (e.match || [])) {
+      if (pat.startsWith('\\b') && pat.endsWith('\\b')) {
+        // 簡易: \b...\b は word内 substring に置換して評価
+        const inner = pat.slice(2, -2);
+        const re = new RegExp('\\b' + inner.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+        if (re.test(norm)) return e;
+      } else if (norm.includes(pat)) {
+        return e;
+      }
+    }
+  }
+  return null;
+}
+
+async function showDiseaseInfo(diseaseKey) {
+  const kb = await loadDiseaseKbOnce();
+  const entry = _findDiseaseEntry(kb, diseaseKey);
+  const modal = document.getElementById('locusModal');
+  const title = document.getElementById('locusModalTitle');
+  const body = document.getElementById('locusModalBody');
+
+  if (!entry) {
+    title.textContent = diseaseKey || '疾患情報';
+    body.innerHTML = '<div class="field"><span class="field-label">解説</span>' +
+      'この検査項目の詳細解説はまだ登録されていません。<br>' +
+      '<a href="/glossary" target="_blank" rel="noopener">📖 辞書ページで検索する ↗</a></div>';
+  } else {
+    title.textContent = entry.title || diseaseKey;
+    const sections = [
+      { label: '📋 概要', text: entry.summary },
+      { label: '🧬 メカニズム', text: entry.mechanism },
+      { label: '⚠️ 症状', text: entry.symptoms },
+      { label: '🧪 遺伝様式', text: entry.inheritance },
+      { label: '💡 アドバイス', text: entry.advice }
+    ];
+    let html = sections.filter(s => s.text).map(s =>
+      '<div class="field"><span class="field-label">' + s.label + '</span>' + s.text + '</div>'
+    ).join('');
+    if (Array.isArray(entry.references) && entry.references.length) {
+      html += '<div class="field refs"><span class="field-label">🔗 参考リンク</span>' +
+        entry.references.map(r =>
+          '<a href="' + r.url + '" target="_blank" rel="noopener noreferrer">' + r.label + ' ↗</a>'
+        ).join('') + '</div>';
+    }
+    body.innerHTML = html;
+  }
+
+  if (typeof modal.showModal === 'function') modal.showModal();
+  else modal.setAttribute('open', '');
 }
 </script>
 
