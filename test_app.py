@@ -661,6 +661,35 @@ class TestDiseaseKB:
         # Veqta 主要疾患含めて 40 以上
         assert len(DISEASE_KB) >= 40, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
 
+    # === PR #47 拡張カバレッジ (50+ diseases) ===
+    def test_cerebellar_abiotrophy(self):
+        d = get_disease_detail("Cerebellar Abiotrophy")
+        assert d is not None and "小脳" in d.get("title", "")
+
+    def test_krabbe(self):
+        d = get_disease_detail("Krabbe Disease")
+        assert d is not None and "GALC" in d.get("mechanism", "")
+
+    def test_efs(self):
+        d = get_disease_detail("Episodic Falling Syndrome")
+        assert d is not None and "BCAN" in d.get("mechanism", "")
+
+    def test_l2hga(self):
+        d = get_disease_detail("L-2-Hydroxyglutaric Aciduria")
+        assert d is not None and "L2HGDH" in d.get("mechanism", "")
+
+    def test_cmr(self):
+        d = get_disease_detail("Multifocal Retinopathy CMR1")
+        assert d is not None and "BEST1" in d.get("mechanism", "")
+
+    def test_cda(self):
+        d = get_disease_detail("Color Dilution Alopecia")
+        assert d is not None and "希釈" in d.get("title", "")
+
+    def test_full_panel_min_coverage(self):
+        # PR #47 後で 50 以上
+        assert len(DISEASE_KB) >= 55, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
+
 
 # ===========================================================================
 # 11. グロッサリー(/glossary) ルート
