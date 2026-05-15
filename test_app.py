@@ -786,6 +786,94 @@ class TestDiseaseGrouping:
         assert group_diseases_by_category([]) == []
 
 
+# ===========================================================================
+# 13. 重症度フィルタリング
+# ===========================================================================
+
+try:
+    from poodle_genetics import get_disease_severity, SEVERITY_LABELS
+    _HAS_SEVERITY = True
+except Exception:
+    _HAS_SEVERITY = False
+
+
+@pytest.mark.skipif(not _HAS_SEVERITY, reason="severity helpers not importable")
+class TestSeverity:
+    def test_returns_one_of_three(self):
+        from poodle_genetics import DISEASE_KB
+        for e in DISEASE_KB:
+            sev = get_disease_severity(e)
+            assert sev in ("high", "medium", "low"), f"unexpected severity {sev} for {e.get('title')}"
+
+    def test_explicit_severity_takes_priority(self):
+        entry = {"severity": "high", "summary": "通常は無症状"}  # 矛盾するキーワード
+        assert get_disease_severity(entry) == "high"
+
+    def test_keyword_detection_high(self):
+        # 「予後不良」「致死」「死亡」などで high と判定
+        entry = {"summary": "重篤な遺伝性疾患", "advice": "P/P は予後不良"}
+        assert get_disease_severity(entry) == "high"
+
+    def test_keyword_detection_low(self):
+        entry = {"summary": "通常は無症状", "advice": "完治はしない"}
+        assert get_disease_severity(entry) == "low"
+
+    def test_severity_labels_complete(self):
+        for level in ("high", "medium", "low"):
+            assert level in SEVERITY_LABELS
+            assert "label" in SEVERITY_LABELS[level]
+            assert "color" in SEVERITY_LABELS[level]
+            assert "emoji" in SEVERITY_LABELS[level]
+
+    def test_glossary_severity_filter_high(self):
+        rv = client.get("/glossary?severity=high")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "高リスク" in body
+
+    def test_glossary_severity_filter_active_state(self):
+        rv = client.get("/glossary?severity=low")
+        body = rv.get_data(as_text=True)
+        # 低リスクボタンが active class を持つ
+        assert 'severity=low' in body
+        # active クラスが low のリンクに付与される
+        # （class="active" が低リスクボタンに含まれる）
+
+    def test_glossary_severity_combined_with_query(self):
+        rv = client.get("/glossary?severity=high&q=遺伝")
+        assert rv.status_code == 200
+
+    def test_report_html_has_severity_badge(self):
+        """generate_unified_html が KB マッチした疾患に severity-badge クラスを付与する"""
+        import tempfile, os
+        from poodle_genetics import generate_unified_html, DogProfile, TestResult
+        # KB に存在する疾患 (CDDY+IVDD) のヘルスレスルトを作って渡す
+        dog = DogProfile(
+            pet_name="テスト", registered_name="Test Dog",
+            breed="Toy Poodle", sex="Male", dob="2020-01-01",
+            test_date="2024-01-01",
+            health_results=[
+                TestResult(
+                    category="健康",
+                    test_name="Chondrodystrophy with IVDD",
+                    japanese_name="軟骨異栄養症+椎間板疾患",
+                    genotype="P/N", result_text="Carrier",
+                    status="carrier",
+                )
+            ],
+        )
+        with tempfile.NamedTemporaryFile("w", suffix=".html", delete=False) as f:
+            path = f.name
+        try:
+            generate_unified_html([dog], [], path)
+            with open(path, "r", encoding="utf-8") as f:
+                html = f.read()
+            assert 'class="severity-badge"' in html
+            assert "リスク" in html  # 重症度ラベル
+        finally:
+            os.unlink(path)
+
+
 @pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
 class TestTraitKB:
     def test_e_locus_matches(self):

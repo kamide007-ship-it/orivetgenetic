@@ -699,6 +699,7 @@ DISEASE_KB = [
     {
         "match": ["achromatopsia", "day blindness", "cnga3"],
         "title": "全色盲 / 昼盲 (Achromatopsia / CNGA3)",
+        "severity": "medium",
         "summary": "錐体細胞の機能不全により、明るい場所で物が見えなくなる疾患です。",
         "mechanism": "CNGA3 遺伝子の変異により錐体光受容細胞が機能しません。色覚は失われ、明るい光下では視覚が低下。",
         "symptoms": "明るい場所で目を細める・物にぶつかる。薄暗い場所では比較的見える（杆体機能は保たれる）。",
@@ -712,6 +713,7 @@ DISEASE_KB = [
     {
         "match": ["collie eye anomaly", "\\bcea\\b"],
         "title": "コリーアイ症候群 (CEA / NHEJ1)",
+        "severity": "medium",
         "summary": "網膜・脈絡膜・強膜の形成異常により、視覚障害を起こす遺伝性眼疾患です。コリー系で多発。",
         "mechanism": "NHEJ1 遺伝子の変異により眼球の発達が異常になります。軽度から重度まで連続スペクトラム。",
         "symptoms": "軽度: 無症状〜軽度視覚障害。重度: 出血・網膜剥離・失明。",
@@ -724,6 +726,7 @@ DISEASE_KB = [
     {
         "match": ["hereditary cataract", "hsf4"],
         "title": "遺伝性白内障 (HSF4)",
+        "severity": "medium",
         "summary": "若齢期から水晶体が混濁し、視力低下〜失明に至る遺伝性疾患です。",
         "mechanism": "HSF4 遺伝子の変異により水晶体の蛋白質形成が異常になります。ボストンテリア・スタッフィー等で報告。",
         "symptoms": "若齢期（数ヶ月〜数年）から白内障進行。視覚低下〜失明。",
@@ -928,6 +931,7 @@ DISEASE_KB = [
     {
         "match": ["congenital stationary night blindness", "csnb", "cnsb"],
         "title": "先天性停止性夜盲症 (CSNB / RPE65)",
+        "severity": "low",
         "summary": "生まれつき夜間視力が無い遺伝性眼疾患です。昼間は通常通り見えます。",
         "mechanism": "RPE65 遺伝子の変異により網膜の桿体細胞での視物質再生が障害。ブリアード犬で報告。",
         "symptoms": "生後から夜盲・薄暗い場所での視覚困難。進行性ではない（停止性）。",
@@ -1131,6 +1135,7 @@ DISEASE_KB = [
     {
         "match": ["l 2 hydroxyglutaric aciduria", "hydroxyglutaric aciduria", "l2hga"],
         "title": "L-2-ヒドロキシグルタル酸尿症 (L2HGA / L2HGDH)",
+        "severity": "high",
         "summary": "代謝産物が異常蓄積し神経症状を起こす希少な遺伝性代謝疾患です。スタッフィー系で報告。",
         "mechanism": "L2HGDH 遺伝子の変異により L-2-ヒドロキシグルタル酸の分解酵素が欠損。",
         "symptoms": "若齢期から運動失調・痙攣・行動異常・認知障害。",
@@ -1156,6 +1161,7 @@ DISEASE_KB = [
     {
         "match": ["cone degeneration", "achromatopsia cnga3", "day-blindness"],
         "title": "錐体ジストロフィー (Cone Degeneration / CNGB3)",
+        "severity": "medium",
         "summary": "網膜の錐体細胞が機能不全になり、明所視・色覚に障害を起こす疾患です。",
         "mechanism": "CNGB3 遺伝子の変異により錐体光受容細胞が変性。アラスカン・マラミュート等で報告。",
         "symptoms": "生後数ヶ月から明所での視覚困難・色覚消失。夜間視は保持。",
@@ -1260,6 +1266,47 @@ def get_disease_category(entry: dict) -> str:
             if p in title:
                 return cat
     return "📋 その他"
+
+
+# 重症度ヒューリスティック: KB 本文のキーワードから 3段階に分類
+# entry.get("severity") で明示指定があればそれを優先
+_SEVERITY_KEYWORDS = {
+    "high":   ["予後不良", "致死", "死亡", "生命に関わる", "生命予後", "1〜2 年で死亡", "1〜2年で死亡",
+               "重篤", "失明", "完全失明"],
+    "medium": ["対症療法のみ", "進行性", "リスク大幅", "重症", "重度", "進行抑制", "発症リスク",
+               "歩行困難", "繰り返す感染"],
+    "low":    ["通常は無症状", "通常無症状", "QOL 維持可能", "完治はしない", "症状コントロール",
+               "症状管理"],
+}
+
+
+def get_disease_severity(entry: dict) -> str:
+    """KB エントリから重症度を推定する: 'high' / 'medium' / 'low'.
+
+    entry.get('severity') が明示されていればそれを使う（手動オーバーライド可）。
+    未指定なら summary/mechanism/symptoms/advice のテキストから推定。
+    """
+    explicit = entry.get("severity")
+    if explicit in ("high", "medium", "low"):
+        return explicit
+    text = " ".join([
+        entry.get("summary", ""),
+        entry.get("mechanism", ""),
+        entry.get("symptoms", ""),
+        entry.get("advice", ""),
+    ])
+    for level in ("high", "medium", "low"):
+        for kw in _SEVERITY_KEYWORDS[level]:
+            if kw in text:
+                return level
+    return "medium"  # デフォルト
+
+
+SEVERITY_LABELS = {
+    "high":   {"label": "高リスク", "color": "#dc2626", "bg": "#fee2e2", "emoji": "🔴"},
+    "medium": {"label": "中リスク", "color": "#c2410c", "bg": "#fef3c7", "emoji": "🟡"},
+    "low":    {"label": "低リスク", "color": "#166534", "bg": "#dcfce7", "emoji": "🟢"},
+}
 
 
 def group_diseases_by_category(entries: list) -> list:
@@ -2718,9 +2765,21 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             # ↓ 「理解できること」コンセプト: 詳細解説 + 参考リンク
             detail = get_disease_detail(r.test_name)
             detail_html = render_detail_html(detail) if detail else ""
+            # 重症度バッジ（KB エントリがある場合のみ表示）
+            severity_html = ""
+            if detail:
+                sev = get_disease_severity(detail)
+                meta = SEVERITY_LABELS.get(sev, {})
+                if meta:
+                    severity_html = (
+                        f'<span class="severity-badge" style="background:{meta["bg"]};color:{meta["color"]};'
+                        f'display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;'
+                        f'font-size:0.72em;font-weight:700;vertical-align:middle;">'
+                        f'{meta["emoji"]} {meta["label"]}</span>'
+                    )
             health_rows += f"""        <tr>
           <td>{_h(r.category)}</td>
-          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{annotation_html}{detail_html}</td>
+          <td>{display_name}{severity_html}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{annotation_html}{detail_html}</td>
           <td>{badge}</td>
           <td style="font-size:0.85em">{_h(r.result_text[:120])}</td>
         </tr>\n"""
