@@ -112,6 +112,7 @@ from poodle_genetics import (
     parse_pdf, parse_pedigree_pdf, KNOWN_PEDIGREES,
     generate_unified_html, generate_excel,
     HAS_PDFPLUMBER, HAS_OCR,
+    DISEASE_KB, TRAIT_KB,
 )
 
 try:
@@ -472,6 +473,48 @@ def download(session_id, filename):
 
     report_dir = os.path.join(REPORT_FOLDER, session_id)
     return send_from_directory(report_dir, filename, as_attachment=True)
+
+
+@app.route("/glossary")
+def glossary():
+    """遺伝子疾患・形質の辞書ページ。
+
+    解析結果がなくても DISEASE_KB / TRAIT_KB を独立してブラウズできる。
+    検索クエリ ?q=xxx で簡易フィルタリング。"""
+    query = (request.args.get("q") or "").strip().lower()
+
+    def _filter(entries):
+        if not query:
+            return entries
+        out = []
+        for e in entries:
+            haystack = " ".join([
+                e.get("title", ""), e.get("summary", ""),
+                e.get("mechanism", ""), e.get("symptoms", ""),
+                e.get("phenotype", ""), e.get("advice", ""),
+                " ".join(e.get("match", [])),
+            ]).lower()
+            if query in haystack:
+                out.append(e)
+        return out
+
+    return render_template(
+        "glossary.html",
+        diseases=_filter(DISEASE_KB),
+        traits=_filter(TRAIT_KB),
+        query=request.args.get("q", ""),
+        total_diseases=len(DISEASE_KB),
+        total_traits=len(TRAIT_KB),
+    )
+
+
+@app.route("/api/glossary")
+def api_glossary():
+    """辞書データを JSON で返す（クライアント側検索やシミュレーター連携用）"""
+    return jsonify({
+        "diseases": DISEASE_KB,
+        "traits": TRAIT_KB,
+    })
 
 
 @app.route("/simulator")

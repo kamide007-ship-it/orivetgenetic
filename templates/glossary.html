@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>遺伝子疾患・形質 辞書 — Orivet Genetics Suite</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif; background:#f8f9fa; color:#1f2937; line-height:1.6; }
+  header { background: linear-gradient(135deg, #4a1a7a, #e6007e); color:#fff; padding:24px 0; }
+  header .container { max-width:1100px; margin:0 auto; padding:0 20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+  header h1 { font-size:1.5em; }
+  header p { opacity:0.9; font-size:0.9em; }
+  header .nav { display:flex; gap:8px; flex-wrap:wrap; }
+  header .nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:8px; font-size:0.85em; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.15); }
+  header .nav a:hover { background:rgba(255,255,255,0.3); }
+
+  .container { max-width:1100px; margin:0 auto; padding:20px; }
+
+  .search-box { background:#fff; padding:16px 20px; border-radius:12px; margin-bottom:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .search-box input { flex:1; min-width:200px; padding:10px 14px; border:2px solid #e5e7eb; border-radius:8px; font-size:1em; font-family:inherit; }
+  .search-box input:focus { outline:none; border-color:#7c3aed; }
+  .search-box button { background:#7c3aed; color:#fff; border:none; padding:10px 22px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.95em; }
+  .search-box button:hover { background:#6d28d9; }
+  .search-box .stat { color:#6b7280; font-size:0.85em; }
+
+  .section-tab { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; border-bottom:2px solid #e5e7eb; padding-bottom:0; }
+  .section-tab button { background:none; border:none; padding:10px 18px; cursor:pointer; font-size:0.95em; font-weight:600; color:#6b7280; border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .section-tab button.active { color:#5b21b6; border-bottom-color:#7c3aed; }
+  .section-tab button .count { background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:10px; font-size:0.75em; margin-left:6px; }
+
+  .entries { display:grid; gap:14px; }
+  @media (min-width:768px) { .entries { grid-template-columns:repeat(2, 1fr); } }
+
+  details.entry { background:#fff; border-radius:10px; padding:14px 18px; border:1px solid #e5e7eb; box-shadow:0 1px 3px rgba(0,0,0,0.03); }
+  details.entry > summary { cursor:pointer; font-weight:600; color:#4a1a7a; font-size:1em; user-select:none; list-style:none; outline:none; padding:4px 0; }
+  details.entry > summary::-webkit-details-marker { display:none; }
+  details.entry > summary::before { content:"▶"; display:inline-block; margin-right:8px; font-size:0.7em; color:#9ca3af; transition:transform 0.15s; }
+  details.entry[open] > summary::before { transform:rotate(90deg); color:#7c3aed; }
+  details.entry > summary:hover { color:#7c3aed; }
+  details.entry .body { margin-top:10px; padding-top:10px; border-top:1px dashed #e5e7eb; font-size:0.9em; }
+  details.entry .body .field { margin-bottom:8px; }
+  details.entry .body .field-label { display:block; font-weight:600; color:#4a1a7a; font-size:0.92em; margin-bottom:2px; }
+  details.entry .body .refs { margin-top:10px; }
+  details.entry .body .refs a { display:inline-block; margin:2px 6px 2px 0; padding:4px 11px; background:#ede9fe; color:#5b21b6; text-decoration:none; border-radius:14px; font-size:0.85em; }
+  details.entry .body .refs a:hover { background:#ddd6fe; }
+
+  .empty-state { background:#fff; padding:30px; border-radius:12px; text-align:center; color:#6b7280; }
+  :focus-visible { outline:3px solid #7c3aed; outline-offset:2px; }
+
+  /* セクション切替 */
+  .section-content { display:none; }
+  .section-content.active { display:block; }
+</style>
+</head>
+<body>
+<header>
+  <div class="container">
+    <div>
+      <h1>📖 遺伝子疾患・形質 辞書</h1>
+      <p>全 {{ total_diseases }} 疾患 / {{ total_traits }} 形質座位 を解説</p>
+    </div>
+    <div class="nav">
+      <a href="/">新しい解析</a>
+      <a href="/simulator">繁殖シミュレーター</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- 検索ボックス -->
+  <form class="search-box" method="get" action="/glossary" role="search">
+    <input type="search" name="q" placeholder="疾患名・遺伝子・症状などで検索 (例: PRA, ブラウン, 椎間板)" value="{{ query }}" aria-label="検索クエリ">
+    <button type="submit">検索</button>
+    {% if query %}
+    <a href="/glossary" style="color:#6b7280;font-size:0.85em;">クリア</a>
+    {% endif %}
+    <span class="stat">疾患 {{ diseases|length }} / 形質 {{ traits|length }} 件ヒット</span>
+  </form>
+
+  <!-- セクションタブ -->
+  <div class="section-tab" role="tablist">
+    <button type="button" class="active" role="tab" aria-controls="section-diseases" onclick="showSection('diseases', this)">
+      🩺 健康疾患<span class="count">{{ diseases|length }}</span>
+    </button>
+    <button type="button" role="tab" aria-controls="section-traits" onclick="showSection('traits', this)">
+      🎨 毛色・形質<span class="count">{{ traits|length }}</span>
+    </button>
+  </div>
+
+  <!-- 疾患リスト -->
+  <div id="section-diseases" class="section-content active">
+    {% if diseases %}
+    <div class="entries">
+      {% for d in diseases %}
+      <details class="entry">
+        <summary>{{ d.title }}</summary>
+        <div class="body">
+          {% if d.summary %}<div class="field"><span class="field-label">📋 概要</span>{{ d.summary }}</div>{% endif %}
+          {% if d.mechanism %}<div class="field"><span class="field-label">🧬 メカニズム</span>{{ d.mechanism }}</div>{% endif %}
+          {% if d.symptoms %}<div class="field"><span class="field-label">⚠️ 症状</span>{{ d.symptoms }}</div>{% endif %}
+          {% if d.inheritance %}<div class="field"><span class="field-label">🧪 遺伝様式</span>{{ d.inheritance }}</div>{% endif %}
+          {% if d.advice %}<div class="field"><span class="field-label">💡 アドバイス</span>{{ d.advice }}</div>{% endif %}
+          {% if d.references %}
+          <div class="refs">
+            <span class="field-label">🔗 参考リンク</span>
+            {% for ref in d.references %}
+            <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </details>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">「{{ query }}」に該当する疾患は見つかりませんでした。</div>
+    {% endif %}
+  </div>
+
+  <!-- 形質リスト -->
+  <div id="section-traits" class="section-content">
+    {% if traits %}
+    <div class="entries">
+      {% for t in traits %}
+      <details class="entry">
+        <summary>{{ t.title }}</summary>
+        <div class="body">
+          {% if t.summary %}<div class="field"><span class="field-label">📋 概要</span>{{ t.summary }}</div>{% endif %}
+          {% if t.mechanism %}<div class="field"><span class="field-label">🧬 メカニズム</span>{{ t.mechanism }}</div>{% endif %}
+          {% if t.phenotype %}<div class="field" style="white-space:pre-line"><span class="field-label">🎨 表現型</span>{{ t.phenotype }}</div>{% endif %}
+          {% if t.advice %}<div class="field"><span class="field-label">💡 アドバイス</span>{{ t.advice }}</div>{% endif %}
+          {% if t.references %}
+          <div class="refs">
+            <span class="field-label">🔗 参考リンク</span>
+            {% for ref in t.references %}
+            <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </details>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">「{{ query }}」に該当する形質は見つかりませんでした。</div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function showSection(name, btn) {
+  document.querySelectorAll('.section-tab button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.section-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('section-' + name).classList.add('active');
+}
+</script>
+
+</body>
+</html>

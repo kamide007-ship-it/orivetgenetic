@@ -89,6 +89,64 @@ tr:hover td { background:#faf5ff; }
 select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:focus-visible {
   outline:3px solid var(--purple); outline-offset:2px;
 }
+
+/* === 疾患名リンクボタン（健康シミュ table 内） === */
+.disease-link {
+  background:none; border:none; padding:0; font-family:inherit; font-size:inherit;
+  color:var(--purple); cursor:pointer; text-align:left;
+  text-decoration:underline; text-decoration-style:dotted; text-decoration-thickness:1px;
+  text-underline-offset:3px;
+}
+.disease-link:hover { color:var(--pink); }
+.disease-link .kb-icon { opacity:0.55; font-size:0.85em; margin-left:2px; }
+.disease-link:focus-visible { outline:2px solid var(--purple); outline-offset:2px; border-radius:3px; }
+
+/* === 座位ヘルプボタン（理解できるコンセプト） === */
+.kb-help {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:18px; height:18px; margin-left:6px;
+  background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd;
+  border-radius:50%; cursor:pointer; font-size:0.7em; font-weight:700;
+  font-family:inherit; line-height:1; padding:0;
+  transition:all 0.15s;
+  vertical-align:middle;
+}
+.kb-help:hover, .kb-help:focus { background:var(--purple); color:#fff; outline:none; }
+
+/* === KB モーダル === */
+dialog.kb-modal {
+  border:none; border-radius:12px; padding:0; max-width:560px;
+  width:90vw; max-height:85vh;
+  box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
+dialog.kb-modal::backdrop { background:rgba(0,0,0,0.4); }
+dialog.kb-modal .kb-modal-head {
+  background:linear-gradient(135deg,var(--purple),var(--pink));
+  color:#fff; padding:16px 24px;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  border-radius:12px 12px 0 0;
+}
+dialog.kb-modal .kb-modal-head h3 { font-size:1.1em; margin:0; }
+dialog.kb-modal .kb-close {
+  background:rgba(255,255,255,0.2); border:none; color:#fff;
+  width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:1em;
+}
+dialog.kb-modal .kb-close:hover { background:rgba(255,255,255,0.4); }
+dialog.kb-modal .kb-modal-body {
+  padding:20px 24px; max-height:65vh; overflow-y:auto;
+  font-size:0.92em; line-height:1.65;
+}
+dialog.kb-modal .kb-modal-body .field { margin-bottom:14px; }
+dialog.kb-modal .kb-modal-body .field-label {
+  display:block; font-weight:700; color:var(--purple);
+  margin-bottom:4px; font-size:0.95em;
+}
+dialog.kb-modal .kb-modal-body .refs a {
+  display:inline-block; margin:2px 6px 2px 0; padding:4px 11px;
+  background:#ede9fe; color:#5b21b6; text-decoration:none;
+  border-radius:14px; font-size:0.85em;
+}
+dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
 </style>
 </head>
 <body>
@@ -148,21 +206,21 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
       <div id="custom-sire" style="display:none;" class="card" style="background:#f9fafb;">
         <h3>父犬カスタム遺伝子型</h3>
         <div class="form-row">
-          <div class="form-group"><label>E Locus</label><select id="cs-e"><option value="EE">E/E</option><option value="Ee" selected>E/e</option><option value="ee">e/e</option></select></div>
-          <div class="form-group"><label>K Locus</label><select id="cs-k"><option value="KBKB">KB/KB</option><option value="KBky" selected>KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
+          <div class="form-group"><label>E Locus<button type="button" class="kb-help" onclick="showLocusInfo('e')" aria-label="E座位の解説">?</button></label><select id="cs-e"><option value="EE">E/E</option><option value="Ee" selected>E/e</option><option value="ee">e/e</option></select></div>
+          <div class="form-group"><label>K Locus<button type="button" class="kb-help" onclick="showLocusInfo('k')" aria-label="K座位の解説">?</button></label><select id="cs-k"><option value="KBKB">KB/KB</option><option value="KBky" selected>KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>A Locus</label><select id="cs-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
-          <div class="form-group"><label>B Locus</label><select id="cs-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
+          <div class="form-group"><label>A Locus<button type="button" class="kb-help" onclick="showLocusInfo('a')" aria-label="A座位の解説">?</button></label><select id="cs-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
+          <div class="form-group"><label>B Locus<button type="button" class="kb-help" onclick="showLocusInfo('b')" aria-label="B座位の解説">?</button></label><select id="cs-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>D Locus</label><select id="cs-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
-          <div class="form-group"><label>M Locus</label><select id="cs-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
+          <div class="form-group"><label>D Locus<button type="button" class="kb-help" onclick="showLocusInfo('d')" aria-label="D座位の解説">?</button></label><select id="cs-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
+          <div class="form-group"><label>M Locus<button type="button" class="kb-help" onclick="showLocusInfo('m')" aria-label="M座位の解説">?</button></label><select id="cs-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>S (Pied)</label><select id="cs-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
+          <div class="form-group"><label>S (Pied)<button type="button" class="kb-help" onclick="showLocusInfo('s')" aria-label="S座位の解説">?</button></label><select id="cs-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
           <div class="form-group">
-            <label>G (Greying / 退色)</label>
+            <label>G (Greying / 退色)<button type="button" class="kb-help" onclick="showLocusInfo('g')" aria-label="G座位の解説">?</button></label>
             <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
               <input type="checkbox" id="cs-g" onchange="runColorSim()">
               Greying遺伝子を持つ（G/g 想定）
@@ -174,21 +232,21 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
       <div id="custom-dam" style="display:none;" class="card">
         <h3>母犬カスタム遺伝子型</h3>
         <div class="form-row">
-          <div class="form-group"><label>E Locus</label><select id="cd-e"><option value="EE">E/E</option><option value="Ee">E/e</option><option value="ee" selected>e/e</option></select></div>
-          <div class="form-group"><label>K Locus</label><select id="cd-k"><option value="KBKB" selected>KB/KB</option><option value="KBky">KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
+          <div class="form-group"><label>E Locus<button type="button" class="kb-help" onclick="showLocusInfo('e')" aria-label="E座位の解説">?</button></label><select id="cd-e"><option value="EE">E/E</option><option value="Ee">E/e</option><option value="ee" selected>e/e</option></select></div>
+          <div class="form-group"><label>K Locus<button type="button" class="kb-help" onclick="showLocusInfo('k')" aria-label="K座位の解説">?</button></label><select id="cd-k"><option value="KBKB" selected>KB/KB</option><option value="KBky">KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>A Locus</label><select id="cd-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
-          <div class="form-group"><label>B Locus</label><select id="cd-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
+          <div class="form-group"><label>A Locus<button type="button" class="kb-help" onclick="showLocusInfo('a')" aria-label="A座位の解説">?</button></label><select id="cd-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
+          <div class="form-group"><label>B Locus<button type="button" class="kb-help" onclick="showLocusInfo('b')" aria-label="B座位の解説">?</button></label><select id="cd-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>D Locus</label><select id="cd-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
-          <div class="form-group"><label>M Locus</label><select id="cd-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
+          <div class="form-group"><label>D Locus<button type="button" class="kb-help" onclick="showLocusInfo('d')" aria-label="D座位の解説">?</button></label><select id="cd-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
+          <div class="form-group"><label>M Locus<button type="button" class="kb-help" onclick="showLocusInfo('m')" aria-label="M座位の解説">?</button></label><select id="cd-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>S (Pied)</label><select id="cd-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
+          <div class="form-group"><label>S (Pied)<button type="button" class="kb-help" onclick="showLocusInfo('s')" aria-label="S座位の解説">?</button></label><select id="cd-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
           <div class="form-group">
-            <label>G (Greying / 退色)</label>
+            <label>G (Greying / 退色)<button type="button" class="kb-help" onclick="showLocusInfo('g')" aria-label="G座位の解説">?</button></label>
             <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
               <input type="checkbox" id="cd-g" onchange="runColorSim()">
               Greying遺伝子を持つ（G/g 想定）
@@ -248,10 +306,13 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
   <!-- ================================================================ -->
   <div id="coi" class="tab-content">
     <div class="card">
-      <h2>近親交配係数 (COI) 算出</h2>
+      <h2>近親交配係数 (COI) 算出
+        <button type="button" class="kb-help" onclick="showCoiInfo()" aria-label="COIとは何か" style="vertical-align:middle;margin-left:8px;">?</button>
+      </h2>
       <p style="color:var(--gray); font-size:0.9em; margin-bottom:16px;">
         3世代（曾祖父母まで）の血統情報を入力して、Wright's Coefficient of Inbreeding を算出します。<br>
         同じ祖先が父方・母方の両方に出現する場合、COIが上昇します。
+        <a href="javascript:void(0)" onclick="showCoiInfo()" style="color:var(--purple);font-weight:600;">📖 COI の意味を詳しく見る</a>
       </p>
 
       <div id="ped-loader" style="display:none; margin-bottom:16px; padding:12px 16px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px;">
@@ -898,8 +959,9 @@ function runHealthSim() {
     const sireLabel = sireGT === "NN" ? "N/N" : sireGT === "PN" ? "P/N" : "P/P";
     const damLabel = damGT === "NN" ? "N/N" : damGT === "PN" ? "P/N" : "P/P";
 
+    // ↓ 疾患名をクリックで KB モーダル
     html += `<tr>
-      <td>${jp}</td>
+      <td><button type="button" class="disease-link" onclick="showDiseaseInfo('${disease.replace(/'/g, "\\'")}')">${jp} <span class="kb-icon">📖</span></button></td>
       <td>${sireLabel}</td>
       <td>${damLabel}</td>
       <td class="${pNN >= 1 ? 'risk-low' : ''}" style="text-align:center;font-weight:700;">${(pNN*100).toFixed(0)}%</td>
@@ -1006,6 +1068,14 @@ function calcCOI() {
 
   html += `<div class="coi-gauge"><div class="coi-fill" style="width:${Math.min(coiPct * 2, 100)}%;background:${gaugeColor};">${coiPct.toFixed(2)}%</div></div>`;
   html += '<div class="coi-marks"><span>0%</span><span>6.25%</span><span>12.5%</span><span>25%</span><span>50%</span></div>';
+  // 人間関係に置き換えた目安表
+  html += '<div style="margin:6px 0 16px;font-size:0.75em;color:var(--gray);text-align:center;">'
+       + '目安: 0% = 完全に無関係 / 6.25% = いとこ婚相当 / 12.5% = 半兄妹婚相当 / 25% = 兄妹婚・親子婚相当'
+       + '</div>';
+  // COI 解説への誘導
+  html += '<div style="text-align:center;margin-bottom:18px;">'
+       + '<button type="button" onclick="showCoiInfo()" style="background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;padding:6px 14px;border-radius:14px;cursor:pointer;font-size:0.85em;font-weight:600;">📖 この数値の意味を詳しく見る</button>'
+       + '</div>';
 
   // Common ancestors
   if (commonAncestors.length > 0) {
@@ -1217,6 +1287,214 @@ document.addEventListener('DOMContentLoaded', () => {
   runColorSim();
   runHealthSim();
 });
+
+// === 座位ヘルプモーダル (KB) ===
+// テキストは TRAIT_KB のサブセット。完全な辞書は /glossary で閲覧可能。
+const LOCUS_KB = {
+  e: {
+    title: 'E座位 (MC1R) — 黒系色素のスイッチ',
+    summary: 'コートに黒/茶色色素（eumelanin）を作るかどうかを決める『マスタースイッチ』です。',
+    phenotype: 'E/E, E/e: コートに黒/茶色素を発現可能（K・A座位の支配を受ける）\\ne/e: コートはクリーム〜アプリコット〜レッド（KITLG が濃淡決定）',
+    advice: 'e/e でも鼻・パッド・アイリムの色は B 座位で決まります（黒 or ブラウン）。'
+  },
+  k: {
+    title: 'K座位 (CBD103) — ドミナントブラック',
+    summary: '黒一色（ソリッド）かどうかを決める優性遺伝子です。',
+    phenotype: 'KB/_  : ソリッド（黒・茶・希釈色、E と B で決まる）\\nky/ky : A座位の模様（セーブル・タンポイント等）\\nkbr/_ : ブリンドル',
+    advice: 'ソリッドカラーを残したいなら KB を維持。模様を出したいなら ky/ky × ky/ky。'
+  },
+  a: {
+    title: 'A座位 (ASIP) — アグーチ（模様）パターン',
+    summary: 'K座位が ky/ky のときに発現する『毛色の模様』を決める座位です。優性順位 ay > aw > at > a。',
+    phenotype: 'ay/_  : フォーン/セーブル\\naw/_ : ワイルドセーブル\\nat/_ : ブラックタン/トライカラー\\na/a   : リセッシブブラック',
+    advice: '見た目の模様は A 座位 + K 座位 + E 座位の組み合わせで決まります。'
+  },
+  b: {
+    title: 'B座位 (TYRP1) — ブラウン色素',
+    summary: '黒色素を「黒」のまま発現するか「茶色」に変換するかを決めます。',
+    phenotype: 'B/_ : 通常通り黒色素\\nbb  : 全ての黒がブラウン（チョコ/レバー）',
+    advice: 'e/e の場合 B はコート色に影響せず、鼻・パッド色素のみに影響します。'
+  },
+  d: {
+    title: 'D座位 (MLPH) — 希釈遺伝子',
+    summary: '色素の濃度を薄める（希釈する）遺伝子。黒→ブルー、茶→ライラック/イザベラ、黄→シャンパン。',
+    phenotype: 'D/_ : 通常通り\\ndd  : 希釈',
+    advice: 'ワイマラナーの『ねずみ色』、フレンチブルドッグの『ブルー』などは dd によるもの。'
+  },
+  m: {
+    title: 'M座位 (PMEL17) — マールパターン',
+    summary: 'コートに不規則な色のまだら（マール）を作る遺伝子。M/M（ダブルマール）は重大な健康リスクあり。',
+    phenotype: 'm/m : マールなし\\nM/m : マール表現型\\nM/M : ダブルマール（白割合増・視聴覚障害リスク大）',
+    advice: '⚠️ M/m × M/m の交配は厳禁。25% の確率でダブルマール子犬が生まれ、失明・難聴のリスクがあります。'
+  },
+  s: {
+    title: 'S座位 (MITF) — パイド/パーティカラー',
+    summary: 'コートに白い部分（白斑）を作るかどうかを決めます。',
+    phenotype: 'S/S    : 白斑なし or 最小\\nS/sp   : 軽度の白斑\\nsp/sp  : パーティカラー（白の割合が高い）',
+    advice: 'パーティプードルは sp/sp。Irish spotting 等の他遺伝子も白の表現に関与。'
+  },
+  g: {
+    title: 'G座位 (Greying / PMEL17) — 進行性退色',
+    summary: '子犬期は色付きで生まれ、成犬になると退色する遺伝子。プードルのシルバー色の原因。',
+    phenotype: 'g/g  : 退色なし\\nG/g, G/G : 成犬で退色\\n  Black + G_  → Silver\\n  Brown + G_  → Silver Beige\\n  Blue + G_   → Silver（淡）',
+    advice: 'シルバープードルは生まれた時は黒。1〜2歳までに段階的に退色していきます。'
+  }
+};
+
+function showLocusInfo(locus) {
+  const kb = LOCUS_KB[locus];
+  if (!kb) return;
+  const modal = document.getElementById('locusModal');
+  document.getElementById('locusModalTitle').textContent = kb.title;
+  const body = document.getElementById('locusModalBody');
+  const sections = [
+    { label: '📋 概要', text: kb.summary },
+    { label: '🎨 表現型', text: kb.phenotype },
+    { label: '💡 アドバイス', text: kb.advice }
+  ];
+  body.innerHTML = sections
+    .filter(s => s.text)
+    .map(s => '<div class="field"><span class="field-label">' + s.label + '</span>' +
+              s.text.replace(/\\n/g, '<br>') + '</div>')
+    .join('') +
+    '<div class="field refs"><span class="field-label">🔗 完全な解説</span>' +
+    '<a href="/glossary" target="_blank" rel="noopener">📖 全44疾患 + 形質辞書を見る ↗</a></div>';
+  if (typeof modal.showModal === 'function') {
+    modal.showModal();
+  } else {
+    // dialog 非対応ブラウザのフォールバック
+    modal.setAttribute('open', '');
+  }
+}
+function closeLocusModal() {
+  const modal = document.getElementById('locusModal');
+  if (typeof modal.close === 'function') modal.close();
+  else modal.removeAttribute('open');
+}
+
+// === COI 解説モーダル（理解できるコンセプト） ===
+const COI_KB = {
+  title: '近親交配係数 (COI / Coefficient of Inbreeding) とは',
+  summary: '父親と母親が共通の祖先を持つ場合、その子犬が両親から同じ遺伝子を 2 コピー受け継ぐ確率を示す指標です。Sewall Wright が 1922 年に確立しました。',
+  scale: [
+    { range: '0%',         desc: '完全に無関係な両親同士の交配。理論上のベースライン',         color: '#22c55e' },
+    { range: '〜6.25%',    desc: 'いとこ婚相当。一般的に許容範囲',                                color: '#22c55e' },
+    { range: '6.25〜12.5%', desc: '半兄妹婚相当。免疫力低下・繁殖力低下の傾向あり',            color: '#eab308' },
+    { range: '12.5〜25%',  desc: '兄妹婚・親子婚相当。遺伝性疾患の発現リスク大幅増加',        color: '#ef4444' },
+    { range: '25%超',      desc: '近親婚の繰り返し。劣性遺伝病の発症率が指数関数的に上昇',  color: '#dc2626' },
+  ],
+  health: '高COI犬は劣性遺伝病が顕在化しやすく、免疫機能・繁殖能力・寿命の低下が報告されています。育種学的には JKC・FCI 等が「COI 6.25% 以下を推奨」とするケースが多いです。',
+  calculation: 'Wright の経路法: COI = Σ (0.5)^(n+m+1)\n  n = 個体 → 共通祖先 → 父 までの世代数\n  m = 個体 → 共通祖先 → 母 までの世代数\n複数の共通祖先がいる場合は各経路の寄与を合計します。',
+  advice: '繁殖計画では COI を計算前に **両親候補の登録番号レベルで照合**し、共通祖先を確認することが重要です。本ツールは 3 世代上限の簡易計算なので、より深い世代の重複は別途確認してください。',
+  references: [
+    { label: 'Wikipedia: 近交係数', url: 'https://ja.wikipedia.org/wiki/Special:Search/' + encodeURIComponent('近交係数') },
+    { label: '詳細を検索', url: 'https://www.google.com/search?q=' + encodeURIComponent('COI 近親交配係数 犬 Wright') },
+  ],
+};
+
+function showCoiInfo() {
+  const modal = document.getElementById('locusModal');
+  document.getElementById('locusModalTitle').textContent = COI_KB.title;
+  let html = '<div class="field"><span class="field-label">📋 概要</span>' + COI_KB.summary + '</div>';
+  // 段階別表
+  html += '<div class="field"><span class="field-label">🎚 段階の目安（人間関係換算）</span>';
+  html += '<table style="width:100%;border-collapse:collapse;font-size:0.88em;margin-top:6px;">';
+  html += '<tr style="background:#f3f4f6;"><th style="padding:6px 10px;text-align:left;border-bottom:1px solid #e5e7eb;">COI 範囲</th><th style="padding:6px 10px;text-align:left;border-bottom:1px solid #e5e7eb;">意味</th></tr>';
+  for (const s of COI_KB.scale) {
+    html += '<tr><td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;"><strong style="color:' + s.color + ';">' + s.range + '</strong></td>'
+         + '<td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;">' + s.desc + '</td></tr>';
+  }
+  html += '</table></div>';
+  html += '<div class="field"><span class="field-label">⚠️ 健康への影響</span>' + COI_KB.health + '</div>';
+  html += '<div class="field" style="white-space:pre-line"><span class="field-label">🧪 計算方法</span>' + COI_KB.calculation + '</div>';
+  html += '<div class="field"><span class="field-label">💡 アドバイス</span>' + COI_KB.advice + '</div>';
+  html += '<div class="field refs"><span class="field-label">🔗 参考リンク</span>'
+       + COI_KB.references.map(r => '<a href="' + r.url + '" target="_blank" rel="noopener noreferrer">' + r.label + ' ↗</a>').join('')
+       + '</div>';
+  document.getElementById('locusModalBody').innerHTML = html;
+  if (typeof modal.showModal === 'function') modal.showModal();
+  else modal.setAttribute('open', '');
+}
+
+// === 疾患KB モーダル: /api/glossary から DISEASE_KB を遅延ロード ===
+let DISEASE_KB_CACHE = null;
+async function loadDiseaseKbOnce() {
+  if (DISEASE_KB_CACHE) return DISEASE_KB_CACHE;
+  try {
+    const res = await fetch('/api/glossary');
+    if (!res.ok) throw new Error('fetch failed: ' + res.status);
+    const data = await res.json();
+    DISEASE_KB_CACHE = Array.isArray(data.diseases) ? data.diseases : [];
+  } catch (e) {
+    console.warn('Disease KB load failed:', e);
+    DISEASE_KB_CACHE = [];
+  }
+  return DISEASE_KB_CACHE;
+}
+
+function _findDiseaseEntry(kb, key) {
+  // 検査名 key (例: "CDDY+IVDD") に該当する KB エントリを探す
+  const norm = String(key || '').toLowerCase().replace(/[-_]/g, ' ');
+  for (const e of kb) {
+    for (const pat of (e.match || [])) {
+      if (pat.startsWith('\\b') && pat.endsWith('\\b')) {
+        // 簡易: \b...\b は word内 substring に置換して評価
+        const inner = pat.slice(2, -2);
+        const re = new RegExp('\\b' + inner.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+        if (re.test(norm)) return e;
+      } else if (norm.includes(pat)) {
+        return e;
+      }
+    }
+  }
+  return null;
+}
+
+async function showDiseaseInfo(diseaseKey) {
+  const kb = await loadDiseaseKbOnce();
+  const entry = _findDiseaseEntry(kb, diseaseKey);
+  const modal = document.getElementById('locusModal');
+  const title = document.getElementById('locusModalTitle');
+  const body = document.getElementById('locusModalBody');
+
+  if (!entry) {
+    title.textContent = diseaseKey || '疾患情報';
+    body.innerHTML = '<div class="field"><span class="field-label">解説</span>' +
+      'この検査項目の詳細解説はまだ登録されていません。<br>' +
+      '<a href="/glossary" target="_blank" rel="noopener">📖 辞書ページで検索する ↗</a></div>';
+  } else {
+    title.textContent = entry.title || diseaseKey;
+    const sections = [
+      { label: '📋 概要', text: entry.summary },
+      { label: '🧬 メカニズム', text: entry.mechanism },
+      { label: '⚠️ 症状', text: entry.symptoms },
+      { label: '🧪 遺伝様式', text: entry.inheritance },
+      { label: '💡 アドバイス', text: entry.advice }
+    ];
+    let html = sections.filter(s => s.text).map(s =>
+      '<div class="field"><span class="field-label">' + s.label + '</span>' + s.text + '</div>'
+    ).join('');
+    if (Array.isArray(entry.references) && entry.references.length) {
+      html += '<div class="field refs"><span class="field-label">🔗 参考リンク</span>' +
+        entry.references.map(r =>
+          '<a href="' + r.url + '" target="_blank" rel="noopener noreferrer">' + r.label + ' ↗</a>'
+        ).join('') + '</div>';
+    }
+    body.innerHTML = html;
+  }
+
+  if (typeof modal.showModal === 'function') modal.showModal();
+  else modal.setAttribute('open', '');
+}
 </script>
+
+<!-- 座位ヘルプモーダル -->
+<dialog id="locusModal" class="kb-modal" aria-labelledby="locusModalTitle">
+  <div class="kb-modal-head">
+    <h3 id="locusModalTitle">座位の解説</h3>
+    <button type="button" class="kb-close" onclick="closeLocusModal()" aria-label="閉じる">✕</button>
+  </div>
+  <div class="kb-modal-body" id="locusModalBody"></div>
+</dialog>
 </body>
 </html>
