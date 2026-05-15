@@ -89,6 +89,53 @@ tr:hover td { background:#faf5ff; }
 select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:focus-visible {
   outline:3px solid var(--purple); outline-offset:2px;
 }
+
+/* === 座位ヘルプボタン（理解できるコンセプト） === */
+.kb-help {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:18px; height:18px; margin-left:6px;
+  background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd;
+  border-radius:50%; cursor:pointer; font-size:0.7em; font-weight:700;
+  font-family:inherit; line-height:1; padding:0;
+  transition:all 0.15s;
+  vertical-align:middle;
+}
+.kb-help:hover, .kb-help:focus { background:var(--purple); color:#fff; outline:none; }
+
+/* === KB モーダル === */
+dialog.kb-modal {
+  border:none; border-radius:12px; padding:0; max-width:560px;
+  width:90vw; max-height:85vh;
+  box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}
+dialog.kb-modal::backdrop { background:rgba(0,0,0,0.4); }
+dialog.kb-modal .kb-modal-head {
+  background:linear-gradient(135deg,var(--purple),var(--pink));
+  color:#fff; padding:16px 24px;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  border-radius:12px 12px 0 0;
+}
+dialog.kb-modal .kb-modal-head h3 { font-size:1.1em; margin:0; }
+dialog.kb-modal .kb-close {
+  background:rgba(255,255,255,0.2); border:none; color:#fff;
+  width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:1em;
+}
+dialog.kb-modal .kb-close:hover { background:rgba(255,255,255,0.4); }
+dialog.kb-modal .kb-modal-body {
+  padding:20px 24px; max-height:65vh; overflow-y:auto;
+  font-size:0.92em; line-height:1.65;
+}
+dialog.kb-modal .kb-modal-body .field { margin-bottom:14px; }
+dialog.kb-modal .kb-modal-body .field-label {
+  display:block; font-weight:700; color:var(--purple);
+  margin-bottom:4px; font-size:0.95em;
+}
+dialog.kb-modal .kb-modal-body .refs a {
+  display:inline-block; margin:2px 6px 2px 0; padding:4px 11px;
+  background:#ede9fe; color:#5b21b6; text-decoration:none;
+  border-radius:14px; font-size:0.85em;
+}
+dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
 </style>
 </head>
 <body>
@@ -148,21 +195,21 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
       <div id="custom-sire" style="display:none;" class="card" style="background:#f9fafb;">
         <h3>父犬カスタム遺伝子型</h3>
         <div class="form-row">
-          <div class="form-group"><label>E Locus</label><select id="cs-e"><option value="EE">E/E</option><option value="Ee" selected>E/e</option><option value="ee">e/e</option></select></div>
-          <div class="form-group"><label>K Locus</label><select id="cs-k"><option value="KBKB">KB/KB</option><option value="KBky" selected>KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
+          <div class="form-group"><label>E Locus<button type="button" class="kb-help" onclick="showLocusInfo('e')" aria-label="E座位の解説">?</button></label><select id="cs-e"><option value="EE">E/E</option><option value="Ee" selected>E/e</option><option value="ee">e/e</option></select></div>
+          <div class="form-group"><label>K Locus<button type="button" class="kb-help" onclick="showLocusInfo('k')" aria-label="K座位の解説">?</button></label><select id="cs-k"><option value="KBKB">KB/KB</option><option value="KBky" selected>KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>A Locus</label><select id="cs-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
-          <div class="form-group"><label>B Locus</label><select id="cs-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
+          <div class="form-group"><label>A Locus<button type="button" class="kb-help" onclick="showLocusInfo('a')" aria-label="A座位の解説">?</button></label><select id="cs-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
+          <div class="form-group"><label>B Locus<button type="button" class="kb-help" onclick="showLocusInfo('b')" aria-label="B座位の解説">?</button></label><select id="cs-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>D Locus</label><select id="cs-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
-          <div class="form-group"><label>M Locus</label><select id="cs-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
+          <div class="form-group"><label>D Locus<button type="button" class="kb-help" onclick="showLocusInfo('d')" aria-label="D座位の解説">?</button></label><select id="cs-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
+          <div class="form-group"><label>M Locus<button type="button" class="kb-help" onclick="showLocusInfo('m')" aria-label="M座位の解説">?</button></label><select id="cs-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>S (Pied)</label><select id="cs-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
+          <div class="form-group"><label>S (Pied)<button type="button" class="kb-help" onclick="showLocusInfo('s')" aria-label="S座位の解説">?</button></label><select id="cs-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
           <div class="form-group">
-            <label>G (Greying / 退色)</label>
+            <label>G (Greying / 退色)<button type="button" class="kb-help" onclick="showLocusInfo('g')" aria-label="G座位の解説">?</button></label>
             <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
               <input type="checkbox" id="cs-g" onchange="runColorSim()">
               Greying遺伝子を持つ（G/g 想定）
@@ -174,21 +221,21 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
       <div id="custom-dam" style="display:none;" class="card">
         <h3>母犬カスタム遺伝子型</h3>
         <div class="form-row">
-          <div class="form-group"><label>E Locus</label><select id="cd-e"><option value="EE">E/E</option><option value="Ee">E/e</option><option value="ee" selected>e/e</option></select></div>
-          <div class="form-group"><label>K Locus</label><select id="cd-k"><option value="KBKB" selected>KB/KB</option><option value="KBky">KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
+          <div class="form-group"><label>E Locus<button type="button" class="kb-help" onclick="showLocusInfo('e')" aria-label="E座位の解説">?</button></label><select id="cd-e"><option value="EE">E/E</option><option value="Ee">E/e</option><option value="ee" selected>e/e</option></select></div>
+          <div class="form-group"><label>K Locus<button type="button" class="kb-help" onclick="showLocusInfo('k')" aria-label="K座位の解説">?</button></label><select id="cd-k"><option value="KBKB" selected>KB/KB</option><option value="KBky">KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>A Locus</label><select id="cd-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
-          <div class="form-group"><label>B Locus</label><select id="cd-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
+          <div class="form-group"><label>A Locus<button type="button" class="kb-help" onclick="showLocusInfo('a')" aria-label="A座位の解説">?</button></label><select id="cd-a"><option value="ayay">ay/ay</option><option value="ayat">ay/at</option><option value="away">ay/aw</option><option value="aay">ay/a</option><option value="awaw">aw/aw</option><option value="ataw">aw/at</option><option value="aaw">aw/a</option><option value="atat" selected>at/at</option><option value="aat">at/a</option><option value="aa">a/a</option></select></div>
+          <div class="form-group"><label>B Locus<button type="button" class="kb-help" onclick="showLocusInfo('b')" aria-label="B座位の解説">?</button></label><select id="cd-b"><option value="BB">BB</option><option value="Bb" selected>Bb</option><option value="bb">bb</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>D Locus</label><select id="cd-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
-          <div class="form-group"><label>M Locus</label><select id="cd-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
+          <div class="form-group"><label>D Locus<button type="button" class="kb-help" onclick="showLocusInfo('d')" aria-label="D座位の解説">?</button></label><select id="cd-d"><option value="DD" selected>D/D</option><option value="Dd">D/d</option><option value="dd">d/d</option></select></div>
+          <div class="form-group"><label>M Locus<button type="button" class="kb-help" onclick="showLocusInfo('m')" aria-label="M座位の解説">?</button></label><select id="cd-m"><option value="mm" selected>m/m</option><option value="Mm">M/m</option><option value="MM">M/M</option></select></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>S (Pied)</label><select id="cd-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
+          <div class="form-group"><label>S (Pied)<button type="button" class="kb-help" onclick="showLocusInfo('s')" aria-label="S座位の解説">?</button></label><select id="cd-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
           <div class="form-group">
-            <label>G (Greying / 退色)</label>
+            <label>G (Greying / 退色)<button type="button" class="kb-help" onclick="showLocusInfo('g')" aria-label="G座位の解説">?</button></label>
             <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
               <input type="checkbox" id="cd-g" onchange="runColorSim()">
               Greying遺伝子を持つ（G/g 想定）
@@ -1217,6 +1264,99 @@ document.addEventListener('DOMContentLoaded', () => {
   runColorSim();
   runHealthSim();
 });
+
+// === 座位ヘルプモーダル (KB) ===
+// テキストは TRAIT_KB のサブセット。完全な辞書は /glossary で閲覧可能。
+const LOCUS_KB = {
+  e: {
+    title: 'E座位 (MC1R) — 黒系色素のスイッチ',
+    summary: 'コートに黒/茶色色素（eumelanin）を作るかどうかを決める『マスタースイッチ』です。',
+    phenotype: 'E/E, E/e: コートに黒/茶色素を発現可能（K・A座位の支配を受ける）\\ne/e: コートはクリーム〜アプリコット〜レッド（KITLG が濃淡決定）',
+    advice: 'e/e でも鼻・パッド・アイリムの色は B 座位で決まります（黒 or ブラウン）。'
+  },
+  k: {
+    title: 'K座位 (CBD103) — ドミナントブラック',
+    summary: '黒一色（ソリッド）かどうかを決める優性遺伝子です。',
+    phenotype: 'KB/_  : ソリッド（黒・茶・希釈色、E と B で決まる）\\nky/ky : A座位の模様（セーブル・タンポイント等）\\nkbr/_ : ブリンドル',
+    advice: 'ソリッドカラーを残したいなら KB を維持。模様を出したいなら ky/ky × ky/ky。'
+  },
+  a: {
+    title: 'A座位 (ASIP) — アグーチ（模様）パターン',
+    summary: 'K座位が ky/ky のときに発現する『毛色の模様』を決める座位です。優性順位 ay > aw > at > a。',
+    phenotype: 'ay/_  : フォーン/セーブル\\naw/_ : ワイルドセーブル\\nat/_ : ブラックタン/トライカラー\\na/a   : リセッシブブラック',
+    advice: '見た目の模様は A 座位 + K 座位 + E 座位の組み合わせで決まります。'
+  },
+  b: {
+    title: 'B座位 (TYRP1) — ブラウン色素',
+    summary: '黒色素を「黒」のまま発現するか「茶色」に変換するかを決めます。',
+    phenotype: 'B/_ : 通常通り黒色素\\nbb  : 全ての黒がブラウン（チョコ/レバー）',
+    advice: 'e/e の場合 B はコート色に影響せず、鼻・パッド色素のみに影響します。'
+  },
+  d: {
+    title: 'D座位 (MLPH) — 希釈遺伝子',
+    summary: '色素の濃度を薄める（希釈する）遺伝子。黒→ブルー、茶→ライラック/イザベラ、黄→シャンパン。',
+    phenotype: 'D/_ : 通常通り\\ndd  : 希釈',
+    advice: 'ワイマラナーの『ねずみ色』、フレンチブルドッグの『ブルー』などは dd によるもの。'
+  },
+  m: {
+    title: 'M座位 (PMEL17) — マールパターン',
+    summary: 'コートに不規則な色のまだら（マール）を作る遺伝子。M/M（ダブルマール）は重大な健康リスクあり。',
+    phenotype: 'm/m : マールなし\\nM/m : マール表現型\\nM/M : ダブルマール（白割合増・視聴覚障害リスク大）',
+    advice: '⚠️ M/m × M/m の交配は厳禁。25% の確率でダブルマール子犬が生まれ、失明・難聴のリスクがあります。'
+  },
+  s: {
+    title: 'S座位 (MITF) — パイド/パーティカラー',
+    summary: 'コートに白い部分（白斑）を作るかどうかを決めます。',
+    phenotype: 'S/S    : 白斑なし or 最小\\nS/sp   : 軽度の白斑\\nsp/sp  : パーティカラー（白の割合が高い）',
+    advice: 'パーティプードルは sp/sp。Irish spotting 等の他遺伝子も白の表現に関与。'
+  },
+  g: {
+    title: 'G座位 (Greying / PMEL17) — 進行性退色',
+    summary: '子犬期は色付きで生まれ、成犬になると退色する遺伝子。プードルのシルバー色の原因。',
+    phenotype: 'g/g  : 退色なし\\nG/g, G/G : 成犬で退色\\n  Black + G_  → Silver\\n  Brown + G_  → Silver Beige\\n  Blue + G_   → Silver（淡）',
+    advice: 'シルバープードルは生まれた時は黒。1〜2歳までに段階的に退色していきます。'
+  }
+};
+
+function showLocusInfo(locus) {
+  const kb = LOCUS_KB[locus];
+  if (!kb) return;
+  const modal = document.getElementById('locusModal');
+  document.getElementById('locusModalTitle').textContent = kb.title;
+  const body = document.getElementById('locusModalBody');
+  const sections = [
+    { label: '📋 概要', text: kb.summary },
+    { label: '🎨 表現型', text: kb.phenotype },
+    { label: '💡 アドバイス', text: kb.advice }
+  ];
+  body.innerHTML = sections
+    .filter(s => s.text)
+    .map(s => '<div class="field"><span class="field-label">' + s.label + '</span>' +
+              s.text.replace(/\\n/g, '<br>') + '</div>')
+    .join('') +
+    '<div class="field refs"><span class="field-label">🔗 完全な解説</span>' +
+    '<a href="/glossary" target="_blank" rel="noopener">📖 全44疾患 + 形質辞書を見る ↗</a></div>';
+  if (typeof modal.showModal === 'function') {
+    modal.showModal();
+  } else {
+    // dialog 非対応ブラウザのフォールバック
+    modal.setAttribute('open', '');
+  }
+}
+function closeLocusModal() {
+  const modal = document.getElementById('locusModal');
+  if (typeof modal.close === 'function') modal.close();
+  else modal.removeAttribute('open');
+}
 </script>
+
+<!-- 座位ヘルプモーダル -->
+<dialog id="locusModal" class="kb-modal" aria-labelledby="locusModalTitle">
+  <div class="kb-modal-head">
+    <h3 id="locusModalTitle">座位の解説</h3>
+    <button type="button" class="kb-close" onclick="closeLocusModal()" aria-label="閉じる">✕</button>
+  </div>
+  <div class="kb-modal-body" id="locusModalBody"></div>
+</dialog>
 </body>
 </html>
