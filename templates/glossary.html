@@ -51,6 +51,17 @@
   /* セクション切替 */
   .section-content { display:none; }
   .section-content.active { display:block; }
+
+  /* カテゴリグループ */
+  .toc { background:#fff; padding:14px 18px; border-radius:10px; margin-bottom:18px; border:1px solid #e5e7eb; }
+  .toc-title { font-size:0.85em; color:#6b7280; margin-bottom:8px; font-weight:600; }
+  .toc-links { display:flex; flex-wrap:wrap; gap:6px; }
+  .toc-links a { background:#f3f4f6; color:#374151; padding:5px 11px; border-radius:14px; text-decoration:none; font-size:0.82em; }
+  .toc-links a:hover { background:#ede9fe; color:#5b21b6; }
+
+  .cat-section { margin-bottom:24px; scroll-margin-top:80px; }
+  .cat-section h3 { color:#4a1a7a; font-size:1.05em; margin-bottom:10px; padding:8px 12px; background:linear-gradient(90deg,#faf5ff,transparent); border-left:4px solid #7c3aed; border-radius:0 6px 6px 0; }
+  .cat-section h3 .cat-count { background:#ede9fe; color:#5b21b6; padding:2px 8px; border-radius:10px; font-size:0.75em; margin-left:6px; }
 </style>
 </head>
 <body>
@@ -89,31 +100,48 @@
     </button>
   </div>
 
-  <!-- 疾患リスト -->
+  <!-- 疾患リスト（カテゴリ別） -->
   <div id="section-diseases" class="section-content active">
-    {% if diseases %}
-    <div class="entries">
-      {% for d in diseases %}
-      <details class="entry">
-        <summary>{{ d.title }}</summary>
-        <div class="body">
-          {% if d.summary %}<div class="field"><span class="field-label">📋 概要</span>{{ d.summary }}</div>{% endif %}
-          {% if d.mechanism %}<div class="field"><span class="field-label">🧬 メカニズム</span>{{ d.mechanism }}</div>{% endif %}
-          {% if d.symptoms %}<div class="field"><span class="field-label">⚠️ 症状</span>{{ d.symptoms }}</div>{% endif %}
-          {% if d.inheritance %}<div class="field"><span class="field-label">🧪 遺伝様式</span>{{ d.inheritance }}</div>{% endif %}
-          {% if d.advice %}<div class="field"><span class="field-label">💡 アドバイス</span>{{ d.advice }}</div>{% endif %}
-          {% if d.references %}
-          <div class="refs">
-            <span class="field-label">🔗 参考リンク</span>
-            {% for ref in d.references %}
-            <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
-            {% endfor %}
-          </div>
-          {% endif %}
+    {% if disease_groups %}
+
+      <!-- 目次 -->
+      <div class="toc" aria-label="カテゴリ目次">
+        <div class="toc-title">📑 目次 — カテゴリでジャンプ</div>
+        <div class="toc-links">
+          {% for cat, items in disease_groups %}
+          <a href="#cat-{{ loop.index }}">{{ cat }} ({{ items|length }})</a>
+          {% endfor %}
         </div>
-      </details>
+      </div>
+
+      {% for cat, items in disease_groups %}
+      <section class="cat-section" id="cat-{{ loop.index }}">
+        <h3>{{ cat }}<span class="cat-count">{{ items|length }}</span></h3>
+        <div class="entries">
+          {% for d in items %}
+          <details class="entry">
+            <summary>{{ d.title }}</summary>
+            <div class="body">
+              {% if d.summary %}<div class="field"><span class="field-label">📋 概要</span>{{ d.summary }}</div>{% endif %}
+              {% if d.mechanism %}<div class="field"><span class="field-label">🧬 メカニズム</span>{{ d.mechanism }}</div>{% endif %}
+              {% if d.symptoms %}<div class="field"><span class="field-label">⚠️ 症状</span>{{ d.symptoms }}</div>{% endif %}
+              {% if d.inheritance %}<div class="field"><span class="field-label">🧪 遺伝様式</span>{{ d.inheritance }}</div>{% endif %}
+              {% if d.advice %}<div class="field"><span class="field-label">💡 アドバイス</span>{{ d.advice }}</div>{% endif %}
+              {% if d.references %}
+              <div class="refs">
+                <span class="field-label">🔗 参考リンク</span>
+                {% for ref in d.references %}
+                <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </details>
+          {% endfor %}
+        </div>
+      </section>
       {% endfor %}
-    </div>
+
     {% else %}
     <div class="empty-state">「{{ query }}」に該当する疾患は見つかりませんでした。</div>
     {% endif %}
