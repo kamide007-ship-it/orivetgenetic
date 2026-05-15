@@ -460,6 +460,344 @@ HEALTH_TEST_BLACKLIST = [
 ]
 
 
+# ============================================================
+# 詳細解説ナレッジベース（一般飼い主向け）
+# ============================================================
+# 「理解できること」を目的に、各疾患・形質について
+#   - summary: 1〜2文の概要（何の病気/形質か）
+#   - mechanism: 発症メカニズム・特徴
+#   - symptoms: 症状（疾患の場合）
+#   - inheritance: 遺伝様式
+#   - advice: 飼育・繁殖時のアドバイス
+#   - references: 参考リンク [{label, url}]
+# を提供する。
+#
+# 参考リンクは URL が常に有効である **Wikipedia 検索URL** と
+# **Google 検索URL** を採用。直接記事URLは時間経過で404になる
+# リスクがあるため、検索URLでフェイルセーフ。
+# 追加リンクが必要な場合は references リストに新エントリを足すだけ。
+
+def _wiki_jp(term: str) -> str:
+    """Wikipedia 日本語版の検索URL（常に有効）"""
+    from urllib.parse import quote
+    return "https://ja.wikipedia.org/wiki/Special:Search/" + quote(term)
+
+
+def _google_search(query: str) -> str:
+    from urllib.parse import quote
+    return "https://www.google.com/search?q=" + quote(query)
+
+
+DISEASE_KB = [
+    {
+        "match": ["chondrodystrophy", "cddy", "ivdd"],
+        "title": "軟骨異栄養症 + 椎間板疾患 (CDDY+IVDD)",
+        "summary": "椎間板を構成する軟骨の異常により、椎間板ヘルニアを起こしやすくなる遺伝性疾患です。",
+        "mechanism": "FGF4遺伝子のレトロウィルス挿入が原因。椎間板の中心部（髄核）が早期に変性・石灰化し、些細な衝撃で破裂し脊髄を圧迫します。",
+        "symptoms": "後肢のふらつき、痛み、歩行困難。重症例では完全麻痺や排尿障害が起こり得ます。",
+        "inheritance": "常染色体（不完全）優性。1コピーでもリスクが上がり、2コピーでさらに高まります。",
+        "advice": "P/P 同士の交配は避けることを強く推奨。発症リスクのある個体は体重管理と階段の昇降・激しい運動を控えることが重要。",
+        "references": [
+            {"label": "Wikipedia: 椎間板ヘルニア", "url": _wiki_jp("椎間板ヘルニア")},
+            {"label": "詳細を検索 (CDDY)", "url": _google_search("CDDY IVDD 犬 軟骨異栄養症")},
+        ],
+    },
+    {
+        "match": ["osteochondrodysplasia"],
+        "title": "骨軟骨異形成症 (Osteochondrodysplasia / SLC13A1)",
+        "summary": "骨と軟骨の発達異常により、四肢の短縮や関節異常が現れる遺伝性疾患です。",
+        "mechanism": "SLC13A1 遺伝子の変異によりミネラル代謝が異常になり、骨格の正常な発達が阻害されます。",
+        "symptoms": "四肢の短縮、関節の変形、運動制限。スコティッシュフォールド・ミニチュアプードルなどで報告。",
+        "inheritance": "常染色体劣性。両親共にキャリア(P/N)の場合、25% の確率で発症犬(P/P)が生まれます。",
+        "advice": "P/N 同士の交配は避けてください。発症犬は獣医師による定期的な整形外科診察を推奨。",
+        "references": [
+            {"label": "Wikipedia: 骨軟骨異形成症", "url": _wiki_jp("骨軟骨異形成症")},
+            {"label": "詳細を検索", "url": _google_search("骨軟骨異形成症 犬 SLC13A1")},
+        ],
+    },
+    {
+        "match": ["chondrodysplasia (cdpa)", "cdpa", "chondrodysplasia"],
+        "title": "軟骨異形成症 (CDPA / 短足遺伝子)",
+        "summary": "短い四肢を生む遺伝子で、ダックスフンド・コーギーなどの「短足犬種」の特徴となる因子です。",
+        "mechanism": "FGF4 遺伝子の重複により軟骨形成が変化し、四肢が短くなります。CDDY と異なり病気そのものではなく、犬種特性として定着しています。",
+        "symptoms": "通常、症状はなし。短足は犬種スタンダードとして許容されています。",
+        "inheritance": "不完全優性。短足犬種では多くが P/P または P/N。",
+        "advice": "短足犬種ではこの因子の保有が一般的。CDDY とは別の因子ですが、合わせて検査する場合が多いです。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("CDPA 軟骨異形成症 犬 FGF4")},
+        ],
+    },
+    {
+        "match": ["macrothrombocytopenia"],
+        "title": "先天性巨大血小板減少症 (Macrothrombocytopenia / β1-tubulin)",
+        "summary": "血小板が通常より大きく、数が少ない遺伝性疾患です。多くは無症状ですが手術時に注意が必要。",
+        "mechanism": "TUBB1 遺伝子（β1-tubulin）の変異により血小板の形成が異常になります。キャバリア・キング・チャールズ・スパニエルで頻発。",
+        "symptoms": "ほとんどの場合無症状。健康診断で血小板数が低く出るが、機能は保たれていることが多い。",
+        "inheritance": "常染色体劣性。両親キャリアの場合 25% で発症犬。",
+        "advice": "手術前には事前に獣医師に申告してください。誤って「血小板減少症」と診断されないよう注意。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Macrothrombocytopenia 犬 TUBB1")},
+        ],
+    },
+    {
+        "match": ["methemoglobinemia"],
+        "title": "先天性メトヘモグロビン血症 (Methemoglobinemia / CYB5R3)",
+        "summary": "血液中のヘモグロビンが酸素を運べない型に変わってしまう遺伝性疾患です。",
+        "mechanism": "CYB5R3 遺伝子の変異により、酸化型ヘモグロビン（メトヘモグロビン）を還元する酵素が欠損。慢性的なチアノーゼ症状を起こします。",
+        "symptoms": "皮膚・粘膜の青紫変色（チアノーゼ）、運動不耐性、疲れやすい。",
+        "inheritance": "常染色体劣性。両親キャリアの場合 25% で発症犬。",
+        "advice": "発症犬は獣医師の管理下で定期検査が必要。麻酔時は特に注意。",
+        "references": [
+            {"label": "Wikipedia: メトヘモグロビン血症", "url": _wiki_jp("メトヘモグロビン血症")},
+            {"label": "詳細を検索", "url": _google_search("Methemoglobinemia 犬 CYB5R3")},
+        ],
+    },
+    {
+        "match": ["von willebrand", "vwd"],
+        "title": "フォン・ヴィレブランド病 I型 (vWD1)",
+        "summary": "止血に関わるフォン・ヴィレブランド因子が不足し、出血が止まりにくくなる遺伝性疾患です。",
+        "mechanism": "vWF 遺伝子の変異により、血小板を血管壁に結合させる蛋白質が不足。軽度（I型）から重度（II型・III型）まで様々。ドーベルマンで頻発。",
+        "symptoms": "外傷時の止血困難、鼻血、歯科処置後の長時間出血、血便など。",
+        "inheritance": "常染色体（不完全）優性。1コピーで軽度症状、2コピーでより重度。",
+        "advice": "手術・抜歯前に必ず獣医師に申告してください。アスピリン等の抗血小板薬は避ける必要があります。",
+        "references": [
+            {"label": "Wikipedia: フォン・ヴィレブランド病", "url": _wiki_jp("フォン・ヴィレブランド病")},
+            {"label": "詳細を検索", "url": _google_search("vWD von Willebrand 犬")},
+        ],
+    },
+    {
+        "match": ["degenerative myelopathy", "\\bdm\\b"],
+        "title": "変性性脊髄症 (DM / SOD1)",
+        "summary": "高齢期に脊髄が徐々に変性し、後肢の麻痺が進行する遺伝性神経疾患です。",
+        "mechanism": "SOD1 遺伝子の変異により神経細胞内に異常蛋白質が蓄積。ヒトのALS（筋萎縮性側索硬化症）と類似のメカニズムで発症します。",
+        "symptoms": "8〜14歳頃から後肢のふらつき → 麻痺へ進行。痛みはない場合が多い。最終的には前肢にも進行。",
+        "inheritance": "常染色体劣性（不完全浸透）。P/P でも全頭発症するわけではなく、発症率は犬種により異なる。",
+        "advice": "P/P 同士の交配は避けることを推奨。発症犬はリハビリ・補助器具で QOL を維持できます。",
+        "references": [
+            {"label": "Wikipedia: 変性性脊髄症", "url": _wiki_jp("変性性脊髄症")},
+            {"label": "詳細を検索", "url": _google_search("Degenerative Myelopathy 犬 SOD1")},
+        ],
+    },
+    {
+        "match": ["gangliosidosis", "gm2"],
+        "title": "ガングリオシドーシス GM2 (GM2 / HEXB)",
+        "summary": "神経細胞内に脂質が異常蓄積し、進行性の神経障害を起こす重篤な遺伝性疾患です。",
+        "mechanism": "HEXB 遺伝子の変異によりリソソーム酵素ヘキソサミニダーゼBが欠損。GM2ガングリオシドが分解されず神経細胞に蓄積。ヒトのテイ・サックス病類似。",
+        "symptoms": "若齢で発症し、運動失調・痙攣・視覚障害が進行。多くは1〜2年で死に至る。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "P/N 同士の交配は厳に避けるべき。発症犬には根本治療はなく、対症療法のみ。",
+        "references": [
+            {"label": "Wikipedia: テイ・サックス病", "url": _wiki_jp("テイ・サックス病")},
+            {"label": "詳細を検索", "url": _google_search("GM2 Gangliosidosis 犬 HEXB")},
+        ],
+    },
+    {
+        "match": ["progressive rod cone", "prcd", "progressive retinal atrophy"],
+        "title": "進行性網膜萎縮症 (prcd-PRA / PRCD)",
+        "summary": "網膜の光受容細胞（杆体・錐体）が徐々に変性し、最終的に失明する遺伝性疾患です。",
+        "mechanism": "PRCD 遺伝子の変異により網膜細胞が徐々に死滅。最初に夜盲、次第に昼間視力も失われます。",
+        "symptoms": "薄暗い場所での視覚障害（夜盲）→ 周辺視野の喪失 → 完全失明。痛みはなし。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "発症は通常 3〜5歳以降のため、繁殖判断には遺伝子検査が重要。失明後も嗅覚・聴覚で適応可能。",
+        "references": [
+            {"label": "Wikipedia: 網膜色素変性症", "url": _wiki_jp("網膜色素変性症")},
+            {"label": "詳細を検索", "url": _google_search("prcd-PRA 犬 進行性網膜萎縮")},
+        ],
+    },
+    {
+        "match": ["exercise-induced collapse", "\\beic\\b"],
+        "title": "運動誘発性虚脱 (EIC / DNM1)",
+        "summary": "激しい運動の後に突然脱力・崩れる遺伝性疾患です。ラブラドール等で報告。",
+        "mechanism": "DNM1 遺伝子の変異により、運動中の神経シナプス伝達が一時的に障害されます。",
+        "symptoms": "5〜15分の激しい運動後、後肢の脱力・歩行不能。意識はあり、5〜25分で回復することが多い。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "発症犬は激しい運動を避け、ドッグスポーツへの参加は獣医師と相談を。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("EIC 運動誘発性虚脱 犬 DNM1")},
+        ],
+    },
+]
+
+
+def _normalize_for_match(text: str) -> str:
+    """マッチング用の正規化: lowercase + ハイフン/アンダースコアをスペースに."""
+    return re.sub(r"[\-_]", " ", text.lower())
+
+
+def get_disease_detail(test_name: str) -> Optional[dict]:
+    """疾患名から詳細解説を取得する。"""
+    if not test_name:
+        return None
+    name_norm = _normalize_for_match(test_name)
+    for entry in DISEASE_KB:
+        for pattern in entry["match"]:
+            # 簡易マッチング: substring または '\b...\b' 単語境界
+            if pattern.startswith("\\b") and pattern.endswith("\\b"):
+                if re.search(pattern, name_norm):
+                    return entry
+            elif pattern in name_norm:
+                return entry
+    return None
+
+
+# ============================================================
+# 形質（毛色など）詳細解説 KB
+# ============================================================
+
+TRAIT_KB = [
+    {
+        "match": ["e locus", "mc1r"],
+        "title": "E座位 (MC1R) — 黒系色素のスイッチ",
+        "summary": "コートに黒/茶色色素（eumelanin）を作るかどうかを決める『マスタースイッチ』です。",
+        "mechanism": "MC1R 遺伝子が活性なら黒/茶色素を産生。e/e ホモ（劣性）では完全に活性が失われ、コートは赤/黄/クリーム/ホワイトのみになります（鼻パッドの色素は残る）。",
+        "phenotype": "E/E, E/e: コートに黒/茶色素を発現可。K座位・A座位の支配を受ける。\\ne/e: コートはクリーム〜アプリコット〜レッド（KITLG が濃淡を決定）。",
+        "advice": "e/e でも鼻・パッド・アイリムの色は B 座位で決まります（黒 or ブラウン）。",
+        "references": [
+            {"label": "詳細を検索 (E locus)", "url": _google_search("E locus MC1R 犬 毛色")},
+        ],
+    },
+    {
+        "match": ["k locus", "cbd103"],
+        "title": "K座位 (CBD103) — ドミナントブラック",
+        "summary": "黒一色（ソリッド）かどうかを決める優性遺伝子です。",
+        "mechanism": "KB（優性）が 1コピーでもあると A 座位の表現が抑制され、コートは単色になります。ky/ky ではアグーチ模様（A座位）が現れます。kbr はブリンドル。",
+        "phenotype": "KB/_ : ソリッド（黒・茶・希釈色 など、E と B で決まる）\\nky/ky : A 座位の模様（セーブル・タンポイント等）\\nkbr/_  : ブリンドル",
+        "advice": "ソリッドカラーを残したいなら KB を維持。模様を出したいなら ky/ky × ky/ky に交配。",
+        "references": [
+            {"label": "詳細を検索 (K locus)", "url": _google_search("K locus CBD103 犬 ドミナントブラック")},
+        ],
+    },
+    {
+        "match": ["a locus", "agouti", "asip"],
+        "title": "A座位 (ASIP) — アグーチ（模様）パターン",
+        "summary": "K座位が ky/ky のときに発現する『毛色の模様』を決める座位です。",
+        "mechanism": "ay > aw > at > a の優性順位。ay=セーブル、aw=ワイルドセーブル、at=タンポイント、a=リセッシブブラック。",
+        "phenotype": "ay/_ : フォーン/セーブル\\naw/_ : ワイルドセーブル\\nat/_ : ブラックタン/トライカラー（ドーベルマン的）\\na/a : リセッシブブラック（単色黒）",
+        "advice": "見た目の模様パターンは A 座位＋K 座位＋E 座位の組み合わせで決まります。",
+        "references": [
+            {"label": "詳細を検索 (A locus)", "url": _google_search("A locus ASIP 犬 アグーチ")},
+        ],
+    },
+    {
+        "match": ["b locus", "tyrp1", "brown"],
+        "title": "B座位 (TYRP1) — ブラウン色素",
+        "summary": "黒色素を「黒」のまま発現するか「茶色」に変換するかを決めます。",
+        "mechanism": "TYRP1 遺伝子の機能が失われると（bb ホモ）、すべての黒色素がブラウンに変換されます。e/e の場合はコートに eumelanin が無いため B はコートに影響せず、鼻・パッド色素のみに影響します。",
+        "phenotype": "B/_ : 通常通り黒色素\\nbb : 全ての黒がブラウン（チョコレート/レバー）。ee と組み合わせるとコートはクリーム〜アプリコットだが鼻はブラウン。",
+        "advice": "チョコレート色を残したい場合は bb 必須。",
+        "references": [
+            {"label": "詳細を検索 (B locus)", "url": _google_search("B locus TYRP1 犬 ブラウン チョコレート")},
+        ],
+    },
+    {
+        "match": ["d locus", "dilute", "mlph"],
+        "title": "D座位 (MLPH) — 希釈遺伝子",
+        "summary": "色素の濃度を薄める（希釈する）遺伝子。黒→青/ブルー、茶→ライラック/イザベラ、黄→シャンパンになります。",
+        "mechanism": "MLPH 遺伝子の機能不全（dd ホモ）でメラニン顆粒が均一に分布せず、淡い色になります。",
+        "phenotype": "D/_ : 通常通り\\ndd : 希釈。Black→Blue, Brown→Lilac/Isabella, Yellow→Champagne",
+        "advice": "ワイマラナーの『ねずみ色』、フレンチブルドッグの『ブルー』などは dd によるもの。",
+        "references": [
+            {"label": "詳細を検索 (D locus)", "url": _google_search("D locus MLPH 犬 dilute ブルー")},
+        ],
+    },
+    {
+        "match": ["m locus", "merle", "pmel"],
+        "title": "M座位 (PMEL17) — マールパターン",
+        "summary": "コートに不規則な色のまだら（マール）を作る遺伝子。M/M（ダブルマール）は重大な健康リスクあり。",
+        "mechanism": "PMEL17 遺伝子の変異により、色素細胞の機能が部分的に失われ、まだら模様になります。M/M は失明・聴覚障害のリスクが高い。",
+        "phenotype": "m/m : マールなし\\nM/m : マール表現型\\nM/M : ダブルマール（白割合増・視聴覚障害リスク大）",
+        "advice": "**M/m × M/m の交配は厳禁**。25% の確率でダブルマール子犬が生まれます。",
+        "references": [
+            {"label": "詳細を検索 (Merle)", "url": _google_search("Merle locus PMEL17 犬 マール")},
+        ],
+    },
+    {
+        "match": ["s locus", "pied", "mitf", "piebald"],
+        "title": "S座位 (MITF) — パイド/パーティカラー",
+        "summary": "コートに白い部分（白斑）を作るかどうかを決めます。",
+        "mechanism": "MITF 遺伝子のプロモーター変異により、色素細胞の分布が制限されコートに白い領域ができます。",
+        "phenotype": "S/S : 白斑なし or 最小\\nS/sp : 軽度の白斑\\nsp/sp : パイド/パーティカラー（白の割合が高い）",
+        "advice": "パーティプードルなどは sp/sp。S 座位だけでなく Irish spotting 等の他遺伝子も白の表現に関与。",
+        "references": [
+            {"label": "詳細を検索 (S locus)", "url": _google_search("S locus MITF 犬 パイド ピーバルド")},
+        ],
+    },
+    {
+        "match": ["furnishings", "rspo2"],
+        "title": "ファーニシング (RSPO2)",
+        "summary": "眉毛・髭・飾り毛などの『ふさふさ』を作る遺伝子です。",
+        "mechanism": "RSPO2 遺伝子の挿入変異が顔の毛量を増やします。",
+        "phenotype": "F/F or F/N: ファーニシングあり（テリア・ドゥードゥル系）\\nN/N: スムースコート",
+        "advice": "ドゥードゥル系（ラブラドゥードル等）の見た目に大きく影響。",
+        "references": [
+            {"label": "詳細を検索 (Furnishings)", "url": _google_search("Furnishings RSPO2 犬 ファーニシング")},
+        ],
+    },
+    {
+        "match": ["curly coat", "krt71", "curl"],
+        "title": "巻き毛遺伝子 (KRT71)",
+        "summary": "コートが直毛か巻き毛かを決める遺伝子です。",
+        "mechanism": "KRT71 遺伝子の変異がカール毛を形成します。",
+        "phenotype": "C/C or C/N: 巻き毛\\nN/N: 直毛",
+        "advice": "プードル・ビションフリーゼ等は C/C ホモ。F 座位（ファーニシング）と組み合わせると様々な毛質に。",
+        "references": [
+            {"label": "詳細を検索 (Curly)", "url": _google_search("Curly coat KRT71 犬 巻き毛")},
+        ],
+    },
+]
+
+
+def get_trait_detail(test_name: str) -> Optional[dict]:
+    """形質名から詳細解説を取得する。"""
+    if not test_name:
+        return None
+    name_norm = _normalize_for_match(test_name)
+    for entry in TRAIT_KB:
+        for pattern in entry["match"]:
+            if pattern.startswith("\\b") and pattern.endswith("\\b"):
+                if re.search(pattern, name_norm):
+                    return entry
+            elif pattern in name_norm:
+                return entry
+    return None
+
+
+def render_detail_html(detail: dict) -> str:
+    """KB エントリ dict を折りたためる <details> HTML に変換。"""
+    if not detail:
+        return ""
+    refs_html = ""
+    for ref in detail.get("references", []):
+        url = _h(ref.get("url", "#"))
+        label = _h(ref.get("label", "リンク"))
+        refs_html += f'<a href="{url}" target="_blank" rel="noopener noreferrer" class="kb-ref-link">{label} ↗</a>'
+
+    sections = []
+    for field_key, label in [
+        ("summary", "📋 概要"),
+        ("mechanism", "🧬 メカニズム"),
+        ("symptoms", "⚠️ 症状"),
+        ("phenotype", "🎨 表現型"),
+        ("inheritance", "🧪 遺伝様式"),
+        ("advice", "💡 アドバイス"),
+    ]:
+        text = detail.get(field_key)
+        if text:
+            sections.append(f'<div class="kb-section"><strong>{label}</strong><div>{_h(text).replace(chr(10), "<br>")}</div></div>')
+
+    body = "".join(sections)
+    if refs_html:
+        body += f'<div class="kb-section kb-refs"><strong>🔗 参考リンク</strong><div>{refs_html}</div></div>'
+
+    return f"""<details class="kb-detail">
+<summary>📖 詳しい解説を見る</summary>
+<div class="kb-body">
+<h4 class="kb-title">{_h(detail.get("title", ""))}</h4>
+{body}
+</div>
+</details>"""
+
+
 def is_valid_health_test(test_name: str) -> bool:
     """有効な健康検査項目かどうかを判定（PDFの文字化けやゴミデータを除外）"""
     if not test_name or len(test_name) < 3:
@@ -1727,9 +2065,12 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             badge = status_badge(r.status, r.genotype if r.genotype else r.status.upper())
             annotation = get_health_annotation(r.test_name, r.genotype, r.status)
             annotation_html = f'<div style="margin-top:4px;padding:6px 8px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:4px;font-size:0.85em;color:#374151;">{_h(annotation)}</div>' if annotation else ''
+            # ↓ 「理解できること」コンセプト: 詳細解説 + 参考リンク
+            detail = get_disease_detail(r.test_name)
+            detail_html = render_detail_html(detail) if detail else ""
             health_rows += f"""        <tr>
           <td>{_h(r.category)}</td>
-          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{annotation_html}</td>
+          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{annotation_html}{detail_html}</td>
           <td>{badge}</td>
           <td style="font-size:0.85em">{_h(r.result_text[:120])}</td>
         </tr>\n"""
@@ -1740,8 +2081,11 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             badge = status_badge("trait", r.genotype if r.genotype else "—")
             annotation = get_trait_annotation(r.test_name, r.genotype)
             annotation_html = f'<div style="margin-top:4px;padding:6px 8px;background:#f0f4ff;border-left:3px solid #667eea;border-radius:4px;font-size:0.85em;color:#374151;">{_h(annotation)}</div>' if annotation else ''
+            # ↓ 形質の詳細解説 + 参考リンク
+            t_detail = get_trait_detail(r.test_name)
+            t_detail_html = render_detail_html(t_detail) if t_detail else ""
             trait_rows += f"""        <tr>
-          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small></td>
+          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{t_detail_html}</td>
           <td>{badge}</td>
           <td style="font-size:0.85em">{_h(r.result_text[:150])}{annotation_html}</td>
         </tr>\n"""
@@ -2062,6 +2406,36 @@ header p {{ opacity:0.9; font-size:0.95em; }}
 .breed-warn.danger .warn-title {{ color:#dc2626; }}
 .print-btn {{ background:var(--purple); color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; }}
 .print-btn:hover {{ background:var(--pink); }}
+/* 詳細解説（理解できることコンセプト）— 折りたためる knowledge base 表示 */
+details.kb-detail {{
+  margin-top:8px; padding:6px 10px; background:#f8fafc;
+  border:1px solid #e2e8f0; border-radius:6px; font-size:0.85em;
+}}
+details.kb-detail > summary {{
+  cursor:pointer; font-weight:600; color:#5b21b6; padding:4px 0;
+  user-select:none; list-style:none; outline:none;
+}}
+details.kb-detail > summary::-webkit-details-marker {{ display:none; }}
+details.kb-detail > summary::before {{
+  content:"▶"; display:inline-block; margin-right:6px; font-size:0.7em;
+  transition:transform 0.15s;
+}}
+details.kb-detail[open] > summary::before {{ transform:rotate(90deg); }}
+details.kb-detail .kb-body {{
+  padding:10px 4px 4px; line-height:1.6; color:#1f2937;
+}}
+details.kb-detail .kb-title {{
+  font-size:1.05em; color:#5b21b6; margin-bottom:10px; padding-bottom:6px;
+  border-bottom:1px dashed #ddd6fe;
+}}
+details.kb-detail .kb-section {{ margin-bottom:10px; }}
+details.kb-detail .kb-section strong {{ display:block; margin-bottom:3px; color:#4a1a7a; font-size:0.95em; }}
+details.kb-detail .kb-refs a.kb-ref-link {{
+  display:inline-block; margin:2px 6px 2px 0; padding:4px 10px;
+  background:#ede9fe; color:#5b21b6; text-decoration:none;
+  border-radius:14px; font-size:0.85em;
+}}
+details.kb-detail .kb-refs a.kb-ref-link:hover {{ background:#ddd6fe; }}
 @media (max-width:768px) {{ header h1 {{ font-size:1.3em; }} .dog-header {{ flex-direction:column; }} .compare-table,.results-table {{ display:block; overflow-x:auto; }} .info-grid {{ grid-template-columns:1fr; }} }}
 @media print {{ .tabs,.print-btn,header {{ display:none!important; }} .tab-content {{ display:block!important; page-break-inside:avoid; }} .dog-card {{ break-inside:avoid; }} }}
 </style>
