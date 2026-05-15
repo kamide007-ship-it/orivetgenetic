@@ -554,6 +554,113 @@ class TestSanitizeForExcel:
         assert sanitize_for_excel("\x07=EVIL") == "'=EVIL"
 
 
+# ===========================================================================
+# 10. ナレッジベース（詳細解説）
+# ===========================================================================
+
+try:
+    from poodle_genetics import (
+        get_disease_detail, get_trait_detail, render_detail_html,
+        DISEASE_KB, TRAIT_KB,
+    )
+    _HAS_KB = True
+except Exception:
+    _HAS_KB = False
+
+
+@pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
+class TestDiseaseKB:
+    def test_cddy_matches(self):
+        d = get_disease_detail("Chondrodystrophy with IVDD")
+        assert d is not None
+        assert "椎間板" in d.get("summary", "")
+        assert any("Wikipedia" in r.get("label", "") or "検索" in r.get("label", "") for r in d.get("references", []))
+
+    def test_dm_matches(self):
+        d = get_disease_detail("Degenerative Myelopathy")
+        assert d is not None
+        assert "SOD1" in d.get("mechanism", "")
+
+    def test_prcd_matches(self):
+        d = get_disease_detail("Progressive Rod-Cone Degeneration")
+        assert d is not None
+        assert "網膜" in d.get("title", "") or "PRA" in d.get("title", "")
+
+    def test_unknown_returns_none(self):
+        assert get_disease_detail("Random Unknown Disease") is None
+
+    def test_empty_returns_none(self):
+        assert get_disease_detail("") is None
+        assert get_disease_detail(None) is None
+
+    def test_all_entries_have_required_fields(self):
+        for entry in DISEASE_KB:
+            assert "match" in entry and entry["match"]
+            assert "title" in entry and entry["title"]
+            assert "summary" in entry and entry["summary"]
+            assert "references" in entry
+            for ref in entry["references"]:
+                assert "label" in ref and "url" in ref
+                assert ref["url"].startswith("https://")
+
+
+@pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
+class TestTraitKB:
+    def test_e_locus_matches(self):
+        t = get_trait_detail("E Locus (Cream/Red/Yellow)")
+        assert t is not None
+        assert "MC1R" in t.get("title", "")
+
+    def test_b_locus_matches(self):
+        t = get_trait_detail("B Locus (Brown)")
+        assert t is not None
+        assert "ブラウン" in t.get("title", "") or "TYRP1" in t.get("title", "")
+
+    def test_merle_warning_present(self):
+        t = get_trait_detail("M Locus (Merle/Dapple)")
+        assert t is not None
+        # M/M ダブルマールの警告が advice に含まれること
+        assert "M/m" in t.get("advice", "") or "ダブル" in t.get("advice", "")
+
+    def test_all_entries_have_required_fields(self):
+        for entry in TRAIT_KB:
+            assert "match" in entry and entry["match"]
+            assert "title" in entry
+            assert "summary" in entry
+            assert "references" in entry
+
+
+@pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
+class TestRenderDetailHtml:
+    def test_returns_empty_for_none(self):
+        assert render_detail_html(None) == ""
+
+    def test_includes_summary_section(self):
+        d = get_disease_detail("CDDY+IVDD")
+        html = render_detail_html(d)
+        assert "<details" in html
+        assert "概要" in html
+        assert "椎間板" in html
+
+    def test_links_have_security_attrs(self):
+        d = get_disease_detail("CDDY+IVDD")
+        html = render_detail_html(d)
+        # 外部リンクは noopener noreferrer を必ず持つ
+        assert "rel=\"noopener noreferrer\"" in html
+        assert "target=\"_blank\"" in html
+
+    def test_escapes_xss(self):
+        # KB に xss-like 文字列が紛れても _h() でエスケープされる
+        evil = {
+            "title": "<script>alert(1)</script>",
+            "summary": "<img src=x>",
+            "references": [{"label": "<b>", "url": "https://example.com/?x=<x>"}],
+        }
+        html = render_detail_html(evil)
+        assert "<script>" not in html
+        assert "&lt;script&gt;" in html
+
+
 class TestRoutes:
     EXPECTED = ["/", "/analyze", "/report/<session_id>",
                 "/api/dogs/<session_id>", "/api/pedigrees/<session_id>",
