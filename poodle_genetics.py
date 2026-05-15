@@ -553,7 +553,12 @@ DISEASE_KB = [
         ],
     },
     {
-        "match": ["von willebrand", "vwd"],
+        "match": [
+            "willebrand type 1", "willebrand's type 1",
+            "willebrand disease type 1", "willebrand's disease type 1",
+            "vwd1", "vwd-1", "vwd type 1", "vwd type i",
+            "willebrand i", "willebrand 1",
+        ],
         "title": "フォン・ヴィレブランド病 I型 (vWD1)",
         "summary": "止血に関わるフォン・ヴィレブランド因子が不足し、出血が止まりにくくなる遺伝性疾患です。",
         "mechanism": "vWF 遺伝子の変異により、血小板を血管壁に結合させる蛋白質が不足。軽度（I型）から重度（II型・III型）まで様々。ドーベルマンで頻発。",
@@ -579,7 +584,7 @@ DISEASE_KB = [
         ],
     },
     {
-        "match": ["gangliosidosis", "gm2"],
+        "match": ["gm2 gangliosidosis", "gm2", "gangliosidosis gm2"],
         "title": "ガングリオシドーシス GM2 (GM2 / HEXB)",
         "summary": "神経細胞内に脂質が異常蓄積し、進行性の神経障害を起こす重篤な遺伝性疾患です。",
         "mechanism": "HEXB 遺伝子の変異によりリソソーム酵素ヘキソサミニダーゼBが欠損。GM2ガングリオシドが分解されず神経細胞に蓄積。ヒトのテイ・サックス病類似。",
@@ -867,6 +872,196 @@ DISEASE_KB = [
         "advice": "P/P は予後不良。繁殖前検査が予防の鍵。",
         "references": [
             {"label": "詳細を検索", "url": _google_search("Trapped Neutrophil Syndrome TNS 犬 VPS13B")},
+        ],
+    },
+    # === Veqta 検査パネル準拠の追加疾患 (PR #45) ===
+    # 眼科系（追加）
+    {
+        "match": ["glaucoma", "緑内障", "primary glaucoma"],
+        "title": "原発性緑内障 (Primary Glaucoma / ADAMTS10, ADAMTS17 等)",
+        "summary": "眼内圧が異常に上昇し、視神経が圧迫されて失明に至る遺伝性眼疾患です。",
+        "mechanism": "前房隅角の閉塞や房水排出経路の異常により眼内圧が上昇。ADAMTS10/17 等の遺伝子変異が関与。ビーグル・コッカー・シーズーなどで多発。",
+        "symptoms": "目の充血・角膜混濁・瞳孔散大・痛み・視覚消失。急性発作は緊急事態。",
+        "inheritance": "犬種・遺伝子により異なる。多くは常染色体劣性または不完全優性。",
+        "advice": "急性発作時は **24時間以内の眼科処置が視力保存の鍵**。定期的な眼圧測定を推奨。",
+        "references": [
+            {"label": "Wikipedia: 緑内障", "url": _wiki_jp("緑内障")},
+            {"label": "詳細を検索", "url": _google_search("犬 緑内障 ADAMTS 原発性")},
+        ],
+    },
+    {
+        "match": ["cord1", "cord-1", "rpgrip1 pra"],
+        "title": "PRA - CORD1 型 (RPGRIP1)",
+        "summary": "進行性網膜萎縮症の一型。錐体（昼間視）が先に変性するタイプです。",
+        "mechanism": "RPGRIP1 遺伝子の変異により網膜光受容細胞の機能が失われます。ミニチュアロングヘアダックスフンドで報告。",
+        "symptoms": "1〜2歳から昼間の視覚異常 → 進行性失明。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "発症前に検査による遺伝子型把握が重要。失明後も嗅覚・聴覚で適応可能。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("PRA CORD1 犬 RPGRIP1")},
+        ],
+    },
+    {
+        "match": ["rcd3", "rcd-3", "pde6a pra", "rod cone dysplasia"],
+        "title": "PRA - rcd3 型 (PDE6A)",
+        "summary": "若齢期から急速に進行する PRA の一型。生後数ヶ月から発症します。",
+        "mechanism": "PDE6A 遺伝子の変異により杆体（夜間視）細胞が早期に変性。",
+        "symptoms": "生後6ヶ月頃から夜盲 → 1〜2歳で完全失明。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "重度のため早期検査・繁殖選択が重要。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("PRA rcd3 犬 PDE6A")},
+        ],
+    },
+    {
+        "match": ["cngb1 pra", "cngb1"],
+        "title": "PRA - CNGB1 型",
+        "summary": "PRA の遅発型。比較的緩やかな進行を示す型です。",
+        "mechanism": "CNGB1 遺伝子の変異により網膜杆体の機能が低下。",
+        "symptoms": "中年期から夜盲が始まり、徐々に昼間視覚も低下。",
+        "inheritance": "常染色体劣性。",
+        "advice": "進行が緩やかなため早期発見で QOL を保ちやすい。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("PRA CNGB1 犬")},
+        ],
+    },
+    {
+        "match": ["congenital stationary night blindness", "csnb", "cnsb"],
+        "title": "先天性停止性夜盲症 (CSNB / RPE65)",
+        "summary": "生まれつき夜間視力が無い遺伝性眼疾患です。昼間は通常通り見えます。",
+        "mechanism": "RPE65 遺伝子の変異により網膜の桿体細胞での視物質再生が障害。ブリアード犬で報告。",
+        "symptoms": "生後から夜盲・薄暗い場所での視覚困難。進行性ではない（停止性）。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "夜間の照明確保で QOL 維持可能。遺伝子治療研究も進行中。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("CSNB 先天性停止性夜盲 犬 RPE65")},
+        ],
+    },
+    # 神経系（追加）
+    {
+        "match": ["gm1 gangliosidosis", "gm-1"],
+        "title": "ガングリオシドーシス GM1 (GM1 / GLB1)",
+        "summary": "GM1 ガングリオシドが神経細胞内に蓄積し進行性神経障害を起こす疾患です。",
+        "mechanism": "GLB1 遺伝子の変異によりβ-ガラクトシダーゼ酵素が欠損。GM1 が分解されず蓄積します。シーバ・柴犬・スパニエル等で報告。",
+        "symptoms": "若齢発症で運動失調・痙攣・視覚障害が進行。多くは2〜3歳までに死亡。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "P/N 同士の交配は厳に避ける。発症犬は予後不良。",
+        "references": [
+            {"label": "Wikipedia: ガングリオシドーシス", "url": _wiki_jp("ガングリオシドーシス")},
+            {"label": "詳細を検索", "url": _google_search("GM1 Gangliosidosis 犬 GLB1")},
+        ],
+    },
+    {
+        "match": ["myotonia congenita", "先天性筋強直症", "clcn1"],
+        "title": "先天性筋強直症 (Myotonia Congenita / CLCN1)",
+        "summary": "筋肉が一度収縮すると弛緩しにくくなる遺伝性筋疾患です。",
+        "mechanism": "CLCN1 遺伝子の変異により筋細胞膜のクロライドチャネル機能不全。筋電気活動が異常持続します。",
+        "symptoms": "運動開始時のこわばり・転倒・歩行困難。運動を続けると改善（ウォームアップ現象）。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "対症療法のみ。寒冷を避け、ウォームアップを十分にとる。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Myotonia Congenita 犬 CLCN1")},
+        ],
+    },
+    # 血液系（追加）
+    {
+        "match": [
+            "willebrand type 2", "willebrand's type 2",
+            "willebrand disease type 2", "willebrand's disease type 2",
+            "vwd2", "vwd-2", "vwd type 2", "vwd type ii",
+            "willebrand ii", "willebrand 2",
+        ],
+        "title": "フォン・ヴィレブランド病 II型 (vWD2)",
+        "summary": "vWD の中等度〜重度型。I型より出血傾向が強くなります。",
+        "mechanism": "vWF 遺伝子の質的変異により、止血因子の機能が低下（量はあるが機能しない）。",
+        "symptoms": "外傷・抜歯後の長時間出血、自然出血のリスクあり。",
+        "inheritance": "常染色体劣性（不完全浸透）。",
+        "advice": "手術前に必ず申告。出血時は新鮮凍結血漿・vWF 製剤が必要。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("von Willebrand Type 2 犬 vWD2")},
+        ],
+    },
+    {
+        "match": [
+            "willebrand type 3", "willebrand's type 3",
+            "willebrand disease type 3", "willebrand's disease type 3",
+            "vwd3", "vwd-3", "vwd type 3", "vwd type iii",
+            "willebrand iii", "willebrand 3",
+        ],
+        "title": "フォン・ヴィレブランド病 III型 (vWD3)",
+        "summary": "最重度の vWD。出血が止まらず生命に関わる重篤型です。",
+        "mechanism": "vWF 蛋白質が完全に欠損。スコティッシュテリア等で報告。",
+        "symptoms": "幼齢期から重度出血。歯科処置・外傷で致命的になり得る。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "P/P 犬は手術リスク極大。輸血製剤の準備が必須。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("von Willebrand Type 3 犬 vWD3")},
+        ],
+    },
+    {
+        "match": ["prekallikrein", "プレカリクレイン"],
+        "title": "プレカリクレイン欠乏症 (Prekallikrein Deficiency / KLKB1)",
+        "summary": "凝固系の前段階因子が欠損し、APTT 検査値が異常を示す凝固障害です。",
+        "mechanism": "KLKB1 遺伝子の変異により内因系凝固第一段階が遅延。多くは無症状。",
+        "symptoms": "通常は無症状だが、手術時に APTT 延長が見られる。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "手術前検査で APTT 延長が出たら本症を疑う。臨床的影響は少ない。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Prekallikrein Deficiency 犬 KLKB1")},
+        ],
+    },
+    # 代謝系（追加）
+    {
+        "match": ["glycogen storage disease", "gsd", "グリコーゲン蓄積症"],
+        "title": "グリコーゲン蓄積症 (GSD / 複数型)",
+        "summary": "グリコーゲンが分解できず体内に蓄積する重篤な代謝疾患です。型により症状が異なります。",
+        "mechanism": "GAA (II型), GBE1 (IV型) などの遺伝子変異によりグリコーゲン代謝酵素が欠損。",
+        "symptoms": "II型: 心筋・骨格筋の障害、IV型: 肝硬変・神経症状。多くは若齢で重症化。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "P/P は予後不良。早期診断と対症療法。",
+        "references": [
+            {"label": "Wikipedia: 糖原病", "url": _wiki_jp("糖原病")},
+            {"label": "詳細を検索", "url": _google_search("Glycogen Storage Disease 犬 GSD")},
+        ],
+    },
+    {
+        "match": ["cobalamin malabsorption", "コバラミン吸収", "imerslund", "amn cubn"],
+        "title": "コバラミン吸収不良症 (Cobalamin Malabsorption / AMN, CUBN)",
+        "summary": "ビタミンB12（コバラミン）の腸吸収障害により神経・血液障害を起こす遺伝性疾患です。",
+        "mechanism": "AMN または CUBN 遺伝子の変異により回腸でのコバラミン受容体が機能不全。",
+        "symptoms": "成長不良・貧血・神経症状（運動失調・痙攣）。ジャイアントシュナウザー等で報告。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "**コバラミン (B12) 注射で症状改善可能** — 治療可能な疾患のため診断が重要。",
+        "references": [
+            {"label": "Wikipedia: ビタミンB12欠乏症", "url": _wiki_jp("ビタミンB12欠乏症")},
+            {"label": "詳細を検索", "url": _google_search("Cobalamin Malabsorption 犬 AMN CUBN")},
+        ],
+    },
+    # 骨格系（追加）
+    {
+        "match": ["osteogenesis imperfecta", "骨形成不全", "serpinh1", "col1a"],
+        "title": "骨形成不全症 (Osteogenesis Imperfecta / SERPINH1, COL1A1, COL1A2)",
+        "summary": "骨が脆くなり、軽度の衝撃でも骨折しやすい遺伝性疾患です。",
+        "mechanism": "コラーゲン関連遺伝子 (SERPINH1, COL1A1, COL1A2) の変異により骨の構造蛋白質が異常になります。",
+        "symptoms": "若齢期からの繰り返す骨折・歯の異常・関節弛緩。ダックスフンド・ビーグル等で報告。",
+        "inheritance": "常染色体劣性（亜型による）。",
+        "advice": "発症犬は運動制限・骨折予防が必要。栄養管理（カルシウム・コラーゲン）も重要。",
+        "references": [
+            {"label": "Wikipedia: 骨形成不全症", "url": _wiki_jp("骨形成不全症")},
+            {"label": "詳細を検索", "url": _google_search("Osteogenesis Imperfecta 犬 SERPINH1")},
+        ],
+    },
+    # 消化器系（追加）
+    {
+        "match": ["gastric and intestinal polyposis", "消化管ポリポーシス", "gastrointestinal polyposis"],
+        "title": "消化管ポリポーシス (GP)",
+        "summary": "胃・腸にポリープが多発し、出血・腸閉塞のリスクを増す遺伝性疾患です。",
+        "mechanism": "遺伝性ポリープ形成傾向。ジャックラッセルテリア等で報告。",
+        "symptoms": "繰り返す消化器症状・血便・体重減少・嘔吐。",
+        "inheritance": "常染色体劣性または優性。",
+        "advice": "定期的な内視鏡検査でポリープ管理。悪性化リスクあり。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Gastric Intestinal Polyposis 犬")},
         ],
     },
 ]

@@ -632,6 +632,72 @@ class TestDiseaseKB:
         # KB は 11 (元の10 + EIC) → 拡張後 30 以上に
         assert len(DISEASE_KB) >= 25, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
 
+    # === Veqta 検査パネル準拠の追加カバレッジ (40+ diseases) ===
+    def test_glaucoma(self):
+        d = get_disease_detail("Primary Glaucoma")
+        assert d is not None and "緑内障" in d.get("title", "")
+
+    def test_gm1(self):
+        d = get_disease_detail("GM1 Gangliosidosis")
+        assert d is not None and "GLB1" in d.get("mechanism", "")
+
+    def test_vwd_type2(self):
+        d = get_disease_detail("von Willebrand Disease Type 2")
+        assert d is not None and "II型" in d.get("title", "")
+
+    def test_gsd(self):
+        d = get_disease_detail("Glycogen Storage Disease")
+        assert d is not None and "グリコーゲン" in d.get("summary", "")
+
+    def test_osteogenesis_imperfecta(self):
+        d = get_disease_detail("Osteogenesis Imperfecta")
+        assert d is not None and "骨形成不全" in d.get("title", "")
+
+    def test_cobalamin(self):
+        d = get_disease_detail("Cobalamin Malabsorption")
+        assert d is not None and "B12" in d.get("advice", "")
+
+    def test_veqta_min_coverage(self):
+        # Veqta 主要疾患含めて 40 以上
+        assert len(DISEASE_KB) >= 40, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
+
+
+# ===========================================================================
+# 11. グロッサリー(/glossary) ルート
+# ===========================================================================
+
+class TestGlossaryRoute:
+    def test_glossary_200(self):
+        rv = client.get("/glossary")
+        assert rv.status_code == 200
+
+    def test_glossary_lists_diseases(self):
+        rv = client.get("/glossary")
+        body = rv.get_data(as_text=True)
+        # 主要疾患の見出しが含まれる
+        assert "椎間板" in body or "CDDY" in body
+        assert "DM" in body or "変性性脊髄症" in body
+
+    def test_glossary_search_filters(self):
+        rv = client.get("/glossary?q=椎間板")
+        body = rv.get_data(as_text=True)
+        assert "CDDY" in body or "椎間板" in body
+        # 他の疾患は出ない（ヒット件数 1 表示）
+        assert "&#34;椎間板&#34;" in body or "椎間板" in body
+
+    def test_glossary_empty_search(self):
+        rv = client.get("/glossary?q=nonexistent_xyz_term_zzz")
+        body = rv.get_data(as_text=True)
+        assert "見つかりませんでした" in body
+
+    def test_api_glossary_json(self):
+        rv = client.get("/api/glossary")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert "diseases" in data and "traits" in data
+        assert len(data["diseases"]) >= 30
+        assert len(data["traits"]) >= 5
+
 
 @pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
 class TestTraitKB:
