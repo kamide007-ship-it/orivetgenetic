@@ -90,6 +90,17 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
   outline:3px solid var(--purple); outline-offset:2px;
 }
 
+/* === 結果テーブル内の座位コードをクリッカブル化 === */
+.result-locus {
+  display:inline-block; padding:0 4px; margin:0 1px;
+  background:#f3e8ff; color:#5b21b6;
+  border-radius:4px; cursor:pointer; font-family:'Menlo','Monaco',monospace;
+  font-size:0.95em; transition:background 0.12s;
+  border-bottom:1px dotted #c4b5fd;
+}
+.result-locus:hover { background:#ddd6fe; color:var(--purple); }
+.result-locus:focus-visible { outline:2px solid var(--purple); outline-offset:1px; }
+
 /* === 疾患名リンクボタン（健康シミュ table 内） === */
 .disease-link {
   background:none; border:none; padding:0; font-family:inherit; font-size:inherit;
@@ -885,7 +896,9 @@ function runColorSim() {
     const pct = (data.prob / totalProb * 100).toFixed(1);
     html += `<tr><td><span class="color-swatch" style="background:${cm.hex}"></span>${cm.name}</td>`;
     html += `<td style="font-weight:700;font-size:1.1em">${pct}%</td>`;
-    html += `<td style="font-size:0.82em">${data.notes.join('<br>')}</td></tr>`;
+    // 各 note の遺伝子型表記をクリッカブル化（座位ヘルプモーダルへ）
+    const wrappedNotes = data.notes.map(wrapLocusReferences).join('<br>');
+    html += `<td style="font-size:0.82em">${wrappedNotes}</td></tr>`;
   }
   html += '</table>';
 
@@ -1370,6 +1383,34 @@ function closeLocusModal() {
   const modal = document.getElementById('locusModal');
   if (typeof modal.close === 'function') modal.close();
   else modal.removeAttribute('open');
+}
+
+// === 遺伝子型表記のクリッカブル化（理解できるコンセプト） ===
+// 結果 note 内の "E_", "KB_", "bb" などを <span> で wrap して
+// クリックで該当座位の解説モーダルを開く。
+const _LOCUS_FROM_CODE = {
+  'E_':'e','ee':'e','Ee':'e','EE':'e',
+  'KB_':'k','kbr_':'k','ky_':'k','KB':'k','ky':'k','kbr':'k',
+  'B_':'b','bb':'b','BB':'b','Bb':'b',
+  'D_':'d','dd':'d','DD':'d','Dd':'d',
+  'M_':'m','mm':'m','Mm':'m','MM':'m',
+  'S_':'s','SS':'s','Ssp':'s','spsp':'s','sp':'s',
+  'G_':'g','gg':'g','Gg':'g','GG':'g',
+  // A 座位は ay/aw/at/a 由来全パターン
+  'ay':'a','aw':'a','at':'a','a/a':'a',
+  'ayay':'a','ayat':'a','away':'a','aay':'a','awaw':'a',
+  'ataw':'a','aaw':'a','atat':'a','aat':'a','aa':'a',
+};
+// 正規表現: 長いパターンを先に評価する必要があるため alternation 順序が重要
+const _LOCUS_REGEX = /\b(KB_|kbr_|ky_|E_|B_|D_|M_|S_|G_|ayay|ayat|away|aay|awaw|ataw|aaw|atat|aat|Ssp|spsp|kbr|KB|ky|EE|Ee|ee|BB|Bb|bb|DD|Dd|dd|MM|Mm|mm|GG|Gg|gg|SS|sp|aa)\b/g;
+
+function wrapLocusReferences(text) {
+  if (!text) return text;
+  return text.replace(_LOCUS_REGEX, function(match) {
+    const locus = _LOCUS_FROM_CODE[match];
+    if (!locus) return match;
+    return '<span class="result-locus" onclick="showLocusInfo(\'' + locus + '\')" title="クリックで座位の解説">' + match + '</span>';
+  });
 }
 
 // === COI 解説モーダル（理解できるコンセプト） ===

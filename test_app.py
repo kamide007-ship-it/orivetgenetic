@@ -698,6 +698,64 @@ class TestGlossaryRoute:
         assert len(data["diseases"]) >= 30
         assert len(data["traits"]) >= 5
 
+    def test_glossary_groups_by_category(self):
+        rv = client.get("/glossary")
+        body = rv.get_data(as_text=True)
+        # 主要カテゴリヘッダーが表示される
+        assert "神経・脳系" in body
+        assert "眼科系" in body
+        assert "血液・凝固系" in body
+        # 目次が表示される
+        assert "目次" in body
+        # アンカーリンクが生成される
+        assert "#cat-" in body
+
+
+# ===========================================================================
+# 12. group_diseases_by_category ヘルパー
+# ===========================================================================
+
+try:
+    from poodle_genetics import group_diseases_by_category, get_disease_category
+    _HAS_GROUPING = True
+except Exception:
+    _HAS_GROUPING = False
+
+
+@pytest.mark.skipif(not _HAS_GROUPING, reason="grouping helpers not importable")
+class TestDiseaseGrouping:
+    def test_returns_list_of_tuples(self):
+        from poodle_genetics import DISEASE_KB
+        groups = group_diseases_by_category(DISEASE_KB)
+        assert isinstance(groups, list)
+        for cat, items in groups:
+            assert isinstance(cat, str) and cat
+            assert isinstance(items, list) and items
+
+    def test_all_entries_categorized(self):
+        from poodle_genetics import DISEASE_KB
+        groups = group_diseases_by_category(DISEASE_KB)
+        total = sum(len(items) for _, items in groups)
+        assert total == len(DISEASE_KB)
+
+    def test_cddy_in_skeletal(self):
+        from poodle_genetics import get_disease_detail
+        cddy = get_disease_detail("CDDY+IVDD")
+        assert "骨格" in get_disease_category(cddy)
+
+    def test_dm_in_neuro(self):
+        from poodle_genetics import get_disease_detail
+        dm = get_disease_detail("Degenerative Myelopathy")
+        assert "神経" in get_disease_category(dm)
+
+    def test_pra_in_eye(self):
+        from poodle_genetics import get_disease_detail
+        pra = get_disease_detail("Progressive Rod-Cone Degeneration")
+        assert "眼科" in get_disease_category(pra)
+
+    def test_empty_list(self):
+        assert group_diseases_by_category([]) == []
+
 
 @pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
 class TestTraitKB:

@@ -112,7 +112,7 @@ from poodle_genetics import (
     parse_pdf, parse_pedigree_pdf, KNOWN_PEDIGREES,
     generate_unified_html, generate_excel,
     HAS_PDFPLUMBER, HAS_OCR,
-    DISEASE_KB, TRAIT_KB,
+    DISEASE_KB, TRAIT_KB, group_diseases_by_category,
 )
 
 try:
@@ -498,9 +498,11 @@ def glossary():
                 out.append(e)
         return out
 
+    filtered_diseases = _filter(DISEASE_KB)
     return render_template(
         "glossary.html",
-        diseases=_filter(DISEASE_KB),
+        diseases=filtered_diseases,
+        disease_groups=group_diseases_by_category(filtered_diseases),
         traits=_filter(TRAIT_KB),
         query=request.args.get("q", ""),
         total_diseases=len(DISEASE_KB),

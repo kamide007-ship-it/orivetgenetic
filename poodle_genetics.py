@@ -1072,6 +1072,44 @@ def _normalize_for_match(text: str) -> str:
     return re.sub(r"[\-_]", " ", text.lower())
 
 
+# 疾患をカテゴリへ分類するパターン（タイトルキーワードベース）
+# 辞書ページでグルーピング表示に使用
+DISEASE_CATEGORIES = [
+    ("🦴 骨格・関節系",   ["椎間板", "骨軟骨", "短足", "骨形成不全"]),
+    ("🧠 神経・脳系",     ["脳症", "リポフスチン", "運動失調", "脊髄小脳", "多剤耐性", "ガングリオシドーシス", "変性性脊髄症", "筋強直症"]),
+    ("👁 眼科系",         ["緑内障", "夜盲", "コリーアイ", "白内障", "全色盲", "錐体杆体", "進行性網膜萎縮", "PRA"]),
+    ("🩸 血液・凝固系",   ["フォン・ヴィレブランド", "ピルビン酸", "第VII", "プレカリクレイン", "血小板", "メトヘモグロビン"]),
+    ("🧪 代謝・内分泌系", ["尿酸尿", "コバラミン", "グリコーゲン蓄積", "ムコ多糖", "銅蓄積"]),
+    ("💪 筋・運動系",     ["運動誘発性", "中心核ミオパチー"]),
+    ("🫘 腎・泌尿器系",   ["シスチン尿", "腎症"]),
+    ("🧴 皮膚・被毛系",   ["鼻過角化", "魚鱗癬"]),
+    ("🛡 免疫系",         ["好中球"]),
+    ("🫃 消化器系",       ["消化管"]),
+]
+
+
+def get_disease_category(entry: dict) -> str:
+    """エントリのタイトルからカテゴリを推定。マッチしない場合は『その他』"""
+    title = entry.get("title", "")
+    for cat, patterns in DISEASE_CATEGORIES:
+        for p in patterns:
+            if p in title:
+                return cat
+    return "📋 その他"
+
+
+def group_diseases_by_category(entries: list) -> list:
+    """疾患リストをカテゴリ別にグループ化し、定義順で返す。
+    Returns: [(category_name, [entries...]), ...]"""
+    buckets = {cat: [] for cat, _ in DISEASE_CATEGORIES}
+    buckets["📋 その他"] = []
+    order = [cat for cat, _ in DISEASE_CATEGORIES] + ["📋 その他"]
+    for entry in entries:
+        cat = get_disease_category(entry)
+        buckets[cat].append(entry)
+    return [(cat, buckets[cat]) for cat in order if buckets[cat]]
+
+
 def get_disease_detail(test_name: str) -> Optional[dict]:
     """疾患名から詳細解説を取得する。"""
     if not test_name:
