@@ -1064,6 +1064,170 @@ DISEASE_KB = [
             {"label": "詳細を検索", "url": _google_search("Gastric Intestinal Polyposis 犬")},
         ],
     },
+    # === Embark/Orivet 標準パネル拡張 (PR #47) ===
+    # 神経系（追加）
+    {
+        "match": ["cerebellar abiotrophy", "小脳皮質変性", "cerebellar degeneration"],
+        "title": "小脳皮質変性症 (Cerebellar Abiotrophy)",
+        "summary": "小脳のプルキンエ細胞が出生後変性し、運動失調を起こす遺伝性神経疾患です。",
+        "mechanism": "犬種により原因遺伝子が異なる (GRM1, SPTBN2 等)。プルキンエ細胞の選択的死滅。",
+        "symptoms": "若齢期 (3〜12ヶ月) からふらつき歩行・頭の震え・転倒。進行性。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "対症療法のみ。穏やかな環境での QOL 維持。",
+        "references": [
+            {"label": "Wikipedia: 小脳萎縮症", "url": _wiki_jp("小脳萎縮症")},
+            {"label": "詳細を検索", "url": _google_search("Cerebellar Abiotrophy 犬")},
+        ],
+    },
+    {
+        "match": ["sensory neuropathy", "感覚性神経障害", "fam134b"],
+        "title": "感覚性神経障害 (SN / FAM134B)",
+        "summary": "末梢神経の感覚線維が変性し、痛覚消失や自咬行動を起こす遺伝性疾患です。",
+        "mechanism": "FAM134B 遺伝子の変異により末梢感覚神経が変性。ボーダーコリーで報告。",
+        "symptoms": "肢端の感覚消失 → 自咬 → 潰瘍・感染。歩行運動には支障なし。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "発症犬は自咬予防 (エリザベスカラー等) と感染症管理が必要。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Sensory Neuropathy 犬 FAM134B")},
+        ],
+    },
+    {
+        "match": ["globoid cell leukodystrophy", "krabbe", "galc"],
+        "title": "球状細胞白質ジストロフィー (Krabbe / GALC)",
+        "summary": "中枢・末梢神経のミエリン形成が異常になる重篤な遺伝性代謝疾患です。",
+        "mechanism": "GALC 遺伝子の変異によりガラクトセレブロシダーゼ酵素が欠損。ミエリン分解産物が蓄積し神経変性を起こします。",
+        "symptoms": "生後 1〜6ヶ月で運動異常・痙攣・成長不全。多くは 1〜2 年で死亡。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "P/P は予後不良。骨髄移植研究中だが実用化はまだ。繁殖前検査必須。",
+        "references": [
+            {"label": "Wikipedia: クラッベ病", "url": _wiki_jp("クラッベ病")},
+            {"label": "詳細を検索", "url": _google_search("Globoid Cell Leukodystrophy 犬 GALC")},
+        ],
+    },
+    {
+        "match": ["polyneuropathy", "多発性神経障害", "ndrg1", "arhgef10"],
+        "title": "多発性神経障害 (Polyneuropathy / NDRG1, ARHGEF10)",
+        "summary": "複数の末梢神経が同時に障害を受け、運動失調・筋萎縮を起こす疾患です。",
+        "mechanism": "NDRG1 や ARHGEF10 等の変異により末梢神経の機能が低下。グレーハウンド・アラスカン・マラミュート等で報告。",
+        "symptoms": "若齢期から後肢の脱力・歩行異常・筋萎縮。",
+        "inheritance": "犬種により異なる（多くは常染色体劣性）。",
+        "advice": "対症療法のみ。物理療法・補助具で QOL 維持。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Polyneuropathy 犬 NDRG1")},
+        ],
+    },
+    {
+        "match": ["episodic falling", "episodic falling syndrome", "efs"],
+        "title": "発作性失神症 (EFS / BCAN)",
+        "summary": "興奮や運動で発作的に筋肉が硬直し転倒する遺伝性疾患です。キャバリア K.C. スパニエルで頻発。",
+        "mechanism": "BCAN 遺伝子の変異により神経シグナル伝達が異常になり、運動時に発作を起こします。",
+        "symptoms": "興奮・運動・暑さで筋強直 → 転倒・硬直。意識は保持。数秒〜数分で回復。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "発作誘因 (興奮・暑さ) を避け、抗痙攣薬で予防可能なケースあり。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Episodic Falling Syndrome 犬 BCAN")},
+        ],
+    },
+    {
+        "match": ["l 2 hydroxyglutaric aciduria", "hydroxyglutaric aciduria", "l2hga"],
+        "title": "L-2-ヒドロキシグルタル酸尿症 (L2HGA / L2HGDH)",
+        "summary": "代謝産物が異常蓄積し神経症状を起こす希少な遺伝性代謝疾患です。スタッフィー系で報告。",
+        "mechanism": "L2HGDH 遺伝子の変異により L-2-ヒドロキシグルタル酸の分解酵素が欠損。",
+        "symptoms": "若齢期から運動失調・痙攣・行動異常・認知障害。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "対症療法のみ。スタッフォードシャーブルテリア・アメリカン・スタッフォードシャー・テリアで頻発。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("L-2-Hydroxyglutaric Aciduria 犬 L2HGDH")},
+        ],
+    },
+    # 眼科系（追加）
+    {
+        "match": ["multifocal retinopathy", "cmr1", "cmr2", "best1"],
+        "title": "多巣性網膜症 (CMR / BEST1)",
+        "summary": "網膜に複数の隆起・剥離が起こる遺伝性眼疾患です。多くは進行が緩やか。",
+        "mechanism": "BEST1 遺伝子の変異により網膜色素上皮の機能が異常。マスティフ・ピレネー等で報告。",
+        "symptoms": "初期は無症状。中年期から斑状の網膜病変が見られる。視覚障害は軽度なことが多い。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "進行が緩やかなため早期管理で QOL 良好。眼科専門医の定期検査推奨。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Canine Multifocal Retinopathy CMR BEST1")},
+        ],
+    },
+    {
+        "match": ["cone degeneration", "achromatopsia cnga3", "day-blindness"],
+        "title": "錐体ジストロフィー (Cone Degeneration / CNGB3)",
+        "summary": "網膜の錐体細胞が機能不全になり、明所視・色覚に障害を起こす疾患です。",
+        "mechanism": "CNGB3 遺伝子の変異により錐体光受容細胞が変性。アラスカン・マラミュート等で報告。",
+        "symptoms": "生後数ヶ月から明所での視覚困難・色覚消失。夜間視は保持。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "失明とは異なる『昼盲』状態。暗い環境で QOL 維持可能。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Cone Degeneration 犬 CNGB3")},
+        ],
+    },
+    {
+        "match": ["stargardt", "stgd1", "abca4"],
+        "title": "スターガルト病 (STGD1 / ABCA4)",
+        "summary": "若齢期から黄斑部の網膜が変性する遺伝性眼疾患です。",
+        "mechanism": "ABCA4 遺伝子の変異により網膜色素上皮にリポフスチンが蓄積。ラブラドール等で報告。",
+        "symptoms": "1〜2 歳から中心視野の視覚低下 → 進行性。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "発症前検査による遺伝子型把握で繁殖選択が重要。",
+        "references": [
+            {"label": "Wikipedia: スターガルト病", "url": _wiki_jp("スターガルト病")},
+            {"label": "詳細を検索", "url": _google_search("Stargardt 犬 ABCA4")},
+        ],
+    },
+    # 皮膚系（追加）
+    {
+        "match": ["coat color dilution alopecia", "color dilution alopecia", "cda"],
+        "title": "毛色希釈性脱毛症 (CDA)",
+        "summary": "希釈毛色 (Blue, Lilac 等) を持つ犬で起こる遺伝性脱毛症です。",
+        "mechanism": "メラニン顆粒の異常蓄積により毛包が損傷。MLPH 遺伝子変異 (dd) を持つ希釈色犬の一部で発症。",
+        "symptoms": "若齢期 (6ヶ月〜2歳) から希釈色部分の脱毛・痂皮・二次感染。非希釈色部位は正常。",
+        "inheritance": "希釈遺伝子 dd 保持者のうち一部で発症 (多因子)。",
+        "advice": "皮膚ケア・抗生剤治療で症状管理。発症犬の繁殖は再考を。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Color Dilution Alopecia 犬 CDA")},
+        ],
+    },
+    {
+        "match": ["footpad hyperkeratosis", "hfh", "肉球角化"],
+        "title": "肉球角化亢進症 (HFH / FAM83G)",
+        "summary": "肉球が異常に厚く硬化し、亀裂・痛みを生じる遺伝性皮膚疾患です。",
+        "mechanism": "FAM83G 遺伝子の変異により肉球の角化が亢進。アイリッシュ・テリア、ドゴ・ド・ボルドー等で報告。",
+        "symptoms": "若齢期から全肉球の硬化・亀裂・痛み。歩行困難を起こすこともある。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "軟膏・保湿で QOL 維持。完治はしない。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Hereditary Footpad Hyperkeratosis 犬 HFH FAM83G")},
+        ],
+    },
+    # 内分泌・腎系（追加）
+    {
+        "match": ["renal cystadenocarcinoma", "rcnd", "nodular dermatofibrosis", "腎嚢腺癌"],
+        "title": "腎嚢腺癌・結節性皮膚線維腫症 (RCND / FLCN)",
+        "summary": "腎臓に多発する腫瘍と皮膚結節を起こす遺伝性腫瘍症候群です。ジャーマン・シェパード特有。",
+        "mechanism": "FLCN 遺伝子の変異により腫瘍抑制機能が失われ、腎臓・皮膚に腫瘍が発生。",
+        "symptoms": "中年期から皮膚に多数の結節 → 後に腎腫瘍・腎不全。",
+        "inheritance": "常染色体優性。1コピーで発症リスクあり。",
+        "advice": "定期的な腎機能検査・腹部画像診断が早期発見の鍵。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Renal Cystadenocarcinoma RCND 犬 FLCN")},
+        ],
+    },
+    {
+        "match": ["hyperphosphatemia", "fgf23", "高リン血症"],
+        "title": "家族性高リン血症 (Hyperphosphatemia / FGF23)",
+        "summary": "血中リン濃度が異常に高くなる遺伝性内分泌疾患です。",
+        "mechanism": "FGF23 関連遺伝子の変異によりリン代謝が異常。骨・軟組織の異常石灰化を引き起こす。",
+        "symptoms": "成長異常・骨格変形・腎機能障害。重症例では予後不良。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "発症犬は低リン食・リン結合薬で進行抑制。",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Hyperphosphatemia 犬 FGF23")},
+        ],
+    },
 ]
 
 
@@ -1076,13 +1240,13 @@ def _normalize_for_match(text: str) -> str:
 # 辞書ページでグルーピング表示に使用
 DISEASE_CATEGORIES = [
     ("🦴 骨格・関節系",   ["椎間板", "骨軟骨", "短足", "骨形成不全"]),
-    ("🧠 神経・脳系",     ["脳症", "リポフスチン", "運動失調", "脊髄小脳", "多剤耐性", "ガングリオシドーシス", "変性性脊髄症", "筋強直症"]),
-    ("👁 眼科系",         ["緑内障", "夜盲", "コリーアイ", "白内障", "全色盲", "錐体杆体", "進行性網膜萎縮", "PRA"]),
+    ("🧠 神経・脳系",     ["脳症", "リポフスチン", "運動失調", "脊髄小脳", "多剤耐性", "ガングリオシドーシス", "変性性脊髄症", "筋強直症", "小脳皮質", "感覚性神経", "ジストロフィー", "白質ジストロフィー", "Krabbe", "多発性神経", "発作性失神", "ヒドロキシグルタル"]),
+    ("👁 眼科系",         ["緑内障", "夜盲", "コリーアイ", "白内障", "全色盲", "錐体杆体", "進行性網膜萎縮", "PRA", "多巣性網膜症", "CMR", "錐体ジストロフィー", "スターガルト"]),
     ("🩸 血液・凝固系",   ["フォン・ヴィレブランド", "ピルビン酸", "第VII", "プレカリクレイン", "血小板", "メトヘモグロビン"]),
-    ("🧪 代謝・内分泌系", ["尿酸尿", "コバラミン", "グリコーゲン蓄積", "ムコ多糖", "銅蓄積"]),
+    ("🧪 代謝・内分泌系", ["尿酸尿", "コバラミン", "グリコーゲン蓄積", "ムコ多糖", "銅蓄積", "高リン血症", "リン血症"]),
     ("💪 筋・運動系",     ["運動誘発性", "中心核ミオパチー"]),
-    ("🫘 腎・泌尿器系",   ["シスチン尿", "腎症"]),
-    ("🧴 皮膚・被毛系",   ["鼻過角化", "魚鱗癬"]),
+    ("🫘 腎・泌尿器系",   ["シスチン尿", "腎症", "腎嚢腺癌"]),
+    ("🧴 皮膚・被毛系",   ["鼻過角化", "魚鱗癬", "希釈性脱毛", "肉球角化"]),
     ("🛡 免疫系",         ["好中球"]),
     ("🫃 消化器系",       ["消化管"]),
 ]
