@@ -843,6 +843,36 @@ class TestSeverity:
         rv = client.get("/glossary?severity=high&q=遺伝")
         assert rv.status_code == 200
 
+    def test_report_html_has_severity_badge(self):
+        """generate_unified_html が KB マッチした疾患に severity-badge クラスを付与する"""
+        import tempfile, os
+        from poodle_genetics import generate_unified_html, DogProfile, TestResult
+        # KB に存在する疾患 (CDDY+IVDD) のヘルスレスルトを作って渡す
+        dog = DogProfile(
+            pet_name="テスト", registered_name="Test Dog",
+            breed="Toy Poodle", sex="Male", dob="2020-01-01",
+            test_date="2024-01-01",
+            health_results=[
+                TestResult(
+                    category="健康",
+                    test_name="Chondrodystrophy with IVDD",
+                    japanese_name="軟骨異栄養症+椎間板疾患",
+                    genotype="P/N", result_text="Carrier",
+                    status="carrier",
+                )
+            ],
+        )
+        with tempfile.NamedTemporaryFile("w", suffix=".html", delete=False) as f:
+            path = f.name
+        try:
+            generate_unified_html([dog], [], path)
+            with open(path, "r", encoding="utf-8") as f:
+                html = f.read()
+            assert 'class="severity-badge"' in html
+            assert "リスク" in html  # 重症度ラベル
+        finally:
+            os.unlink(path)
+
 
 @pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
 class TestTraitKB:

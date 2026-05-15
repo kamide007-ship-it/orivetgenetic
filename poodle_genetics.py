@@ -2765,9 +2765,21 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             # ↓ 「理解できること」コンセプト: 詳細解説 + 参考リンク
             detail = get_disease_detail(r.test_name)
             detail_html = render_detail_html(detail) if detail else ""
+            # 重症度バッジ（KB エントリがある場合のみ表示）
+            severity_html = ""
+            if detail:
+                sev = get_disease_severity(detail)
+                meta = SEVERITY_LABELS.get(sev, {})
+                if meta:
+                    severity_html = (
+                        f'<span class="severity-badge" style="background:{meta["bg"]};color:{meta["color"]};'
+                        f'display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;'
+                        f'font-size:0.72em;font-weight:700;vertical-align:middle;">'
+                        f'{meta["emoji"]} {meta["label"]}</span>'
+                    )
             health_rows += f"""        <tr>
           <td>{_h(r.category)}</td>
-          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{annotation_html}{detail_html}</td>
+          <td>{display_name}{severity_html}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{annotation_html}{detail_html}</td>
           <td>{badge}</td>
           <td style="font-size:0.85em">{_h(r.result_text[:120])}</td>
         </tr>\n"""
