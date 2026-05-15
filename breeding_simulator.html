@@ -306,10 +306,13 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
   <!-- ================================================================ -->
   <div id="coi" class="tab-content">
     <div class="card">
-      <h2>近親交配係数 (COI) 算出</h2>
+      <h2>近親交配係数 (COI) 算出
+        <button type="button" class="kb-help" onclick="showCoiInfo()" aria-label="COIとは何か" style="vertical-align:middle;margin-left:8px;">?</button>
+      </h2>
       <p style="color:var(--gray); font-size:0.9em; margin-bottom:16px;">
         3世代（曾祖父母まで）の血統情報を入力して、Wright's Coefficient of Inbreeding を算出します。<br>
         同じ祖先が父方・母方の両方に出現する場合、COIが上昇します。
+        <a href="javascript:void(0)" onclick="showCoiInfo()" style="color:var(--purple);font-weight:600;">📖 COI の意味を詳しく見る</a>
       </p>
 
       <div id="ped-loader" style="display:none; margin-bottom:16px; padding:12px 16px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px;">
@@ -1065,6 +1068,14 @@ function calcCOI() {
 
   html += `<div class="coi-gauge"><div class="coi-fill" style="width:${Math.min(coiPct * 2, 100)}%;background:${gaugeColor};">${coiPct.toFixed(2)}%</div></div>`;
   html += '<div class="coi-marks"><span>0%</span><span>6.25%</span><span>12.5%</span><span>25%</span><span>50%</span></div>';
+  // 人間関係に置き換えた目安表
+  html += '<div style="margin:6px 0 16px;font-size:0.75em;color:var(--gray);text-align:center;">'
+       + '目安: 0% = 完全に無関係 / 6.25% = いとこ婚相当 / 12.5% = 半兄妹婚相当 / 25% = 兄妹婚・親子婚相当'
+       + '</div>';
+  // COI 解説への誘導
+  html += '<div style="text-align:center;margin-bottom:18px;">'
+       + '<button type="button" onclick="showCoiInfo()" style="background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;padding:6px 14px;border-radius:14px;cursor:pointer;font-size:0.85em;font-weight:600;">📖 この数値の意味を詳しく見る</button>'
+       + '</div>';
 
   // Common ancestors
   if (commonAncestors.length > 0) {
@@ -1359,6 +1370,50 @@ function closeLocusModal() {
   const modal = document.getElementById('locusModal');
   if (typeof modal.close === 'function') modal.close();
   else modal.removeAttribute('open');
+}
+
+// === COI 解説モーダル（理解できるコンセプト） ===
+const COI_KB = {
+  title: '近親交配係数 (COI / Coefficient of Inbreeding) とは',
+  summary: '父親と母親が共通の祖先を持つ場合、その子犬が両親から同じ遺伝子を 2 コピー受け継ぐ確率を示す指標です。Sewall Wright が 1922 年に確立しました。',
+  scale: [
+    { range: '0%',         desc: '完全に無関係な両親同士の交配。理論上のベースライン',         color: '#22c55e' },
+    { range: '〜6.25%',    desc: 'いとこ婚相当。一般的に許容範囲',                                color: '#22c55e' },
+    { range: '6.25〜12.5%', desc: '半兄妹婚相当。免疫力低下・繁殖力低下の傾向あり',            color: '#eab308' },
+    { range: '12.5〜25%',  desc: '兄妹婚・親子婚相当。遺伝性疾患の発現リスク大幅増加',        color: '#ef4444' },
+    { range: '25%超',      desc: '近親婚の繰り返し。劣性遺伝病の発症率が指数関数的に上昇',  color: '#dc2626' },
+  ],
+  health: '高COI犬は劣性遺伝病が顕在化しやすく、免疫機能・繁殖能力・寿命の低下が報告されています。育種学的には JKC・FCI 等が「COI 6.25% 以下を推奨」とするケースが多いです。',
+  calculation: 'Wright の経路法: COI = Σ (0.5)^(n+m+1)\n  n = 個体 → 共通祖先 → 父 までの世代数\n  m = 個体 → 共通祖先 → 母 までの世代数\n複数の共通祖先がいる場合は各経路の寄与を合計します。',
+  advice: '繁殖計画では COI を計算前に **両親候補の登録番号レベルで照合**し、共通祖先を確認することが重要です。本ツールは 3 世代上限の簡易計算なので、より深い世代の重複は別途確認してください。',
+  references: [
+    { label: 'Wikipedia: 近交係数', url: 'https://ja.wikipedia.org/wiki/Special:Search/' + encodeURIComponent('近交係数') },
+    { label: '詳細を検索', url: 'https://www.google.com/search?q=' + encodeURIComponent('COI 近親交配係数 犬 Wright') },
+  ],
+};
+
+function showCoiInfo() {
+  const modal = document.getElementById('locusModal');
+  document.getElementById('locusModalTitle').textContent = COI_KB.title;
+  let html = '<div class="field"><span class="field-label">📋 概要</span>' + COI_KB.summary + '</div>';
+  // 段階別表
+  html += '<div class="field"><span class="field-label">🎚 段階の目安（人間関係換算）</span>';
+  html += '<table style="width:100%;border-collapse:collapse;font-size:0.88em;margin-top:6px;">';
+  html += '<tr style="background:#f3f4f6;"><th style="padding:6px 10px;text-align:left;border-bottom:1px solid #e5e7eb;">COI 範囲</th><th style="padding:6px 10px;text-align:left;border-bottom:1px solid #e5e7eb;">意味</th></tr>';
+  for (const s of COI_KB.scale) {
+    html += '<tr><td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;"><strong style="color:' + s.color + ';">' + s.range + '</strong></td>'
+         + '<td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;">' + s.desc + '</td></tr>';
+  }
+  html += '</table></div>';
+  html += '<div class="field"><span class="field-label">⚠️ 健康への影響</span>' + COI_KB.health + '</div>';
+  html += '<div class="field" style="white-space:pre-line"><span class="field-label">🧪 計算方法</span>' + COI_KB.calculation + '</div>';
+  html += '<div class="field"><span class="field-label">💡 アドバイス</span>' + COI_KB.advice + '</div>';
+  html += '<div class="field refs"><span class="field-label">🔗 参考リンク</span>'
+       + COI_KB.references.map(r => '<a href="' + r.url + '" target="_blank" rel="noopener noreferrer">' + r.label + ' ↗</a>').join('')
+       + '</div>';
+  document.getElementById('locusModalBody').innerHTML = html;
+  if (typeof modal.showModal === 'function') modal.showModal();
+  else modal.setAttribute('open', '');
 }
 
 // === 疾患KB モーダル: /api/glossary から DISEASE_KB を遅延ロード ===
