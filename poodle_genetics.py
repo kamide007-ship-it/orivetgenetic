@@ -1262,6 +1262,47 @@ def get_disease_category(entry: dict) -> str:
     return "📋 その他"
 
 
+# 重症度ヒューリスティック: KB 本文のキーワードから 3段階に分類
+# entry.get("severity") で明示指定があればそれを優先
+_SEVERITY_KEYWORDS = {
+    "high":   ["予後不良", "致死", "死亡", "生命に関わる", "生命予後", "1〜2 年で死亡", "1〜2年で死亡",
+               "重篤", "失明", "完全失明"],
+    "medium": ["対症療法のみ", "進行性", "リスク大幅", "重症", "重度", "進行抑制", "発症リスク",
+               "歩行困難", "繰り返す感染"],
+    "low":    ["通常は無症状", "通常無症状", "QOL 維持可能", "完治はしない", "症状コントロール",
+               "症状管理"],
+}
+
+
+def get_disease_severity(entry: dict) -> str:
+    """KB エントリから重症度を推定する: 'high' / 'medium' / 'low'.
+
+    entry.get('severity') が明示されていればそれを使う（手動オーバーライド可）。
+    未指定なら summary/mechanism/symptoms/advice のテキストから推定。
+    """
+    explicit = entry.get("severity")
+    if explicit in ("high", "medium", "low"):
+        return explicit
+    text = " ".join([
+        entry.get("summary", ""),
+        entry.get("mechanism", ""),
+        entry.get("symptoms", ""),
+        entry.get("advice", ""),
+    ])
+    for level in ("high", "medium", "low"):
+        for kw in _SEVERITY_KEYWORDS[level]:
+            if kw in text:
+                return level
+    return "medium"  # デフォルト
+
+
+SEVERITY_LABELS = {
+    "high":   {"label": "高リスク", "color": "#dc2626", "bg": "#fee2e2", "emoji": "🔴"},
+    "medium": {"label": "中リスク", "color": "#c2410c", "bg": "#fef3c7", "emoji": "🟡"},
+    "low":    {"label": "低リスク", "color": "#166534", "bg": "#dcfce7", "emoji": "🟢"},
+}
+
+
 def group_diseases_by_category(entries: list) -> list:
     """疾患リストをカテゴリ別にグループ化し、定義順で返す。
     Returns: [(category_name, [entries...]), ...]"""
