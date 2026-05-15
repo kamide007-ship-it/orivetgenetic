@@ -603,6 +603,35 @@ class TestDiseaseKB:
                 assert "label" in ref and "url" in ref
                 assert ref["url"].startswith("https://")
 
+    # === 拡張カバレッジテスト (PR #44 で 11→30+ 疾患に拡大) ===
+    def test_extended_coverage_news(self):
+        d = get_disease_detail("Neonatal Encephalopathy with Seizures")
+        assert d is not None and "ATF2" in d.get("title", "")
+
+    def test_extended_coverage_mdr1(self):
+        d = get_disease_detail("MDR1 / Multidrug Resistance")
+        assert d is not None and "ABCB1" in d.get("mechanism", "")
+
+    def test_extended_coverage_huu(self):
+        d = get_disease_detail("Hyperuricosuria")
+        assert d is not None and "尿酸" in d.get("summary", "")
+
+    def test_extended_coverage_cea(self):
+        d = get_disease_detail("Collie Eye Anomaly")
+        assert d is not None and "NHEJ1" in d.get("mechanism", "")
+
+    def test_extended_coverage_cystinuria(self):
+        d = get_disease_detail("Cystinuria")
+        assert d is not None and "SLC" in d.get("mechanism", "")
+
+    def test_extended_coverage_hnpk(self):
+        d = get_disease_detail("Hereditary Nasal Parakeratosis (HNPK)")
+        assert d is not None and "SUV39H2" in d.get("mechanism", "")
+
+    def test_extended_coverage_minimum_count(self):
+        # KB は 11 (元の10 + EIC) → 拡張後 30 以上に
+        assert len(DISEASE_KB) >= 25, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
+
 
 @pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
 class TestTraitKB:
