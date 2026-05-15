@@ -90,6 +90,15 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
   outline:3px solid var(--purple); outline-offset:2px;
 }
 
+/* === 遺伝子座テーブルの座位名リンク === */
+.locus-cell-link {
+  background:none; border:none; padding:0; font-family:inherit; font-size:inherit;
+  color:var(--purple); cursor:pointer; font-weight:600;
+  text-decoration:underline; text-decoration-style:dotted; text-underline-offset:3px;
+}
+.locus-cell-link:hover { color:var(--pink); }
+.locus-cell-link:focus-visible { outline:2px solid var(--purple); outline-offset:2px; border-radius:3px; }
+
 /* === 結果テーブル内の座位コードをクリッカブル化 === */
 .result-locus {
   display:inline-block; padding:0 4px; margin:0 1px;
@@ -906,18 +915,21 @@ function runColorSim() {
   html += '<h3 style="margin-top:20px;">各遺伝子座の交配結果</h3><table>';
   html += '<tr><th>遺伝子座</th><th>父犬</th><th>母犬</th><th>子犬の遺伝子型確率</th></tr>';
   const loci = [
-    {name:"E Locus", s:sire.e, d:dam.e},
-    {name:"K Locus", s:sire.k, d:dam.k},
-    {name:"A Locus", s:sire.a, d:dam.a},
-    {name:"B Locus", s:sire.b, d:dam.b},
-    {name:"D Locus", s:sire.d, d:dam.d},
-    {name:"M Locus", s:sire.m, d:dam.m},
-    {name:"S (Pied)", s:sire.s, d:dam.s},
+    {name:"E Locus", key:"e", s:sire.e, d:dam.e},
+    {name:"K Locus", key:"k", s:sire.k, d:dam.k},
+    {name:"A Locus", key:"a", s:sire.a, d:dam.a},
+    {name:"B Locus", key:"b", s:sire.b, d:dam.b},
+    {name:"D Locus", key:"d", s:sire.d, d:dam.d},
+    {name:"M Locus", key:"m", s:sire.m, d:dam.m},
+    {name:"S (Pied)", key:"s", s:sire.s, d:dam.s},
+    {name:"G (Greying)", key:"g", s:sire.g, d:dam.g},
   ];
   for (const l of loci) {
     const cx = cross(l.s, l.d);
     const detail = Object.entries(cx).map(([g,p]) => `${g}: ${(p*100).toFixed(0)}%`).join(', ');
-    html += `<tr><td>${l.name}</td><td>${l.s}</td><td>${l.d}</td><td>${detail}</td></tr>`;
+    // 遺伝子座名・親遺伝子型・子確率の全てをクリッカブル化
+    const locusBtn = `<button type="button" class="locus-cell-link" onclick="showLocusInfo('${l.key}')" title="${l.name} の解説">${l.name} 📖</button>`;
+    html += `<tr><td>${locusBtn}</td><td>${wrapLocusReferences(l.s)}</td><td>${wrapLocusReferences(l.d)}</td><td>${wrapLocusReferences(detail)}</td></tr>`;
   }
   html += '</table>';
 
