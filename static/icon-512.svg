@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- PWA プレースホルダーアイコン (512x512)
+       Orivet ブランドロゴ受領後に差し替えてください -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a1a7a"/>
+      <stop offset="100%" stop-color="#e6007e"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- DNA らせんモチーフ -->
+  <g stroke="#fff" stroke-width="16" fill="none" stroke-linecap="round">
+    <path d="M 160 110 Q 256 180 160 270 Q 256 360 160 430" opacity="0.85"/>
+    <path d="M 352 110 Q 256 180 352 270 Q 256 360 352 430" opacity="0.85"/>
+    <line x1="180" y1="150" x2="332" y2="150"/>
+    <line x1="180" y1="230" x2="332" y2="230"/>
+    <line x1="180" y1="310" x2="332" y2="310"/>
+    <line x1="180" y1="390" x2="332" y2="390"/>
+  </g>
+</svg>
