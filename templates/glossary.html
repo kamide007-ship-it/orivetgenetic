@@ -32,6 +32,32 @@
   .entries { display:grid; gap:14px; }
   @media (min-width:768px) { .entries { grid-template-columns:repeat(2, 1fr); } }
 
+  /* === スマートフォン UX 集中改善 (PR #51) === */
+  @media (max-width:480px) {
+    /* iOS 自動ズーム防止 */
+    .search-box input { font-size:16px !important; padding:12px 14px; min-height:44px; }
+    .search-box button { padding:12px 20px; min-height:44px; font-size:1em; }
+    /* タッチターゲット拡大 */
+    .toc-links a { padding:8px 12px; min-height:36px; font-size:0.85em; }
+    .severity-filter a { padding:10px 14px; min-height:40px; font-size:0.85em; }
+    .section-tab button { padding:14px 16px; min-height:44px; }
+    details.entry > summary { padding:10px 0; min-height:36px; line-height:1.4; }
+    details.entry .body .refs a { padding:8px 12px; min-height:36px; font-size:0.9em; }
+    /* ヘッダー */
+    header h1 { font-size:1.2em; }
+    header p { font-size:0.82em; }
+    header .nav a { padding:10px 12px; min-height:40px; }
+    /* 余白調整 */
+    .container { padding:14px; }
+    .toc, .search-box { padding:12px 14px; }
+    .cat-section h3 { font-size:0.98em; padding:6px 10px; }
+    details.entry { padding:12px 14px; }
+    /* バッジ可読性 */
+    details.entry .sev-badge { font-size:0.7em; padding:2px 8px; }
+    /* iOS safe-area */
+    body { padding-bottom:env(safe-area-inset-bottom); }
+  }
+
   details.entry { background:#fff; border-radius:10px; padding:14px 18px; border:1px solid #e5e7eb; box-shadow:0 1px 3px rgba(0,0,0,0.03); }
   details.entry > summary { cursor:pointer; font-weight:600; color:#4a1a7a; font-size:1em; user-select:none; list-style:none; outline:none; padding:4px 0; }
   details.entry > summary::-webkit-details-marker { display:none; }

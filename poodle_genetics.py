@@ -3001,6 +3001,22 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     total_carrier = sum(len([r for r in d.health_results if r.status == "carrier"]) for d in dogs)
     total_positive = sum(len([r for r in d.health_results if r.status == "positive"]) for d in dogs)
 
+    # 重症度別の陽性・キャリア集計（理解できるコンセプト）
+    def _disease_severity_for_result(r):
+        d = get_disease_detail(r.test_name)
+        return get_disease_severity(d) if d else None
+
+    high_risk_positive = 0
+    high_risk_carrier = 0
+    for d in dogs:
+        for r in d.health_results:
+            sev = _disease_severity_for_result(r)
+            if sev == "high":
+                if r.status == "positive":
+                    high_risk_positive += 1
+                elif r.status == "carrier":
+                    high_risk_carrier += 1
+
     has_orivet = len(dogs) > 0
     has_pedigree = len(pedigrees) > 0
 
@@ -3279,12 +3295,17 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
 
     # ── Summary card counts ──
     summary_html = ""
+    # 高リスク陽性カードのスタイル（陽性件数の有無で強調度を変える）
+    high_risk_emphasis = ""
+    if high_risk_positive > 0:
+        high_risk_emphasis = "box-shadow:0 0 0 3px rgba(220,38,38,0.4),0 2px 8px rgba(0,0,0,0.06);"
     if has_orivet:
         summary_html = f"""  <div class="summary-row">
     <div class="summary-card"><div class="num blue">{len(dogs)}</div><div class="label" data-i18n="sum_tested">検査頭数</div></div>
     <div class="summary-card"><div class="num green">{total_normal}</div><div class="label" data-i18n="sum_normal">ノーマル項目</div></div>
     <div class="summary-card"><div class="num yellow">{total_carrier}</div><div class="label" data-i18n="sum_carrier">キャリア項目</div></div>
     <div class="summary-card"><div class="num red">{total_positive}</div><div class="label" data-i18n="sum_positive">ポジティブ (要注意)</div></div>
+    <div class="summary-card" style="{high_risk_emphasis}"><div class="num red" style="font-size:1.7em;">🚨 {high_risk_positive}</div><div class="label" data-i18n="sum_high_risk_pos" style="font-weight:600;">高リスク疾患の陽性</div></div>
     {'<div class="summary-card"><div class="num" style="color:#4a1a7a;">' + str(len(pedigrees)) + '</div><div class="label" data-i18n="sum_pedigree">血統書データ</div></div>' if has_pedigree else ''}
   </div>"""
     elif has_pedigree:
@@ -3410,6 +3431,22 @@ details.kb-detail .kb-refs a.kb-ref-link {{
 }}
 details.kb-detail .kb-refs a.kb-ref-link:hover {{ background:#ddd6fe; }}
 @media (max-width:768px) {{ header h1 {{ font-size:1.3em; }} .dog-header {{ flex-direction:column; }} .compare-table,.results-table {{ display:block; overflow-x:auto; }} .info-grid {{ grid-template-columns:1fr; }} }}
+/* スマートフォン UX 集中改善 (PR #51) */
+@media (max-width:480px) {{
+  .container {{ padding:12px; }}
+  header {{ padding:18px 0; }}
+  header h1 {{ font-size:1.15em; }}
+  .summary-row {{ grid-template-columns:repeat(2, 1fr); gap:8px; }}
+  .summary-card {{ padding:12px; }}
+  .summary-card .num {{ font-size:1.4em; }}
+  .summary-card .label {{ font-size:0.75em; line-height:1.2; }}
+  .tab {{ padding:10px 14px; min-height:44px; font-size:0.85em; }}
+  .dog-card {{ padding:14px; border-radius:10px; }}
+  .results-table th, .results-table td {{ padding:8px 6px; font-size:0.82em; }}
+  details.kb-detail {{ font-size:0.82em; padding:6px 8px; }}
+  details.kb-detail .kb-refs a.kb-ref-link {{ padding:6px 12px; min-height:36px; display:inline-block; }}
+  body {{ padding-bottom:env(safe-area-inset-bottom); }}
+}}
 @media print {{ .tabs,.print-btn,header {{ display:none!important; }} .tab-content {{ display:block!important; page-break-inside:avoid; }} .dog-card {{ break-inside:avoid; }} }}
 </style>
 </head>

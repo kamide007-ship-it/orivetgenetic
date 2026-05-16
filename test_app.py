@@ -935,6 +935,33 @@ class TestSeverity:
         finally:
             os.unlink(path)
 
+    def test_report_high_risk_summary_card(self):
+        """高リスク陽性サマリーカードが表示される"""
+        import tempfile, os
+        from poodle_genetics import generate_unified_html, DogProfile, TestResult
+        # 高リスク疾患の陽性ケース (DM = high) を含む
+        dog = DogProfile(
+            pet_name="テスト", registered_name="Test Dog",
+            test_date="2024-01-01",
+            health_results=[
+                TestResult(
+                    category="健康", test_name="Degenerative Myelopathy",
+                    japanese_name="変性性脊髄症", genotype="P/P",
+                    result_text="Positive", status="positive",
+                )
+            ],
+        )
+        with tempfile.NamedTemporaryFile("w", suffix=".html", delete=False) as f:
+            path = f.name
+        try:
+            generate_unified_html([dog], [], path)
+            with open(path, "r", encoding="utf-8") as f:
+                html = f.read()
+            # 高リスク陽性カードが表示される
+            assert "🚨" in html or "高リスク疾患の陽性" in html or "sum_high_risk_pos" in html
+        finally:
+            os.unlink(path)
+
 
 @pytest.mark.skipif(not _HAS_KB, reason="KB module not importable")
 class TestTraitKB:
