@@ -1214,6 +1214,63 @@ class TestKbExport:
         # エントリ件数情報
         assert "疾患エントリ数" in body
 
+
+# ===========================================================================
+# 19. PWA 対応 (manifest.json / theme-color / icons)
+# ===========================================================================
+
+class TestPWA:
+    def test_manifest_json_200(self):
+        rv = client.get("/manifest.json")
+        assert rv.status_code == 200
+        assert rv.content_type.startswith("application/json")
+        data = rv.get_json()
+        # 必須フィールド
+        assert "name" in data
+        assert "short_name" in data
+        assert "start_url" in data
+        assert "display" in data
+        assert "icons" in data
+        assert "theme_color" in data
+        # アイコン参照
+        assert any("192" in icon["sizes"] for icon in data["icons"])
+        assert any("512" in icon["sizes"] for icon in data["icons"])
+
+    def test_manifest_shortcuts(self):
+        rv = client.get("/manifest.json")
+        data = rv.get_json()
+        assert "shortcuts" in data
+        assert len(data["shortcuts"]) >= 3
+        urls = [s["url"] for s in data["shortcuts"]]
+        assert "/glossary" in urls
+        assert "/simulator" in urls
+
+    def test_static_icon_served(self):
+        # SVG アイコンが配信される
+        rv = client.get("/static/icon-192.svg")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "<svg" in body
+        assert 'viewBox="0 0 192 192"' in body
+
+    def test_static_icon_512(self):
+        rv = client.get("/static/icon-512.svg")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "<svg" in body
+
+    def test_index_has_manifest_link(self):
+        rv = client.get("/")
+        body = rv.get_data(as_text=True)
+        assert 'rel="manifest"' in body
+        assert 'name="theme-color"' in body
+        assert 'apple-mobile-web-app-capable' in body
+
+    def test_glossary_has_manifest_link(self):
+        rv = client.get("/glossary")
+        body = rv.get_data(as_text=True)
+        assert 'rel="manifest"' in body
+
     def test_report_html_has_severity_badge(self):
         """generate_unified_html が KB マッチした疾患に severity-badge クラスを付与する"""
         import tempfile, os

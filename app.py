@@ -678,6 +678,61 @@ def robots_txt():
     return Response(body, mimetype="text/plain")
 
 
+@app.route("/manifest.json")
+def manifest_json():
+    """PWA manifest — モバイル『ホーム画面に追加』対応
+
+    アイコンは絵文字ベースの SVG プレースホルダー。
+    Orivet ブランドアイコン受領後に置き換えてください (icons[].src)。
+    """
+    manifest = {
+        "name": "Orivet 遺伝子解析",
+        "short_name": "Orivet 遺伝子",
+        "description": "犬の遺伝子検査PDFから健康・毛色・血統を解析",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#f8f9fa",
+        "theme_color": "#7c3aed",
+        "lang": "ja",
+        "icons": [
+            {
+                "src": "/static/icon-192.svg",
+                "sizes": "192x192",
+                "type": "image/svg+xml",
+                "purpose": "any maskable",
+            },
+            {
+                "src": "/static/icon-512.svg",
+                "sizes": "512x512",
+                "type": "image/svg+xml",
+                "purpose": "any maskable",
+            },
+        ],
+        "categories": ["health", "lifestyle", "education"],
+        "shortcuts": [
+            {
+                "name": "辞書",
+                "short_name": "辞書",
+                "url": "/glossary",
+                "description": "遺伝子疾患・形質辞書",
+            },
+            {
+                "name": "シミュレーター",
+                "short_name": "シミュレーター",
+                "url": "/simulator",
+                "description": "繁殖シミュレーター",
+            },
+            {
+                "name": "ガイド",
+                "short_name": "ガイド",
+                "url": "/guides",
+                "description": "ガイド記事",
+            },
+        ],
+    }
+    return jsonify(manifest)
+
+
 @app.route("/simulator")
 def simulator():
     """繁殖シミュレーター（静的HTML。session_id はクライアント側JS が
