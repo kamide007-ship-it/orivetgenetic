@@ -4,3 +4,6 @@ uploads/
 reports/
 .env
 venv/
+
+# KB レビュー用エクスポート (export_kb_review.py の出力 — 一時生成物)
+kb_review_*.md

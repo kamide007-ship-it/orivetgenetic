@@ -1143,6 +1143,77 @@ class TestSampleAndGuides:
             for slug in guide.get("related_trait_slugs", []):
                 assert slug in TRAIT_SLUG_INDEX, f"unknown trait slug {slug} in guide {guide['slug']}"
 
+
+# ===========================================================================
+# 18. KB エクスポート (export_kb_review.py)
+# ===========================================================================
+
+class TestKbExport:
+    def test_export_module_importable(self):
+        import export_kb_review
+        assert hasattr(export_kb_review, "main")
+        assert hasattr(export_kb_review, "disease_to_md")
+        assert hasattr(export_kb_review, "trait_to_md")
+
+    def test_disease_to_md_format(self):
+        import export_kb_review
+        entry = {
+            "_slug": "test-disease",
+            "title": "テスト疾患 (TEST)",
+            "match": ["test", "テスト"],
+            "summary": "テスト用の概要",
+            "mechanism": "メカニズム説明",
+            "symptoms": "症状説明",
+            "inheritance": "常染色体劣性",
+            "advice": "繁殖アドバイス",
+            "references": [{"label": "Test Link", "url": "https://example.com"}],
+        }
+        md = export_kb_review.disease_to_md(entry)
+        assert "### テスト疾患 (TEST)" in md
+        assert "test-disease" in md
+        assert "📋 概要" in md
+        assert "🧬 メカニズム" in md
+        assert "[Test Link](https://example.com)" in md
+        # レビューチェックリストが含まれる
+        assert "レビュアーへ" in md
+        assert "- [ ]" in md
+
+    def test_trait_to_md_format(self):
+        import export_kb_review
+        entry = {
+            "_slug": "test-trait",
+            "title": "テスト座位",
+            "match": ["test locus"],
+            "summary": "概要",
+            "mechanism": "メカニズム",
+            "phenotype": "表現型",
+            "advice": "アドバイス",
+            "references": [],
+        }
+        md = export_kb_review.trait_to_md(entry)
+        assert "### テスト座位" in md
+        assert "🎨 表現型" in md
+        assert "レビュアーへ" in md
+
+    def test_full_export_runs(self, tmp_path):
+        """フル export を実行し、エラーなく完了することを確認"""
+        import export_kb_review, sys
+        out = tmp_path / "test_export.md"
+        sys.argv = ["export_kb_review.py", "--out", str(out)]
+        rc = export_kb_review.main()
+        assert rc == 0
+        assert out.exists()
+        body = out.read_text(encoding="utf-8")
+        # ヘッダ要素
+        assert "Orivet 遺伝子検査 KB レビュードキュメント" in body
+        # 疾患カテゴリヘッダ
+        assert "🩺 疾患エントリ" in body
+        assert "🎨 形質エントリ" in body
+        # 主要疾患
+        assert "CDDY" in body or "椎間板" in body
+        # エントリ件数情報
+        assert "疾患エントリ数" in body
+
     def test_report_html_has_severity_badge(self):
         """generate_unified_html が KB マッチした疾患に severity-badge クラスを付与する"""
         import tempfile, os
