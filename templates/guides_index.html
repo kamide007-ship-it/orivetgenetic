@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ lang or 'ja' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ガイド記事 — 遺伝子検査・繁殖計画・毛色遺伝学 | Orivet 遺伝子解析</title>
-<meta name="description" content="Orivet 遺伝子検査の見方、COI（近親交配係数）の意味、毛色遺伝子の基本、ブリーダー向け繁殖計画など、犬の遺伝学を理解するためのガイド記事。">
+<title>{% if lang == 'en' %}Guides — Genetic Testing, Breeding & Coat Genetics | Orivet Genetic Analysis{% else %}ガイド記事 — 遺伝子検査・繁殖計画・毛色遺伝学 | Orivet 遺伝子解析{% endif %}</title>
+<meta name="description" content="{% if lang == 'en' %}Guides on Orivet genetic test interpretation, COI (inbreeding coefficient), coat color genetics, breeding plans, and breed-specific recommendations.{% else %}Orivet 遺伝子検査の見方、COI（近親交配係数）の意味、毛色遺伝子の基本、ブリーダー向け繁殖計画など、犬の遺伝学を理解するためのガイド記事。{% endif %}">
 <link rel="canonical" href="{{ canonical }}">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="ガイド記事 | Orivet 遺伝子解析">
-<meta property="og:description" content="犬の遺伝子検査・繁殖計画・毛色遺伝学のガイド記事一覧。">
+<meta property="og:title" content="{% if lang == 'en' %}Guides | Orivet Genetic Analysis{% else %}ガイド記事 | Orivet 遺伝子解析{% endif %}">
+<meta property="og:description" content="{% if lang == 'en' %}Guide articles on canine genetic testing, breeding plans, and coat color genetics.{% else %}犬の遺伝子検査・繁殖計画・毛色遺伝学のガイド記事一覧。{% endif %}">
 <meta property="og:url" content="{{ canonical }}">
-<meta property="og:site_name" content="Orivet 遺伝子解析">
+<meta property="og:site_name" content="{% if lang == 'en' %}Orivet Genetic Analysis{% else %}Orivet 遺伝子解析{% endif %}">
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -56,36 +56,45 @@
 <header>
   <div class="container">
     <div>
-      <h1>📚 ガイド記事</h1>
+      <h1>{% if lang == 'en' %}📚 Guides{% else %}📚 ガイド記事{% endif %}</h1>
     </div>
     <div class="nav">
-      <a href="/">解析する</a>
-      <a href="/glossary">📖 辞書</a>
-      <a href="/simulator">🐕 シミュレーター</a>
+      <a href="/{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Analyze{% else %}解析する{% endif %}</a>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}📖 Glossary{% else %}📖 辞書{% endif %}</a>
+      <a href="/simulator">{% if lang == 'en' %}🐕 Simulator{% else %}🐕 シミュレーター{% endif %}</a>
+      {% set toggle_lang = 'ja' if lang == 'en' else 'en' %}
+      <a href="/guides?lang={{ toggle_lang }}" title="Toggle language" style="background:rgba(255,255,255,0.3);font-weight:700;">
+        🌐 {% if lang == 'en' %}日本語{% else %}English{% endif %}
+      </a>
     </div>
   </div>
 </header>
 
 <div class="container">
-  <nav class="breadcrumb" aria-label="パンくず">
-    <a href="/">ホーム</a> &raquo; <span>ガイド記事</span>
+  <nav class="breadcrumb" aria-label="{% if lang == 'en' %}Breadcrumb{% else %}パンくず{% endif %}">
+    <a href="/{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Home{% else %}ホーム{% endif %}</a> &raquo; <span>{% if lang == 'en' %}Guides{% else %}ガイド記事{% endif %}</span>
   </nav>
 
   <div class="intro">
-    <h2>遺伝子検査・繁殖計画の基礎ガイド</h2>
-    <p>初めて愛犬の遺伝子検査結果を受け取った方、繁殖計画を立てているブリーダーの方、毛色遺伝学に興味のある方に向けた解説記事です。</p>
+    <h2>{% if lang == 'en' %}Guides on Genetic Testing & Breeding{% else %}遺伝子検査・繁殖計画の基礎ガイド{% endif %}</h2>
+    <p>{% if lang == 'en' %}Educational articles for owners reading their first genetic test report, breeders planning matings, and anyone curious about coat color genetics.{% else %}初めて愛犬の遺伝子検査結果を受け取った方、繁殖計画を立てているブリーダーの方、毛色遺伝学に興味のある方に向けた解説記事です。{% endif %}</p>
+    {% if lang == 'en' %}
+    <p style="margin-top:10px;padding:10px 14px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;font-size:0.88em;color:#92400e;">
+      ⚠️ Guide content is currently available in Japanese only. Article titles and summaries below are shown in the original language.
+    </p>
+    {% endif %}
   </div>
 
   <div class="guide-grid">
     {% for guide in guides %}
-    <a href="/guides/{{ guide.slug }}" class="guide-card">
+    <a href="/guides/{{ guide.slug }}{% if lang == 'en' %}?lang=en{% endif %}" class="guide-card">
       <div class="meta">
         <span class="badge-category">{{ guide.category }}</span>
         <span class="badge-time">⏱ {{ guide.reading_time }}</span>
       </div>
       <h3>{{ guide.title }}</h3>
       <p>{{ guide.summary }}</p>
-      <span class="read-more">続きを読む →</span>
+      <span class="read-more">{% if lang == 'en' %}Read more →{% else %}続きを読む →{% endif %}</span>
     </a>
     {% endfor %}
   </div>

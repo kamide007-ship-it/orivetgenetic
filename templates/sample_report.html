@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ lang or 'ja' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>サンプルレポート — 解析結果のプレビュー | Orivet 遺伝子解析</title>
-<meta name="description" content="Orivet 遺伝子検査PDFをアップロードすると、こんな解析レポートが生成されます。サンプルデータで実際の表示を確認できます。">
+<title>{% if lang == 'en' %}Sample Report — Analysis Preview | Orivet Genetic Analysis{% else %}サンプルレポート — 解析結果のプレビュー | Orivet 遺伝子解析{% endif %}</title>
+<meta name="description" content="{% if lang == 'en' %}Preview what your analysis report will look like when you upload an Orivet genetic test PDF. View sample data for diseases, traits, and severity badges.{% else %}Orivet 遺伝子検査PDFをアップロードすると、こんな解析レポートが生成されます。サンプルデータで実際の表示を確認できます。{% endif %}">
 <link rel="canonical" href="{{ canonical }}">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="サンプルレポート — Orivet 遺伝子解析">
-<meta property="og:description" content="解析レポートのサンプルプレビュー。健康疾患・形質結果・重症度バッジ・詳細解説を全て確認できます。">
+<meta property="og:title" content="{% if lang == 'en' %}Sample Report — Orivet Genetic Analysis{% else %}サンプルレポート — Orivet 遺伝子解析{% endif %}">
+<meta property="og:description" content="{% if lang == 'en' %}Preview an analysis report showing diseases, traits, severity badges, and detailed explanations.{% else %}解析レポートのサンプルプレビュー。健康疾患・形質結果・重症度バッジ・詳細解説を全て確認できます。{% endif %}">
 <meta property="og:url" content="{{ canonical }}">
-<meta property="og:site_name" content="Orivet 遺伝子解析">
-<meta property="og:locale" content="ja_JP">
+<meta property="og:site_name" content="{% if lang == 'en' %}Orivet Genetic Analysis{% else %}Orivet 遺伝子解析{% endif %}">
+<meta property="og:locale" content="{% if lang == 'en' %}en_US{% else %}ja_JP{% endif %}">
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -78,13 +78,17 @@
 <header>
   <div class="container">
     <div>
-      <h1>📋 サンプルレポート</h1>
-      <p style="opacity:0.85;font-size:0.85em;">解析するとこのような結果が得られます</p>
+      <h1>{% if lang == 'en' %}📋 Sample Report{% else %}📋 サンプルレポート{% endif %}</h1>
+      <p style="opacity:0.85;font-size:0.85em;">{% if lang == 'en' %}This is what your analysis report will look like{% else %}解析するとこのような結果が得られます{% endif %}</p>
     </div>
     <div class="nav">
-      <a href="/">解析する</a>
-      <a href="/glossary">📖 辞書</a>
-      <a href="/guides">📚 ガイド</a>
+      <a href="/{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Analyze{% else %}解析する{% endif %}</a>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}📖 Glossary{% else %}📖 辞書{% endif %}</a>
+      <a href="/guides{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}📚 Guides{% else %}📚 ガイド{% endif %}</a>
+      {% set toggle_lang = 'ja' if lang == 'en' else 'en' %}
+      <a href="/sample?lang={{ toggle_lang }}" title="Toggle language" style="background:rgba(255,255,255,0.3);font-weight:700;">
+        🌐 {% if lang == 'en' %}日本語{% else %}English{% endif %}
+      </a>
     </div>
   </div>
 </header>
@@ -92,101 +96,121 @@
 <div class="container">
 
   <div class="sample-notice">
-    <strong>⚠️ これはサンプルデータです</strong>
-    <p>このページは『Orivet 遺伝子解析の出力例』をプレビューするためのサンプルです。
-    実際の解析を行うには、ホームページから Orivet 遺伝子検査PDFをアップロードしてください。</p>
+    <strong>{% if lang == 'en' %}⚠️ This is sample data{% else %}⚠️ これはサンプルデータです{% endif %}</strong>
+    <p>{% if lang == 'en' %}This page previews an example output of Orivet Genetic Analysis. To run a real analysis, upload your Orivet genetic test PDF from the home page.{% else %}このページは『Orivet 遺伝子解析の出力例』をプレビューするためのサンプルです。
+    実際の解析を行うには、ホームページから Orivet 遺伝子検査PDFをアップロードしてください。{% endif %}</p>
   </div>
 
-  <!-- サマリー行 -->
+  <!-- summary -->
   <div class="summary-row">
     <div class="summary-card">
       <div class="num blue">1</div>
-      <div class="label">検査頭数</div>
+      <div class="label">{% if lang == 'en' %}Dogs Tested{% else %}検査頭数{% endif %}</div>
     </div>
     <div class="summary-card">
       <div class="num green">7</div>
-      <div class="label">ノーマル項目</div>
+      <div class="label">{% if lang == 'en' %}Normal Results{% else %}ノーマル項目{% endif %}</div>
     </div>
     <div class="summary-card">
       <div class="num yellow">2</div>
-      <div class="label">キャリア項目</div>
+      <div class="label">{% if lang == 'en' %}Carriers{% else %}キャリア項目{% endif %}</div>
     </div>
     <div class="summary-card">
       <div class="num red">0</div>
-      <div class="label">ポジティブ</div>
+      <div class="label">{% if lang == 'en' %}Affected{% else %}ポジティブ{% endif %}</div>
     </div>
     <div class="summary-card" style="box-shadow:0 0 0 3px rgba(34,197,94,0.4),0 2px 8px rgba(0,0,0,0.06);">
       <div class="num green" style="font-size:1.7em;">✅ 0</div>
-      <div class="label" style="font-weight:600;">高リスク疾患の陽性</div>
+      <div class="label" style="font-weight:600;">{% if lang == 'en' %}High-Risk Affected{% else %}高リスク疾患の陽性{% endif %}</div>
     </div>
   </div>
 
-  <!-- 検査対象一覧 -->
+  <!-- pet info -->
   <div class="preview-card">
-    <h2>📋 検査対象一覧</h2>
+    <h2>{% if lang == 'en' %}📋 Tested Dogs{% else %}📋 検査対象一覧{% endif %}</h2>
     <table>
-      <tr><th>ペット名</th><th>登録名</th><th>犬種</th><th>性別</th><th>生年月日</th></tr>
-      <tr><td>サンプル太郎</td><td>Sample Buddy of Showcase</td><td>スタンダードプードル</td><td>♂</td><td>2022/05/15</td></tr>
-    </table>
-  </div>
-
-  <!-- 健康検査結果 -->
-  <div class="preview-card">
-    <h2>🩺 健康検査結果（9項目）</h2>
-    <table>
-      <tr><th>検査項目</th><th>結果</th><th>詳細</th></tr>
       <tr>
-        <td>軟骨異栄養症+椎間板疾患 (CDDY+IVDD)
-          <span class="sev-badge" style="background:#fef3c7;color:#c2410c;">🟡 中リスク</span>
-        </td>
-        <td><span class="status carrier">P/N</span></td>
-        <td>キャリア。1コピー保有。<br><a href="/glossary/disease/chondrodystrophy" style="color:#7c3aed;">📖 詳細を見る</a></td>
+        <th>{% if lang == 'en' %}Pet Name{% else %}ペット名{% endif %}</th>
+        <th>{% if lang == 'en' %}Registered Name{% else %}登録名{% endif %}</th>
+        <th>{% if lang == 'en' %}Breed{% else %}犬種{% endif %}</th>
+        <th>{% if lang == 'en' %}Sex{% else %}性別{% endif %}</th>
+        <th>{% if lang == 'en' %}DOB{% else %}生年月日{% endif %}</th>
       </tr>
       <tr>
-        <td>変性性脊髄症 (DM)
-          <span class="sev-badge" style="background:#fee2e2;color:#dc2626;">🔴 高リスク</span>
-        </td>
-        <td><span class="status normal">N/N</span></td>
-        <td>正常。<a href="/glossary/disease/degenerative-myelopathy" style="color:#7c3aed;">📖 詳細を見る</a></td>
-      </tr>
-      <tr>
-        <td>進行性網膜萎縮症 (prcd-PRA)
-          <span class="sev-badge" style="background:#fee2e2;color:#dc2626;">🔴 高リスク</span>
-        </td>
-        <td><span class="status normal">N/N</span></td>
-        <td>正常。<a href="/glossary/disease/progressive-rod-cone" style="color:#7c3aed;">📖 詳細を見る</a></td>
-      </tr>
-      <tr>
-        <td>フォン・ヴィレブランド病 I型 (vWD1)
-          <span class="sev-badge" style="background:#fef3c7;color:#c2410c;">🟡 中リスク</span>
-        </td>
-        <td><span class="status carrier">P/N</span></td>
-        <td>キャリア。手術前に獣医師に申告を。</td>
+        <td>{% if lang == 'en' %}Sample Buddy{% else %}サンプル太郎{% endif %}</td>
+        <td>Sample Buddy of Showcase</td>
+        <td>{% if lang == 'en' %}Standard Poodle{% else %}スタンダードプードル{% endif %}</td>
+        <td>♂</td>
+        <td>2022/05/15</td>
       </tr>
     </table>
   </div>
 
-  <!-- 毛色・形質結果 -->
+  <!-- health -->
   <div class="preview-card">
-    <h2>🎨 毛色・形質検査結果（一部抜粋）</h2>
+    <h2>{% if lang == 'en' %}🩺 Health Test Results (9 panels){% else %}🩺 健康検査結果（9項目）{% endif %}</h2>
     <table>
-      <tr><th>検査項目</th><th>遺伝子型</th><th>表現型</th></tr>
-      <tr><td>E Locus</td><td>E/e</td><td>黒系色素を生成可能（キャリア）</td></tr>
-      <tr><td>K Locus</td><td>KB/ky</td><td>ソリッドカラー</td></tr>
-      <tr><td>A Locus</td><td>at/at</td><td>ファントム/タンポイント素因あり</td></tr>
-      <tr><td>B Locus</td><td>BB</td><td>黒色素正常</td></tr>
-      <tr><td>D Locus</td><td>DD</td><td>希釈なし</td></tr>
+      <tr>
+        <th>{% if lang == 'en' %}Test{% else %}検査項目{% endif %}</th>
+        <th>{% if lang == 'en' %}Result{% else %}結果{% endif %}</th>
+        <th>{% if lang == 'en' %}Details{% else %}詳細{% endif %}</th>
+      </tr>
+      <tr>
+        <td>{% if lang == 'en' %}Chondrodystrophy + IVDD (CDDY+IVDD){% else %}軟骨異栄養症+椎間板疾患 (CDDY+IVDD){% endif %}
+          <span class="sev-badge" style="background:#fef3c7;color:#c2410c;">{% if lang == 'en' %}🟡 Medium{% else %}🟡 中リスク{% endif %}</span>
+        </td>
+        <td><span class="status carrier">P/N</span></td>
+        <td>{% if lang == 'en' %}Carrier — 1 copy.{% else %}キャリア。1コピー保有。{% endif %}<br><a href="/glossary/disease/chondrodystrophy{% if lang == 'en' %}?lang=en{% endif %}" style="color:#7c3aed;">{% if lang == 'en' %}📖 View details{% else %}📖 詳細を見る{% endif %}</a></td>
+      </tr>
+      <tr>
+        <td>{% if lang == 'en' %}Degenerative Myelopathy (DM){% else %}変性性脊髄症 (DM){% endif %}
+          <span class="sev-badge" style="background:#fee2e2;color:#dc2626;">{% if lang == 'en' %}🔴 High{% else %}🔴 高リスク{% endif %}</span>
+        </td>
+        <td><span class="status normal">N/N</span></td>
+        <td>{% if lang == 'en' %}Clear.{% else %}正常。{% endif %}<a href="/glossary/disease/degenerative-myelopathy{% if lang == 'en' %}?lang=en{% endif %}" style="color:#7c3aed;">{% if lang == 'en' %}📖 View details{% else %}📖 詳細を見る{% endif %}</a></td>
+      </tr>
+      <tr>
+        <td>{% if lang == 'en' %}Progressive Rod-Cone Degeneration (prcd-PRA){% else %}進行性網膜萎縮症 (prcd-PRA){% endif %}
+          <span class="sev-badge" style="background:#fee2e2;color:#dc2626;">{% if lang == 'en' %}🔴 High{% else %}🔴 高リスク{% endif %}</span>
+        </td>
+        <td><span class="status normal">N/N</span></td>
+        <td>{% if lang == 'en' %}Clear.{% else %}正常。{% endif %}<a href="/glossary/disease/progressive-rod-cone{% if lang == 'en' %}?lang=en{% endif %}" style="color:#7c3aed;">{% if lang == 'en' %}📖 View details{% else %}📖 詳細を見る{% endif %}</a></td>
+      </tr>
+      <tr>
+        <td>{% if lang == 'en' %}Von Willebrand Disease Type 1 (vWD1){% else %}フォン・ヴィレブランド病 I型 (vWD1){% endif %}
+          <span class="sev-badge" style="background:#fef3c7;color:#c2410c;">{% if lang == 'en' %}🟡 Medium{% else %}🟡 中リスク{% endif %}</span>
+        </td>
+        <td><span class="status carrier">P/N</span></td>
+        <td>{% if lang == 'en' %}Carrier — disclose to your vet before surgery.{% else %}キャリア。手術前に獣医師に申告を。{% endif %}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- traits -->
+  <div class="preview-card">
+    <h2>{% if lang == 'en' %}🎨 Coat & Trait Results (excerpt){% else %}🎨 毛色・形質検査結果（一部抜粋）{% endif %}</h2>
+    <table>
+      <tr>
+        <th>{% if lang == 'en' %}Test{% else %}検査項目{% endif %}</th>
+        <th>{% if lang == 'en' %}Genotype{% else %}遺伝子型{% endif %}</th>
+        <th>{% if lang == 'en' %}Phenotype{% else %}表現型{% endif %}</th>
+      </tr>
+      <tr><td>E Locus</td><td>E/e</td><td>{% if lang == 'en' %}Can produce eumelanin (carrier of recessive e){% else %}黒系色素を生成可能（キャリア）{% endif %}</td></tr>
+      <tr><td>K Locus</td><td>KB/ky</td><td>{% if lang == 'en' %}Solid color{% else %}ソリッドカラー{% endif %}</td></tr>
+      <tr><td>A Locus</td><td>at/at</td><td>{% if lang == 'en' %}Predisposed to phantom / tan-point pattern{% else %}ファントム/タンポイント素因あり{% endif %}</td></tr>
+      <tr><td>B Locus</td><td>BB</td><td>{% if lang == 'en' %}Normal black pigment{% else %}黒色素正常{% endif %}</td></tr>
+      <tr><td>D Locus</td><td>DD</td><td>{% if lang == 'en' %}No dilution{% else %}希釈なし{% endif %}</td></tr>
     </table>
   </div>
 
   <!-- CTA -->
   <div class="cta-row">
-    <h3>🎯 あなたの愛犬の結果もこの形式で見られます</h3>
-    <p style="color:#6b7280;font-size:0.95em;">Orivet 遺伝子検査PDFをアップロードするだけ。約10〜60秒で完成。</p>
+    <h3>{% if lang == 'en' %}🎯 See your own dog's results in this format{% else %}🎯 あなたの愛犬の結果もこの形式で見られます{% endif %}</h3>
+    <p style="color:#6b7280;font-size:0.95em;">{% if lang == 'en' %}Just upload your Orivet genetic test PDF — analysis completes in ~10–60 seconds.{% else %}Orivet 遺伝子検査PDFをアップロードするだけ。約10〜60秒で完成。{% endif %}</p>
     <div class="btn-row">
-      <a href="/">📄 解析を始める</a>
-      <a href="/glossary" class="alt">📖 疾患辞書を見る</a>
-      <a href="/guides" class="alt">📚 ガイド記事</a>
+      <a href="/{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}📄 Start Analysis{% else %}📄 解析を始める{% endif %}</a>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="alt">{% if lang == 'en' %}📖 Browse Glossary{% else %}📖 疾患辞書を見る{% endif %}</a>
+      <a href="/guides{% if lang == 'en' %}?lang=en{% endif %}" class="alt">{% if lang == 'en' %}📚 Guides{% else %}📚 ガイド記事{% endif %}</a>
     </div>
   </div>
 

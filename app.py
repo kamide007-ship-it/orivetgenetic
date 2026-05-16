@@ -745,30 +745,35 @@ def sitemap():
 @app.route("/sample")
 def sample_report():
     """サンプルレポートページ — 解析せずに何が得られるかを示す。"""
+    lang = _get_lang(request)
     return render_template(
         "sample_report.html",
         canonical=request.url_root.rstrip("/") + "/sample",
+        lang=lang,
     )
 
 
 @app.route("/guides")
 def guides_index():
     """ガイド記事一覧ページ。"""
+    lang = _get_lang(request)
     return render_template(
         "guides_index.html",
         guides=GUIDES,
         canonical=request.url_root.rstrip("/") + "/guides",
+        lang=lang,
     )
 
 
 @app.route("/guides/<slug>")
 def guide_detail(slug):
     """ガイド記事個別ページ。"""
+    lang = _get_lang(request)
     guide = GUIDES_INDEX.get(slug)
     if not guide:
         return render_template(
             "glossary_404.html",
-            kind="ガイド記事",
+            kind="ガイド記事" if lang != "en" else "guide",
             slug=slug,
         ), 404
     # 関連疾患・形質エントリを解決
@@ -777,9 +782,11 @@ def guide_detail(slug):
     return render_template(
         "guide_detail.html",
         guide=guide,
+        slug=slug,
         related_diseases=related_diseases,
         related_traits=related_traits,
         canonical=request.url_root.rstrip("/") + f"/guides/{slug}",
+        lang=lang,
     )
 
 

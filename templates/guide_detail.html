@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ lang or 'ja' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ guide.title }} | Orivet 遺伝子解析</title>
+<title>{{ guide.title }} | {% if lang == 'en' %}Orivet Genetic Analysis{% else %}Orivet 遺伝子解析{% endif %}</title>
 <meta name="description" content="{{ guide.summary | truncate(160) }}">
 <link rel="canonical" href="{{ canonical }}">
 
@@ -26,6 +26,7 @@
   "description": "{{ guide.summary }}",
   "url": "{{ canonical }}",
   "inLanguage": "ja",
+  {% if lang == 'en' %}"availableLanguage": "ja",{% endif %}
   "articleSection": "{{ guide.category }}",
   "timeRequired": "PT{{ guide.reading_time | replace(' 分','') }}M",
   "about": {
@@ -91,19 +92,23 @@
 <header>
   <div class="container">
     <div>
-      <h1>📚 ガイド記事</h1>
+      <h1>{% if lang == 'en' %}📚 Guides{% else %}📚 ガイド記事{% endif %}</h1>
     </div>
     <div class="nav">
-      <a href="/">解析する</a>
-      <a href="/glossary">📖 辞書</a>
-      <a href="/guides">📚 ガイド一覧</a>
+      <a href="/{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Analyze{% else %}解析する{% endif %}</a>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}📖 Glossary{% else %}📖 辞書{% endif %}</a>
+      <a href="/guides{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}📚 All Guides{% else %}📚 ガイド一覧{% endif %}</a>
+      {% set toggle_lang = 'ja' if lang == 'en' else 'en' %}
+      <a href="/guides/{{ slug }}?lang={{ toggle_lang }}" title="Toggle language" style="background:rgba(255,255,255,0.3);font-weight:700;">
+        🌐 {% if lang == 'en' %}日本語{% else %}English{% endif %}
+      </a>
     </div>
   </div>
 </header>
 
 <div class="container">
-  <nav class="breadcrumb" aria-label="パンくず">
-    <a href="/">ホーム</a> &raquo; <a href="/guides">ガイド記事</a> &raquo; <span>{{ guide.title }}</span>
+  <nav class="breadcrumb" aria-label="{% if lang == 'en' %}Breadcrumb{% else %}パンくず{% endif %}">
+    <a href="/{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Home{% else %}ホーム{% endif %}</a> &raquo; <a href="/guides{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Guides{% else %}ガイド記事{% endif %}</a> &raquo; <span>{{ guide.title }}</span>
   </nav>
 
   <article class="article-header">
@@ -113,6 +118,11 @@
     </div>
     <h2>{{ guide.title }}</h2>
     <p class="summary">{{ guide.summary }}</p>
+    {% if lang == 'en' %}
+    <div style="margin-top:14px;padding:10px 14px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;font-size:0.88em;color:#92400e;">
+      ⚠️ <strong>Article content is in Japanese only.</strong> An English translation is on our roadmap. UI labels are translated for navigation.
+    </div>
+    {% endif %}
   </article>
 
   {% for section in guide.sections %}
@@ -124,23 +134,23 @@
 
   {% if related_diseases or related_traits %}
   <div class="related">
-    <h3>🔗 関連する辞書エントリ</h3>
+    <h3>{% if lang == 'en' %}🔗 Related Glossary Entries{% else %}🔗 関連する辞書エントリ{% endif %}</h3>
     {% for d in related_diseases %}
-    <a href="/glossary/disease/{{ d._slug }}">{{ d.title }}</a>
+    <a href="/glossary/disease/{{ d._slug }}{% if lang == 'en' %}?lang=en{% endif %}">{{ d.title }}</a>
     {% endfor %}
     {% for t in related_traits %}
-    <a href="/glossary/trait/{{ t._slug }}">{{ t.title }}</a>
+    <a href="/glossary/trait/{{ t._slug }}{% if lang == 'en' %}?lang=en{% endif %}">{{ t.title }}</a>
     {% endfor %}
   </div>
   {% endif %}
 
   <div class="cta-row">
-    <h3>愛犬の遺伝子検査結果を分析しませんか？</h3>
-    <p style="color:#6b7280;font-size:0.9em;">Orivet 遺伝子検査PDFをアップロードするだけで、AI が結果を解析して理解しやすいレポートを生成します。</p>
+    <h3>{% if lang == 'en' %}Analyze your dog's genetic test results{% else %}愛犬の遺伝子検査結果を分析しませんか？{% endif %}</h3>
+    <p style="color:#6b7280;font-size:0.9em;">{% if lang == 'en' %}Upload your Orivet genetic test PDF — our system analyzes the results and generates an easy-to-understand report.{% else %}Orivet 遺伝子検査PDFをアップロードするだけで、AI が結果を解析して理解しやすいレポートを生成します。{% endif %}</p>
     <div class="btn-row">
-      <a href="/">📄 解析を始める</a>
-      <a href="/sample" class="alt">📋 サンプルを見る</a>
-      <a href="/glossary" class="alt">📖 疾患辞書</a>
+      <a href="/{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}📄 Start Analysis{% else %}📄 解析を始める{% endif %}</a>
+      <a href="/sample{% if lang == 'en' %}?lang=en{% endif %}" class="alt">{% if lang == 'en' %}📋 View Sample{% else %}📋 サンプルを見る{% endif %}</a>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="alt">{% if lang == 'en' %}📖 Glossary{% else %}📖 疾患辞書{% endif %}</a>
     </div>
   </div>
 </div>
