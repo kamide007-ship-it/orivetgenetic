@@ -110,6 +110,32 @@ class TestHealthz:
         assert "ocr" in data
 
 
+class TestVersion:
+    def test_version_returns_200(self):
+        rv = client.get("/version")
+        assert rv.status_code == 200
+
+    def test_version_includes_kb_counts(self):
+        rv = client.get("/version")
+        data = rv.get_json()
+        assert data.get("disease_kb_count", 0) >= 70
+        assert data.get("trait_kb_count", 0) >= 14
+        assert data.get("guides_count", 0) >= 5
+
+    def test_version_includes_config(self):
+        rv = client.get("/version")
+        data = rv.get_json()
+        assert "session_ttl_hours" in data
+        assert "max_upload_mb" in data
+        assert "features" in data
+        assert "service_worker" in data["features"]
+
+    def test_version_service_name(self):
+        rv = client.get("/version")
+        data = rv.get_json()
+        assert "Orivet" in data.get("service", "")
+
+
 # ===========================================================================
 # 3. 413 ハンドラ
 # ===========================================================================

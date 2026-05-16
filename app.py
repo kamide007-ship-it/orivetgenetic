@@ -210,6 +210,28 @@ def healthz():
     }), 200
 
 
+@app.route("/version")
+def version_info():
+    """デプロイ情報・KB件数を返す（運用可視性向上のため）"""
+    return jsonify({
+        "service": "Orivet 遺伝子解析",
+        "git_sha": os.environ.get("GIT_SHA", os.environ.get("RENDER_GIT_COMMIT", "unknown"))[:12],
+        "render_service": os.environ.get("RENDER_SERVICE_NAME", "unknown"),
+        "disease_kb_count": len(DISEASE_KB),
+        "trait_kb_count": len(TRAIT_KB),
+        "guides_count": len(GUIDES),
+        "symptom_categories": len(SYMPTOM_INDEX),
+        "session_ttl_hours": SESSION_TTL_SECONDS // 3600,
+        "max_upload_mb": app.config["MAX_CONTENT_LENGTH"] // (1024 * 1024),
+        "features": {
+            "pdfplumber": HAS_PDFPLUMBER,
+            "ocr": HAS_OCR,
+            "service_worker": True,
+            "manifest": True,
+        },
+    }), 200
+
+
 @app.errorhandler(413)
 def request_entity_too_large(_e):
     """50MB超過時のユーザー向けメッセージ"""
