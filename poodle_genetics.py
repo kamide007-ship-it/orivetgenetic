@@ -3431,6 +3431,22 @@ details.kb-detail .kb-refs a.kb-ref-link {{
 }}
 details.kb-detail .kb-refs a.kb-ref-link:hover {{ background:#ddd6fe; }}
 @media (max-width:768px) {{ header h1 {{ font-size:1.3em; }} .dog-header {{ flex-direction:column; }} .compare-table,.results-table {{ display:block; overflow-x:auto; }} .info-grid {{ grid-template-columns:1fr; }} }}
+/* スマートフォン UX 集中改善 (PR #51) */
+@media (max-width:480px) {{
+  .container {{ padding:12px; }}
+  header {{ padding:18px 0; }}
+  header h1 {{ font-size:1.15em; }}
+  .summary-row {{ grid-template-columns:repeat(2, 1fr); gap:8px; }}
+  .summary-card {{ padding:12px; }}
+  .summary-card .num {{ font-size:1.4em; }}
+  .summary-card .label {{ font-size:0.75em; line-height:1.2; }}
+  .tab {{ padding:10px 14px; min-height:44px; font-size:0.85em; }}
+  .dog-card {{ padding:14px; border-radius:10px; }}
+  .results-table th, .results-table td {{ padding:8px 6px; font-size:0.82em; }}
+  details.kb-detail {{ font-size:0.82em; padding:6px 8px; }}
+  details.kb-detail .kb-refs a.kb-ref-link {{ padding:6px 12px; min-height:36px; display:inline-block; }}
+  body {{ padding-bottom:env(safe-area-inset-bottom); }}
+}}
 @media print {{ .tabs,.print-btn,header {{ display:none!important; }} .tab-content {{ display:block!important; page-break-inside:avoid; }} .dog-card {{ break-inside:avoid; }} }}
 </style>
 </head>

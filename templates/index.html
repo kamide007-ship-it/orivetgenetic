@@ -293,6 +293,24 @@
                 bottom: -4px;
                 transform: translateX(50%);
             }
+            /* スマートフォン UX 集中改善 (PR #51) */
+            .container { padding: 24px 16px; border-radius: 12px; }
+            h1 { font-size: 1.3em; }
+            .feature-cards { grid-template-columns: 1fr; gap: 8px; }
+            .feature-card { padding: 10px 14px; text-align: left; display: flex; gap: 10px; align-items: center; }
+            .feature-card .fc-title { margin-bottom: 0; flex-shrink: 0; }
+            .feature-card .fc-desc { font-size: 0.75em; line-height: 1.3; }
+            .feature-card .fc-desc br { display: none; }
+            /* iOS 自動ズーム防止 */
+            input[type="file"] { font-size: 16px; }
+            /* タッチターゲット */
+            .upload-area { padding: 32px 20px; min-height: 80px; }
+            .btn { padding: 16px; min-height: 48px; font-size: 1.05em; }
+            #langToggle { min-height: 44px; padding: 10px 16px !important; }
+            .trust-badges { gap: 5px; }
+            .trust-badge { font-size: 0.72em; padding: 4px 9px; }
+            /* iOS safe-area */
+            body { padding-bottom: env(safe-area-inset-bottom); }
         }
 
         /* === 信頼バッジ === */

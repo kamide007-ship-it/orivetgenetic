@@ -85,6 +85,34 @@ tr:hover td { background:#faf5ff; }
   /* JS生成テーブル（毛色予測・健康リスク・COI寄与）の横スクロール対応 */
   .card { overflow-x:auto; }
 }
+
+/* === スマートフォン UX 集中改善 (PR #51) === */
+@media (max-width:480px) {
+  /* タッチターゲット拡大 (WCAG 2.5.5: 44x44 推奨) */
+  .kb-help {
+    width:28px; height:28px; font-size:0.85em;
+  }
+  .tab { padding:14px 18px; min-height:44px; font-size:0.95em; }
+  .disease-link, .locus-cell-link { padding:6px 4px; min-height:36px; display:inline-block; }
+  .result-locus { padding:4px 8px; min-height:32px; }
+  /* iOS 自動ズーム防止: input/select は 16px 必須 */
+  select, input { font-size:16px !important; padding:12px 14px; }
+  /* モーダルは全画面風に */
+  dialog.kb-modal { width:96vw; max-height:90vh; max-width:none; margin:auto; }
+  dialog.kb-modal .kb-modal-head { padding:14px 16px; }
+  dialog.kb-modal .kb-modal-body { padding:16px; font-size:0.95em; max-height:75vh; }
+  dialog.kb-modal .kb-close { width:36px; height:36px; }  /* タッチ対応 */
+  /* header の改行対応 */
+  header h1 { font-size:1.3em; }
+  header .nav-buttons { gap:6px; }
+  header .nav-buttons a { padding:10px 12px; min-height:40px; font-size:0.85em; }
+  /* COI ゲージのフォントサイズ */
+  .coi-gauge { height:36px; }
+  .coi-fill { padding-right:10px; font-size:0.85em; }
+  .btn { padding:14px; min-height:48px; font-size:1em; }
+  /* iOS safe-area-inset (ノッチ・ホームバー) */
+  body { padding-bottom:env(safe-area-inset-bottom); }
+}
 /* キーボードフォーカスリング（既存の outline:none を :focus-visible で上書き、マウス操作には影響しない） */
 select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:focus-visible {
   outline:3px solid var(--purple); outline-offset:2px;
