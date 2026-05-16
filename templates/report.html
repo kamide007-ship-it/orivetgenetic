@@ -55,6 +55,7 @@
         <div>
             <button type="button" id="langToggle" onclick="toggleLang()">English</button>
             <a href="/simulator?session={{ session_id }}" id="linkSim">シミュレーターで使う</a>
+            <a href="/glossary" id="linkGlossary">📖 辞書</a>
             {% if xlsx_exists %}
             <a href="/download/{{ session_id }}/report.xlsx" id="linkXlsx">Excel ダウンロード</a>
             {% endif %}
@@ -67,12 +68,14 @@
             en: {
                 toolbarTitle: "Orivet Genetics Suite - Report",
                 linkSim: "Use in Simulator",
+                linkGlossary: "📖 Glossary",
                 linkXlsx: "Download Excel",
                 linkNew: "New Analysis"
             },
             ja: {
                 toolbarTitle: "Orivet Genetics Suite - レポート",
                 linkSim: "シミュレーターで使う",
+                linkGlossary: "📖 辞書",
                 linkXlsx: "Excel ダウンロード",
                 linkNew: "新しい解析"
             }
