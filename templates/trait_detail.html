@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ lang or 'ja' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,7 +84,7 @@
 <header>
   <div class="container">
     <div>
-      <h1>🎨 毛色・形質遺伝子辞書</h1>
+      <h1>{% if lang == 'en' %}🎨 Coat & Trait Glossary{% else %}🎨 毛色・形質遺伝子辞書{% endif %}</h1>
     </div>
     <div class="nav">
       <a href="/">{% if lang == 'en' %}Analyze{% else %}解析する{% endif %}</a>
@@ -98,8 +98,8 @@
 </header>
 
 <div class="container">
-  <nav class="breadcrumb" aria-label="パンくず">
-    <a href="/">ホーム</a> &raquo; <a href="/glossary">遺伝子辞書</a> &raquo; <span>{{ entry.title }}</span>
+  <nav class="breadcrumb" aria-label="{% if lang == 'en' %}Breadcrumb{% else %}パンくず{% endif %}">
+    <a href="/">{% if lang == 'en' %}Home{% else %}ホーム{% endif %}</a> &raquo; <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Glossary{% else %}遺伝子辞書{% endif %}</a> &raquo; <span>{{ entry.title }}</span>
   </nav>
 
   <article class="entry-header">
@@ -120,28 +120,28 @@
 
   {% if entry.mechanism %}
   <section class="section">
-    <h3>🧬 メカニズム</h3>
+    <h3>{% if lang == 'en' %}🧬 Mechanism{% else %}🧬 メカニズム{% endif %}</h3>
     <p>{{ entry.mechanism }}</p>
   </section>
   {% endif %}
 
   {% if entry.phenotype %}
   <section class="section">
-    <h3>🎨 表現型</h3>
+    <h3>{% if lang == 'en' %}🎨 Phenotype{% else %}🎨 表現型{% endif %}</h3>
     <p>{{ entry.phenotype }}</p>
   </section>
   {% endif %}
 
   {% if entry.advice %}
   <section class="section">
-    <h3>💡 アドバイス</h3>
+    <h3>{% if lang == 'en' %}💡 Advice{% else %}💡 アドバイス{% endif %}</h3>
     <p>{{ entry.advice }}</p>
   </section>
   {% endif %}
 
   {% if entry.references %}
   <section class="section refs">
-    <h3>🔗 参考リンク</h3>
+    <h3>{% if lang == 'en' %}🔗 References{% else %}🔗 参考リンク{% endif %}</h3>
     {% for ref in entry.references %}
     <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
     {% endfor %}
@@ -167,12 +167,12 @@
   {% endif %}
 
   <div class="cta-row">
-    <h3>愛犬の遺伝子検査結果を分析しませんか？</h3>
-    <p style="color:#6b7280;font-size:0.9em;">Orivet 遺伝子検査PDFから毛色予測・健康リスク・血統分析を一括生成。</p>
+    <h3>{% if lang == 'en' %}Analyze your dog's genetic test results{% else %}愛犬の遺伝子検査結果を分析しませんか？{% endif %}</h3>
+    <p style="color:#6b7280;font-size:0.9em;">{% if lang == 'en' %}Upload your Orivet genetic test PDF to get coat predictions, health risks, and pedigree analysis at once.{% else %}Orivet 遺伝子検査PDFから毛色予測・健康リスク・血統分析を一括生成。{% endif %}</p>
     <div class="btn-row">
-      <a href="/">📄 解析を始める</a>
-      <a href="/simulator" class="alt">🐕 繁殖シミュレーター</a>
-      <a href="/glossary" class="alt">📖 辞書 TOP</a>
+      <a href="/">{% if lang == 'en' %}📄 Start Analysis{% else %}📄 解析を始める{% endif %}</a>
+      <a href="/simulator" class="alt">{% if lang == 'en' %}🐕 Breeding Simulator{% else %}🐕 繁殖シミュレーター{% endif %}</a>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="alt">{% if lang == 'en' %}📖 Glossary{% else %}📖 辞書 TOP{% endif %}</a>
     </div>
   </div>
 </div>

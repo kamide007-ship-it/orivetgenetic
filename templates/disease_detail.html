@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ lang or 'ja' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -111,7 +111,7 @@
 <header>
   <div class="container">
     <div>
-      <h1>📖 遺伝子疾患辞書</h1>
+      <h1>{% if lang == 'en' %}📖 Genetic Disease Glossary{% else %}📖 遺伝子疾患辞書{% endif %}</h1>
     </div>
     <div class="nav">
       <a href="/">{% if lang == 'en' %}Analyze{% else %}解析する{% endif %}</a>
@@ -125,8 +125,8 @@
 </header>
 
 <div class="container">
-  <nav class="breadcrumb" aria-label="パンくず">
-    <a href="/">ホーム</a> &raquo; <a href="/glossary">遺伝子疾患辞書</a> &raquo; <span>{{ entry.title }}</span>
+  <nav class="breadcrumb" aria-label="{% if lang == 'en' %}Breadcrumb{% else %}パンくず{% endif %}">
+    <a href="/">{% if lang == 'en' %}Home{% else %}ホーム{% endif %}</a> &raquo; <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Glossary{% else %}遺伝子疾患辞書{% endif %}</a> &raquo; <span>{{ entry.title }}</span>
   </nav>
 
   <article class="entry-header">
@@ -153,35 +153,35 @@
 
   {% if entry.mechanism %}
   <section class="section">
-    <h3>🧬 メカニズム</h3>
+    <h3>{% if lang == 'en' %}🧬 Mechanism{% else %}🧬 メカニズム{% endif %}</h3>
     <p>{{ entry.mechanism }}</p>
   </section>
   {% endif %}
 
   {% if entry.symptoms %}
   <section class="section">
-    <h3>⚠️ 症状</h3>
+    <h3>{% if lang == 'en' %}⚠️ Symptoms{% else %}⚠️ 症状{% endif %}</h3>
     <p>{{ entry.symptoms }}</p>
   </section>
   {% endif %}
 
   {% if entry.inheritance %}
   <section class="section">
-    <h3>🧪 遺伝様式</h3>
+    <h3>{% if lang == 'en' %}🧪 Inheritance{% else %}🧪 遺伝様式{% endif %}</h3>
     <p>{{ entry.inheritance }}</p>
   </section>
   {% endif %}
 
   {% if entry.advice %}
   <section class="section">
-    <h3>💡 飼育・繁殖アドバイス</h3>
+    <h3>{% if lang == 'en' %}💡 Care & Breeding Advice{% else %}💡 飼育・繁殖アドバイス{% endif %}</h3>
     <p>{{ entry.advice }}</p>
   </section>
   {% endif %}
 
   {% if entry.references %}
   <section class="section refs">
-    <h3>🔗 参考リンク</h3>
+    <h3>{% if lang == 'en' %}🔗 References{% else %}🔗 参考リンク{% endif %}</h3>
     {% for ref in entry.references %}
     <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
     {% endfor %}
@@ -207,19 +207,22 @@
   {% endif %}
 
   <div class="disclaimer">
-    ⚠️ <strong>医療免責:</strong>
+    {% if lang == 'en' %}⚠️ <strong>Medical Disclaimer:</strong>
+    The information on this page is a general explanation of genetic knowledge and does not guarantee diagnosis or treatment for any individual dog.
+    Actual prognosis varies by breed, genotype (P/N or P/P), and comorbidities.
+    Always consult a veterinarian for diagnosis and treatment decisions.{% else %}⚠️ <strong>医療免責:</strong>
     本ページの情報は遺伝学的知見の一般的解説であり、特定の個体の診断・治療を保証するものではありません。
     実際の予後は犬種・遺伝子型 (P/N or P/P) ・併発症により異なります。
-    診断・治療判断は必ず獣医師にご相談ください。
+    診断・治療判断は必ず獣医師にご相談ください。{% endif %}
   </div>
 
   <div class="cta-row">
-    <h3>愛犬の遺伝子検査結果を分析しませんか？</h3>
-    <p style="color:#6b7280;font-size:0.9em;">Orivet 遺伝子検査PDFをアップロードすると、AI が結果を解析して理解しやすいレポートを生成します。</p>
+    <h3>{% if lang == 'en' %}Analyze your dog's genetic test results{% else %}愛犬の遺伝子検査結果を分析しませんか？{% endif %}</h3>
+    <p style="color:#6b7280;font-size:0.9em;">{% if lang == 'en' %}Upload your Orivet genetic test PDF — our system analyzes the results and generates an easy-to-understand report.{% else %}Orivet 遺伝子検査PDFをアップロードすると、AI が結果を解析して理解しやすいレポートを生成します。{% endif %}</p>
     <div class="btn-row">
-      <a href="/">📄 解析を始める</a>
-      <a href="/glossary" class="alt">📖 他の疾患を調べる</a>
-      <a href="/simulator" class="alt">🐕 繁殖シミュレーター</a>
+      <a href="/">{% if lang == 'en' %}📄 Start Analysis{% else %}📄 解析を始める{% endif %}</a>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="alt">{% if lang == 'en' %}📖 Browse other diseases{% else %}📖 他の疾患を調べる{% endif %}</a>
+      <a href="/simulator" class="alt">{% if lang == 'en' %}🐕 Breeding Simulator{% else %}🐕 繁殖シミュレーター{% endif %}</a>
     </div>
   </div>
 </div>

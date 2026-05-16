@@ -503,6 +503,15 @@ def download(session_id, filename):
     return send_from_directory(report_dir, filename, as_attachment=True)
 
 
+def _get_lang(request):
+    """request から lang を判定 (ja / en)"""
+    lang = (request.args.get("lang") or "").strip().lower()
+    if lang not in ("ja", "en"):
+        accept = (request.headers.get("Accept-Language") or "").lower()
+        lang = "en" if accept.startswith("en") else "ja"
+    return lang
+
+
 @app.route("/glossary")
 def glossary():
     """遺伝子疾患・形質の辞書ページ。
@@ -556,6 +565,10 @@ def glossary():
     for e in DISEASE_KB:
         severity_counts[get_disease_severity(e)] += 1
 
+    # EN モード時は ラベル類も英語化
+    severity_labels_for_ui = SEVERITY_LABELS
+    category_labels_en = CATEGORY_LABELS_EN if lang == "en" else {}
+    symptom_labels_en = SYMPTOM_LABELS_EN if lang == "en" else {}
     return render_template(
         "glossary.html",
         diseases=filtered_diseases,
@@ -564,7 +577,10 @@ def glossary():
         query=request.args.get("q", ""),
         severity_filter=severity_filter,
         severity_counts=severity_counts,
-        severity_labels=SEVERITY_LABELS,
+        severity_labels=severity_labels_for_ui,
+        severity_labels_en=SEVERITY_LABELS_EN,
+        category_labels_en=category_labels_en,
+        symptom_labels_en=symptom_labels_en,
         get_severity=get_disease_severity,
         symptom_filter=symptom_filter,
         symptom_index=SYMPTOM_INDEX,
