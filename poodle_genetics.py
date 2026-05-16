@@ -1899,6 +1899,81 @@ TRAIT_SLUG_INDEX = _build_slug_index(TRAIT_KB)
 
 
 # ============================================================
+# 英訳オーバーレイ (kb_en.py から疾患・形質エントリへマージ)
+# ============================================================
+# AI 自動翻訳。獣医監修要。lang=en で参照可能。
+
+try:
+    from kb_en import (
+        DISEASE_EN, TRAIT_EN,
+        SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN,
+    )
+    # 既存エントリに _en フィールドとしてマージ
+    for slug, en_data in DISEASE_EN.items():
+        if slug in DISEASE_SLUG_INDEX:
+            DISEASE_SLUG_INDEX[slug]["_en"] = en_data
+    for slug, en_data in TRAIT_EN.items():
+        if slug in TRAIT_SLUG_INDEX:
+            TRAIT_SLUG_INDEX[slug]["_en"] = en_data
+    HAS_EN_KB = True
+except ImportError:
+    HAS_EN_KB = False
+    SEVERITY_LABELS_EN = {}
+    CATEGORY_LABELS_EN = {}
+    SYMPTOM_LABELS_EN = {}
+
+
+def get_entry_field(entry: dict, field: str, lang: str = "ja") -> str:
+    """エントリから指定フィールドの値を言語に応じて取得。
+
+    lang='en' なら _en[field] を試み、無ければ日本語フィールドにフォールバック。
+    """
+    if lang == "en" and entry and "_en" in entry:
+        en_val = entry["_en"].get(field)
+        if en_val:
+            return en_val
+    return entry.get(field, "") if entry else ""
+
+
+def get_disease_kb_localized(lang: str = "ja") -> list:
+    """言語に応じた疾患 KB を返す（_en があれば優先、無ければ JA）"""
+    if lang != "en":
+        return DISEASE_KB
+    result = []
+    for entry in DISEASE_KB:
+        if "_en" in entry:
+            merged = {**entry, **entry["_en"]}
+            # match と severity 等 EN にないものは JA から保持
+            merged["match"] = entry["match"]
+            merged["_slug"] = entry.get("_slug")
+            if "severity" in entry:
+                merged["severity"] = entry["severity"]
+            merged["references"] = entry.get("references", [])
+            result.append(merged)
+        else:
+            # 英訳なし: そのまま日本語版を返す（注記をタイトルに追加）
+            result.append(entry)
+    return result
+
+
+def get_trait_kb_localized(lang: str = "ja") -> list:
+    """言語に応じた形質 KB を返す"""
+    if lang != "en":
+        return TRAIT_KB
+    result = []
+    for entry in TRAIT_KB:
+        if "_en" in entry:
+            merged = {**entry, **entry["_en"]}
+            merged["match"] = entry["match"]
+            merged["_slug"] = entry.get("_slug")
+            merged["references"] = entry.get("references", [])
+            result.append(merged)
+        else:
+            result.append(entry)
+    return result
+
+
+# ============================================================
 # ガイド記事フレームワーク（マーケティング・SEO 流入用）
 # ============================================================
 # 各ガイド: slug, title, summary, sections, related_disease_slugs, related_trait_slugs
