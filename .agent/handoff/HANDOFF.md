@@ -1,52 +1,144 @@
-# HANDOFF.md — 前回セッション引き継ぎ
+# HANDOFF.md — 次セッションへの引き継ぎ（PR #53 マージ後・2026-05-16 状態）
 
-## 完了タスク（このセッション）
+## 全体サマリー
 
-| PR | 内容 | 状態 |
-|---|---|---|
-| #27 | ディスク枯渇修正・OCR timeout・サイレントexcept撲滅・/healthz・413 handler | ✅ マージ済み |
-| #28 | iOS 100dvh・aria-label・コントラスト・bfcache spinner・pytest 25件 | ✅ マージ済み |
-| (直接push予定) | CI workflow・マジックバイト検証・.spec/.agent 整備 | 🚧 作業中 |
+**このセッションは「理解できる」コンセプトを中核として poodle-genetics アプリを大幅進化させた。**
+
+| 軸 | 数 |
+|---|---|
+| マージ済 PR | 30+ (PR #27〜#53) |
+| 修正済バグ | 9件 (BUG-001〜009) |
+| pytest テスト | 0 → **161件** |
+| 疾患 KB | **72エントリ** (Veqta/Orivet/Embark/PPG 完全カバー) |
+| 形質 KB | **14エントリ** (E/K/A/B/D/M/S/G + L/SD/BT/Em + Furnishings/Curly) |
+| カテゴリ分類 | 11 + 目次 |
+| 重症度3段階 | 高/中/低 + フィルター + 凡例 + バッジ |
+| 症状ベース検索 | 10カテゴリ・60+疾患マッピング |
+| 新ルート | `/glossary` `/api/glossary` `/healthz` |
+| GitHub Actions CI | pytest 自動実行 |
+
+## アーキテクチャ要点
+
+### ファイル構成
+```
+poodle_genetics.py    主要解析エンジン + KB + HTML生成 (3500+ 行)
+  ├ DISEASE_KB (72)   疾患辞書（match/title/summary/mechanism/symptoms/inheritance/advice/references/severity）
+  ├ TRAIT_KB (14)     形質辞書（match/title/summary/mechanism/phenotype/advice/references）
+  ├ SYMPTOM_INDEX (10) 症状→疾患 マッピング
+  ├ DISEASE_CATEGORIES タイトルキーワード → カテゴリ
+  ├ SEVERITY_LABELS    重症度ラベル定義
+  └ generate_unified_html  レポートHTML生成
+
+app.py                Flask app
+  ├ /              index page
+  ├ /analyze       PDF/画像アップロード解析
+  ├ /report/<id>   生成レポート表示
+  ├ /api/dogs/<id> /api/pedigrees/<id>  シミュレーター連携
+  ├ /simulator     繁殖シミュレーター（静的HTML）
+  ├ /glossary      辞書ページ（症状/重症度/全文検索）
+  ├ /api/glossary  KB JSON API
+  └ /healthz       軽量ヘルスチェック
+
+templates/
+  ├ index.html      ランディング（信頼バッジ・解析中ステップ表示）
+  ├ report.html     レポート iframe wrapper
+  └ glossary.html   辞書ページ
+
+breeding_simulator.html  シミュレーター本体（1300+ 行）
+  ├ 色シミュレーション（E/K/A/B/D/M/S/G 座位・clickable）
+  ├ 健康リスク分析（疾患名 → KBモーダル）
+  └ COI 計算（人間関係換算 KB 付き）
+```
+
+### KB の構造
+各 DISEASE_KB エントリ:
+```python
+{
+  "match": ["pattern1", "pattern2", "\\bword boundary\\b"],
+  "title": "疾患名 (英略 / 遺伝子)",
+  "summary": "1〜2文の概要",
+  "mechanism": "発症メカニズム",
+  "symptoms": "症状",
+  "inheritance": "遺伝様式",
+  "advice": "飼育・繁殖アドバイス",
+  "severity": "high" | "medium" | "low",  # optional 明示オーバーライド
+  "references": [{"label": "...", "url": "..."}],
+}
+```
+
+`get_disease_severity(entry)` は明示 severity を優先、なければ本文キーワードから推定。
+
+### マッチングの罠
+- `_normalize_for_match()` でハイフン・アンダースコアを空白に正規化
+- パターンマッチは先頭一致ではなく substring match
+- `\bword\b` パターンは正規表現で単語境界
+- **第1文字が同じ短い別パターン** が誤マッチする可能性あり（例: "m locus" が "em locus" にもマッチ）
+- → そういう場合は `\bm locus\b` で囲む
+
+## 重要な学び・注意点
+
+### [BUG-009] cross() 関数の sort 動作
+JS の `cross()` は `[a,b].sort().join('')` でキー化するため、`'at' < 'ay'` で `ay/at` は `"atay"` がキー。
+旧コード `aResult["ayat"]` は常に 0 を返していた → ヘテロ確率が完全脱落していた。
+
+```js
+/**
+ * sorted form ("at" < "ay" → "atay") で lookup する
+ * @see cross() JSDoc in breeding_simulator.html
+ */
+const payat = aResult["atay"];  // ✓
+```
+
+### [PROCESS-001] PR バンドル発生
+セッション中に何度も「PR が open のまま新コミット push → PR にバンドル」が発生した（#37, #41, #45, #48, #50, #52）。
+→ 今後は前PRマージを待ってから次コミットを push する運用に。
+
+### 「理解できる」コンセプトのデザイン哲学
+**ユーザーが疑問を持つ全ての箇所に詳細解説への経路がある状態**を目指す:
+1. レポート HTML: 各疾患・形質行に `<details>` 折りたたみ + サマリー行に重症度可視化
+2. シミュレーター: 座位ラベル `?` / 健康疾患名クリック / 色結果のロカスコード / COI `?` ボタン
+3. 辞書ページ: カテゴリ + 重症度 + 症状 + 全文検索の4軸絞り込み
+
+### 重症度の自動推定
+キーワード優先順位:
+- HIGH: 「予後不良」「致死」「死亡」「失明」「生命に関わる」
+- MEDIUM: 「対症療法のみ」「進行性」「重症」「リスク大幅」
+- LOW: 「通常は無症状」「QOL 維持可能」「完治はしない」
+
+誤分類はエントリの `severity` フィールドで明示オーバーライド（既に 6件補正済）。
 
 ## 次セッションで最初にやること
 
-1. `git pull origin main` でローカルを同期
-2. `pytest test_app.py -v` で 33テスト全通過を確認
-3. 下記「保留タスク」の優先度を確認
+1. `git pull origin main` でローカル同期
+2. `pytest test_app.py -v` で 161件全通過を確認
+3. `.spec/TODO.md` で保留・Future タスク確認
+4. 本ドキュメント (`HANDOFF.md`) で全体把握
 
-## 保留タスク（優先度順）
+## 残るタスク（優先度順）
 
-### 高優先度（ユーザー入力が来たら即着手）
+### 高優先（ユーザー入力待ち）
+- **T009/T010**: 実 Orivet/JKC PDF サンプル提供で解析精度改善
+- **実機検証**: iPhone Safari で動作確認・スクリーンショット
 
-- **T002 COI 数値検証**: サンプル血統書データ（既知 COI 値つき）が必要
-  - `calc_coi_cross` の `seen` set が正しく機能しているか検証
-  - 既知ケース例: AKC 公開血統 or ブリーダーが計算済みの COI 値
-- **解析精度改善**: Orivet PDF / JKC 血統書 / ALAJ 血統書サンプル提供待ち
-  - 提供されたら `TestParser` クラスを `test_app.py` に追加
-  - Before/After 比較表を提示してから実装
+### 中優先（自律実行可）
+- KITLG (Intensity) 座位対応 — スキャフォルド済、`KITLG_SUPPORTED=true` 変更で動作
+- 犬種別の疾患推奨表示
+- Wikipedia 検索URL → 直接記事URL 置換（要 URL 検証）
 
-### 中優先度（自律的に進められる）
-
-- **UI 実機確認**: iPhone Safari での `100dvh` / bfcache リセット動作確認
-  - スクリーンショット提供で検証可能
-- **レポート HTML テーブルのスマホ横スクロール対応**
-  - `generate_unified_html`（`poodle_genetics.py:1687-2282`）の table CSS を要確認
-
-### 低優先度
-
-- **KNOWLEDGE.md 作成**: PDF フォーマット構造・OCR 誤認識辞書の文書化
-- **COI の `(1+F_A)` 完全 Wright 公式対応**: 共通祖先自身の近交係数補正
-- **レポート PDF 出力機能**: 日本語フォント埋め込みが必要（`reportlab` or `weasyprint`）
+### 低優先
+- 英語版 KB 翻訳（XL 工数）
+- レポート PDF 出力（日本語フォント埋め込み必要）
+- AI API 連携
 
 ## 注意点・ブロッカー
 
-- `poodle_genetics.py` は 2734 行の巨大ファイル。全体把握より関数単位で確認すること
-- `pedigree_ocr.py` の `try_ocr` は現在 `app.py` 経路では使われていない
-  （`app.py` は `poodle_genetics.try_ocr` を使用）。混在に注意
-- `calc_coi_3gen` と `calc_coi_cross` のロジック差異は意図的か不明。サンプルなしに変更禁止
-- Render 無料枠: メモリ OOM の実測なし。大 PDF 並列処理時のピークは未確認
+- `poodle_genetics.py` は **3500+ 行** の巨大ファイル。全体把握より関数単位で確認推奨
+- 既存例犬は `Object.assign({g:'gg'}, ...)` で G 座位デフォルト指定。新例犬は最初から `g` 指定要
+- Wikipedia/Google 検索URL は常に有効。**直接記事URLに置換する場合は要URL検証**
+- スマホでテストする際は実機推奨（Chrome DevTools の dvh エミュレーションは不完全）
 
-## MEMORY.md に追記すべき教訓（次セッション向け）
+## MEMORY.md / KNOWLEDGE.md へ追記すべき教訓
 
-- 追記内容があれば `.agent/memory/MEMORY.md` に章を追加
-- バグパターンは `[BUG-NNN]` 形式、誤判定は `[WRONG-NNN]` 形式
+- 重症度ヒューリスティックの限界と明示 override 戦略
+- 症状ベース検索の追加で UX が大きく向上
+- 各画面で KB アクセス経路を整える＝「理解できる」アプリ設計の中核
