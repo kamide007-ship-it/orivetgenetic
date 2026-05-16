@@ -116,7 +116,7 @@ from poodle_genetics import (
     get_disease_severity, SEVERITY_LABELS,
     SYMPTOM_INDEX, filter_by_symptom,
     DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug,
-    GUIDES, GUIDES_INDEX,
+    GUIDES, GUIDES_INDEX, GUIDES_BY_DISEASE, GUIDES_BY_TRAIT,
     get_disease_kb_localized, get_trait_kb_localized,
     HAS_EN_KB, SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN,
 )
@@ -607,12 +607,21 @@ def disease_detail_page(slug):
         merged["references"] = entry.get("references", [])
         entry = merged
     severity = get_disease_severity(entry)
+    related_guides = GUIDES_BY_DISEASE.get(slug, [])
+    # 英語表示時のみ監修状態を表示する
+    en_reviewed = False
+    if lang == "en":
+        original = DISEASE_SLUG_INDEX.get(slug, {})
+        en_data = original.get("_en", {})
+        en_reviewed = bool(en_data.get("reviewed"))
     return render_template(
         "disease_detail.html",
         entry=entry,
         slug=slug,
         severity=severity,
         severity_labels=SEVERITY_LABELS,
+        related_guides=related_guides,
+        en_reviewed=en_reviewed,
         canonical=request.url_root.rstrip("/") + f"/glossary/disease/{slug}",
         lang=lang,
     )
@@ -638,10 +647,18 @@ def trait_detail_page(slug):
         merged["_slug"] = entry.get("_slug")
         merged["references"] = entry.get("references", [])
         entry = merged
+    related_guides = GUIDES_BY_TRAIT.get(slug, [])
+    en_reviewed = False
+    if lang == "en":
+        original = TRAIT_SLUG_INDEX.get(slug, {})
+        en_data = original.get("_en", {})
+        en_reviewed = bool(en_data.get("reviewed"))
     return render_template(
         "trait_detail.html",
         entry=entry,
         slug=slug,
+        related_guides=related_guides,
+        en_reviewed=en_reviewed,
         canonical=request.url_root.rstrip("/") + f"/glossary/trait/{slug}",
         lang=lang,
     )
@@ -659,20 +676,50 @@ def sitemap():
         (base + "/sample", "0.8", "monthly"),
         (base + "/simulator", "0.7", "monthly"),
     ]
+    # 各疾患・形質ページ（JA / EN 両方）
     for slug in DISEASE_SLUG_INDEX:
         urls.append((base + f"/glossary/disease/{slug}", "0.7", "monthly"))
+        if HAS_EN_KB and slug in DISEASE_SLUG_INDEX and "_en" in DISEASE_SLUG_INDEX[slug]:
+            urls.append((base + f"/glossary/disease/{slug}?lang=en", "0.6", "monthly"))
     for slug in TRAIT_SLUG_INDEX:
         urls.append((base + f"/glossary/trait/{slug}", "0.6", "monthly"))
+        if HAS_EN_KB and slug in TRAIT_SLUG_INDEX and "_en" in TRAIT_SLUG_INDEX[slug]:
+            urls.append((base + f"/glossary/trait/{slug}?lang=en", "0.5", "monthly"))
+    # ガイド記事
     for guide in GUIDES:
         urls.append((base + f"/guides/{guide['slug']}", "0.8", "monthly"))
+    # 英語 glossary トップ
+    if HAS_EN_KB:
+        urls.append((base + "/glossary?lang=en", "0.9", "weekly"))
 
     today = datetime.utcnow().strftime("%Y-%m-%d")
     xml_parts = ['<?xml version="1.0" encoding="UTF-8"?>',
-                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+                 'xmlns:xhtml="http://www.w3.org/1999/xhtml">']
     for loc, priority, freq in urls:
+        # hreflang: 同一 slug に JA/EN がある疾患・形質ページには xhtml:link を追加
+        alternates_xml = ""
+        if HAS_EN_KB:
+            # /glossary/disease/<slug> 系の URL は EN alternate あり
+            for prefix in ("/glossary/disease/", "/glossary/trait/"):
+                if prefix in loc and "?lang=" not in loc:
+                    slug = loc.split(prefix, 1)[1].rstrip("/")
+                    idx = DISEASE_SLUG_INDEX if "disease" in prefix else TRAIT_SLUG_INDEX
+                    if slug in idx and "_en" in idx[slug]:
+                        alternates_xml = (
+                            f'<xhtml:link rel="alternate" hreflang="ja" href="{loc}"/>'
+                            f'<xhtml:link rel="alternate" hreflang="en" href="{loc}?lang=en"/>'
+                            f'<xhtml:link rel="alternate" hreflang="x-default" href="{loc}"/>'
+                        )
+                    break
+            if loc.endswith("/glossary"):
+                alternates_xml = (
+                    f'<xhtml:link rel="alternate" hreflang="ja" href="{base}/glossary"/>'
+                    f'<xhtml:link rel="alternate" hreflang="en" href="{base}/glossary?lang=en"/>'
+                )
         xml_parts.append(
             f"  <url><loc>{loc}</loc><lastmod>{today}</lastmod>"
-            f"<changefreq>{freq}</changefreq><priority>{priority}</priority></url>"
+            f"<changefreq>{freq}</changefreq><priority>{priority}</priority>{alternates_xml}</url>"
         )
     xml_parts.append("</urlset>")
     from flask import Response

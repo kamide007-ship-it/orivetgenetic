@@ -12,8 +12,17 @@
         "symptoms": "...",
         "inheritance": "...",
         "advice": "...",
+        "reviewed": True/False,      # 獣医監修済フラグ（既定 False）
+        "reviewer": "Dr. Name",      # 監修者名（任意）
+        "reviewed_date": "YYYY-MM-DD", # 監修日（任意）
+        "reviewer_notes": "..."      # 監修コメント（任意・公開しない）
     }
-    TRAIT_EN[slug] = {同様 + "phenotype"}
+
+監修ワークフロー:
+    1. 獣医チームが kb_en.py を編集
+    2. 監修したエントリに reviewed=True を追加
+    3. オプションで reviewer / reviewed_date を記録
+    4. 未監修エントリはアプリ UI に『⚠️ AI 翻訳（未監修）』バッジが表示される
 
 poodle_genetics.py 側で SLUG_INDEX に _en としてマージされる。
 部分英訳でも問題ない（unmatched entries は日本語にフォールバック）。

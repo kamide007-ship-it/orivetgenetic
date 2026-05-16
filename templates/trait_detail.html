@@ -105,6 +105,17 @@
   <article class="entry-header">
     <h2>{{ entry.title }}</h2>
     {% if entry.summary %}<p class="entry-summary">{{ entry.summary }}</p>{% endif %}
+    {% if lang == 'en' %}
+      {% if en_reviewed %}
+      <div style="margin-top:12px;padding:8px 14px;background:#dcfce7;border-left:4px solid #166534;border-radius:6px;font-size:0.85em;color:#166534;">
+        ✅ <strong>Veterinarian-reviewed translation</strong>
+      </div>
+      {% else %}
+      <div style="margin-top:12px;padding:8px 14px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;font-size:0.85em;color:#92400e;">
+        ⚠️ <strong>AI-generated translation</strong> — pending veterinary review.
+      </div>
+      {% endif %}
+    {% endif %}
   </article>
 
   {% if entry.mechanism %}
@@ -134,6 +145,24 @@
     {% for ref in entry.references %}
     <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
     {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if related_guides %}
+  <section class="section">
+    <h3>📚 {% if lang == 'en' %}Related Guides{% else %}関連ガイド記事{% endif %}</h3>
+    <div style="display:grid;gap:10px;margin-top:8px;">
+      {% for guide in related_guides %}
+      <a href="/guides/{{ guide.slug }}" style="display:block;padding:12px 16px;background:#faf5ff;border:1px solid #ede9fe;border-radius:10px;text-decoration:none;color:inherit;">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;font-size:0.78em;">
+          <span style="background:#ede9fe;color:#5b21b6;padding:2px 9px;border-radius:9px;">{{ guide.category }}</span>
+          <span style="background:#f3f4f6;color:#6b7280;padding:2px 9px;border-radius:9px;">⏱ {{ guide.reading_time }}</span>
+        </div>
+        <strong style="color:#4a1a7a;">{{ guide.title }}</strong>
+        <p style="color:#6b7280;font-size:0.88em;margin-top:4px;">{{ guide.summary }}</p>
+      </a>
+      {% endfor %}
+    </div>
   </section>
   {% endif %}
 
