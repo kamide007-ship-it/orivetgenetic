@@ -270,7 +270,7 @@
           {% set sev = get_severity(d) %}
           {% set sev_info = severity_labels[sev] %}
           <details class="entry">
-            <summary>{{ d.title }}<span class="sev-badge" style="background:{{ sev_info.bg }};color:{{ sev_info.color }};">{{ sev_info.emoji }} {{ sev_info.label }}</span></summary>
+            <summary>{{ d.title }}<span class="sev-badge" style="background:{{ sev_info.bg }};color:{{ sev_info.color }};">{{ sev_info.emoji }} {{ sev_info.label }}</span>{% if d._slug %}<a href="/glossary/disease/{{ d._slug }}" style="float:right;font-size:0.75em;color:#7c3aed;text-decoration:none;margin-left:6px;" title="個別ページで見る">🔗</a>{% endif %}</summary>
             <div class="body">
               {% if d.summary %}<div class="field"><span class="field-label">📋 概要</span>{{ d.summary }}</div>{% endif %}
               {% if d.mechanism %}<div class="field"><span class="field-label">🧬 メカニズム</span>{{ d.mechanism }}</div>{% endif %}
@@ -303,7 +303,7 @@
     <div class="entries">
       {% for t in traits %}
       <details class="entry">
-        <summary>{{ t.title }}</summary>
+        <summary>{{ t.title }}{% if t._slug %}<a href="/glossary/trait/{{ t._slug }}" style="float:right;font-size:0.75em;color:#7c3aed;text-decoration:none;margin-left:6px;" title="個別ページで見る">🔗</a>{% endif %}</summary>
         <div class="body">
           {% if t.summary %}<div class="field"><span class="field-label">📋 概要</span>{{ t.summary }}</div>{% endif %}
           {% if t.mechanism %}<div class="field"><span class="field-label">🧬 メカニズム</span>{{ t.mechanism }}</div>{% endif %}

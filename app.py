@@ -115,6 +115,7 @@ from poodle_genetics import (
     DISEASE_KB, TRAIT_KB, group_diseases_by_category,
     get_disease_severity, SEVERITY_LABELS,
     SYMPTOM_INDEX, filter_by_symptom,
+    DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug,
 )
 
 try:
@@ -545,6 +546,90 @@ def api_glossary():
         "diseases": DISEASE_KB,
         "traits": TRAIT_KB,
     })
+
+
+@app.route("/glossary/disease/<slug>")
+def disease_detail_page(slug):
+    """疾患個別ページ（SEO 対応・schema.org 構造化データ付き）"""
+    entry = DISEASE_SLUG_INDEX.get(slug)
+    if not entry:
+        return render_template(
+            "glossary_404.html",
+            kind="疾患",
+            slug=slug,
+        ), 404
+    severity = get_disease_severity(entry)
+    return render_template(
+        "disease_detail.html",
+        entry=entry,
+        slug=slug,
+        severity=severity,
+        severity_labels=SEVERITY_LABELS,
+        canonical=request.url_root.rstrip("/") + f"/glossary/disease/{slug}",
+    )
+
+
+@app.route("/glossary/trait/<slug>")
+def trait_detail_page(slug):
+    """形質個別ページ（SEO 対応）"""
+    entry = TRAIT_SLUG_INDEX.get(slug)
+    if not entry:
+        return render_template(
+            "glossary_404.html",
+            kind="形質",
+            slug=slug,
+        ), 404
+    return render_template(
+        "trait_detail.html",
+        entry=entry,
+        slug=slug,
+        canonical=request.url_root.rstrip("/") + f"/glossary/trait/{slug}",
+    )
+
+
+@app.route("/sitemap.xml")
+def sitemap():
+    """sitemap.xml — 検索エンジン用全URL列挙"""
+    from datetime import datetime
+    base = request.url_root.rstrip("/")
+    urls = [
+        (base + "/", "1.0", "weekly"),
+        (base + "/glossary", "0.9", "weekly"),
+        (base + "/simulator", "0.7", "monthly"),
+    ]
+    for slug in DISEASE_SLUG_INDEX:
+        urls.append((base + f"/glossary/disease/{slug}", "0.7", "monthly"))
+    for slug in TRAIT_SLUG_INDEX:
+        urls.append((base + f"/glossary/trait/{slug}", "0.6", "monthly"))
+
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    xml_parts = ['<?xml version="1.0" encoding="UTF-8"?>',
+                 '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for loc, priority, freq in urls:
+        xml_parts.append(
+            f"  <url><loc>{loc}</loc><lastmod>{today}</lastmod>"
+            f"<changefreq>{freq}</changefreq><priority>{priority}</priority></url>"
+        )
+    xml_parts.append("</urlset>")
+    from flask import Response
+    return Response("\n".join(xml_parts), mimetype="application/xml")
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    """検索エンジン向けクロール設定"""
+    base = request.url_root.rstrip("/")
+    from flask import Response
+    body = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /analyze\n"        # POST endpoint
+        "Disallow: /report/\n"        # session URLs (個人情報含む可能性)
+        "Disallow: /api/\n"           # API endpoints
+        "Disallow: /download/\n"      # session-locked files
+        f"Sitemap: {base}/sitemap.xml\n"
+    )
+    return Response(body, mimetype="text/plain")
 
 
 @app.route("/simulator")
