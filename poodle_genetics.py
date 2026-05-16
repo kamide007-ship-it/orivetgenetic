@@ -1845,8 +1845,11 @@ def _slugify(text: str) -> str:
     例: 'Chondrodystrophy with IVDD' → 'chondrodystrophy-with-ivdd'
     """
     text = text.lower()
-    # 不要記号を空白に
-    text = re.sub(r"[\\\\bxa0()+:,/&]", " ", text)
+    # 区切り記号 → 空白（プラス・スラッシュ・括弧・アンダースコア等）
+    text = re.sub(r"[+_/&,()]", " ", text)
+    # 全角空白・non-breaking space → 半角空白
+    text = re.sub(r"[ 　]", " ", text)
+    # アルファベット・数字・空白・ハイフン以外を削除
     text = re.sub(r"[^a-z0-9\s\-]", "", text)
     # 連続空白・ハイフン → 単一ハイフン
     text = re.sub(r"[\s\-]+", "-", text.strip())
@@ -1893,6 +1896,277 @@ def _build_slug_index(entries: list) -> dict:
 # モジュールロード時に slug インデックスを生成
 DISEASE_SLUG_INDEX = _build_slug_index(DISEASE_KB)
 TRAIT_SLUG_INDEX = _build_slug_index(TRAIT_KB)
+
+
+# ============================================================
+# ガイド記事フレームワーク（マーケティング・SEO 流入用）
+# ============================================================
+# 各ガイド: slug, title, summary, sections, related_disease_slugs, related_trait_slugs
+# sections は heading + body_html のリスト（簡易構造）
+# 監修者・公開日・更新日は Orivet 側で正式化予定
+
+GUIDES = [
+    {
+        "slug": "how-to-read-orivet-results",
+        "title": "Orivet 遺伝子検査結果の読み方ガイド",
+        "summary": "Orivet 遺伝子検査PDFを受け取ったときに、結果の見方・用語の意味・次のアクションを分かりやすく解説します。",
+        "category": "🔰 初心者向け",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "📄 検査結果 PDF に何が書かれているか",
+                "body": (
+                    "Orivet 遺伝子検査 PDF には大きく分けて『健康疾患』と『形質（毛色等）』の2種類の結果が記載されています。"
+                    "各項目に対して『N/N（ノーマル）』『P/N（キャリア）』『P/P（ポジティブ）』のいずれかが示されます。"
+                ),
+            },
+            {
+                "heading": "🟢 N/N — ノーマル（陰性）",
+                "body": (
+                    "両親から受け継いだ遺伝子の両方が正常な状態です。"
+                    "その疾患を発症する遺伝的リスクはなく、子犬にもキャリア遺伝子を渡しません。"
+                ),
+            },
+            {
+                "heading": "🟡 P/N — キャリア（保因犬）",
+                "body": (
+                    "片方の親から変異遺伝子を受け継いだヘテロ接合体。"
+                    "ほとんどの疾患（常染色体劣性遺伝の場合）では**発症しません**が、子犬に変異遺伝子を50%の確率で渡します。"
+                    "繁殖時は P/P または P/N 相手を避けることで、発症犬の出生を防げます。"
+                ),
+            },
+            {
+                "heading": "🔴 P/P — ポジティブ（発症リスクあり）",
+                "body": (
+                    "両親から変異遺伝子を受け継いだホモ接合体。"
+                    "常染色体劣性疾患では**発症します**。発症時期や症状の重さは疾患により異なります。"
+                    "獣医師による定期的な健康チェックを推奨します。"
+                ),
+            },
+            {
+                "heading": "💡 次にすべきこと",
+                "body": (
+                    "1. ポジティブ (P/P) の項目があれば、まず**獣医師に相談**してください。発症前に対策できる疾患も多くあります。<br>"
+                    "2. キャリア (P/N) の場合は**繁殖計画**を慎重に。同じ変異を持つ犬同士の交配は避けるべきです。<br>"
+                    "3. 結果をシェアしたい場合は、Excel ダウンロード機能でドキュメント化できます。<br>"
+                    "4. **辞書ページ**で各疾患の詳細解説・遺伝様式・アドバイスを確認できます。"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["chondrodystrophy", "degenerative-myelopathy", "progressive-rod-cone"],
+        "related_trait_slugs": [],
+    },
+    {
+        "slug": "coi-basics",
+        "title": "COI（近親交配係数）入門 — 数字の意味を理解する",
+        "summary": "COI（Coefficient of Inbreeding）が何を意味するか、どこから危険な水準か、人間関係に置き換えた直感的な解説。",
+        "category": "🐕 繁殖計画",
+        "reading_time": "4 分",
+        "sections": [
+            {
+                "heading": "📊 COI とは",
+                "body": (
+                    "COI（Coefficient of Inbreeding）は、父親と母親が共通祖先を持つ場合、その子犬が両親から同じ遺伝子を2コピー受け継ぐ確率を示す指標です。"
+                    "1922年に Sewall Wright が確立した古典的な指標で、犬の繁殖判断の基本となっています。"
+                ),
+            },
+            {
+                "heading": "🎚 段階の目安（人間関係換算）",
+                "body": (
+                    "<table style='width:100%;border-collapse:collapse;'>"
+                    "<tr><th style='text-align:left;padding:6px 10px;background:#f3f4f6;'>COI</th><th style='text-align:left;padding:6px 10px;background:#f3f4f6;'>人間関係換算</th></tr>"
+                    "<tr><td style='padding:6px 10px;color:#22c55e;'><strong>0%</strong></td><td>完全に無関係な両親同士</td></tr>"
+                    "<tr><td style='padding:6px 10px;color:#22c55e;'><strong>〜6.25%</strong></td><td>いとこ婚相当 — 一般的に許容範囲</td></tr>"
+                    "<tr><td style='padding:6px 10px;color:#eab308;'><strong>6.25〜12.5%</strong></td><td>半兄妹婚相当 — 免疫力・繁殖力低下傾向</td></tr>"
+                    "<tr><td style='padding:6px 10px;color:#ef4444;'><strong>12.5〜25%</strong></td><td>兄妹婚・親子婚相当 — 遺伝性疾患リスク大幅増加</td></tr>"
+                    "<tr><td style='padding:6px 10px;color:#dc2626;'><strong>25%超</strong></td><td>近親婚の繰り返し — 劣性疾患の発症率が指数関数的に上昇</td></tr>"
+                    "</table>"
+                ),
+            },
+            {
+                "heading": "⚠️ 高 COI 犬の健康リスク",
+                "body": (
+                    "高 COI 犬では、隠れていた劣性遺伝病が顕在化しやすくなります。また免疫機能・繁殖能力・寿命の低下も報告されています。"
+                    "JKC・FCI 等の育種団体は『COI 6.25% 以下』を推奨するケースが多く、特に種牡犬の選定時には重要な指標です。"
+                ),
+            },
+            {
+                "heading": "🔧 ツールで COI を算出する",
+                "body": (
+                    "本サービスの**繁殖シミュレーター**では、3世代の血統情報を入力するだけで Wright の方法による COI を自動算出できます。"
+                    "共通祖先がどこに何回出現しているかも可視化されるため、繁殖計画の意思決定に直接活用できます。"
+                ),
+            },
+        ],
+        "related_disease_slugs": [],
+        "related_trait_slugs": [],
+    },
+    {
+        "slug": "color-genetics-basics",
+        "title": "犬の毛色遺伝子の基本 — 8座位の役割",
+        "summary": "犬の毛色は8つの主要な遺伝子座（E/K/A/B/D/M/S/G）の組み合わせで決まります。各座位の役割を簡潔に解説。",
+        "category": "🎨 毛色遺伝学",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🎨 毛色の決まり方の階層構造",
+                "body": (
+                    "犬の毛色は単一の遺伝子ではなく、複数の座位の組み合わせで決まります。"
+                    "まず E座位が『黒系色素を作れるか』を決め、次に K座位が『単色か模様か』を決定。"
+                    "B 座位が『黒 or 茶』、D 座位が『希釈の有無』、M/S は模様、G は退色を司ります。"
+                ),
+            },
+            {
+                "heading": "🔌 E座位（MC1R）— 色素のマスタースイッチ",
+                "body": (
+                    "E_ なら黒/茶色素を coat に発現可能。e/e ホモでは coat はクリーム〜アプリコット〜レッドのみ。"
+                    "ただし e/e でも鼻・パッド・アイリムには色素が出るため B 座位の影響を受けます。"
+                ),
+            },
+            {
+                "heading": "🎯 K座位（CBD103）— ドミナントブラック",
+                "body": (
+                    "KB_ は単色（ソリッド）になり、A座位の発現を抑制。"
+                    "ky/ky では A 座位の模様（セーブル・タンポイント等）が現れます。"
+                    "kbr_ はブリンドル。"
+                ),
+            },
+            {
+                "heading": "🎭 A座位（ASIP）— アグーチ模様",
+                "body": (
+                    "K = ky/ky のときに発現。優性順位 ay > aw > at > a。"
+                    "ay = フォーン/セーブル、aw = ワイルドセーブル、at = ブラックタン/トライカラー、a/a = リセッシブブラック。"
+                ),
+            },
+            {
+                "heading": "🍫 B座位（TYRP1）— ブラウン色素",
+                "body": (
+                    "B_ なら通常の黒色素。bb で全ての黒色素がブラウン（チョコレート/レバー）に。"
+                    "ee 犬では B はコート色に影響せず、鼻・パッド色素のみに作用します。"
+                ),
+            },
+            {
+                "heading": "💧 D座位（MLPH）— 希釈",
+                "body": (
+                    "dd で色素濃度が希釈：Black → Blue, Brown → Lilac/Isabella, Yellow → Champagne。"
+                    "ワイマラナーやフレンチブルドッグのブルーはこれが原因。"
+                ),
+            },
+            {
+                "heading": "🎨 M / S / G 座位",
+                "body": (
+                    "**M座位 (PMEL17)**: マール模様。M/M はダブルマールで視聴覚障害リスク大。<br>"
+                    "**S座位 (MITF)**: パイド/パーティカラー。<br>"
+                    "**G座位 (Greying)**: シルバープードルのような『成犬で退色する』形質。"
+                ),
+            },
+        ],
+        "related_disease_slugs": [],
+        "related_trait_slugs": ["e-locus", "k-locus", "a-locus", "b-locus", "d-locus"],
+    },
+    {
+        "slug": "breeders-checklist",
+        "title": "ブリーダー向け：繁殖計画チェックリスト",
+        "summary": "健康な子犬を生むために、繁殖前に必ず確認すべき項目をチェックリスト形式で整理。",
+        "category": "🐕 繁殖計画",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "✅ 繁殖前に必ず確認すべきこと",
+                "body": (
+                    "□ 両親の遺伝子検査結果がある（少なくとも 12〜14 項目）<br>"
+                    "□ 両親が同じ変異の P/P または P/N でないか（劣性疾患の発症犬を避ける）<br>"
+                    "□ COI が許容範囲内（理想 6.25% 以下）<br>"
+                    "□ M座位（Merle）の場合、M/m × M/m を避ける（ダブルマール禁忌）<br>"
+                    "□ BT座位（自然短尾）の場合、BT/BT 同士は胚致死<br>"
+                    "□ vWD・MDR1 等のキャリア結果を獣医師と共有<br>"
+                    "□ 両親の血統書を 3〜5 世代まで確認"
+                ),
+            },
+            {
+                "heading": "⚠️ 繁殖を再考すべきケース",
+                "body": (
+                    "<strong>1. 両親が同じ高リスク疾患のキャリア</strong>: 25% の確率で発症犬。<br>"
+                    "<strong>2. M/m × M/m</strong>: ダブルマールリスク。失明・聴覚障害。<br>"
+                    "<strong>3. COI 12.5% 超</strong>: 健康問題増加・繁殖力低下リスク大。<br>"
+                    "<strong>4. 親に重度の遺伝性疾患歴</strong>: 子犬への遺伝可能性大。<br>"
+                    "<strong>5. 検査結果なしでの繁殖</strong>: リスクを把握できないまま生まれる子犬への責任問題。"
+                ),
+            },
+            {
+                "heading": "📋 推奨検査パネル（最低限）",
+                "body": (
+                    "犬種により推奨検査は異なりますが、以下は多くの犬種で重要:<br>"
+                    "・<strong>DM（変性性脊髄症）</strong> — SOD1<br>"
+                    "・<strong>CDDY+IVDD</strong> — FGF4 / 椎間板疾患<br>"
+                    "・<strong>vWD I/II/III</strong> — 凝固因子<br>"
+                    "・<strong>prcd-PRA</strong> — 進行性網膜萎縮<br>"
+                    "・<strong>MDR1</strong> — 薬剤過敏症<br>"
+                    "犬種固有の疾患（例: プードルの NEwS、ラブラドールの CNM 等）は **辞書ページで犬種別に確認**してください。"
+                ),
+            },
+            {
+                "heading": "📊 シミュレーターで事前検証",
+                "body": (
+                    "繁殖シミュレーターを使えば、両親候補の遺伝子型から子犬の遺伝子型確率を事前算出できます。"
+                    "色シミュレーション・健康リスク予測・COI 計算を一括で確認しましょう。"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["chondrodystrophy", "degenerative-myelopathy", "progressive-rod-cone"],
+        "related_trait_slugs": [],
+    },
+    {
+        "slug": "severity-explained",
+        "title": "重症度（🔴🟡🟢）の判定基準について",
+        "summary": "辞書ページの重症度バッジが何を基準にしているか、どう活用すべきかを解説。",
+        "category": "🔰 初心者向け",
+        "reading_time": "3 分",
+        "sections": [
+            {
+                "heading": "🚦 3段階の重症度",
+                "body": (
+                    "本サービスでは、辞書・レポートの各疾患に重症度バッジを表示しています:<br>"
+                    "🔴 <strong>高リスク</strong>: 予後不良・致死性が高い、または生命に関わる疾患<br>"
+                    "🟡 <strong>中リスク</strong>: 進行性または対症療法が必要だが、QOL を維持しながら生活可能<br>"
+                    "🟢 <strong>低リスク</strong>: 通常無症状または軽微、限定的な注意で済む"
+                ),
+            },
+            {
+                "heading": "🤖 判定方法",
+                "body": (
+                    "判定は2段階で行います:<br>"
+                    "1. KB エントリの本文テキストから自動推定（『予後不良』『致死』等のキーワード）<br>"
+                    "2. 誤判定が発生したエントリは手動で `severity` フィールドを明示指定（オーバーライド）"
+                ),
+            },
+            {
+                "heading": "⚠️ 重要な免責",
+                "body": (
+                    "重症度は**一般的な傾向**を示すものであり、特定個体の予後を保証するものではありません。"
+                    "実際の症状の重さは:<br>"
+                    "・犬種<br>"
+                    "・遺伝子型（P/N キャリア vs P/P 発症犬）<br>"
+                    "・併発疾患<br>"
+                    "・環境要因<br>"
+                    "により大きく異なります。診断・治療判断は必ず**獣医師にご相談ください**。"
+                ),
+            },
+            {
+                "heading": "🔍 重症度フィルターの活用",
+                "body": (
+                    "辞書ページの 🚦 フィルターで、重症度別の疾患を一覧できます。"
+                    "繁殖計画では特に <strong>高リスク疾患</strong> の検査を優先することをおすすめします。"
+                ),
+            },
+        ],
+        "related_disease_slugs": [],
+        "related_trait_slugs": [],
+    },
+]
+
+# Slug ベースで guides を引けるよう辞書化
+GUIDES_INDEX = {g["slug"]: g for g in GUIDES}
 
 
 def get_trait_detail(test_name: str) -> Optional[dict]:

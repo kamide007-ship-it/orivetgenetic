@@ -1065,6 +1065,84 @@ class TestSEORoutes:
         body = rv.get_data(as_text=True)
         assert "パンくず" in body or "breadcrumb" in body
 
+
+# ===========================================================================
+# 17. サンプルレポート + ガイド記事 (Phase 2 SEO)
+# ===========================================================================
+
+try:
+    from poodle_genetics import GUIDES, GUIDES_INDEX
+    _HAS_GUIDES = True
+except Exception:
+    _HAS_GUIDES = False
+
+
+@pytest.mark.skipif(not _HAS_GUIDES, reason="guides not importable")
+class TestSampleAndGuides:
+    def test_sample_page_200(self):
+        rv = client.get("/sample")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # SEO 要素
+        assert "<title>" in body
+        assert 'rel="canonical"' in body
+        # サンプル明示
+        assert "サンプル" in body
+        # CTA 導線
+        assert "解析を始める" in body or "/" in body
+
+    def test_guides_index_200(self):
+        rv = client.get("/guides")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # 全ガイドが一覧に表示される
+        for guide in GUIDES:
+            assert guide["title"] in body
+
+    def test_guides_count(self):
+        assert len(GUIDES) >= 5
+
+    def test_each_guide_has_required_fields(self):
+        for guide in GUIDES:
+            assert guide.get("slug")
+            assert guide.get("title")
+            assert guide.get("summary")
+            assert guide.get("category")
+            assert guide.get("reading_time")
+            assert guide.get("sections") and len(guide["sections"]) > 0
+            for section in guide["sections"]:
+                assert section.get("heading")
+                assert section.get("body")
+
+    def test_guide_detail_page_200(self):
+        slug = GUIDES[0]["slug"]
+        rv = client.get(f"/guides/{slug}")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert GUIDES[0]["title"] in body
+        # JSON-LD Article 構造化
+        assert "application/ld+json" in body
+        assert "Article" in body
+
+    def test_guide_detail_404_for_unknown_slug(self):
+        rv = client.get("/guides/nonexistent-xyz")
+        assert rv.status_code == 404
+
+    def test_sitemap_includes_guides(self):
+        rv = client.get("/sitemap.xml")
+        body = rv.get_data(as_text=True)
+        for guide in GUIDES:
+            assert f"/guides/{guide['slug']}" in body
+
+    def test_guides_related_entries_resolve(self):
+        """ガイドの related_*_slugs が存在する slug を参照しているか"""
+        from poodle_genetics import DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX
+        for guide in GUIDES:
+            for slug in guide.get("related_disease_slugs", []):
+                assert slug in DISEASE_SLUG_INDEX, f"unknown disease slug {slug} in guide {guide['slug']}"
+            for slug in guide.get("related_trait_slugs", []):
+                assert slug in TRAIT_SLUG_INDEX, f"unknown trait slug {slug} in guide {guide['slug']}"
+
     def test_report_html_has_severity_badge(self):
         """generate_unified_html が KB マッチした疾患に severity-badge クラスを付与する"""
         import tempfile, os

@@ -497,6 +497,10 @@
 
         <a href="/simulator" class="btn btn-secondary" data-i18n="open_sim">繁殖シミュレーターを開く</a>
         <a href="/glossary" class="btn btn-secondary" data-i18n="open_glossary" style="margin-top:8px;">📖 遺伝子疾患・形質 辞書を開く</a>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+            <a href="/sample" class="btn btn-secondary" data-i18n="open_sample" style="flex:1;">📋 サンプルを見る</a>
+            <a href="/guides" class="btn btn-secondary" data-i18n="open_guides" style="flex:1;">📚 ガイド記事</a>
+        </div>
 
         <div class="env-info">
             pdfplumber: {{ "OK" if has_pdfplumber else "未インストール" }} /
@@ -637,6 +641,8 @@
                 loading_msg: "Analyzing... Please wait.",
                 open_sim: "Open Breeding Simulator",
                 open_glossary: "📖 Open Disease & Trait Glossary",
+                open_sample: "📋 View Sample",
+                open_guides: "📚 Read Guides",
                 hiw_title: "Done in 3 simple steps",
                 hiw_s1: "Upload PDF<br>or photo",
                 hiw_s2: "Auto analysis<br>(~10–60s)",
@@ -682,6 +688,8 @@
                 loading_msg: "解析中です。しばらくお待ちください...",
                 open_sim: "繁殖シミュレーターを開く",
                 open_glossary: "📖 遺伝子疾患・形質 辞書を開く",
+                open_sample: "📋 サンプルを見る",
+                open_guides: "📚 ガイド記事",
                 hiw_title: "3つのステップで完了",
                 hiw_s1: "PDF/写真を<br>アップロード",
                 hiw_s2: "自動解析<br>(約10〜60秒)",
