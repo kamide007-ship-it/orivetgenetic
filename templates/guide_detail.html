@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ guide.title }} | Orivet 遺伝子解析</title>
+<meta name="description" content="{{ guide.summary | truncate(160) }}">
+<link rel="canonical" href="{{ canonical }}">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ guide.title }}">
+<meta property="og:description" content="{{ guide.summary | truncate(200) }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:site_name" content="Orivet 遺伝子解析">
+<meta property="og:locale" content="ja_JP">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ guide.title }}">
+<meta name="twitter:description" content="{{ guide.summary | truncate(200) }}">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ guide.title }}",
+  "description": "{{ guide.summary }}",
+  "url": "{{ canonical }}",
+  "inLanguage": "ja",
+  "articleSection": "{{ guide.category }}",
+  "timeRequired": "PT{{ guide.reading_time | replace(' 分','') }}M",
+  "about": {
+    "@type": "Thing",
+    "name": "犬の遺伝学・遺伝子検査"
+  }
+}
+</script>
+
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif; background:#f8f9fa; color:#1f2937; line-height:1.75; }
+  header { background: linear-gradient(135deg, #4a1a7a, #e6007e); color:#fff; padding:24px 0; }
+  header .container { max-width:780px; margin:0 auto; padding:0 20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+  header h1 { font-size:1.4em; }
+  header .nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:8px; font-size:0.85em; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.15); margin-left:6px; }
+
+  .container { max-width:780px; margin:0 auto; padding:24px 20px; }
+  .breadcrumb { margin-bottom:16px; font-size:0.85em; color:#6b7280; }
+  .breadcrumb a { color:#7c3aed; text-decoration:none; }
+
+  .article-header { background:#fff; padding:30px 32px; border-radius:14px; margin-bottom:20px; border:1px solid #e5e7eb; }
+  .article-header h2 { color:#4a1a7a; font-size:1.55em; margin-bottom:14px; line-height:1.4; }
+  .article-header .meta { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; font-size:0.85em; }
+  .article-header .badge { padding:3px 11px; border-radius:11px; font-weight:600; }
+  .article-header .badge-category { background:#ede9fe; color:#5b21b6; }
+  .article-header .badge-time { background:#f3f4f6; color:#6b7280; }
+  .article-header .summary { font-size:1.05em; color:#374151; }
+
+  .section { background:#fff; padding:24px 32px; border-radius:12px; margin-bottom:14px; border:1px solid #e5e7eb; }
+  .section h3 { color:#4a1a7a; font-size:1.15em; margin-bottom:14px; padding-bottom:8px; border-bottom:1px dashed #ddd6fe; }
+  .section p, .section table { color:#374151; }
+  .section a { color:#7c3aed; }
+
+  .related { background:#faf5ff; padding:20px 28px; border-radius:12px; margin-top:24px; border:1px solid #ede9fe; }
+  .related h3 { color:#4a1a7a; font-size:1em; margin-bottom:10px; }
+  .related a { display:inline-block; padding:6px 14px; margin:4px 4px 4px 0; background:#fff; color:#5b21b6; text-decoration:none; border-radius:14px; font-size:0.88em; border:1px solid #c4b5fd; }
+  .related a:hover { background:#ede9fe; }
+
+  .cta-row {
+    margin-top:30px; padding:24px; background:linear-gradient(135deg,#faf5ff,#fdf4ff);
+    border-radius:14px; text-align:center; border:1px solid #ede9fe;
+  }
+  .cta-row h3 { color:#4a1a7a; margin-bottom:10px; }
+  .cta-row .btn-row { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:14px; }
+  .cta-row a {
+    background:#7c3aed; color:#fff; text-decoration:none;
+    padding:12px 24px; border-radius:10px; font-weight:600; font-size:0.95em;
+  }
+  .cta-row a.alt { background:#fff; color:#7c3aed; border:1px solid #c4b5fd; }
+
+  @media (max-width:480px) {
+    .container { padding:14px; }
+    .article-header { padding:20px; }
+    .article-header h2 { font-size:1.25em; }
+    .section { padding:18px 20px; }
+    body { padding-bottom:env(safe-area-inset-bottom); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div>
+      <h1>📚 ガイド記事</h1>
+    </div>
+    <div class="nav">
+      <a href="/">解析する</a>
+      <a href="/glossary">📖 辞書</a>
+      <a href="/guides">📚 ガイド一覧</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <nav class="breadcrumb" aria-label="パンくず">
+    <a href="/">ホーム</a> &raquo; <a href="/guides">ガイド記事</a> &raquo; <span>{{ guide.title }}</span>
+  </nav>
+
+  <article class="article-header">
+    <div class="meta">
+      <span class="badge badge-category">{{ guide.category }}</span>
+      <span class="badge badge-time">⏱ {{ guide.reading_time }}</span>
+    </div>
+    <h2>{{ guide.title }}</h2>
+    <p class="summary">{{ guide.summary }}</p>
+  </article>
+
+  {% for section in guide.sections %}
+  <section class="section">
+    <h3>{{ section.heading }}</h3>
+    <p>{{ section.body | safe }}</p>
+  </section>
+  {% endfor %}
+
+  {% if related_diseases or related_traits %}
+  <div class="related">
+    <h3>🔗 関連する辞書エントリ</h3>
+    {% for d in related_diseases %}
+    <a href="/glossary/disease/{{ d._slug }}">{{ d.title }}</a>
+    {% endfor %}
+    {% for t in related_traits %}
+    <a href="/glossary/trait/{{ t._slug }}">{{ t.title }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="cta-row">
+    <h3>愛犬の遺伝子検査結果を分析しませんか？</h3>
+    <p style="color:#6b7280;font-size:0.9em;">Orivet 遺伝子検査PDFをアップロードするだけで、AI が結果を解析して理解しやすいレポートを生成します。</p>
+    <div class="btn-row">
+      <a href="/">📄 解析を始める</a>
+      <a href="/sample" class="alt">📋 サンプルを見る</a>
+      <a href="/glossary" class="alt">📖 疾患辞書</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

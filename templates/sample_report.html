@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サンプルレポート — 解析結果のプレビュー | Orivet 遺伝子解析</title>
+<meta name="description" content="Orivet 遺伝子検査PDFをアップロードすると、こんな解析レポートが生成されます。サンプルデータで実際の表示を確認できます。">
+<link rel="canonical" href="{{ canonical }}">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="サンプルレポート — Orivet 遺伝子解析">
+<meta property="og:description" content="解析レポートのサンプルプレビュー。健康疾患・形質結果・重症度バッジ・詳細解説を全て確認できます。">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:site_name" content="Orivet 遺伝子解析">
+<meta property="og:locale" content="ja_JP">
+
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif; background:#f8f9fa; color:#1f2937; line-height:1.6; }
+  header { background: linear-gradient(135deg, #4a1a7a, #e6007e); color:#fff; padding:24px 0; }
+  header .container { max-width:900px; margin:0 auto; padding:0 20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+  header h1 { font-size:1.4em; }
+  header .nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:8px; font-size:0.85em; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.15); margin-left:6px; }
+
+  .container { max-width:900px; margin:0 auto; padding:24px 20px; }
+  .sample-notice { background:#fffbeb; border:2px solid #fcd34d; border-radius:12px; padding:18px 24px; margin-bottom:24px; }
+  .sample-notice strong { color:#92400e; font-size:1.05em; }
+  .sample-notice p { color:#374151; margin-top:6px; font-size:0.92em; }
+
+  .preview-card { background:#fff; padding:24px 28px; border-radius:14px; margin-bottom:18px; border:1px solid #e5e7eb; }
+  .preview-card h2 { color:#4a1a7a; font-size:1.2em; margin-bottom:14px; border-left:4px solid #7c3aed; padding-left:10px; }
+  .preview-card table { width:100%; border-collapse:collapse; font-size:0.92em; }
+  .preview-card th { background:#4a1a7a; color:#fff; padding:10px; text-align:left; }
+  .preview-card td { padding:10px; border-bottom:1px solid #f3f4f6; }
+
+  .sev-badge { display:inline-block; padding:2px 10px; border-radius:11px; font-size:0.78em; font-weight:700; margin-left:6px; vertical-align:middle; }
+  .status { display:inline-block; padding:3px 10px; border-radius:12px; font-size:0.82em; font-weight:600; }
+  .status.normal { background:#dcfce7; color:#166534; }
+  .status.carrier { background:#fef3c7; color:#92400e; }
+  .status.positive { background:#fee2e2; color:#991b1b; }
+
+  .summary-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:22px; }
+  .summary-card { background:#fff; border-radius:12px; padding:18px; text-align:center; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+  .summary-card .num { font-size:1.8em; font-weight:800; }
+  .summary-card .label { font-size:0.8em; color:#6b7280; margin-top:4px; }
+  .num.green { color:#22c55e; }
+  .num.yellow { color:#eab308; }
+  .num.red { color:#ef4444; }
+  .num.blue { color:#3b82f6; }
+  .num.alert { color:#dc2626; }
+
+  details.detail-fold { margin-top:6px; padding:6px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; font-size:0.85em; }
+  details.detail-fold summary { cursor:pointer; color:#5b21b6; font-weight:600; }
+
+  .cta-row {
+    margin-top:30px; padding:28px; background:linear-gradient(135deg,#faf5ff,#fdf4ff);
+    border-radius:14px; text-align:center; border:1px solid #ede9fe;
+  }
+  .cta-row h3 { color:#4a1a7a; margin-bottom:10px; font-size:1.15em; }
+  .cta-row .btn-row { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:14px; }
+  .cta-row a {
+    background:#7c3aed; color:#fff; text-decoration:none;
+    padding:14px 28px; border-radius:10px; font-weight:600; font-size:1em;
+  }
+  .cta-row a:hover { background:#6d28d9; }
+  .cta-row a.alt { background:#fff; color:#7c3aed; border:1px solid #c4b5fd; }
+
+  @media (max-width:480px) {
+    .container { padding:14px; }
+    .preview-card { padding:18px 16px; }
+    .summary-row { grid-template-columns:repeat(2, 1fr); }
+    body { padding-bottom:env(safe-area-inset-bottom); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div>
+      <h1>📋 サンプルレポート</h1>
+      <p style="opacity:0.85;font-size:0.85em;">解析するとこのような結果が得られます</p>
+    </div>
+    <div class="nav">
+      <a href="/">解析する</a>
+      <a href="/glossary">📖 辞書</a>
+      <a href="/guides">📚 ガイド</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="sample-notice">
+    <strong>⚠️ これはサンプルデータです</strong>
+    <p>このページは『Orivet 遺伝子解析の出力例』をプレビューするためのサンプルです。
+    実際の解析を行うには、ホームページから Orivet 遺伝子検査PDFをアップロードしてください。</p>
+  </div>
+
+  <!-- サマリー行 -->
+  <div class="summary-row">
+    <div class="summary-card">
+      <div class="num blue">1</div>
+      <div class="label">検査頭数</div>
+    </div>
+    <div class="summary-card">
+      <div class="num green">7</div>
+      <div class="label">ノーマル項目</div>
+    </div>
+    <div class="summary-card">
+      <div class="num yellow">2</div>
+      <div class="label">キャリア項目</div>
+    </div>
+    <div class="summary-card">
+      <div class="num red">0</div>
+      <div class="label">ポジティブ</div>
+    </div>
+    <div class="summary-card" style="box-shadow:0 0 0 3px rgba(34,197,94,0.4),0 2px 8px rgba(0,0,0,0.06);">
+      <div class="num green" style="font-size:1.7em;">✅ 0</div>
+      <div class="label" style="font-weight:600;">高リスク疾患の陽性</div>
+    </div>
+  </div>
+
+  <!-- 検査対象一覧 -->
+  <div class="preview-card">
+    <h2>📋 検査対象一覧</h2>
+    <table>
+      <tr><th>ペット名</th><th>登録名</th><th>犬種</th><th>性別</th><th>生年月日</th></tr>
+      <tr><td>サンプル太郎</td><td>Sample Buddy of Showcase</td><td>スタンダードプードル</td><td>♂</td><td>2022/05/15</td></tr>
+    </table>
+  </div>
+
+  <!-- 健康検査結果 -->
+  <div class="preview-card">
+    <h2>🩺 健康検査結果（9項目）</h2>
+    <table>
+      <tr><th>検査項目</th><th>結果</th><th>詳細</th></tr>
+      <tr>
+        <td>軟骨異栄養症+椎間板疾患 (CDDY+IVDD)
+          <span class="sev-badge" style="background:#fef3c7;color:#c2410c;">🟡 中リスク</span>
+        </td>
+        <td><span class="status carrier">P/N</span></td>
+        <td>キャリア。1コピー保有。<br><a href="/glossary/disease/chondrodystrophy" style="color:#7c3aed;">📖 詳細を見る</a></td>
+      </tr>
+      <tr>
+        <td>変性性脊髄症 (DM)
+          <span class="sev-badge" style="background:#fee2e2;color:#dc2626;">🔴 高リスク</span>
+        </td>
+        <td><span class="status normal">N/N</span></td>
+        <td>正常。<a href="/glossary/disease/degenerative-myelopathy" style="color:#7c3aed;">📖 詳細を見る</a></td>
+      </tr>
+      <tr>
+        <td>進行性網膜萎縮症 (prcd-PRA)
+          <span class="sev-badge" style="background:#fee2e2;color:#dc2626;">🔴 高リスク</span>
+        </td>
+        <td><span class="status normal">N/N</span></td>
+        <td>正常。<a href="/glossary/disease/progressive-rod-cone" style="color:#7c3aed;">📖 詳細を見る</a></td>
+      </tr>
+      <tr>
+        <td>フォン・ヴィレブランド病 I型 (vWD1)
+          <span class="sev-badge" style="background:#fef3c7;color:#c2410c;">🟡 中リスク</span>
+        </td>
+        <td><span class="status carrier">P/N</span></td>
+        <td>キャリア。手術前に獣医師に申告を。</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- 毛色・形質結果 -->
+  <div class="preview-card">
+    <h2>🎨 毛色・形質検査結果（一部抜粋）</h2>
+    <table>
+      <tr><th>検査項目</th><th>遺伝子型</th><th>表現型</th></tr>
+      <tr><td>E Locus</td><td>E/e</td><td>黒系色素を生成可能（キャリア）</td></tr>
+      <tr><td>K Locus</td><td>KB/ky</td><td>ソリッドカラー</td></tr>
+      <tr><td>A Locus</td><td>at/at</td><td>ファントム/タンポイント素因あり</td></tr>
+      <tr><td>B Locus</td><td>BB</td><td>黒色素正常</td></tr>
+      <tr><td>D Locus</td><td>DD</td><td>希釈なし</td></tr>
+    </table>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-row">
+    <h3>🎯 あなたの愛犬の結果もこの形式で見られます</h3>
+    <p style="color:#6b7280;font-size:0.95em;">Orivet 遺伝子検査PDFをアップロードするだけ。約10〜60秒で完成。</p>
+    <div class="btn-row">
+      <a href="/">📄 解析を始める</a>
+      <a href="/glossary" class="alt">📖 疾患辞書を見る</a>
+      <a href="/guides" class="alt">📚 ガイド記事</a>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

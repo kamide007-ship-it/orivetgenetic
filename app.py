@@ -116,6 +116,7 @@ from poodle_genetics import (
     get_disease_severity, SEVERITY_LABELS,
     SYMPTOM_INDEX, filter_by_symptom,
     DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug,
+    GUIDES, GUIDES_INDEX,
 )
 
 try:
@@ -595,12 +596,16 @@ def sitemap():
     urls = [
         (base + "/", "1.0", "weekly"),
         (base + "/glossary", "0.9", "weekly"),
+        (base + "/guides", "0.9", "weekly"),
+        (base + "/sample", "0.8", "monthly"),
         (base + "/simulator", "0.7", "monthly"),
     ]
     for slug in DISEASE_SLUG_INDEX:
         urls.append((base + f"/glossary/disease/{slug}", "0.7", "monthly"))
     for slug in TRAIT_SLUG_INDEX:
         urls.append((base + f"/glossary/trait/{slug}", "0.6", "monthly"))
+    for guide in GUIDES:
+        urls.append((base + f"/guides/{guide['slug']}", "0.8", "monthly"))
 
     today = datetime.utcnow().strftime("%Y-%m-%d")
     xml_parts = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -613,6 +618,47 @@ def sitemap():
     xml_parts.append("</urlset>")
     from flask import Response
     return Response("\n".join(xml_parts), mimetype="application/xml")
+
+
+@app.route("/sample")
+def sample_report():
+    """サンプルレポートページ — 解析せずに何が得られるかを示す。"""
+    return render_template(
+        "sample_report.html",
+        canonical=request.url_root.rstrip("/") + "/sample",
+    )
+
+
+@app.route("/guides")
+def guides_index():
+    """ガイド記事一覧ページ。"""
+    return render_template(
+        "guides_index.html",
+        guides=GUIDES,
+        canonical=request.url_root.rstrip("/") + "/guides",
+    )
+
+
+@app.route("/guides/<slug>")
+def guide_detail(slug):
+    """ガイド記事個別ページ。"""
+    guide = GUIDES_INDEX.get(slug)
+    if not guide:
+        return render_template(
+            "glossary_404.html",
+            kind="ガイド記事",
+            slug=slug,
+        ), 404
+    # 関連疾患・形質エントリを解決
+    related_diseases = [DISEASE_SLUG_INDEX[s] for s in guide.get("related_disease_slugs", []) if s in DISEASE_SLUG_INDEX]
+    related_traits = [TRAIT_SLUG_INDEX[s] for s in guide.get("related_trait_slugs", []) if s in TRAIT_SLUG_INDEX]
+    return render_template(
+        "guide_detail.html",
+        guide=guide,
+        related_diseases=related_diseases,
+        related_traits=related_traits,
+        canonical=request.url_root.rstrip("/") + f"/guides/{slug}",
+    )
 
 
 @app.route("/robots.txt")
