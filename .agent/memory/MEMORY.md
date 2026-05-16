@@ -204,3 +204,72 @@ JKC → ALAJ → AKC → KC → generic（`detect_pedigree_format`）
 - マジックバイト検証（`_is_valid_pdf`, `_is_valid_image`）
 - `report_html | e` フィルタ（XSS 対策、iframe srcdoc）
 - `SECRET_KEY` は Render で自動生成（ハードコードなし）
+- Excel formula injection 対策（[BUG-006] 修正済）
+
+---
+
+## 「理解できる」コンセプト実装パターン
+
+このセッションの中核設計哲学:
+
+> ユーザーが疑問を持つ全ての箇所に、詳細解説への経路を1〜2タップで提供する
+
+### 実装手段
+| 接点 | アクセス方法 |
+|---|---|
+| 解析レポート HTML | `<details>` 折りたたみで疾患/形質の詳細表示 |
+| 解析レポート サマリー | 🚨 高リスク陽性カードで優先度可視化 |
+| 解析レポート 疾患行 | 🔴🟡🟢 重症度バッジ |
+| シミュレーター 座位ラベル | `?` ヘルプモーダル |
+| シミュレーター 健康疾患名 | クリック→`/api/glossary` 遅延ロード→モーダル |
+| シミュレーター COI | 「人間関係換算」KB モーダル |
+| シミュレーター 色結果 | `E_`, `KB_` 等のロカスコードをクリッカブル化 |
+| スタンドアロン辞書 | カテゴリ+重症度+症状+全文 4軸検索 |
+| API | `/api/glossary` JSON |
+
+### 設計判断
+- **KB データの一元管理**: DISEASE_KB / TRAIT_KB を Python に集約。JS から `/api/glossary` 経由で取得
+- **重症度の自動推定 + 明示 override**: 本文テキストから推定し、誤分類は entry.severity で補正
+- **症状→疾患マッピング**: 専門家向け（疾患名検索）と一般飼い主向け（症状検索）を両立
+- **凡例（legend）の明示**: バッジの意味と免責事項を `<details>` で確認可能
+
+---
+
+## ナレッジベース構造（参考）
+
+### DISEASE_KB エントリスキーマ
+```python
+{
+  "match": ["pattern1", "pattern2", "\\bword boundary\\b"],
+  "title": "疾患名 (英略 / 遺伝子)",
+  "summary": "1〜2文の概要",
+  "mechanism": "発症メカニズム",
+  "symptoms": "症状",
+  "inheritance": "遺伝様式",
+  "advice": "飼育・繁殖アドバイス",
+  "severity": "high|medium|low",   # optional 明示オーバーライド
+  "references": [{"label": "...", "url": "..."}],
+}
+```
+
+### TRAIT_KB エントリスキーマ
+```python
+{
+  "match": [...],
+  "title": "...",
+  "summary": "...",
+  "mechanism": "...",
+  "phenotype": "...",   # 表現型（疾患の symptoms に相当）
+  "advice": "...",
+  "references": [...],
+}
+```
+
+### SYMPTOM_INDEX エントリスキーマ
+```python
+{
+  "id": "hindlimb",
+  "label": "🦵 後肢の麻痺・歩行困難",
+  "match_patterns": [...],   # 該当疾患の match パターン
+}
+```
