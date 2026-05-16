@@ -117,6 +117,8 @@ from poodle_genetics import (
     SYMPTOM_INDEX, filter_by_symptom,
     DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug,
     GUIDES, GUIDES_INDEX,
+    get_disease_kb_localized, get_trait_kb_localized,
+    HAS_EN_KB, SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN,
 )
 
 try:
@@ -513,6 +515,12 @@ def glossary():
     query = (request.args.get("q") or "").strip().lower()
     severity_filter = (request.args.get("severity") or "").strip().lower()
     symptom_filter = (request.args.get("symptom") or "").strip().lower()
+    # 言語設定: ?lang=en または Accept-Language で判定
+    lang = (request.args.get("lang") or "").strip().lower()
+    if lang not in ("ja", "en"):
+        # Accept-Language から推定（en-US, en-GB 等を en に）
+        accept = (request.headers.get("Accept-Language") or "").lower()
+        lang = "en" if accept.startswith("en") else "ja"
 
     def _filter_query(entries):
         if not query:
@@ -534,11 +542,14 @@ def glossary():
             return entries
         return [e for e in entries if get_disease_severity(e) == severity_filter]
 
+    # 言語別 KB を取得（EN なら英訳マージ済み）
+    base_diseases = get_disease_kb_localized(lang)
+    base_traits = get_trait_kb_localized(lang)
     # 疾患: 症状 → 検索 → 重症度の順でフィルタリング
-    diseases_after_symptom = filter_by_symptom(DISEASE_KB, symptom_filter) if symptom_filter else DISEASE_KB
+    diseases_after_symptom = filter_by_symptom(base_diseases, symptom_filter) if symptom_filter else base_diseases
     filtered_diseases = _filter_severity(_filter_query(diseases_after_symptom))
     # 形質は severity / symptom フィルター対象外（適用しない）
-    filtered_traits = _filter_query(TRAIT_KB)
+    filtered_traits = _filter_query(base_traits)
 
     # 重症度カウント（バッジ用） — 全疾患ベース
     severity_counts = {"high": 0, "medium": 0, "low": 0}
@@ -559,6 +570,7 @@ def glossary():
         symptom_index=SYMPTOM_INDEX,
         total_diseases=len(DISEASE_KB),
         total_traits=len(TRAIT_KB),
+        lang=lang,
     )
 
 
@@ -581,6 +593,19 @@ def disease_detail_page(slug):
             kind="疾患",
             slug=slug,
         ), 404
+    lang = (request.args.get("lang") or "").strip().lower()
+    if lang not in ("ja", "en"):
+        accept = (request.headers.get("Accept-Language") or "").lower()
+        lang = "en" if accept.startswith("en") else "ja"
+    # EN 表示時は _en で上書き
+    if lang == "en" and "_en" in entry:
+        merged = {**entry, **entry["_en"]}
+        merged["match"] = entry["match"]
+        merged["_slug"] = entry.get("_slug")
+        if "severity" in entry:
+            merged["severity"] = entry["severity"]
+        merged["references"] = entry.get("references", [])
+        entry = merged
     severity = get_disease_severity(entry)
     return render_template(
         "disease_detail.html",
@@ -589,6 +614,7 @@ def disease_detail_page(slug):
         severity=severity,
         severity_labels=SEVERITY_LABELS,
         canonical=request.url_root.rstrip("/") + f"/glossary/disease/{slug}",
+        lang=lang,
     )
 
 
@@ -602,11 +628,22 @@ def trait_detail_page(slug):
             kind="形質",
             slug=slug,
         ), 404
+    lang = (request.args.get("lang") or "").strip().lower()
+    if lang not in ("ja", "en"):
+        accept = (request.headers.get("Accept-Language") or "").lower()
+        lang = "en" if accept.startswith("en") else "ja"
+    if lang == "en" and "_en" in entry:
+        merged = {**entry, **entry["_en"]}
+        merged["match"] = entry["match"]
+        merged["_slug"] = entry.get("_slug")
+        merged["references"] = entry.get("references", [])
+        entry = merged
     return render_template(
         "trait_detail.html",
         entry=entry,
         slug=slug,
         canonical=request.url_root.rstrip("/") + f"/glossary/trait/{slug}",
+        lang=lang,
     )
 
 

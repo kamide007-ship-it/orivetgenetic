@@ -137,6 +137,96 @@ class TestVersion:
 
 
 # ===========================================================================
+# 20. 英訳 KB (kb_en.py)
+# ===========================================================================
+
+try:
+    from kb_en import DISEASE_EN, TRAIT_EN, SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN
+    _HAS_EN = True
+except Exception:
+    _HAS_EN = False
+
+
+@pytest.mark.skipif(not _HAS_EN, reason="kb_en not importable")
+class TestEnglishKB:
+    def test_disease_en_count(self):
+        # 全72疾患の英訳が含まれていること
+        assert len(DISEASE_EN) >= 70
+
+    def test_trait_en_count(self):
+        # 全14形質座位の英訳
+        assert len(TRAIT_EN) >= 14
+
+    def test_disease_en_has_required_fields(self):
+        for slug, entry in DISEASE_EN.items():
+            assert entry.get("title"), f"{slug} missing title"
+            assert entry.get("summary"), f"{slug} missing summary"
+            assert entry.get("mechanism"), f"{slug} missing mechanism"
+
+    def test_trait_en_has_phenotype(self):
+        for slug, entry in TRAIT_EN.items():
+            assert entry.get("title"), f"{slug} missing title"
+            assert entry.get("summary"), f"{slug} missing summary"
+            assert entry.get("phenotype"), f"{slug} missing phenotype"
+
+    def test_severity_labels_en(self):
+        assert "high" in SEVERITY_LABELS_EN
+        assert "Risk" in SEVERITY_LABELS_EN["high"]["label"] or "risk" in SEVERITY_LABELS_EN["high"]["label"]
+
+    def test_category_labels_en(self):
+        # 主要カテゴリの英訳
+        labels = list(CATEGORY_LABELS_EN.values())
+        joined = " ".join(labels)
+        assert "Neurological" in joined or "Skeletal" in joined
+
+    def test_kb_en_slugs_match_kb(self):
+        """kb_en の slug が DISEASE_KB / TRAIT_KB の slug と一致するか"""
+        from poodle_genetics import DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX
+        for slug in DISEASE_EN.keys():
+            assert slug in DISEASE_SLUG_INDEX, f"EN slug '{slug}' not in DISEASE_SLUG_INDEX"
+        for slug in TRAIT_EN.keys():
+            assert slug in TRAIT_SLUG_INDEX, f"EN slug '{slug}' not in TRAIT_SLUG_INDEX"
+
+
+@pytest.mark.skipif(not _HAS_EN, reason="kb_en not importable")
+class TestGlossaryEnglish:
+    def test_glossary_en_returns_english_content(self):
+        rv = client.get("/glossary?lang=en")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # 主要英文テキストが含まれる
+        assert "Chondrodystrophy" in body or "Degenerative Myelopathy" in body or "von Willebrand" in body
+
+    def test_disease_detail_en(self):
+        rv = client.get("/glossary/disease/chondrodystrophy?lang=en")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # CDDY の英文 title が表示される
+        assert "Chondrodystrophy" in body
+
+    def test_trait_detail_en(self):
+        rv = client.get("/glossary/trait/e-locus?lang=en")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "E Locus" in body or "MC1R" in body
+
+    def test_disease_detail_ja_default(self):
+        rv = client.get("/glossary/disease/chondrodystrophy")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # デフォルトは日本語
+        assert "椎間板" in body or "軟骨異栄養症" in body
+
+    def test_accept_language_en_header(self):
+        """Accept-Language: en で英語コンテンツを返す"""
+        rv = client.get("/glossary/disease/chondrodystrophy",
+                         headers={"Accept-Language": "en-US,en;q=0.9"})
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "Chondrodystrophy" in body
+
+
+# ===========================================================================
 # 3. 413 ハンドラ
 # ===========================================================================
 
