@@ -114,8 +114,12 @@
       <h1>📖 遺伝子疾患辞書</h1>
     </div>
     <div class="nav">
-      <a href="/">解析する</a>
-      <a href="/glossary">辞書 TOP</a>
+      <a href="/">{% if lang == 'en' %}Analyze{% else %}解析する{% endif %}</a>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Glossary{% else %}辞書 TOP{% endif %}</a>
+      {% set toggle_lang = 'ja' if lang == 'en' else 'en' %}
+      <a href="/glossary/disease/{{ slug }}?lang={{ toggle_lang }}" title="Toggle language" style="background:rgba(255,255,255,0.3);font-weight:700;">
+        🌐 {% if lang == 'en' %}日本語{% else %}English{% endif %}
+      </a>
     </div>
   </div>
 </header>

@@ -146,8 +146,17 @@
       <p>全 {{ total_diseases }} 疾患 / {{ total_traits }} 形質座位 を解説</p>
     </div>
     <div class="nav">
-      <a href="/">新しい解析</a>
-      <a href="/simulator">繁殖シミュレーター</a>
+      <a href="/">{% if lang == 'en' %}New analysis{% else %}新しい解析{% endif %}</a>
+      <a href="/simulator">{% if lang == 'en' %}Simulator{% else %}繁殖シミュレーター{% endif %}</a>
+      {# 言語切替ボタン (PR #62 G) #}
+      {% set toggle_lang = 'ja' if lang == 'en' else 'en' %}
+      {% set base_query = '?lang=' ~ toggle_lang %}
+      {% if query %}{% set base_query = base_query ~ '&q=' ~ query %}{% endif %}
+      {% if severity_filter %}{% set base_query = base_query ~ '&severity=' ~ severity_filter %}{% endif %}
+      {% if symptom_filter %}{% set base_query = base_query ~ '&symptom=' ~ symptom_filter %}{% endif %}
+      <a href="/glossary{{ base_query }}" title="Toggle language" style="background:rgba(255,255,255,0.3);font-weight:700;">
+        🌐 {% if lang == 'en' %}日本語{% else %}English{% endif %}
+      </a>
     </div>
   </div>
 </header>

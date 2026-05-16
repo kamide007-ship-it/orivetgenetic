@@ -2238,6 +2238,576 @@ GUIDES = [
         "related_disease_slugs": [],
         "related_trait_slugs": [],
     },
+    # === 犬種別ガイド (PR #62) ===
+    {
+        "slug": "poodle-genetic-health-guide",
+        "title": "プードル飼い主・ブリーダー向け遺伝子検査ガイド",
+        "summary": "スタンダード/ミニチュア/トイ/タイニープードルで特に注意すべき遺伝性疾患・毛色遺伝子をまとめたガイド。",
+        "category": "🐩 犬種別",
+        "reading_time": "7 分",
+        "sections": [
+            {
+                "heading": "🐩 プードルで特に重要な遺伝病",
+                "body": (
+                    "プードルは全体的に健康な犬種ですが、いくつか特有の遺伝性疾患があります:<br>"
+                    "・<strong>NEwS (新生児脳症)</strong> — スタンダードプードル特有。生後 4〜6 週で致死。両親キャリア × キャリア交配は厳禁。<br>"
+                    "・<strong>prcd-PRA (進行性網膜萎縮症)</strong> — 全サイズ。中年期から失明。<br>"
+                    "・<strong>vWD1 (フォン・ヴィレブランド病 I型)</strong> — 出血傾向。手術前に申告。<br>"
+                    "・<strong>HSF4 白内障</strong> — 一部ラインで報告。<br>"
+                    "・<strong>DM (変性性脊髄症)</strong> — 大型プードルで報告例あり。"
+                ),
+            },
+            {
+                "heading": "🎨 プードルの毛色遺伝学",
+                "body": (
+                    "プードルは多彩な毛色を持つ犬種で、以下の座位が重要:<br>"
+                    "・<strong>E座位 (MC1R)</strong> — クリーム/アプリコット/レッドの基本色制御<br>"
+                    "・<strong>K座位 (CBD103)</strong> — ブラック/ブラウン(チョコ) のソリッド色<br>"
+                    "・<strong>B座位 (TYRP1)</strong> — bb でブラウン (チョコ/レバー) になる<br>"
+                    "・<strong>D座位 (MLPH)</strong> — dd でブルー/シルバービーグへ希釈<br>"
+                    "・<strong>G座位 (Greying)</strong> — シルバープードルの原因。生まれは黒、成犬で退色<br>"
+                    "・<strong>S座位 (MITF)</strong> — sp/sp でパーティカラー"
+                ),
+            },
+            {
+                "heading": "✂ プードル特有の被毛形質",
+                "body": (
+                    "・<strong>C/C (KRT71)</strong> — 巻き毛（プードルは全て C/C ホモ）<br>"
+                    "・<strong>F/F (RSPO2)</strong> — ファーニシング（眉・髭・飾り毛）<br>"
+                    "・<strong>l/l (FGF5)</strong> — 長毛（プードルは全て l/l ホモ）<br>"
+                    "・<strong>N/N (MC5R)</strong> — 抜け毛少なめ（『ハイポアレジェニック』と称される根拠）<br>"
+                    "これら全てがプードル特有の『くるくる長い毛・抜け毛少ない』被毛を形成します。"
+                ),
+            },
+            {
+                "heading": "🐕 サイズ別の注意点",
+                "body": (
+                    "<strong>スタンダードプードル</strong>: NEwS リスク特有。股関節形成不全・SARDS も注意。COI が低い系統選択を推奨。<br>"
+                    "<strong>ミニチュアプードル</strong>: 膝蓋骨脱臼・てんかんの素因あり。<br>"
+                    "<strong>トイ/タイニープードル</strong>: 低血糖・水頭症・歯の問題が多い。極端な小型化を避けた繁殖を。"
+                ),
+            },
+            {
+                "heading": "💡 プードル繁殖の推奨ステップ",
+                "body": (
+                    "1. <strong>両親の遺伝子検査</strong>を最低 8 項目（プードル標準パネル）<br>"
+                    "2. <strong>COI 6.25% 以下</strong>を維持する系統選択<br>"
+                    "3. <strong>NEwS / prcd-PRA / vWD1</strong> の P/N × P/N 交配を絶対避ける<br>"
+                    "4. M座位 (Merle) を持つ犬は他のメルル犬と交配しない<br>"
+                    "5. 子犬の遺伝子検査を生後早期に実施"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["neonatal-encephalopathy", "progressive-rod-cone", "willebrand-type-1", "hereditary-cataract", "degenerative-myelopathy"],
+        "related_trait_slugs": ["e-locus", "k-locus", "b-locus", "d-locus", "g-locus", "curly-coat", "furnishings", "l-locus"],
+    },
+    {
+        "slug": "labrador-genetic-health-guide",
+        "title": "ラブラドール飼い主・ブリーダー向け遺伝子検査ガイド",
+        "summary": "ラブラドール・レトリーバーで特に注意すべき遺伝性疾患・毛色遺伝子をまとめたガイド。EIC や HNPK 等の犬種特有疾患も解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "7 分",
+        "sections": [
+            {
+                "heading": "🐕 ラブラドールで特に重要な遺伝病",
+                "body": (
+                    "ラブラドールは人気犬種ゆえに遺伝病情報が豊富です:<br>"
+                    "・<strong>EIC (運動誘発性虚脱)</strong> — ラブ特有。激しい運動後に脱力。<br>"
+                    "・<strong>CNM (中心核ミオパチー)</strong> — 若齢期から筋力低下。<br>"
+                    "・<strong>prcd-PRA</strong> — 中年期失明。<br>"
+                    "・<strong>HNPK (鼻過角化症)</strong> — 鼻の硬化・亀裂。ラブで頻発。<br>"
+                    "・<strong>銅蓄積性肝障害 (COMMD1)</strong> — 肝臓に銅が異常蓄積。<br>"
+                    "・<strong>HUU (高尿酸尿症)</strong> — 一部ラインで報告。<br>"
+                    "・<strong>SD2 (骨格異形成 2型)</strong> — 四肢の異常な短縮。<br>"
+                    "・<strong>CDDY+IVDD</strong> — 椎間板疾患リスク（短足ラブで特に）"
+                ),
+            },
+            {
+                "heading": "🎨 ラブラドールの3つの基本色",
+                "body": (
+                    "<strong>ブラック (E_, B_)</strong>: 標準色。E と B の両方が機能。<br>"
+                    "<strong>イエロー (e/e)</strong>: ee ホモで黒/茶色素が coat に出ない。"
+                    "明るいクリームから濃いフォックスレッドまで幅広い（KITLG が濃淡決定）。<br>"
+                    "<strong>チョコレート (bb)</strong>: bb ホモで黒色素がブラウンに変換。<br>"
+                    "<strong>シルバー/チャコール</strong>: dd (希釈) によるブルー/シャンパン。"
+                    "ラブのシルバーは AKC で論争的。Em (マスク) も発現する場合あり。"
+                ),
+            },
+            {
+                "heading": "🦴 ラブラドール特有の被毛・体型形質",
+                "body": (
+                    "・<strong>L/L (FGF5)</strong> — 短毛（ラブは全て L/L）。たまに l/l で出るのは『ファジー』ラブと呼ばれる長毛。<br>"
+                    "・<strong>SD/SD (MC5R)</strong> — シェッディング多。ラブは抜け毛が多い犬種。<br>"
+                    "・<strong>F無し (RSPO2 N/N)</strong> — ファーニシングなし、スムースコート。<br>"
+                    "・<strong>Em/E (MC1R variant)</strong> — 一部ラブで黒マスクが見られる。"
+                ),
+            },
+            {
+                "heading": "💡 ラブラドール繁殖の推奨パネル",
+                "body": (
+                    "最低限テストすべき項目:<br>"
+                    "・EIC、CNM、prcd-PRA、HNPK、CDDY、CNM、HUU、Copper Toxicosis、Centronuclear Myopathy<br>"
+                    "ラブラドール特有の遺伝病が多いため、Embark や Orivet の『Labrador panel』を活用しましょう。"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["exercise-induced-collapse", "centronuclear-myopathy", "progressive-rod-cone", "hnpk", "copper-toxicosis", "hyperuricosuria", "skeletal-dysplasia-2", "chondrodystrophy"],
+        "related_trait_slugs": ["e-locus", "b-locus", "d-locus", "l-locus", "shedding", "em-locus"],
+    },
+    {
+        "slug": "doodle-genetic-health-guide",
+        "title": "ドゥードゥル系犬種（Goldendoodle/Labradoodle 等）の遺伝子検査ガイド",
+        "summary": "プードル × Golden/Labrador 系のミックス犬では両親犬種の遺伝病パネル両方が必要。被毛予測も複雑。",
+        "category": "🐾 犬種別",
+        "reading_time": "7 分",
+        "sections": [
+            {
+                "heading": "🐾 ドゥードゥル系犬種とは",
+                "body": (
+                    "プードルと他犬種の交配で生まれる F1 / F1B / F2 等のミックス犬種:<br>"
+                    "・<strong>Goldendoodle</strong> — プードル × ゴールデン・レトリーバー<br>"
+                    "・<strong>Labradoodle / Australian Labradoodle</strong> — プードル × ラブラドール<br>"
+                    "・<strong>Bernedoodle</strong> — プードル × バーニーズ・マウンテン・ドッグ<br>"
+                    "・<strong>Sheepadoodle</strong> — プードル × オールド・イングリッシュ・シープドッグ<br>"
+                    "・<strong>Cavapoo</strong> — プードル × キャバリア K.C. スパニエル<br>"
+                    "各組み合わせで、両親犬種固有の遺伝病パネルが必要になります。"
+                ),
+            },
+            {
+                "heading": "🩺 ドゥードゥル繁殖で重要な遺伝病パネル",
+                "body": (
+                    "両親犬種の遺伝病を網羅的に検査:<br>"
+                    "<strong>プードル側</strong>: prcd-PRA、NEwS (スタンダードの場合)、vWD1、HSF4<br>"
+                    "<strong>ゴールデン側</strong>: prcd-PRA、Ichthyosis、心臓関連<br>"
+                    "<strong>ラブラドール側</strong>: EIC、CNM、HNPK、HUU、Copper Toxicosis<br>"
+                    "<strong>バーニーズ側</strong>: DM、骨肉腫リスク、組織球性肉腫<br>"
+                    "<strong>キャバリア側</strong>: 僧帽弁疾患、Macrothrombocytopenia、EFS、DM<br>"
+                    "両親が同じ変異の P/N を持つ場合、ドゥードゥルでも 25% 発症します。"
+                ),
+            },
+            {
+                "heading": "🎨 被毛タイプの予測",
+                "body": (
+                    "ドゥードゥル系の被毛は『プードルらしさ』を決める2座位の組み合わせで決まる:<br>"
+                    "<strong>C/C (KRT71 巻き毛)</strong>: カーリー<br>"
+                    "<strong>C/N</strong>: ウェーブ<br>"
+                    "<strong>N/N</strong>: ストレート<br>"
+                    "<strong>F/F (RSPO2 ファーニシング)</strong>: 顔毛しっかり、抜け毛少なめ<br>"
+                    "<strong>F/N</strong>: 中間<br>"
+                    "<strong>N/N (Improper Coat)</strong>: ラブ/ゴールデン的なスムースな顔<br>"
+                    "F1 (純血種同士の初代) は F/N × C/N が多く、被毛タイプにバラつきが出やすい。<br>"
+                    "<strong>『ハイポアレジェニック』を狙うなら F/F + C/C + N/N (Shedding)</strong> が理想。"
+                ),
+            },
+            {
+                "heading": "💡 ドゥードゥルブリーダーへのアドバイス",
+                "body": (
+                    "1. <strong>両親両方</strong>の遺伝子検査が必須（片方だけは無意味）<br>"
+                    "2. <strong>COI 計算</strong>は両親が異犬種でも、共通の祖先がいる場合（同系プードル等）に上昇<br>"
+                    "3. <strong>被毛タイプは確率予測</strong>のみ — F/F C/C N/N の両親同士でも、F1 子犬は被毛が混ざる<br>"
+                    "4. <strong>初代 (F1) より F1B が予測しやすい</strong>（F1 × プードル戻し交配）<br>"
+                    "5. 健康とブリーダーの倫理が優先 — 被毛より遺伝病パネルを優先"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["progressive-rod-cone", "ichthyosis", "exercise-induced-collapse", "centronuclear-myopathy", "hnpk", "degenerative-myelopathy", "macrothrombocytopenia"],
+        "related_trait_slugs": ["curly-coat", "furnishings", "shedding", "l-locus", "e-locus", "b-locus"],
+    },
+    # === 追加犬種別ガイド (Orivet JP 対応犬種 + 日本人気犬種) ===
+    {
+        "slug": "shiba-genetic-health-guide",
+        "title": "柴犬の遺伝子検査・健康ガイド",
+        "summary": "日本犬の代表・柴犬で重要な遺伝病（GM1ガングリオシドーシス等）・毛色遺伝学を解説。Orivet 検査対応犬種。",
+        "category": "🐕 犬種別",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🐕 柴犬で特に重要な遺伝病",
+                "body": (
+                    "柴犬は比較的健康な犬種ですが、特有の遺伝病があります:<br>"
+                    "・<strong>GM1 ガングリオシドーシス (GLB1)</strong> — 柴犬で確立した致死性神経疾患。両親キャリア × キャリア交配で 25% 発症。<br>"
+                    "・<strong>緑内障</strong> — 中年期から発症リスク。失明予防に定期眼圧測定。<br>"
+                    "・<strong>アトピー性皮膚炎</strong> — 遺伝的素因 + 環境要因。<br>"
+                    "・<strong>膝蓋骨脱臼</strong> — 中型犬として一般的なリスク。<br>"
+                    "・<strong>GM2 ガングリオシドーシス</strong> — 一部ラインで報告（GM1 ほど頻発しない）"
+                ),
+            },
+            {
+                "heading": "🎨 柴犬の毛色遺伝学",
+                "body": (
+                    "柴犬の4毛色は以下の組み合わせ:<br>"
+                    "<strong>赤</strong>: ay/_ ky/ky E_ B_ (アグーチ・セーブル発現)<br>"
+                    "<strong>黒褐 (黒タン)</strong>: at/at ky/ky E_ B_ (タンポイント)<br>"
+                    "<strong>胡麻 (ごま)</strong>: ay/at + 個体差で胡麻状の混色<br>"
+                    "<strong>白</strong>: e/e (劣性) でクリーム/白系。少数派。<br>"
+                    "<strong>ウラジロ (裏白)</strong>: 一般的な裏白模様は S 座位とは別の遺伝子。"
+                ),
+            },
+            {
+                "heading": "💡 柴犬繁殖の推奨",
+                "body": (
+                    "・<strong>GM1 検査必須</strong> — 日本のブリーダーは特に注意<br>"
+                    "・四毛色（赤・黒褐・胡麻・白）の維持には A/E/B 座位の遺伝管理<br>"
+                    "・小型化の極端化は健康問題を増やすため避ける"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["gm1-gangliosidosis", "gm2-gangliosidosis", "glaucoma"],
+        "related_trait_slugs": ["a-locus", "e-locus", "b-locus", "k-locus"],
+    },
+    {
+        "slug": "akita-genetic-health-guide",
+        "title": "秋田犬の遺伝子検査・健康ガイド",
+        "summary": "秋田犬で重要な遺伝病（DM・免疫疾患等）と特有の遺伝形質を解説。Orivet 検査対応犬種。",
+        "category": "🐕 犬種別",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "🐕 秋田犬で特に重要な遺伝病",
+                "body": (
+                    "・<strong>DM (変性性脊髄症)</strong> — 秋田犬は SOD1 リスクアレルを保有することが多い。<br>"
+                    "・<strong>VKH 様症候群</strong> — 自己免疫疾患（眼・皮膚色素脱失）。秋田で多い。<br>"
+                    "・<strong>進行性網膜萎縮症 (PRA)</strong> — 一部系統で報告。<br>"
+                    "・<strong>股関節形成不全</strong> — 大型犬として注意。<br>"
+                    "・<strong>甲状腺機能低下症</strong> — 中高齢期から発症。"
+                ),
+            },
+            {
+                "heading": "🎨 秋田犬の毛色",
+                "body": (
+                    "<strong>赤</strong>: ay/_ + 一般的なウラジロ模様<br>"
+                    "<strong>白</strong>: e/e でクリーム/白系<br>"
+                    "<strong>胡麻</strong>: アグーチによる混色<br>"
+                    "<strong>虎毛 (ブリンドル)</strong>: kbr アレル発現（日本秋田より米国秋田で多い）"
+                ),
+            },
+            {
+                "heading": "💡 秋田犬繁殖の推奨",
+                "body": (
+                    "・<strong>DM 検査</strong>を成犬時に必ず実施。P/P 犬同士の交配は避ける。<br>"
+                    "・自己免疫疾患の素因を考慮した系統選択<br>"
+                    "・COI を低く保つ（秋田犬は犬種内多様性が低めなため）"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["degenerative-myelopathy", "progressive-rod-cone"],
+        "related_trait_slugs": ["a-locus", "e-locus", "k-locus"],
+    },
+    {
+        "slug": "shar-pei-genetic-health-guide",
+        "title": "シャー・ペイの遺伝子検査・健康ガイド",
+        "summary": "シワが特徴のシャー・ペイで重要な家族性シャーペイ熱・皮膚疾患を解説。Orivet 検査対応犬種。",
+        "category": "🐕 犬種別",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "🐕 シャー・ペイで特に重要な遺伝病",
+                "body": (
+                    "・<strong>家族性シャーペイ熱 (FSF)</strong> — 周期的な発熱と関節腫脹。アミロイドーシスのリスクと関連。シャー・ペイ特有。<br>"
+                    "・<strong>進行性腎臓アミロイドーシス</strong> — FSF の長期合併症。<br>"
+                    "・<strong>瞼内反症 / 外反症</strong> — シワ多い犬種で多発。<br>"
+                    "・<strong>パッド過角化症</strong> — 皮膚バリア機能の遺伝的低下。<br>"
+                    "・<strong>POAG（原発性開放隅角緑内障）</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 シャー・ペイの毛色・被毛",
+                "body": (
+                    "<strong>毛色</strong>: 黒・ブラウン・クリーム・赤・チョコ等の多彩な色<br>"
+                    "<strong>被毛タイプ</strong>:<br>"
+                    "・ホースコート (短い・硬い)<br>"
+                    "・ブラッシュコート (やや長め)<br>"
+                    "・ベアーコート (長毛・FCI 非認可)<br>"
+                    "L 座位 (FGF5) の l/l がベアーコートの原因。"
+                ),
+            },
+            {
+                "heading": "💡 シャー・ペイ繁殖の推奨",
+                "body": (
+                    "・FSF / アミロイドーシスの家族歴を必ず確認<br>"
+                    "・極端なシワ強調を避けた繁殖（皮膚疾患リスク）<br>"
+                    "・若齢期からの定期的な腎機能検査"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["glaucoma"],
+        "related_trait_slugs": ["l-locus", "e-locus", "b-locus"],
+    },
+    {
+        "slug": "chin-genetic-health-guide",
+        "title": "狆（チン）の遺伝子検査・健康ガイド",
+        "summary": "日本の伝統小型犬・狆で重要な遺伝病と特性。Orivet 検査対応犬種。",
+        "category": "🐕 犬種別",
+        "reading_time": "4 分",
+        "sections": [
+            {
+                "heading": "🐕 狆で特に重要な遺伝病",
+                "body": (
+                    "・<strong>ガングリオシドーシス GM2</strong> — 一部ラインで報告。重篤な神経疾患。<br>"
+                    "・<strong>頭蓋骨変形（Brachycephalic Syndrome）</strong> — 短頭種症候群。呼吸器・眼科リスク。<br>"
+                    "・<strong>水頭症</strong> — 小型犬として注意。<br>"
+                    "・<strong>膝蓋骨脱臼</strong> — 小型犬として一般的。<br>"
+                    "・<strong>白内障</strong> — 中年期以降。"
+                ),
+            },
+            {
+                "heading": "🎨 狆の毛色",
+                "body": (
+                    "<strong>白黒 (Black & White)</strong>: at/at + 白斑 (sp/sp)<br>"
+                    "<strong>白赤 (Red & White)</strong>: ay/_ + 白斑<br>"
+                    "白の割合が多いのが特徴で、S 座位 sp/sp の発現が顕著。"
+                ),
+            },
+            {
+                "heading": "💡 狆繁殖の推奨",
+                "body": (
+                    "・短頭種特有の呼吸器負担を考慮した骨格繁殖<br>"
+                    "・小型化を極端に進めない<br>"
+                    "・GM2 等の遺伝子検査"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["gm2-gangliosidosis"],
+        "related_trait_slugs": ["a-locus", "e-locus", "s-locus"],
+    },
+    {
+        "slug": "dachshund-genetic-health-guide",
+        "title": "ダックスフンドの遺伝子検査・健康ガイド",
+        "summary": "短足の代表・ダックスフンドで特に注意すべき椎間板疾患 (CDDY+IVDD)・PRA を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🐕 ダックスフンドで特に重要な遺伝病",
+                "body": (
+                    "・<strong>CDDY+IVDD (椎間板疾患)</strong> — ダックス系で最重要。短足の原因 CDPA に加え、椎間板リスクの CDDY を保有。<br>"
+                    "・<strong>CORD1 / PRA</strong> — ミニチュアロングヘアード Dx で特に。失明リスク。<br>"
+                    "・<strong>ラフォラ病</strong> — 進行性ミオクローヌス癲癇。ミニチュア Dx で報告。<br>"
+                    "・<strong>骨形成不全症 (OI)</strong> — ダックスで報告例あり。<br>"
+                    "・<strong>てんかん</strong> — 多因子。"
+                ),
+            },
+            {
+                "heading": "🎨 ダックスフンドの毛色・被毛",
+                "body": (
+                    "<strong>毛色</strong>: ブラックタン・チョコタン・レッド・クリーム・シルバーダップル (Merle)・ピーバルド 等<br>"
+                    "<strong>被毛タイプ</strong>: スムース (短毛)・ロングヘアード (l/l)・ワイヤーヘアード (F/F + Curl 混合)<br>"
+                    "⚠️ <strong>ダップル × ダップル交配は厳禁</strong> (M/M ダブルマール = 失明・難聴)"
+                ),
+            },
+            {
+                "heading": "💡 ダックスフンド飼育の推奨",
+                "body": (
+                    "・<strong>椎間板予防</strong>: 体重管理・階段の昇降制限・ジャンプ禁止<br>"
+                    "・<strong>CDDY 検査</strong>: 全頭推奨<br>"
+                    "・<strong>PRA / Lafora 検査</strong>: ミニチュアロングで必須<br>"
+                    "・ダップル交配規則の厳守"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["chondrodystrophy", "cord1", "progressive-rod-cone", "lafora", "osteogenesis-imperfecta"],
+        "related_trait_slugs": ["m-locus", "s-locus", "l-locus", "curly-coat", "furnishings"],
+    },
+    {
+        "slug": "french-bulldog-genetic-health-guide",
+        "title": "フレンチブルドッグの遺伝子検査・健康ガイド",
+        "summary": "日本で人気のフレブルで重要な短頭種疾患・遺伝病・ブルー(dd)関連 CDA を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🐕 フレンチブルドッグで特に重要な遺伝病",
+                "body": (
+                    "・<strong>短頭種気道症候群 (BOAS)</strong> — 呼吸器負担。麻酔リスク高。<br>"
+                    "・<strong>椎骨形成異常 (Hemivertebrae)</strong> — フレブル特有の脊椎奇形。<br>"
+                    "・<strong>CDA (毛色希釈性脱毛症)</strong> — ブルー (dd) フレブルで頻発。<br>"
+                    "・<strong>HUU (高尿酸尿症)</strong> — 一部ラインで報告。<br>"
+                    "・<strong>多発性軟骨外骨腫</strong><br>"
+                    "・<strong>白内障 / チェリーアイ</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 フレンチブルドッグの毛色",
+                "body": (
+                    "<strong>標準色 (FCI 認可)</strong>: フォーン・ブリンドル・パイド<br>"
+                    "<strong>非認可色</strong>: ブルー (dd)・チョコ (bb)・ライラック (bb dd)・マール (M/_)<br>"
+                    "ブルー系は CDA リスクが付随。マールは FCI 非認可 + 健康リスク（M/M ダブルマール厳禁）"
+                ),
+            },
+            {
+                "heading": "💡 フレブル繁殖の推奨",
+                "body": (
+                    "・<strong>BOAS スコアリング</strong>を実施した個体での繁殖<br>"
+                    "・<strong>椎骨レントゲン</strong>で奇形チェック<br>"
+                    "・帝王切開率が高いため、ブリーダーは産科対応必須<br>"
+                    "・希釈色 (dd) を選ぶ場合は CDA リスクを認識"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["coat-color-dilution-alopecia", "hyperuricosuria", "hereditary-cataract"],
+        "related_trait_slugs": ["d-locus", "b-locus", "m-locus", "k-locus"],
+    },
+    {
+        "slug": "cavalier-genetic-health-guide",
+        "title": "キャバリア K.C. スパニエルの遺伝子検査・健康ガイド",
+        "summary": "キャバリア特有の僧帽弁疾患 (MVD)・先天性巨大血小板減少症・EFS を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🐕 キャバリアで特に重要な遺伝病",
+                "body": (
+                    "・<strong>僧帽弁疾患 (MVD)</strong> — キャバリア最大の死因。中年期から発症。心臓検査必須。<br>"
+                    "・<strong>キアリ様奇形 / SM (脊髄空洞症)</strong> — 頭部の発達異常で神経症状。MRI 検査必要。<br>"
+                    "・<strong>EFS (発作性失神症 / BCAN)</strong> — 興奮で発作。キャバリア特有。<br>"
+                    "・<strong>Macrothrombocytopenia (TUBB1)</strong> — 巨大血小板。多くは無症状。<br>"
+                    "・<strong>DM (変性性脊髄症)</strong> — 一部ラインで報告。<br>"
+                    "・<strong>白内障 (HSF4)</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 キャバリアの4毛色",
+                "body": (
+                    "<strong>ブレナム (赤白)</strong>: ay/_ + 白斑<br>"
+                    "<strong>トライカラー (黒赤白)</strong>: at/at + 白斑<br>"
+                    "<strong>ルビー (赤)</strong>: e/e (劣性レッド)<br>"
+                    "<strong>ブラック・アンド・タン</strong>: at/at"
+                ),
+            },
+            {
+                "heading": "💡 キャバリア繁殖の推奨",
+                "body": (
+                    "・<strong>MVD 検査</strong>を成犬時に実施。心臓スコアでブリーダー選定。<br>"
+                    "・<strong>SM の MRI スクリーニング</strong>（コストは高いが推奨）<br>"
+                    "・EFS / Macrothrombo / DM の遺伝子検査<br>"
+                    "・キャバリアは犬種内 COI が高めなので、低 COI 系統選択が重要"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["episodic-falling", "macrothrombocytopenia", "degenerative-myelopathy", "hereditary-cataract"],
+        "related_trait_slugs": ["a-locus", "e-locus", "s-locus"],
+    },
+    {
+        "slug": "border-collie-genetic-health-guide",
+        "title": "ボーダーコリーの遺伝子検査・健康ガイド",
+        "summary": "知能高い牧羊犬・ボーダーコリーで多数の遺伝子検査が必要な理由とパネルを解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "7 分",
+        "sections": [
+            {
+                "heading": "🐕 ボーダーコリーで特に重要な遺伝病",
+                "body": (
+                    "ボーダーコリーは遺伝子検査が最も充実した犬種の1つ:<br>"
+                    "・<strong>CEA (コリーアイ症候群)</strong> — 眼球の発達異常。<br>"
+                    "・<strong>TNS (好中球機能不全症候群)</strong> — 重度免疫不全、幼齢致死。<br>"
+                    "・<strong>NCL (神経セロイドリポフスチン症)</strong> — 進行性神経変性。<br>"
+                    "・<strong>MDR1 (多剤耐性)</strong> — イベルメクチン等の薬剤過敏症。<br>"
+                    "・<strong>感覚性神経障害 (SN / FAM134B)</strong> — 自咬リスク。<br>"
+                    "・<strong>CL (Ceroid Lipofuscinosis 各型)</strong><br>"
+                    "・<strong>DM</strong>、<strong>てんかん</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 ボーダーコリーの多彩な毛色",
+                "body": (
+                    "<strong>標準色</strong>: ブラック&ホワイト・レッド&ホワイト・トライカラー・ブルー&ホワイト<br>"
+                    "<strong>マール</strong>: ブルーマール・レッドマール・スレートマール<br>"
+                    "<strong>レア色</strong>: ライラック・シール・ブリンドル<br>"
+                    "⚠️ <strong>マール × マール交配は厳禁</strong>（M/M ダブルマール）"
+                ),
+            },
+            {
+                "heading": "💡 ボーダーコリー繁殖の推奨",
+                "body": (
+                    "<strong>必須パネル（最低限）</strong>:<br>"
+                    "CEA / TNS / NCL / MDR1 / IGS (B12)<br>"
+                    "<strong>推奨パネル</strong>:<br>"
+                    "DM / SN / 全 CL タイプ / EAOD（早期発症成犬難聴）<br>"
+                    "<strong>運動犬種としての注意</strong>:<br>"
+                    "高運動量犬種なので、関節検査と運動誘発性虚脱の確認も。"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["collie-eye-anomaly", "trapped-neutrophil-syndrome", "neuronal-ceroid-lipofuscinosis", "multidrug-resistance", "sensory-neuropathy", "degenerative-myelopathy", "cobalamin-malabsorption"],
+        "related_trait_slugs": ["m-locus", "s-locus", "k-locus"],
+    },
+    {
+        "slug": "german-shepherd-genetic-health-guide",
+        "title": "ジャーマンシェパードの遺伝子検査・健康ガイド",
+        "summary": "知能・運動能力高いジャーマンシェパード特有の DM・RCND・下垂体性小人症等を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🐕 ジャーマンシェパードで特に重要な遺伝病",
+                "body": (
+                    "・<strong>DM (変性性脊髄症)</strong> — 中高齢期から後肢麻痺進行。SOD1 保有率が高い犬種。<br>"
+                    "・<strong>RCND (腎嚢腺癌・結節性皮膚線維腫症 / FLCN)</strong> — ジャーマンシェパード特有の腫瘍症候群。<br>"
+                    "・<strong>下垂体性小人症 (LHX3)</strong> — 成長異常。<br>"
+                    "・<strong>股関節形成不全</strong> — 大型犬として注意。OFA / PennHIP 検査推奨。<br>"
+                    "・<strong>肘関節形成不全</strong>、<strong>てんかん</strong><br>"
+                    "・<strong>膵外分泌不全 (EPI)</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 ジャーマンシェパードの毛色",
+                "body": (
+                    "<strong>標準色</strong>: ブラック&タン（黒マスク Em/_）・セーブル<br>"
+                    "<strong>レア色</strong>: 全黒 (a/a)・全白 (e/e + 色素脱失)・パンダ<br>"
+                    "ブラック&タンはアグーチ at/at + Em マスクの組み合わせ。"
+                ),
+            },
+            {
+                "heading": "💡 ジャーマンシェパード繁殖の推奨",
+                "body": (
+                    "・<strong>DM 検査</strong>を成犬時に。P/P × P/P は厳禁。<br>"
+                    "・<strong>股関節レントゲン</strong>を 12 ヶ月齢以降に。<br>"
+                    "・RCND の家族歴確認<br>"
+                    "・大型犬の宿命として COI を低く保つことが重要"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["degenerative-myelopathy", "renal-cystadenocarcinoma", "pituitary-dwarfism", "x-linked-hereditary-nephropathy"],
+        "related_trait_slugs": ["a-locus", "em-locus", "k-locus", "b-locus"],
+    },
+    {
+        "slug": "mini-schnauzer-genetic-health-guide",
+        "title": "ミニチュアシュナウザーの遺伝子検査・健康ガイド",
+        "summary": "ミニシュナで特に重要な PMDS・MAC（高脂血症）・若年性白内障等を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "🐕 ミニシュナで特に重要な遺伝病",
+                "body": (
+                    "・<strong>PMDS (ミュラー管遺残症候群 / AMHR2)</strong> — オス犬が子宮・卵管を残す発達異常。ミニシュナで報告。<br>"
+                    "・<strong>高脂血症 / 膵炎</strong> — 遺伝的素因。食事管理が重要。<br>"
+                    "・<strong>若年性白内障 (HSF4)</strong> — 一部ラインで報告。<br>"
+                    "・<strong>糖尿病</strong> — 中高齢期から発症リスク。<br>"
+                    "・<strong>尿石症</strong>（シュウ酸カルシウム結石）<br>"
+                    "・<strong>進行性網膜萎縮症 (PRA)</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 ミニシュナの毛色",
+                "body": (
+                    "<strong>FCI 認可色</strong>: ソルト&ペッパー (G座位による退色)・ブラック&シルバー (at/at + G)・ブラック・ホワイト (e/e)<br>"
+                    "<strong>非認可色</strong>: チョコレート (bb)・パーティカラー (sp/sp)"
+                ),
+            },
+            {
+                "heading": "💡 ミニシュナ繁殖の推奨",
+                "body": (
+                    "・<strong>低脂肪食</strong>での飼育（膵炎予防）<br>"
+                    "・<strong>HSF4 / PRA 検査</strong><br>"
+                    "・若年性白内障の家族歴確認<br>"
+                    "・PMDS のオス犬の繁殖は再考"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["persistent-mullerian-duct-syndrome", "hereditary-cataract", "progressive-rod-cone"],
+        "related_trait_slugs": ["a-locus", "g-locus", "b-locus", "s-locus"],
+    },
 ]
 
 # Slug ベースで guides を引けるよう辞書化
