@@ -101,6 +101,36 @@
     display:inline-block; margin-left:8px; padding:1px 9px; border-radius:10px;
     font-size:0.72em; font-weight:700; vertical-align:middle;
   }
+
+  /* 重症度凡例 */
+  .severity-legend {
+    background:#fff; padding:14px 18px; border-radius:10px; margin-bottom:16px;
+    border:1px solid #e5e7eb; font-size:0.85em;
+  }
+  .severity-legend summary {
+    cursor:pointer; font-weight:600; color:#5b21b6; user-select:none;
+    list-style:none; outline:none;
+  }
+  .severity-legend summary::-webkit-details-marker { display:none; }
+  .severity-legend summary::before {
+    content:"▶"; display:inline-block; margin-right:8px; font-size:0.7em;
+    color:#9ca3af; transition:transform 0.15s;
+  }
+  .severity-legend[open] summary::before { transform:rotate(90deg); color:#7c3aed; }
+  .severity-legend .legend-body { margin-top:12px; padding-top:10px; border-top:1px dashed #e5e7eb; }
+  .severity-legend .legend-row {
+    display:flex; align-items:flex-start; gap:10px; padding:8px 0;
+    border-bottom:1px solid #f3f4f6;
+  }
+  .severity-legend .legend-row:last-child { border-bottom:none; }
+  .severity-legend .legend-badge {
+    flex-shrink:0; padding:3px 12px; border-radius:12px; font-size:0.85em;
+    font-weight:700; min-width:72px; text-align:center;
+  }
+  .severity-legend .legend-desc {
+    flex:1; color:#374151; line-height:1.5; font-size:0.88em;
+  }
+  .severity-legend .legend-desc strong { color:#4a1a7a; }
 </style>
 </head>
 <body>
@@ -147,6 +177,44 @@
       {{ severity_labels.low.emoji }} 低<span class="badge-count">{{ severity_counts.low }}</span>
     </a>
   </div>
+
+  <!-- 重症度凡例（折りたたみ） -->
+  <details class="severity-legend">
+    <summary>🚦 重症度バッジの意味を確認する</summary>
+    <div class="legend-body">
+      <div class="legend-row">
+        <span class="legend-badge" style="background:{{ severity_labels.high.bg }};color:{{ severity_labels.high.color }};">{{ severity_labels.high.emoji }} {{ severity_labels.high.label }}</span>
+        <span class="legend-desc">
+          <strong>予後不良・致死性が高い</strong>か、生命に関わる重篤な疾患。
+          発症すると治療困難なものが多く、繁殖前検査が特に重要。
+          例: GM2/GM1 ガングリオシドーシス、NCL、Krabbe、NEwS、SCID 等
+        </span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-badge" style="background:{{ severity_labels.medium.bg }};color:{{ severity_labels.medium.color }};">{{ severity_labels.medium.emoji }} {{ severity_labels.medium.label }}</span>
+        <span class="legend-desc">
+          <strong>進行性または対症療法が必要</strong>な疾患。
+          発症犬は獣医師の継続管理が必要だが、QOL を維持しながら生活できることが多い。
+          例: CDDY+IVDD、DM、PRA、コリーアイ、CEA、CMR、白内障 等
+        </span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-badge" style="background:{{ severity_labels.low.bg }};color:{{ severity_labels.low.color }};">{{ severity_labels.low.emoji }} {{ severity_labels.low.label }}</span>
+        <span class="legend-desc">
+          <strong>通常無症状または軽微</strong>な疾患。
+          手術前の事前申告など限定的な注意で済む場合が多い。
+          例: 第VII因子欠損症、Prekallikrein 欠乏症、HNPK、魚鱗癬、CDA 等
+        </span>
+      </div>
+      <div class="legend-row" style="border-top:1px solid #e5e7eb;margin-top:6px;padding-top:10px;">
+        <span class="legend-desc" style="color:#6b7280;font-size:0.82em;">
+          ⚠️ <strong>免責:</strong> 重症度は KB テキストからの自動推定 + 手動補正です。
+          実際の予後は犬種・遺伝子型 (P/N or P/P) ・併発疾患により異なります。
+          診断・治療判断は必ず獣医師にご相談ください。
+        </span>
+      </div>
+    </div>
+  </details>
 
   <!-- セクションタブ -->
   <div class="section-tab" role="tablist">
