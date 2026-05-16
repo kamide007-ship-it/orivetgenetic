@@ -905,6 +905,61 @@ class TestSeverity:
         rv = client.get("/glossary?severity=high&q=遺伝")
         assert rv.status_code == 200
 
+
+# ===========================================================================
+# 15. 症状ベース絞り込み (SYMPTOM_INDEX / filter_by_symptom)
+# ===========================================================================
+
+try:
+    from poodle_genetics import SYMPTOM_INDEX, filter_by_symptom
+    _HAS_SYMPTOM = True
+except Exception:
+    _HAS_SYMPTOM = False
+
+
+@pytest.mark.skipif(not _HAS_SYMPTOM, reason="symptom helpers not importable")
+class TestSymptomFilter:
+    def test_symptom_index_has_entries(self):
+        assert len(SYMPTOM_INDEX) >= 8
+        for sym in SYMPTOM_INDEX:
+            assert "id" in sym and sym["id"]
+            assert "label" in sym and sym["label"]
+            assert "match_patterns" in sym and len(sym["match_patterns"]) > 0
+
+    def test_filter_hindlimb_includes_dm(self):
+        from poodle_genetics import DISEASE_KB
+        result = filter_by_symptom(DISEASE_KB, "hindlimb")
+        titles = [e.get("title", "") for e in result]
+        assert any("変性性脊髄症" in t for t in titles)
+
+    def test_filter_vision_includes_pra(self):
+        from poodle_genetics import DISEASE_KB
+        result = filter_by_symptom(DISEASE_KB, "vision")
+        titles = [e.get("title", "") for e in result]
+        assert any("PRA" in t or "進行性網膜萎縮" in t for t in titles)
+
+    def test_filter_bleeding_includes_vwd(self):
+        from poodle_genetics import DISEASE_KB
+        result = filter_by_symptom(DISEASE_KB, "bleeding")
+        titles = [e.get("title", "") for e in result]
+        assert any("ヴィレブランド" in t for t in titles)
+
+    def test_filter_unknown_symptom_returns_all(self):
+        from poodle_genetics import DISEASE_KB
+        # 未知 ID は全件返す（フォールバック）
+        result = filter_by_symptom(DISEASE_KB, "nonexistent_xyz")
+        assert len(result) == len(DISEASE_KB)
+
+    def test_glossary_symptom_url_param(self):
+        rv = client.get("/glossary?symptom=hindlimb")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "後肢" in body or "歩行" in body
+
+    def test_glossary_symptom_combined_with_severity(self):
+        rv = client.get("/glossary?symptom=vision&severity=high")
+        assert rv.status_code == 200
+
     def test_report_html_has_severity_badge(self):
         """generate_unified_html が KB マッチした疾患に severity-badge クラスを付与する"""
         import tempfile, os

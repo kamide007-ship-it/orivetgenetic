@@ -178,6 +178,28 @@
     </a>
   </div>
 
+  <!-- 症状ベースフィルター（折りたたみ） -->
+  <details class="severity-legend" {% if symptom_filter %}open{% endif %}>
+    <summary>🔍 症状から疾患を探す</summary>
+    <div class="legend-body">
+      <p style="font-size:0.85em; color:#6b7280; margin-bottom:10px;">
+        愛犬の気になる症状から、関連する可能性のある遺伝性疾患を探せます。
+        ※ 症状の原因は遺伝性疾患以外にも多数あります。獣医師にご相談ください。
+      </p>
+      <div class="severity-filter" aria-label="症状フィルター">
+        {% if symptom_filter %}
+        <a href="/glossary{% if query %}?q={{ query }}{% endif %}" style="background:#f3f4f6;color:#374151;">✕ クリア</a>
+        {% endif %}
+        {% for sym in symptom_index %}
+        <a href="/glossary?symptom={{ sym.id }}{% if query %}&q={{ query }}{% endif %}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}"
+           class="{% if symptom_filter == sym.id %}active{% endif %}">
+          {{ sym.label }}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </details>
+
   <!-- 重症度凡例（折りたたみ） -->
   <details class="severity-legend">
     <summary>🚦 重症度バッジの意味を確認する</summary>

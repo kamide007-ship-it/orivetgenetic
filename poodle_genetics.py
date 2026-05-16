@@ -1517,6 +1517,137 @@ SEVERITY_LABELS = {
 }
 
 
+# 症状ベースの絞り込みインデックス（理解できるコンセプト）
+# ユーザーが『うちの犬は X の症状がある』から関連疾患を探せる。
+# 各シンボトムは KB の match パターンの集合にマップ。
+SYMPTOM_INDEX = [
+    {
+        "id": "hindlimb",
+        "label": "🦵 後肢の麻痺・歩行困難",
+        "match_patterns": [
+            "degenerative myelopathy", "chondrodystrophy", "cddy", "ivdd",
+            "centronuclear myopathy", "limb-girdle muscular dystrophy", "myasthenia gravis",
+            "episodic falling", "exercise-induced collapse",
+        ],
+    },
+    {
+        "id": "vision",
+        "label": "👁 視覚障害・失明",
+        "match_patterns": [
+            "progressive rod cone", "prcd", "progressive retinal atrophy",
+            "cone-rod dystrophy", "rcd1", "rcd2", "rcd3", "cngb1 pra",
+            "achromatopsia", "day blindness", "stargardt",
+            "collie eye anomaly", "hereditary cataract", "hsf4",
+            "glaucoma", "csnb", "cone degeneration", "multifocal retinopathy",
+            "congenital stationary night blindness",
+        ],
+    },
+    {
+        "id": "bleeding",
+        "label": "🩸 出血傾向・止血困難",
+        "match_patterns": [
+            "von willebrand", "vwd",
+            "factor vii", "factor 7",
+            "prekallikrein", "macrothrombocytopenia",
+        ],
+    },
+    {
+        "id": "neuro",
+        "label": "🧠 痙攣・神経症状",
+        "match_patterns": [
+            "neonatal encephalopathy", "news",
+            "neuronal ceroid lipofuscinosis", "ncl",
+            "gangliosidosis", "gm1", "gm2",
+            "globoid cell leukodystrophy", "krabbe",
+            "lafora", "necrotizing meningoencephalitis", "nme",
+            "spinocerebellar ataxia", "cerebellar abiotrophy",
+            "late onset ataxia", "neuroaxonal dystrophy",
+            "spongiform leukoencephalomyelopathy",
+        ],
+    },
+    {
+        "id": "kidney",
+        "label": "🫘 多飲多尿・腎機能異常",
+        "match_patterns": [
+            "hyperuricosuria", "huu",
+            "cystinuria",
+            "familial nephropathy",
+            "x-linked hereditary nephropathy",
+            "renal cystadenocarcinoma",
+        ],
+    },
+    {
+        "id": "skin",
+        "label": "🧴 皮膚異常・脱毛",
+        "match_patterns": [
+            "hnpk", "hereditary nasal parakeratosis",
+            "ichthyosis",
+            "coat color dilution alopecia", "cda",
+            "footpad hyperkeratosis", "hfh",
+        ],
+    },
+    {
+        "id": "skeletal",
+        "label": "🦴 骨格・関節異常",
+        "match_patterns": [
+            "osteochondrodysplasia", "skeletal dysplasia",
+            "osteogenesis imperfecta",
+            "chondrodysplasia", "cdpa",
+        ],
+    },
+    {
+        "id": "metabolic",
+        "label": "🧪 代謝・成長異常",
+        "match_patterns": [
+            "glycogen storage disease",
+            "mucopolysaccharidosis",
+            "cobalamin malabsorption",
+            "copper toxicosis",
+            "hyperphosphatemia",
+            "pituitary dwarfism",
+            "pyruvate kinase",
+        ],
+    },
+    {
+        "id": "drug",
+        "label": "💉 薬剤過敏症",
+        "match_patterns": [
+            "multidrug resistance", "mdr1", "abcb1",
+            "methemoglobinemia",
+        ],
+    },
+    {
+        "id": "immune",
+        "label": "🛡 免疫異常・感染症",
+        "match_patterns": [
+            "trapped neutrophil",
+            "severe combined immunodeficiency", "scid",
+            "recurrent inflammatory pulmonary",
+        ],
+    },
+]
+
+
+def filter_by_symptom(entries: list, symptom_id: str) -> list:
+    """症状 ID で疾患をフィルタリング。
+
+    各疾患エントリの match パターンと、症状の match_patterns 間で
+    部分文字列マッチがあればその疾患を含める。
+    """
+    sym = next((s for s in SYMPTOM_INDEX if s["id"] == symptom_id), None)
+    if not sym:
+        return entries
+    sym_patterns = [p.lower() for p in sym["match_patterns"]]
+    result = []
+    for entry in entries:
+        entry_patterns = [p.lower() for p in entry.get("match", [])]
+        for sp in sym_patterns:
+            if any(sp in ep or ep in sp for ep in entry_patterns):
+                result.append(entry)
+                break
+    return result
+
+
 def group_diseases_by_category(entries: list) -> list:
     """疾患リストをカテゴリ別にグループ化し、定義順で返す。
     Returns: [(category_name, [entries...]), ...]"""

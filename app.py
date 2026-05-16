@@ -114,6 +114,7 @@ from poodle_genetics import (
     HAS_PDFPLUMBER, HAS_OCR,
     DISEASE_KB, TRAIT_KB, group_diseases_by_category,
     get_disease_severity, SEVERITY_LABELS,
+    SYMPTOM_INDEX, filter_by_symptom,
 )
 
 try:
@@ -483,9 +484,11 @@ def glossary():
     クエリパラメータ:
       ?q=xxx        — 全文検索
       ?severity=    — 重症度フィルター (high / medium / low / all)
+      ?symptom=     — 症状ベース絞り込み (SYMPTOM_INDEX の id)
     """
     query = (request.args.get("q") or "").strip().lower()
     severity_filter = (request.args.get("severity") or "").strip().lower()
+    symptom_filter = (request.args.get("symptom") or "").strip().lower()
 
     def _filter_query(entries):
         if not query:
@@ -507,9 +510,10 @@ def glossary():
             return entries
         return [e for e in entries if get_disease_severity(e) == severity_filter]
 
-    # 疾患: 検索 → 重症度の順でフィルタリング
-    filtered_diseases = _filter_severity(_filter_query(DISEASE_KB))
-    # 形質は severity フィルター対象外（適用しない）
+    # 疾患: 症状 → 検索 → 重症度の順でフィルタリング
+    diseases_after_symptom = filter_by_symptom(DISEASE_KB, symptom_filter) if symptom_filter else DISEASE_KB
+    filtered_diseases = _filter_severity(_filter_query(diseases_after_symptom))
+    # 形質は severity / symptom フィルター対象外（適用しない）
     filtered_traits = _filter_query(TRAIT_KB)
 
     # 重症度カウント（バッジ用） — 全疾患ベース
@@ -527,6 +531,8 @@ def glossary():
         severity_counts=severity_counts,
         severity_labels=SEVERITY_LABELS,
         get_severity=get_disease_severity,
+        symptom_filter=symptom_filter,
+        symptom_index=SYMPTOM_INDEX,
         total_diseases=len(DISEASE_KB),
         total_traits=len(TRAIT_KB),
     )
