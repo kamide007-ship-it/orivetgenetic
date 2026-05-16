@@ -110,9 +110,26 @@ const payat = aResult["atay"];  // ✓
 ## 次セッションで最初にやること
 
 1. `git pull origin main` でローカル同期
-2. `pytest test_app.py -v` で 161件全通過を確認
+2. `pytest test_app.py -v` で 全件通過を確認
 3. `.spec/TODO.md` で保留・Future タスク確認
 4. 本ドキュメント (`HANDOFF.md`) で全体把握
+
+## 🩺 KB レビュー Workflow（重要）
+
+**現状の KB は私 (Claude) が生成しており、Orivet 獣医チームの監修を経ていません**。
+Orivet ブランドで公開する前にレビュー必須。
+
+エクスポートツール:
+```bash
+python3 export_kb_review.py
+# → kb_review_YYYY-MM-DD.md が生成される（3000+ 行の Markdown）
+```
+
+各疾患エントリには:
+- 全フィールド（title / match / severity / summary / mechanism / symptoms / inheritance / advice / references）
+- レビューチェックリスト 6項目
+
+このファイルを Orivet 獣医チームに共有 → 修正コメント受領 → DISEASE_KB / TRAIT_KB 反映 → デプロイ。
 
 ## 残るタスク（優先度順）
 
