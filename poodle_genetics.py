@@ -1839,6 +1839,62 @@ TRAIT_KB = [
 ]
 
 
+def _slugify(text: str) -> str:
+    """URL-safe スラッグに変換。
+
+    例: 'Chondrodystrophy with IVDD' → 'chondrodystrophy-with-ivdd'
+    """
+    text = text.lower()
+    # 不要記号を空白に
+    text = re.sub(r"[\\\\bxa0()+:,/&]", " ", text)
+    text = re.sub(r"[^a-z0-9\s\-]", "", text)
+    # 連続空白・ハイフン → 単一ハイフン
+    text = re.sub(r"[\s\-]+", "-", text.strip())
+    return text.strip("-")
+
+
+def make_entry_slug(entry: dict) -> str:
+    """KB エントリから URL スラッグを生成。
+
+    最初の ASCII-friendly な match パターンを優先。
+    日本語のみの場合は title からフォールバック。
+    """
+    for pat in entry.get("match", []):
+        clean = pat.replace("\\b", "").strip()
+        # ASCII 主体のパターンを採用
+        if re.match(r"^[a-zA-Z0-9\s\-_]+$", clean):
+            slug = _slugify(clean)
+            if slug:
+                return slug
+    # フォールバック: title から生成
+    title = entry.get("title", "")
+    # 括弧内の英略を優先抽出 (例: "CDDY+IVDD" 等)
+    m = re.search(r"\(([A-Za-z0-9\s\-+/]+)\)", title)
+    if m:
+        return _slugify(m.group(1))
+    return _slugify(title) or "entry"
+
+
+def _build_slug_index(entries: list) -> dict:
+    """slug → entry の辞書を生成。重複時はサフィックスで一意化。"""
+    index = {}
+    for e in entries:
+        slug = make_entry_slug(e)
+        base = slug
+        i = 2
+        while slug in index:
+            slug = f"{base}-{i}"
+            i += 1
+        e["_slug"] = slug  # エントリ自身に slug をキャッシュ
+        index[slug] = e
+    return index
+
+
+# モジュールロード時に slug インデックスを生成
+DISEASE_SLUG_INDEX = _build_slug_index(DISEASE_KB)
+TRAIT_SLUG_INDEX = _build_slug_index(TRAIT_KB)
+
+
 def get_trait_detail(test_name: str) -> Optional[dict]:
     """形質名から詳細解説を取得する。"""
     if not test_name:

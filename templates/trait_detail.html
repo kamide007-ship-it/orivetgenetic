@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ entry.title }} | Orivet 遺伝子解析</title>
+
+<meta name="description" content="{{ entry.summary | truncate(160) }}">
+<link rel="canonical" href="{{ canonical }}">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="{{ entry.title }} | Orivet 遺伝子解析">
+<meta property="og:description" content="{{ entry.summary | truncate(200) }}">
+<meta property="og:url" content="{{ canonical }}">
+<meta property="og:site_name" content="Orivet 遺伝子解析">
+<meta property="og:locale" content="ja_JP">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ entry.title }}">
+<meta name="twitter:description" content="{{ entry.summary | truncate(200) }}">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "{{ entry.title }}",
+  "description": "{{ entry.summary }}",
+  "url": "{{ canonical }}",
+  "inLanguage": "ja",
+  "about": {
+    "@type": "Thing",
+    "name": "犬の遺伝学・毛色遺伝子"
+  }
+}
+</script>
+
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif; background:#f8f9fa; color:#1f2937; line-height:1.7; }
+  header { background: linear-gradient(135deg, #4a1a7a, #e6007e); color:#fff; padding:24px 0; }
+  header .container { max-width:900px; margin:0 auto; padding:0 20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
+  header h1 { font-size:1.5em; }
+  header .nav a { color:#fff; text-decoration:none; padding:6px 14px; border-radius:8px; font-size:0.85em; border:1px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.15); margin-left:6px; }
+  header .nav a:hover { background:rgba(255,255,255,0.3); }
+  .container { max-width:900px; margin:0 auto; padding:24px 20px; }
+  .breadcrumb { margin-bottom:16px; font-size:0.85em; color:#6b7280; }
+  .breadcrumb a { color:#7c3aed; text-decoration:none; }
+  .entry-header { background:#fff; padding:24px 28px; border-radius:14px; margin-bottom:18px; border:1px solid #e5e7eb; }
+  .entry-header h2 { color:#4a1a7a; font-size:1.45em; margin-bottom:10px; }
+  .entry-summary { font-size:1.05em; color:#374151; margin-top:6px; }
+  .section { background:#fff; padding:22px 28px; border-radius:12px; margin-bottom:14px; border:1px solid #e5e7eb; }
+  .section h3 { color:#4a1a7a; font-size:1.05em; margin-bottom:10px; padding-bottom:8px; border-bottom:1px dashed #ddd6fe; }
+  .section p { color:#374151; white-space:pre-line; }
+  .refs a {
+    display:inline-block; margin:4px 6px 4px 0; padding:6px 14px;
+    background:#ede9fe; color:#5b21b6; text-decoration:none;
+    border-radius:14px; font-size:0.9em;
+  }
+  .refs a:hover { background:#ddd6fe; }
+  .cta-row {
+    margin-top:30px; padding:24px; background:linear-gradient(135deg,#faf5ff,#fdf4ff);
+    border-radius:14px; text-align:center; border:1px solid #ede9fe;
+  }
+  .cta-row h3 { color:#4a1a7a; margin-bottom:10px; font-size:1.1em; }
+  .cta-row .btn-row { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:14px; }
+  .cta-row a {
+    background:#7c3aed; color:#fff; text-decoration:none;
+    padding:12px 24px; border-radius:10px; font-weight:600; font-size:0.95em;
+  }
+  .cta-row a:hover { background:#6d28d9; }
+  .cta-row a.alt { background:#fff; color:#7c3aed; border:1px solid #c4b5fd; }
+  :focus-visible { outline:3px solid #7c3aed; outline-offset:2px; }
+  @media (max-width:480px) {
+    .container { padding:14px; }
+    .entry-header { padding:18px 20px; }
+    .entry-header h2 { font-size:1.2em; }
+    .section { padding:16px 18px; }
+    body { padding-bottom:env(safe-area-inset-bottom); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div>
+      <h1>🎨 毛色・形質遺伝子辞書</h1>
+    </div>
+    <div class="nav">
+      <a href="/">解析する</a>
+      <a href="/glossary">辞書 TOP</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <nav class="breadcrumb" aria-label="パンくず">
+    <a href="/">ホーム</a> &raquo; <a href="/glossary">遺伝子辞書</a> &raquo; <span>{{ entry.title }}</span>
+  </nav>
+
+  <article class="entry-header">
+    <h2>{{ entry.title }}</h2>
+    {% if entry.summary %}<p class="entry-summary">{{ entry.summary }}</p>{% endif %}
+  </article>
+
+  {% if entry.mechanism %}
+  <section class="section">
+    <h3>🧬 メカニズム</h3>
+    <p>{{ entry.mechanism }}</p>
+  </section>
+  {% endif %}
+
+  {% if entry.phenotype %}
+  <section class="section">
+    <h3>🎨 表現型</h3>
+    <p>{{ entry.phenotype }}</p>
+  </section>
+  {% endif %}
+
+  {% if entry.advice %}
+  <section class="section">
+    <h3>💡 アドバイス</h3>
+    <p>{{ entry.advice }}</p>
+  </section>
+  {% endif %}
+
+  {% if entry.references %}
+  <section class="section refs">
+    <h3>🔗 参考リンク</h3>
+    {% for ref in entry.references %}
+    <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <div class="cta-row">
+    <h3>愛犬の遺伝子検査結果を分析しませんか？</h3>
+    <p style="color:#6b7280;font-size:0.9em;">Orivet 遺伝子検査PDFから毛色予測・健康リスク・血統分析を一括生成。</p>
+    <div class="btn-row">
+      <a href="/">📄 解析を始める</a>
+      <a href="/simulator" class="alt">🐕 繁殖シミュレーター</a>
+      <a href="/glossary" class="alt">📖 辞書 TOP</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

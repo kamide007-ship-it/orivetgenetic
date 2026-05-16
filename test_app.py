@@ -960,6 +960,111 @@ class TestSymptomFilter:
         rv = client.get("/glossary?symptom=vision&severity=high")
         assert rv.status_code == 200
 
+
+# ===========================================================================
+# 16. 個別 URL + SEO（疾患・形質ごとの URL / sitemap / robots.txt）
+# ===========================================================================
+
+try:
+    from poodle_genetics import (
+        DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug, _slugify,
+    )
+    _HAS_SLUG = True
+except Exception:
+    _HAS_SLUG = False
+
+
+@pytest.mark.skipif(not _HAS_SLUG, reason="slug helpers not importable")
+class TestSlugIndex:
+    def test_slugify_basic(self):
+        assert _slugify("Chondrodystrophy with IVDD") == "chondrodystrophy-with-ivdd"
+        assert _slugify("CDDY+IVDD") == "cddy-ivdd"
+        assert _slugify("Hello World!") == "hello-world"
+
+    def test_disease_slug_index_built(self):
+        assert len(DISEASE_SLUG_INDEX) > 0
+        # 全エントリに slug が振られている
+        for slug, entry in DISEASE_SLUG_INDEX.items():
+            assert slug and slug == entry.get("_slug")
+
+    def test_trait_slug_index_built(self):
+        assert len(TRAIT_SLUG_INDEX) > 0
+
+    def test_slugs_are_unique(self):
+        # 重複なし
+        assert len(DISEASE_SLUG_INDEX) == len(set(DISEASE_SLUG_INDEX.keys()))
+        assert len(TRAIT_SLUG_INDEX) == len(set(TRAIT_SLUG_INDEX.keys()))
+
+    def test_known_slugs_exist(self):
+        # 主要疾患・形質の slug が存在することを確認
+        all_slugs = " ".join(DISEASE_SLUG_INDEX.keys())
+        # CDDY 関連のいずれかのスラッグが存在
+        assert "chondrodystrophy" in all_slugs or "cddy" in all_slugs
+
+
+@pytest.mark.skipif(not _HAS_SLUG, reason="slug helpers not importable")
+class TestSEORoutes:
+    def test_disease_detail_page_200(self):
+        # 既知の slug でアクセス
+        slug = list(DISEASE_SLUG_INDEX.keys())[0]
+        rv = client.get(f"/glossary/disease/{slug}")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # SEO 重要要素を確認
+        assert "<title>" in body
+        assert 'name="description"' in body
+        assert 'rel="canonical"' in body
+        assert 'property="og:title"' in body
+        assert 'application/ld+json' in body
+
+    def test_disease_detail_404_for_unknown_slug(self):
+        rv = client.get("/glossary/disease/nonexistent-xyz-slug")
+        assert rv.status_code == 404
+        body = rv.get_data(as_text=True)
+        assert "見つかりません" in body or "404" in body
+
+    def test_trait_detail_page_200(self):
+        slug = list(TRAIT_SLUG_INDEX.keys())[0]
+        rv = client.get(f"/glossary/trait/{slug}")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "<title>" in body
+        assert 'application/ld+json' in body
+
+    def test_sitemap_xml(self):
+        rv = client.get("/sitemap.xml")
+        assert rv.status_code == 200
+        assert rv.content_type.startswith("application/xml")
+        body = rv.get_data(as_text=True)
+        # 全疾患 + 全形質 + メインページが含まれる
+        assert "<urlset" in body
+        assert "/glossary/disease/" in body
+        assert "/glossary/trait/" in body
+
+    def test_robots_txt(self):
+        rv = client.get("/robots.txt")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "User-agent: *" in body
+        assert "Sitemap:" in body
+        # セッション URL クロール禁止
+        assert "Disallow: /report/" in body
+        assert "Disallow: /api/" in body
+
+    def test_disease_page_has_jsonld_schema(self):
+        slug = list(DISEASE_SLUG_INDEX.keys())[0]
+        rv = client.get(f"/glossary/disease/{slug}")
+        body = rv.get_data(as_text=True)
+        # schema.org MedicalCondition の存在
+        assert "MedicalCondition" in body
+        assert '"@context": "https://schema.org"' in body
+
+    def test_disease_page_breadcrumb(self):
+        slug = list(DISEASE_SLUG_INDEX.keys())[0]
+        rv = client.get(f"/glossary/disease/{slug}")
+        body = rv.get_data(as_text=True)
+        assert "パンくず" in body or "breadcrumb" in body
+
     def test_report_html_has_severity_badge(self):
         """generate_unified_html が KB マッチした疾患に severity-badge クラスを付与する"""
         import tempfile, os
