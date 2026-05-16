@@ -1271,6 +1271,33 @@ class TestPWA:
         body = rv.get_data(as_text=True)
         assert 'rel="manifest"' in body
 
+    def test_service_worker_route(self):
+        rv = client.get("/sw.js")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # Service Worker のキー要素
+        assert "self.addEventListener" in body
+        assert "install" in body
+        assert "fetch" in body
+        # Cache 戦略
+        assert "CACHE_NAME" in body or "caches.open" in body
+        # 個人情報含むルートをキャッシュしないこと
+        assert "/api/" in body
+        assert "/analyze" in body
+
+    def test_service_worker_headers(self):
+        rv = client.get("/sw.js")
+        # SW は no-cache が必須（更新反映のため）
+        assert "no-cache" in rv.headers.get("Cache-Control", "")
+        # Service-Worker-Allowed ヘッダで広いスコープ許可
+        assert rv.headers.get("Service-Worker-Allowed") == "/"
+
+    def test_index_registers_service_worker(self):
+        rv = client.get("/")
+        body = rv.get_data(as_text=True)
+        assert "navigator.serviceWorker.register" in body
+        assert "/sw.js" in body
+
     def test_report_html_has_severity_badge(self):
         """generate_unified_html が KB マッチした疾患に severity-badge クラスを付与する"""
         import tempfile, os

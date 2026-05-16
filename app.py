@@ -733,6 +733,21 @@ def manifest_json():
     return jsonify(manifest)
 
 
+@app.route("/sw.js")
+def service_worker():
+    """Service Worker をルート直下から配信（スコープ制御のため）
+
+    Service Worker は配置パスより下のスコープしか制御できないため、
+    /static/sw.js だとサイト全体を制御できない。/sw.js から配信する。
+    """
+    static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+    response = send_from_directory(static_dir, "sw.js")
+    # Service Worker は強制再フェッチでアップデート反映する必要があるため no-cache
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Service-Worker-Allowed"] = "/"
+    return response
+
+
 @app.route("/simulator")
 def simulator():
     """繁殖シミュレーター（静的HTML。session_id はクライアント側JS が
