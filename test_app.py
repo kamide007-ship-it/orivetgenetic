@@ -690,6 +690,68 @@ class TestDiseaseKB:
         # PR #47 後で 50 以上
         assert len(DISEASE_KB) >= 55, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
 
+    # === PR #49 Embark準拠拡張 (73+ diseases) ===
+    def test_nme(self):
+        d = get_disease_detail("Necrotizing Meningoencephalitis")
+        assert d is not None and "髄膜脳炎" in d.get("title", "")
+
+    def test_lafora(self):
+        d = get_disease_detail("Lafora Disease")
+        assert d is not None and "NHLRC1" in d.get("mechanism", "")
+
+    def test_narcolepsy(self):
+        d = get_disease_detail("Narcolepsy")
+        assert d is not None and "HCRTR2" in d.get("mechanism", "")
+
+    def test_scid(self):
+        d = get_disease_detail("Severe Combined Immunodeficiency")
+        assert d is not None and "免疫" in d.get("title", "")
+
+    def test_pituitary_dwarfism(self):
+        d = get_disease_detail("Pituitary Dwarfism")
+        assert d is not None and "LHX3" in d.get("mechanism", "")
+
+    def test_rcd1_pdesb(self):
+        d = get_disease_detail("PRA rcd1")
+        assert d is not None and "PDE6B" in d.get("mechanism", "")
+
+    def test_embark_min_coverage(self):
+        # PR #49 後で 73 以上
+        assert len(DISEASE_KB) >= 70, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
+
+
+# ===========================================================================
+# 14. PR #49 トレイトKB拡張 (14+ 座位)
+# ===========================================================================
+
+@pytest.mark.skipif(not _HAS_KB, reason="TRAIT_KB not importable")
+class TestTraitKBExpansion:
+    def test_l_locus(self):
+        t = get_trait_detail("L Locus (Hair Length)")
+        assert t is not None and "FGF5" in t.get("title", "")
+
+    def test_shedding(self):
+        t = get_trait_detail("Shedding (MC5R)")
+        assert t is not None and "MC5R" in t.get("title", "")
+
+    def test_bob_tail(self):
+        t = get_trait_detail("Natural Bob Tail")
+        assert t is not None and "Brachyury" in t.get("title", "") or "短尾" in t.get("title", "")
+        # 致死警告が含まれること
+        assert "致死" in t.get("phenotype", "") or "致死" in t.get("advice", "")
+
+    def test_em_locus(self):
+        t = get_trait_detail("Em Locus (Melanistic Mask)")
+        assert t is not None and "マスク" in t.get("title", "")
+
+    def test_g_locus(self):
+        t = get_trait_detail("G Locus (Greying)")
+        assert t is not None and "退色" in t.get("title", "") or "Greying" in t.get("title", "")
+
+    def test_trait_kb_count(self):
+        from poodle_genetics import TRAIT_KB
+        assert len(TRAIT_KB) >= 14, f"TRAIT_KB has only {len(TRAIT_KB)} entries"
+
 
 # ===========================================================================
 # 11. グロッサリー(/glossary) ルート

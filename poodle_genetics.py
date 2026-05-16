@@ -1234,6 +1234,213 @@ DISEASE_KB = [
             {"label": "詳細を検索", "url": _google_search("Hyperphosphatemia 犬 FGF23")},
         ],
     },
+    # === Embark 準拠の追加疾患 (PR #49) ===
+    # 神経・脳系（追加）
+    {
+        "match": ["necrotizing meningoencephalitis", "nme", "pug encephalitis", "壊死性髄膜脳炎"],
+        "title": "壊死性髄膜脳炎 (NME / Pug Encephalitis)",
+        "summary": "脳実質に重度の壊死性炎症を起こす重篤な遺伝性自己免疫疾患です。パグ・マルチーズ等で多発。",
+        "mechanism": "MHC class II 関連の遺伝子多型による自己免疫反応で、脳・髄膜に壊死病変を形成。",
+        "symptoms": "若齢期 (1〜7歳) から痙攣・行動異常・失調・盲目。多くは数週間〜数ヶ月で死亡。",
+        "inheritance": "遺伝的素因 + 環境要因（多遺伝子）。リスク遺伝子型保有犬は発症率が高い。",
+        "advice": "発症犬は免疫抑制療法で進行抑制可能だが予後不良。リスク遺伝子型犬の繁殖は再考を。",
+        "severity": "high",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Necrotizing Meningoencephalitis NME 犬 パグ")},
+        ],
+    },
+    {
+        "match": ["lafora", "nhlrc1", "ラフォラ"],
+        "title": "ラフォラ病 (Lafora Disease / NHLRC1)",
+        "summary": "若齢期から進行性ミオクローヌス癲癇を起こす重篤な遺伝性神経疾患です。",
+        "mechanism": "NHLRC1 遺伝子の変異によりラフォラ小体（多糖類凝集体）が神経細胞に蓄積。ミニチュアダックスフンド・バセットハウンド等で報告。",
+        "symptoms": "5〜10歳から短時間のジャーキング (ミオクローヌス) → 進行性発作・認知低下。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "発症抑制薬で進行を遅らせる可能性。繁殖前検査が予防の鍵。",
+        "severity": "high",
+        "references": [
+            {"label": "Wikipedia: ラフォラ病", "url": _wiki_jp("ラフォラ病")},
+            {"label": "詳細を検索", "url": _google_search("Lafora Disease 犬 NHLRC1")},
+        ],
+    },
+    {
+        "match": ["narcolepsy", "ナルコレプシー", "hcrtr2"],
+        "title": "ナルコレプシー (Narcolepsy / HCRTR2)",
+        "summary": "突然の脱力と睡眠発作を起こす遺伝性睡眠障害です。",
+        "mechanism": "HCRTR2 遺伝子の変異によりオレキシン受容体が機能不全。覚醒・睡眠の制御が異常になります。ドーベルマン等で報告。",
+        "symptoms": "興奮や食事中に突然倒れて眠る・脱力 (カタプレキシー)。意識は保持。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "中枢神経刺激薬・三環系抗うつ薬で症状軽減可能。生命予後は良好。",
+        "severity": "medium",
+        "references": [
+            {"label": "Wikipedia: ナルコレプシー", "url": _wiki_jp("ナルコレプシー")},
+            {"label": "詳細を検索", "url": _google_search("Narcolepsy 犬 HCRTR2")},
+        ],
+    },
+    {
+        "match": ["neuroaxonal dystrophy", "nad", "pla2g6", "神経軸索ジストロフィー"],
+        "title": "神経軸索ジストロフィー (NAD / PLA2G6)",
+        "summary": "中枢・末梢神経の軸索が変性し、運動失調が進行する遺伝性神経疾患です。",
+        "mechanism": "PLA2G6 遺伝子の変異により神経軸索の膜代謝が異常。スピノーン・パピヨン等で報告。",
+        "symptoms": "若齢期 (1〜4歳) から運動失調・転倒・固有感覚異常。進行性。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "対症療法のみ。物理療法で QOL 維持。",
+        "severity": "high",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Neuroaxonal Dystrophy NAD 犬 PLA2G6")},
+        ],
+    },
+    {
+        "match": ["spongiform leukoencephalomyelopathy", "slem", "海綿状白質脳脊髄症"],
+        "title": "海綿状白質脳脊髄症 (SLEM)",
+        "summary": "脳・脊髄の白質に空胞変性を起こす重篤な若齢期発症の遺伝性疾患です。",
+        "mechanism": "ミトコンドリア機能異常により神経軸索ミエリンが変性。シルキー・テリア等で報告。",
+        "symptoms": "生後数週間から運動失調・痙攣・成長停止。多くは数ヶ月で死亡。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "予後不良。繁殖前検査必須。",
+        "severity": "high",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Spongiform Leukoencephalomyelopathy SLEM 犬")},
+        ],
+    },
+    # 免疫系（追加）
+    {
+        "match": ["severe combined immunodeficiency", "scid", "重症複合免疫不全"],
+        "title": "重症複合免疫不全症 (SCID)",
+        "summary": "T 細胞・B 細胞が機能せず重度免疫不全を起こす致死性の遺伝性疾患です。",
+        "mechanism": "RAG1/RAG2 や DCLRE1C 等の遺伝子変異により T/B 細胞の発達が阻害される。バセットハウンド・ジャックラッセルテリア等で報告。",
+        "symptoms": "生後数週間から繰り返す重症感染症・成長不良。骨髄移植以外では多くが幼齢で死亡。",
+        "inheritance": "常染色体劣性または X 連鎖。両親キャリアで 25% 発症。",
+        "advice": "骨髄移植のみ根治療法。繁殖前検査必須。",
+        "severity": "high",
+        "references": [
+            {"label": "Wikipedia: 重症複合免疫不全症", "url": _wiki_jp("重症複合免疫不全症")},
+            {"label": "詳細を検索", "url": _google_search("SCID 犬 重症複合免疫不全")},
+        ],
+    },
+    {
+        "match": ["myasthenia gravis", "重症筋無力症", "chrne"],
+        "title": "先天性重症筋無力症 (CMG / CHRNE)",
+        "summary": "神経筋接合部の機能不全により筋力低下を起こす遺伝性疾患です。",
+        "mechanism": "CHRNE 遺伝子の変異によりアセチルコリン受容体が機能不全。シグナル伝達が阻害される。",
+        "symptoms": "若齢期から運動不耐・四肢筋力低下・嚥下困難。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "抗コリンエステラーゼ薬で症状改善可能。早期診断・治療が重要。",
+        "severity": "medium",
+        "references": [
+            {"label": "Wikipedia: 重症筋無力症", "url": _wiki_jp("重症筋無力症")},
+            {"label": "詳細を検索", "url": _google_search("Myasthenia Gravis 犬 CHRNE")},
+        ],
+    },
+    # 内分泌・発達系（追加）
+    {
+        "match": ["pituitary dwarfism", "下垂体性小人症", "lhx3"],
+        "title": "下垂体性小人症 (Pituitary Dwarfism / LHX3)",
+        "summary": "下垂体機能不全により成長ホルモン等が不足し、極端な低身長になる遺伝性疾患です。",
+        "mechanism": "LHX3 遺伝子の変異により下垂体前葉の発達が異常。ジャーマンシェパード等で報告。",
+        "symptoms": "成長不良・体格小さい・被毛異常・甲状腺機能低下を伴う。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "成長ホルモン・甲状腺ホルモン補充療法で QOL 改善可能。",
+        "severity": "medium",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Pituitary Dwarfism 犬 LHX3")},
+        ],
+    },
+    {
+        "match": ["persistent mullerian duct syndrome", "pmds", "ミュラー管遺残"],
+        "title": "ミュラー管遺残症候群 (PMDS / AMHR2)",
+        "summary": "オス犬が子宮・卵管などのメス内性器を持つ遺伝性発達異常です。外見はオス。",
+        "mechanism": "AMHR2 遺伝子の変異により抗ミュラー管ホルモンの作用が失われ、メス内性器が退縮しない。ミニチュアシュナウザー等で報告。",
+        "symptoms": "外見はオスだが繁殖能力低下・尿路感染・前立腺問題。",
+        "inheritance": "常染色体劣性。X 染色体遺伝。",
+        "advice": "発症犬は外科的処置を要する場合あり。繁殖前検査が予防の鍵。",
+        "severity": "low",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("PMDS 犬 ミュラー管 AMHR2")},
+        ],
+    },
+    # 筋骨格系（追加）
+    {
+        "match": ["limb-girdle muscular dystrophy", "lgmd", "肢帯型筋ジストロフィー"],
+        "title": "肢帯型筋ジストロフィー (LGMD)",
+        "summary": "肢帯部（肩・腰）の筋肉が進行性に萎縮する遺伝性筋疾患です。",
+        "mechanism": "ジストロフィン関連タンパク (DMD, SGCD 等) の変異により筋細胞膜の構造が異常になります。",
+        "symptoms": "若齢期から肩・腰の筋萎縮・運動不耐・歩行困難。",
+        "inheritance": "X 連鎖劣性または常染色体劣性 (亜型による)。",
+        "advice": "対症療法のみ。物理療法・補助具で QOL 維持。",
+        "severity": "medium",
+        "references": [
+            {"label": "Wikipedia: 肢帯型筋ジストロフィー", "url": _wiki_jp("肢帯型筋ジストロフィー")},
+            {"label": "詳細を検索", "url": _google_search("Limb-Girdle Muscular Dystrophy 犬 LGMD")},
+        ],
+    },
+    {
+        "match": ["skeletal dysplasia 2", "sd2", "骨格異形成2"],
+        "title": "骨格異形成 2 型 (Skeletal Dysplasia 2 / COL11A2)",
+        "summary": "ラブラドール特有の四肢短縮・骨格異形成を起こす遺伝性疾患です。",
+        "mechanism": "COL11A2 遺伝子の変異によりコラーゲン形成が異常。四肢の短縮・前肢の弓形変形。",
+        "symptoms": "生後数ヶ月から四肢の短縮・前肢弓形変形・関節異常。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "整形外科的管理・運動制限で QOL 維持。",
+        "severity": "medium",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Skeletal Dysplasia 2 犬 COL11A2 ラブラドール")},
+        ],
+    },
+    # 腎・呼吸系（追加）
+    {
+        "match": ["x-linked hereditary nephropathy", "xlhn", "x連鎖腎症"],
+        "title": "X 連鎖性遺伝性腎症 (XLHN / COL4A5)",
+        "summary": "オス犬で重度に発症する遺伝性腎症。サモエド等で報告。",
+        "mechanism": "X 染色体上の COL4A5 遺伝子変異により糸球体基底膜が脆弱に。",
+        "symptoms": "オス: 3〜6ヶ月齢から多飲多尿・進行性腎不全。メス: 軽度症状。",
+        "inheritance": "X 連鎖劣性。オスは X 1コピーで発症、メスはキャリア。",
+        "advice": "オス犬の P/Y は予後不良。早期発見で食事療法・対症療法。",
+        "severity": "high",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("X-Linked Hereditary Nephropathy 犬 COL4A5")},
+        ],
+    },
+    {
+        "match": ["recurrent inflammatory pulmonary disease", "ripd", "再発性炎症性肺疾患"],
+        "title": "再発性炎症性肺疾患 (RIPD / AKNA)",
+        "summary": "繰り返す肺炎・気管支炎を起こすロットワイラー特有の遺伝性免疫疾患です。",
+        "mechanism": "AKNA 遺伝子の変異により気道粘膜の免疫機能が低下。",
+        "symptoms": "若齢期から繰り返す肺感染・呼吸困難・運動不耐。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "抗生剤・気管支拡張剤で対症療法。重症例では長期管理が必要。",
+        "severity": "medium",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("Recurrent Inflammatory Pulmonary Disease RIPD 犬")},
+        ],
+    },
+    # 眼科系（追加）
+    {
+        "match": ["rcd1", "pra rcd-1", "pde6b pra", "rod cone dysplasia 1"],
+        "title": "PRA - rcd1 型 (PDE6B)",
+        "summary": "アイリッシュセッターで報告される重度若齢期 PRA。生後数ヶ月で完全失明。",
+        "mechanism": "PDE6B 遺伝子の変異により杆体光受容細胞が急速変性。",
+        "symptoms": "生後数ヶ月から夜盲 → 1歳までに完全失明。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "予後不良の重度 PRA。繁殖前検査必須。",
+        "severity": "medium",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("PRA rcd1 犬 PDE6B アイリッシュセッター")},
+        ],
+    },
+    {
+        "match": ["rcd2", "pra rcd-2", "rd3 pra", "rod cone dysplasia 2"],
+        "title": "PRA - rcd2 型 (RD3)",
+        "summary": "コリー系で報告される若齢期発症 PRA。",
+        "mechanism": "RD3 遺伝子の変異により網膜光受容細胞が変性。",
+        "symptoms": "生後 6〜12 週から夜盲 → 進行性失明。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。",
+        "advice": "重度の若齢期 PRA。繁殖前検査必須。",
+        "severity": "medium",
+        "references": [
+            {"label": "詳細を検索", "url": _google_search("PRA rcd2 犬 RD3 コリー")},
+        ],
+    },
 ]
 
 
@@ -1246,14 +1453,15 @@ def _normalize_for_match(text: str) -> str:
 # 辞書ページでグルーピング表示に使用
 DISEASE_CATEGORIES = [
     ("🦴 骨格・関節系",   ["椎間板", "骨軟骨", "短足", "骨形成不全"]),
-    ("🧠 神経・脳系",     ["脳症", "リポフスチン", "運動失調", "脊髄小脳", "多剤耐性", "ガングリオシドーシス", "変性性脊髄症", "筋強直症", "小脳皮質", "感覚性神経", "ジストロフィー", "白質ジストロフィー", "Krabbe", "多発性神経", "発作性失神", "ヒドロキシグルタル"]),
-    ("👁 眼科系",         ["緑内障", "夜盲", "コリーアイ", "白内障", "全色盲", "錐体杆体", "進行性網膜萎縮", "PRA", "多巣性網膜症", "CMR", "錐体ジストロフィー", "スターガルト"]),
+    ("🧠 神経・脳系",     ["脳症", "リポフスチン", "運動失調", "脊髄小脳", "多剤耐性", "ガングリオシドーシス", "変性性脊髄症", "筋強直症", "小脳皮質", "感覚性神経", "ジストロフィー", "白質ジストロフィー", "Krabbe", "多発性神経", "発作性失神", "ヒドロキシグルタル", "髄膜脳炎", "ラフォラ", "ナルコレプシー", "神経軸索", "海綿状白質"]),
+    ("👁 眼科系",         ["緑内障", "夜盲", "コリーアイ", "白内障", "全色盲", "錐体杆体", "進行性網膜萎縮", "PRA", "多巣性網膜症", "CMR", "錐体ジストロフィー", "スターガルト", "rcd"]),
     ("🩸 血液・凝固系",   ["フォン・ヴィレブランド", "ピルビン酸", "第VII", "プレカリクレイン", "血小板", "メトヘモグロビン"]),
     ("🧪 代謝・内分泌系", ["尿酸尿", "コバラミン", "グリコーゲン蓄積", "ムコ多糖", "銅蓄積", "高リン血症", "リン血症"]),
-    ("💪 筋・運動系",     ["運動誘発性", "中心核ミオパチー"]),
+    ("💪 筋・運動系",     ["運動誘発性", "中心核ミオパチー", "肢帯型筋", "重症筋無力症", "骨格異形成"]),
     ("🫘 腎・泌尿器系",   ["シスチン尿", "腎症", "腎嚢腺癌"]),
     ("🧴 皮膚・被毛系",   ["鼻過角化", "魚鱗癬", "希釈性脱毛", "肉球角化"]),
-    ("🛡 免疫系",         ["好中球"]),
+    ("🛡 免疫系",         ["好中球", "重症複合免疫不全", "再発性炎症性肺"]),
+    ("🌱 発達・内分泌系", ["下垂体性小人症", "ミュラー管"]),
     ("🫃 消化器系",       ["消化管"]),
 ]
 
@@ -1398,7 +1606,7 @@ TRAIT_KB = [
         ],
     },
     {
-        "match": ["m locus", "merle", "pmel"],
+        "match": ["\\bm locus\\b", "merle"],
         "title": "M座位 (PMEL17) — マールパターン",
         "summary": "コートに不規則な色のまだら（マール）を作る遺伝子。M/M（ダブルマール）は重大な健康リスクあり。",
         "mechanism": "PMEL17 遺伝子の変異により、色素細胞の機能が部分的に失われ、まだら模様になります。M/M は失明・聴覚障害のリスクが高い。",
@@ -1439,6 +1647,62 @@ TRAIT_KB = [
         "advice": "プードル・ビションフリーゼ等は C/C ホモ。F 座位（ファーニシング）と組み合わせると様々な毛質に。",
         "references": [
             {"label": "詳細を検索 (Curly)", "url": _google_search("Curly coat KRT71 犬 巻き毛")},
+        ],
+    },
+    # === Orivet パネル準拠の追加形質 (PR #49) ===
+    {
+        "match": ["l locus", "hair length", "fgf5", "毛長", "long hair"],
+        "title": "L座位 (FGF5) — 被毛長",
+        "summary": "短毛か長毛かを決める遺伝子です。長毛は劣性。",
+        "mechanism": "FGF5 遺伝子の変異により被毛のサイクルが変化。L/L は短毛、l/l は長毛になります。",
+        "phenotype": "L/L: 短毛\\nL/l: 短毛（キャリア）\\nl/l: 長毛",
+        "advice": "プードル・ヨークシャーテリア・パピヨン等は l/l ホモ。FGF5 だけでなく KRT71 (Curly)・RSPO2 (Furnishings) との組み合わせで多様な毛質に。",
+        "references": [
+            {"label": "詳細を検索 (Hair Length)", "url": _google_search("FGF5 犬 被毛長 短毛 長毛")},
+        ],
+    },
+    {
+        "match": ["shedding", "mc5r", "shed", "抜け毛"],
+        "title": "SD座位 (MC5R) — 抜け毛量",
+        "summary": "コートの抜け毛量を決める遺伝子です。多くの犬種で 1〜2 アレルを保有。",
+        "mechanism": "MC5R 遺伝子の変異が被毛の脱落サイクルに影響。SD/SD ホモは抜け毛多、N/N は少なめ。",
+        "phenotype": "SD/SD: 抜け毛多（重ねシェッディング）\\nSD/N: 中程度\\nN/N: 抜け毛少なめ",
+        "advice": "プードル・ドゥードゥル系は N/N で抜け毛が少なく『ハイポアレジェニック』とされる場合あり。100% 無毛ではない点に注意。",
+        "references": [
+            {"label": "詳細を検索 (Shedding)", "url": _google_search("MC5R 犬 抜け毛 シェッディング")},
+        ],
+    },
+    {
+        "match": ["bob tail", "natural bob tail", "brachyury", "t-gene", "短尾"],
+        "title": "BT座位 (Brachyury / T 遺伝子) — 自然短尾",
+        "summary": "生まれつき尻尾が短い形質を決める遺伝子です。ホモ (BT/BT) は致死。",
+        "mechanism": "Brachyury (T) 遺伝子の変異により尻尾の発達が短くなります。ホモ接合は胚致死。",
+        "phenotype": "BT/BT: 胚致死（生まれない）\\nBT/N: 自然短尾\\nN/N: 通常の尾長",
+        "advice": "**BT/BT 同士の交配は厳禁** — 受胎しても胚致死で出生しません。コーギー・ボブテイル・ボクサー等で頻発。",
+        "references": [
+            {"label": "詳細を検索 (Bob Tail)", "url": _google_search("Brachyury 犬 自然短尾 BT")},
+        ],
+    },
+    {
+        "match": ["em locus", "melanistic mask", "メラニスティックマスク", "黒マスク"],
+        "title": "Em座位 (MC1R) — メラニスティックマスク",
+        "summary": "顔に黒いマスク模様を形成する遺伝子。MC1R の特定バリアント。",
+        "mechanism": "E座位 (MC1R) の Em バリアントが優性で、顔面に黒い色素を集中させます。E座位本体とは別の変異。",
+        "phenotype": "Em/Em or Em/E: 黒マスクあり\\nE/E (Em なし): マスクなし",
+        "advice": "ジャーマンシェパード・パグ・ボクサー等で典型。ee 犬では発現しません（eumelanin がコートに無いため）。",
+        "references": [
+            {"label": "詳細を検索 (Mask)", "url": _google_search("Em MC1R 犬 メラニスティックマスク 黒マスク")},
+        ],
+    },
+    {
+        "match": ["g locus", "greying", "progressive greying", "退色", "シルバー"],
+        "title": "G座位 (Greying / PMEL17) — 進行性退色",
+        "summary": "子犬期は色付きで生まれ、成犬になると退色する遺伝子。プードルのシルバー・ベージュ色の原因。",
+        "mechanism": "G_ は成犬期に毛色のメラニンを段階的に失わせます。1〜2歳までに退色が進行。",
+        "phenotype": "g/g: 退色なし\\nG/g or G/G: 成犬で退色\\n  Black + G_  → Silver\\n  Brown + G_  → Silver Beige\\n  Blue + G_   → Silver（淡）",
+        "advice": "シルバープードルは生まれた時は黒。1〜2歳までに段階的に退色していきます。M座位 (Merle) とは別遺伝子（同じ PMEL17 でも変異位置が異なる）。",
+        "references": [
+            {"label": "詳細を検索 (Greying)", "url": _google_search("Greying 犬 シルバー 退色 PMEL17")},
         ],
     },
 ]
