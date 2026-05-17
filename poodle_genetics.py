@@ -1836,6 +1836,95 @@ TRAIT_KB = [
             {"label": "詳細を検索 (Greying)", "url": _google_search("Greying 犬 シルバー 退色 PMEL17")},
         ],
     },
+    # === 犬種特異形質遺伝子（プードル以外） ===
+    {
+        "match": ["ridge", "ridgeback", "dorsal ridge", "fgf3 fgf4 fgf19", "リッジ", "リッジバック"],
+        "title": "Ridge 座位 (FGF3-FGF4-FGF19 重複) — 背筋リッジ",
+        "summary": "ローデシアン・リッジバック特有の、背中に逆向きの毛流が生じる形質。FGF3/FGF4/FGF19 領域の重複が原因。",
+        "mechanism": "16番染色体の FGF3-FGF4-FGF19 領域に約 133kb の重複が発生し、背中の毛流が逆方向に成長します。",
+        "phenotype": "R/R: リッジあり（ただしダーモイドサイナス [dermoid sinus] のリスク上昇）\\nR/r: リッジあり\\nr/r: リッジなし（FCI スタンダード違反）",
+        "advice": "R/R ホモ接合では**ダーモイドサイナス**（神経管閉鎖不全による皮下嚢胞）の発症率が上がります。R/r ヘテロ × r/r で繁殖し、リッジを保持しつつホモ接合を避けるのが推奨。タイランドリッジバック、フーピアン (Phu Quoc) リッジバックでも同じ変異。",
+        "references": [
+            {"label": "詳細を検索 (Ridge)", "url": _google_search("FGF4 ridgeback dermoid sinus")},
+        ],
+    },
+    {
+        "match": ["hairless", "foxi3", "ヘアレス", "無毛", "中国冠毛犬", "シャイクレ"],
+        "title": "Hairless 座位 (FOXI3) — 無毛形質",
+        "summary": "チャイニーズ・クレステッド、メキシカン・ヘアレス（ショロイツクィントレ）、ペルービアン・ヘアレスの無毛を決める遺伝子。ホモは胚致死。",
+        "mechanism": "FOXI3 遺伝子の挿入変異が優性。歯や毛包の発達に関与し、変異により被毛・歯の生成が抑制されます。H/H ホモ接合は胚段階で致死。",
+        "phenotype": "H/H: 胚致死（生まれない）\\nH/h: 無毛 / 部分無毛・歯の欠損あり\\nh/h: 完全な被毛 (powderpuff / coated)",
+        "advice": "**H/H 同士の交配は厳禁** — 全頭出生しない。チャイニーズ・クレステッドでは無毛 (H/h) × パウダーパフ (h/h) 交配が標準。皮膚保護・日焼け止め・防寒が必要な犬種。",
+        "references": [
+            {"label": "詳細を検索 (Hairless)", "url": _google_search("FOXI3 hairless dog Chinese Crested Xolo")},
+        ],
+    },
+    {
+        "match": ["i locus", "intense red", "mfsd12", "intensity", "レッド濃度", "イエロー濃度"],
+        "title": "I 座位 (MFSD12) — 赤/黄色の濃度",
+        "summary": "E座位 e/e のフェオメラニン（赤・黄系）の濃さを決める遺伝子。ラブラドール・プードル・ゴールデンの色の濃淡を説明。",
+        "mechanism": "MFSD12 遺伝子の変異がメラノサイトでのフェオメラニン生成量を調節。i/i ホモで色素が薄くなりクリーム/ホワイト寄りになります。",
+        "phenotype": "I/I: 濃い赤・ディープレッド\\nI/i: 中間（アプリコット〜レッド）\\ni/i: 淡いクリーム・ホワイト寄り",
+        "advice": "イングリッシュ・クリーム・ゴールデンの淡色や、プードルのホワイト〜クリーム〜アプリコット〜レッドの幅広さの一因。E座位 ee と組み合わせて色の濃淡を予測する際に重要。E_ 犬（黒系優位）では coat 色への影響は限定的。",
+        "references": [
+            {"label": "詳細を検索 (Intense Red)", "url": _google_search("MFSD12 dog intense red phaeomelanin")},
+        ],
+    },
+    {
+        "match": ["cocoa", "hps3", "non-standard chocolate", "テスティング・チョコ", "ココア"],
+        "title": "Cocoa 座位 (HPS3) — 非標準チョコレート",
+        "summary": "フレンチブルドッグで報告された B座位 (TYRP1) とは別の劣性チョコレート色。",
+        "mechanism": "HPS3 遺伝子の変異が劣性で発現。BB（または Bb）でも co/co ホモであればチョコレート色になります。B座位 bb の従来チョコとは独立した遺伝子。",
+        "phenotype": "Co/Co or Co/co: 通常色\\nco/co: チョコレート（B 座位とは独立に発現）",
+        "advice": "フレンチブルドッグ・オーストラリアンシェパード等で報告。B座位だけ検査して 'チョコにならないはず' の交配でも、co/co × co/co で予想外のチョコが出るため、希少色のブリーダーは両方検査推奨。CDA リスクは未確立。",
+        "references": [
+            {"label": "詳細を検索 (Cocoa)", "url": _google_search("HPS3 cocoa French Bulldog chocolate")},
+        ],
+    },
+    {
+        "match": ["harlequin", "h locus", "psmb7", "ハーレクイン"],
+        "title": "H座位 (PSMB7) — ハーレクイン",
+        "summary": "グレートデーン特有の白地に黒斑のハーレクイン模様を決める遺伝子。マールと相互作用。ホモ致死。",
+        "mechanism": "PSMB7 遺伝子の変異が優性。M座位 (Merle) のメルル領域の色素を完全に脱色させ、白地に黒斑のパターンを作ります。M_ + H_ の組み合わせでのみ発現。H/H は胚致死。",
+        "phenotype": "H/H: 胚致死\\nH/h + M/m: ハーレクイン（白地に黒斑）\\nH/h + m/m: 表現型に変化なし（ハーレクイン非発現の保因）\\nh/h: ハーレクイン非発現",
+        "advice": "**H/H × H/H 交配は禁忌** — 全頭胚致死。さらに M/M（ダブルマール）× ハーレクインの組み合わせは深刻な発達異常リスク。グレートデーンのハーレクインブリーダーは PSMB7 と PMEL17 (M) の両方を検査する必要があります。",
+        "references": [
+            {"label": "詳細を検索 (Harlequin)", "url": _google_search("PSMB7 harlequin Great Dane merle")},
+        ],
+    },
+    {
+        "match": ["roan", "r locus", "usher", "ローン"],
+        "title": "Roan 座位 — ローン（混色斑点）",
+        "summary": "成犬になると白い部分に色付き斑点が散らばる『ローン』形質。スパニエル系・オーストラリアン・キャトルドッグ等で典型。",
+        "mechanism": "原因遺伝子は未確定（USH2A 周辺が候補）。優性遺伝で、白斑領域に色素細胞が遅れて移行することで成犬期にティッキング模様が出現します。",
+        "phenotype": "Rn/Rn or Rn/rn: ローンあり（成犬で発現）\\nrn/rn: ローンなし（白斑のまま）",
+        "advice": "イングリッシュ・コッカー・スパニエル、ジャーマン・ショートヘアード・ポインター、オーストラリアン・キャトルドッグの『ブルーヒーラー』『レッドヒーラー』はこのアレル発現。子犬期は白いが、4〜6 週齢から斑点が出始めます。",
+        "references": [
+            {"label": "詳細を検索 (Roan)", "url": _google_search("dog roan USH2A coat pattern")},
+        ],
+    },
+    {
+        "match": ["ticking", "t locus", "ティッキング", "ダルメシアン斑点"],
+        "title": "T座位 — ティッキング（斑点）",
+        "summary": "白地に小さな色付き斑点が散らばる形質。ダルメシアンの斑点もこの遺伝子による。",
+        "mechanism": "優性遺伝。原因遺伝子は未確定だが、S座位 sp/sp の白斑領域に色素細胞が遅れて移行することで斑点が出現します。Roan より斑点が小さく密度が低い。",
+        "phenotype": "T/T or T/t: ティッキングあり（白地に小斑点）\\nt/t: 純白の白斑のまま",
+        "advice": "ダルメシアン・イングリッシュ・セッター・ジャック・ラッセル・テリア等で典型。ダルメシアンでは追加で SLC2A9（高尿酸尿症 HUU）のリスクアレルが固定しており、HUU 検査と併用が標準。",
+        "references": [
+            {"label": "詳細を検索 (Ticking)", "url": _google_search("dog ticking T locus Dalmatian")},
+        ],
+    },
+    {
+        "match": ["alx4", "blue eyes", "blue eye duplication", "青目", "ブルーアイ"],
+        "title": "ALX4 — ブルーアイ（青目）",
+        "summary": "シベリアン・ハスキー特有の青目を決める遺伝子重複。マールやメルル以外の青目原因。",
+        "mechanism": "18番染色体の ALX4 近傍に約 98kb の重複が発生し、優性遺伝で虹彩の色素生成を抑制。M座位 (Merle) や S座位 (Pied) 経由の青目とは独立の機構です。",
+        "phenotype": "BE/BE or BE/be: 青目（片目または両目）\\nbe/be: 通常色（茶〜琥珀）",
+        "advice": "シベリアン・ハスキーの青目・オッドアイの主因。マールや白斑経由の青目と異なり、視聴覚障害リスクとの関連は報告されていません。オーストラリアンシェパードのマール経由青目とは区別が必要。",
+        "references": [
+            {"label": "詳細を検索 (ALX4 Blue Eyes)", "url": _google_search("ALX4 blue eyes Siberian Husky")},
+        ],
+    },
 ]
 
 
