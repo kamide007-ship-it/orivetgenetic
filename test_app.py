@@ -295,6 +295,85 @@ class TestReviewedFlag:
         assert "Veterinarian-reviewed translation" not in body
 
 
+class TestEnglishGuides:
+    """guides_en.py の英訳ガイドを検証"""
+
+    def test_guides_en_module_importable(self):
+        from guides_en import GUIDES_EN
+        assert isinstance(GUIDES_EN, dict)
+        assert len(GUIDES_EN) > 0
+
+    def test_all_guides_have_en_translation(self):
+        """全 18 ガイドに英訳がある"""
+        from poodle_genetics import GUIDES
+        from guides_en import GUIDES_EN
+        missing = [g["slug"] for g in GUIDES if g["slug"] not in GUIDES_EN]
+        assert not missing, f"Missing EN translations for: {missing}"
+
+    def test_guide_structure_preserved(self):
+        """各 EN ガイドは title/summary/category/sections を持ち、sections 数が一致"""
+        from poodle_genetics import GUIDES
+        from guides_en import GUIDES_EN
+        for g in GUIDES:
+            en = GUIDES_EN.get(g["slug"])
+            assert en, f"missing: {g['slug']}"
+            for key in ("title", "summary", "category", "sections"):
+                assert key in en, f"{g['slug']} EN missing {key}"
+            assert len(en["sections"]) == len(g["sections"]), (
+                f"{g['slug']} section count mismatch: "
+                f"JA={len(g['sections'])} EN={len(en['sections'])}"
+            )
+
+    def test_guides_index_en_renders(self):
+        rv = client.get("/guides?lang=en")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "Guides on Genetic Testing" in body
+        # 英訳タイトルが少なくとも 1 件は出ている
+        assert "Coefficient of Inbreeding" in body or "Poodle Owner" in body
+
+    def test_guide_detail_en_uses_translation(self):
+        rv = client.get("/guides/coi-basics?lang=en")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # 英訳本文が使われている
+        assert "Sewall Wright" in body
+        # AI 翻訳警告が出ている（reviewed=False）
+        assert "AI-generated translation" in body
+
+    def test_guide_detail_ja_unchanged(self):
+        rv = client.get("/guides/coi-basics")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "COI（近親交配係数）" in body
+        assert "AI-generated translation" not in body
+
+
+class TestTranslationLint:
+    """translation_lint.py が KB / guides の翻訳ギャップを検出"""
+
+    def test_lint_returns_zero_on_clean_tree(self):
+        from translation_lint import main
+        # 現状で違反が無いことを確認
+        assert main([]) == 0
+
+    def test_lint_detects_missing_term(self, tmp_path, monkeypatch):
+        """わざと用語を抜くと検出される"""
+        from translation_lint import check_kb_pair
+        ja = "変性性脊髄症 (DM) は SOD1 変異により発症します。"
+        en_good = "Degenerative myelopathy (DM) is caused by SOD1 mutation."
+        en_bad = "A spinal cord disease caused by gene mutation."
+        assert check_kb_pair("x", ja, en_good) == []
+        assert any("DM" in m for _, m in check_kb_pair("x", ja, en_bad))
+
+    def test_lint_detects_numeric_drift(self):
+        from translation_lint import check_kb_pair
+        ja = "COI 6.25% 以下が推奨されます。"
+        en_bad = "A COI below 5% is recommended."
+        violations = check_kb_pair("x", ja, en_bad)
+        assert any("RULE-4" in r for r, _ in violations)
+
+
 # ===========================================================================
 # 3. 413 ハンドラ
 # ===========================================================================

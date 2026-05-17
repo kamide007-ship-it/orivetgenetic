@@ -25,3 +25,6 @@ jobs:
 
       - name: Run tests
         run: pytest test_app.py -v --tb=short
+
+      - name: Translation lint (kb_en / guides_en)
+        run: python translation_lint.py
