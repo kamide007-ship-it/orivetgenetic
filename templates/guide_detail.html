@@ -119,9 +119,21 @@
     <h2>{{ guide.title }}</h2>
     <p class="summary">{{ guide.summary }}</p>
     {% if lang == 'en' %}
-    <div style="margin-top:14px;padding:10px 14px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;font-size:0.88em;color:#92400e;">
-      ⚠️ <strong>Article content is in Japanese only.</strong> An English translation is on our roadmap. UI labels are translated for navigation.
-    </div>
+      {% if has_en_translation %}
+        {% if en_reviewed %}
+        <div style="margin-top:14px;padding:10px 14px;background:#dcfce7;border-left:4px solid #166534;border-radius:6px;font-size:0.88em;color:#166534;">
+          ✅ <strong>Reviewed translation</strong>
+        </div>
+        {% else %}
+        <div style="margin-top:14px;padding:10px 14px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;font-size:0.88em;color:#92400e;">
+          ⚠️ <strong>AI-generated translation</strong> — pending editorial review. For clinical or breeding decisions, please verify against the Japanese version.
+        </div>
+        {% endif %}
+      {% else %}
+      <div style="margin-top:14px;padding:10px 14px;background:#fef3c7;border-left:4px solid #f59e0b;border-radius:6px;font-size:0.88em;color:#92400e;">
+        ⚠️ <strong>Article content is in Japanese only.</strong> An English translation is on our roadmap. UI labels are translated for navigation.
+      </div>
+      {% endif %}
     {% endif %}
   </article>
 

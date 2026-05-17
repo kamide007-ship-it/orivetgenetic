@@ -118,6 +118,7 @@ from poodle_genetics import (
     DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug,
     GUIDES, GUIDES_INDEX, GUIDES_BY_DISEASE, GUIDES_BY_TRAIT,
     get_disease_kb_localized, get_trait_kb_localized,
+    get_guides_localized, get_guide_localized, HAS_EN_GUIDES,
     HAS_EN_KB, SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN,
 )
 
@@ -759,7 +760,7 @@ def guides_index():
     lang = _get_lang(request)
     return render_template(
         "guides_index.html",
-        guides=GUIDES,
+        guides=get_guides_localized(lang),
         canonical=request.url_root.rstrip("/") + "/guides",
         lang=lang,
     )
@@ -769,13 +770,14 @@ def guides_index():
 def guide_detail(slug):
     """ガイド記事個別ページ。"""
     lang = _get_lang(request)
-    guide = GUIDES_INDEX.get(slug)
+    guide = get_guide_localized(slug, lang)
     if not guide:
         return render_template(
             "glossary_404.html",
             kind="ガイド記事" if lang != "en" else "guide",
             slug=slug,
         ), 404
+    has_en_translation = "_en" in GUIDES_INDEX.get(slug, {})
     # 関連疾患・形質エントリを解決
     related_diseases = [DISEASE_SLUG_INDEX[s] for s in guide.get("related_disease_slugs", []) if s in DISEASE_SLUG_INDEX]
     related_traits = [TRAIT_SLUG_INDEX[s] for s in guide.get("related_trait_slugs", []) if s in TRAIT_SLUG_INDEX]
@@ -787,6 +789,8 @@ def guide_detail(slug):
         related_traits=related_traits,
         canonical=request.url_root.rstrip("/") + f"/guides/{slug}",
         lang=lang,
+        has_en_translation=has_en_translation,
+        en_reviewed=(guide.get("reviewed") if lang == "en" else False),
     )
 
 

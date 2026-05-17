@@ -776,8 +776,8 @@ TRAIT_EN = {
     },
     "bob-tail": {
         "title": "BT Locus (Brachyury / T Gene) — Natural Bob Tail",
-        "summary": "A gene producing a naturally short tail. BT/BT homozygous is embryonic lethal.",
-        "mechanism": "Mutation in Brachyury (T) gene shortens tail development. Homozygous is embryonic lethal.",
+        "summary": "A gene producing a naturally short tail. BT/BT homozygotes are embryonic lethal.",
+        "mechanism": "Mutation in Brachyury (T) gene shortens tail development. Homozygotes are embryonic lethal.",
         "phenotype": "BT/BT: Embryonic lethal (not born)\nBT/N: Natural bob tail\nN/N: Normal tail length",
         "advice": "**BT/BT × BT/BT crosses are strictly prohibited** — embryos are not born. Common in Welsh Corgis, Bobtails, Boxers.",
     },

@@ -2833,6 +2833,56 @@ def _build_guide_reverse_index():
 GUIDES_BY_DISEASE, GUIDES_BY_TRAIT = _build_guide_reverse_index()
 
 
+# ============================================================
+# ガイド記事の英訳オーバーレイ
+# ============================================================
+try:
+    from guides_en import GUIDES_EN
+    for g in GUIDES:
+        en_data = GUIDES_EN.get(g["slug"])
+        if en_data:
+            g["_en"] = en_data
+    HAS_EN_GUIDES = True
+except ImportError:
+    HAS_EN_GUIDES = False
+    GUIDES_EN = {}
+
+
+def get_guide_localized(slug: str, lang: str = "ja") -> Optional[dict]:
+    """slug + lang からローカライズ済みガイド dict を返す。
+
+    lang='en' で英訳が存在すれば merge した dict を返す。無ければ日本語版。
+    related_*_slugs 等の言語非依存フィールドは保持。
+    """
+    guide = GUIDES_INDEX.get(slug)
+    if not guide:
+        return None
+    if lang == "en" and "_en" in guide:
+        merged = {**guide, **guide["_en"]}
+        merged["slug"] = guide["slug"]
+        merged["related_disease_slugs"] = guide.get("related_disease_slugs", [])
+        merged["related_trait_slugs"] = guide.get("related_trait_slugs", [])
+        return merged
+    return guide
+
+
+def get_guides_localized(lang: str = "ja") -> list:
+    """ガイド一覧をローカライズして返す（一覧表示用）"""
+    if lang != "en":
+        return GUIDES
+    result = []
+    for g in GUIDES:
+        if "_en" in g:
+            merged = {**g, **g["_en"]}
+            merged["slug"] = g["slug"]
+            merged["related_disease_slugs"] = g.get("related_disease_slugs", [])
+            merged["related_trait_slugs"] = g.get("related_trait_slugs", [])
+            result.append(merged)
+        else:
+            result.append(g)
+    return result
+
+
 def get_trait_detail(test_name: str) -> Optional[dict]:
     """形質名から詳細解説を取得する。"""
     if not test_name:
