@@ -788,6 +788,321 @@ GUIDES_EN = {
         ],
     },
 
+    # === Additional breed guides (popular 8 breeds) ===
+    "golden-retriever-genetic-health-guide": {
+        "title": "Golden Retriever Genetic Testing & Health Guide",
+        "summary": "Important inherited conditions in Golden Retrievers — GR-PRA, ichthyosis, joint disease, and cancer predisposition.",
+        "category": "🐕 Breed-specific",
+        "reading_time": "6 min",
+        "sections": [
+            {
+                "heading": "🐕 Key genetic diseases in Golden Retrievers",
+                "body": (
+                    "・<strong>GR-PRA1 / GR-PRA2 / prcd-PRA</strong> — three forms of progressive retinal atrophy specific to Goldens. Mid-life blindness risk.<br>"
+                    "・<strong>Ichthyosis (PNPLA1)</strong> — scaly skin and dandruff. Common in Goldens.<br>"
+                    "・<strong>HSF4 cataract</strong> — juvenile cataract.<br>"
+                    "・<strong>Degenerative Myelopathy (DM)</strong> — SOD1 risk allele carriers are common.<br>"
+                    "・<strong>Hip and elbow dysplasia</strong> — typical large-breed concern.<br>"
+                    "・<strong>Sensory Neuropathy (SN)</strong> — self-mutilation, neural deficits. Reported in some lines.<br>"
+                    "・<strong>Cancer predisposition</strong> — hemangiosarcoma, lymphoma, osteosarcoma (polygenic, but family history matters)."
+                ),
+            },
+            {
+                "heading": "🎨 Golden Retriever colors",
+                "body": (
+                    "Goldens are fixed for E-locus e/e (recessive red):<br>"
+                    "・<strong>Standard</strong>: all dogs are e/e, ranging from cream to deep gold<br>"
+                    "・<strong>KITLG / I locus</strong>: the main drivers of yellow intensity, from pale English Cream to deep red<br>"
+                    "・<strong>Rare colors</strong>: black coat indicates non-Golden ancestry (K + E_)"
+                ),
+            },
+            {
+                "heading": "💡 Recommended breeding panel for Goldens",
+                "body": (
+                    "・<strong>All three PRA forms</strong> (GR-PRA1 / GR-PRA2 / prcd)<br>"
+                    "・<strong>Ichthyosis</strong> — essential for healthy coat<br>"
+                    "・<strong>DM / HSF4 / SN</strong><br>"
+                    "・<strong>Hip OFA / PennHIP</strong> after 12 months of age<br>"
+                    "・Verify family history for cancer (especially the breed's high hemangiosarcoma rate)"
+                ),
+            },
+        ],
+    },
+    "welsh-corgi-genetic-health-guide": {
+        "title": "Welsh Corgi Genetic Testing & Health Guide",
+        "summary": "DM, intervertebral disc disease, and the natural bobtail (BT) gene in Pembroke and Cardigan Corgis.",
+        "category": "🐕 Breed-specific",
+        "reading_time": "6 min",
+        "sections": [
+            {
+                "heading": "🐕 Key genetic diseases in Welsh Corgis",
+                "body": (
+                    "・<strong>Degenerative Myelopathy (DM)</strong> — Pembrokes have one of the highest SOD1 risk-allele frequencies of any breed. Affected rate is high.<br>"
+                    "・<strong>CDDY + IVDD (intervertebral disc disease)</strong> — disc risk accompanies the short-legged conformation.<br>"
+                    "・<strong>Von Willebrand Disease Type 1 (vWD1)</strong> — reported in some lines.<br>"
+                    "・<strong>Exercise-Induced Collapse (EIC)</strong> — reported in Pembrokes.<br>"
+                    "・<strong>Progressive Retinal Atrophy (prcd-PRA)</strong> — reported in Cardigans.<br>"
+                    "・<strong>Hip dysplasia</strong> — driven by body mass on short legs."
+                ),
+            },
+            {
+                "heading": "🎨 Corgi colors and traits",
+                "body": (
+                    "<strong>Pembroke standard colors</strong>: red (ay), sable (ay), tricolor (at/at), fawn.<br>"
+                    "<strong>Cardigan</strong>: the above plus brindle (kbr) and blue merle (M/m).<br>"
+                    "<strong>Natural Bob Tail (BT locus / Brachyury)</strong>: some Pembrokes are born with a short tail. BT/BT is embryonic lethal, so BT/N × N/N is the standard breeding.<br>"
+                    "<strong>Cardigans are long-tailed</strong>: no BT testing needed."
+                ),
+            },
+            {
+                "heading": "💡 Corgi breeding recommendations",
+                "body": (
+                    "・<strong>DM testing essential</strong> — especially in Pembrokes. Strictly avoid P/P × P/P; where possible, breed P/N × N/N to lower frequency.<br>"
+                    "・<strong>CDDY testing</strong> plus disc-protective management (weight, stair limits).<br>"
+                    "・<strong>BT testing</strong>: never breed BT/BT × BT/BT in Pembrokes.<br>"
+                    "・<strong>Cardigan: strictly no Merle × Merle</strong> (double merle is blinding and deafening)."
+                ),
+            },
+        ],
+    },
+    "pomeranian-genetic-health-guide": {
+        "title": "Pomeranian Genetic Testing & Health Guide",
+        "summary": "Important conditions in Pomeranians — Alopecia X, tracheal collapse, patellar luxation, and dental disease.",
+        "category": "🐕 Breed-specific",
+        "reading_time": "5 min",
+        "sections": [
+            {
+                "heading": "🐕 Key genetic diseases in Pomeranians",
+                "body": (
+                    "・<strong>Alopecia X</strong> — bilateral, symmetric truncal alopecia. The causative gene is still under study, but familial clustering is pronounced.<br>"
+                    "・<strong>Patellar luxation</strong> — common in toy breeds.<br>"
+                    "・<strong>Tracheal collapse</strong> — typical toy-breed risk.<br>"
+                    "・<strong>Hypoglycemia</strong> — serious risk in puppyhood.<br>"
+                    "・<strong>Dental disease</strong> — early calculus and periodontitis.<br>"
+                    "・<strong>Cataract (HSF4)</strong>, <strong>Progressive Retinal Atrophy</strong><br>"
+                    "・<strong>Hydrocephalus</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 Wide-ranging Pomeranian colors",
+                "body": (
+                    "Pomeranians display one of the broadest within-breed color ranges:<br>"
+                    "<strong>Standard colors</strong>: orange (ay), cream (e/e), sable, black-and-tan (at/at), black, chocolate (bb), blue (dd).<br>"
+                    "<strong>Parti (sp/sp)</strong>, <strong>Merle (M/_)</strong> — strictly no Merle × Merle.<br>"
+                    "<strong>I locus / KITLG</strong>: affect orange intensity."
+                ),
+            },
+            {
+                "heading": "💡 Pomeranian care recommendations",
+                "body": (
+                    "・<strong>Hypoglycemia management</strong> in puppyhood — frequent small meals<br>"
+                    "・<strong>Tracheal protection</strong>: use a harness, not a collar<br>"
+                    "・<strong>Daily dental care</strong><br>"
+                    "・<strong>PRA / HSF4 testing</strong><br>"
+                    "・If Alopecia X presents, consult a veterinarian (neutering / spaying sometimes improves the condition)"
+                ),
+            },
+        ],
+    },
+    "chihuahua-genetic-health-guide": {
+        "title": "Chihuahua Genetic Testing & Health Guide",
+        "summary": "Important conditions in Chihuahuas — hydrocephalus, patellar luxation, hypoglycemia, and dental disease.",
+        "category": "🐕 Breed-specific",
+        "reading_time": "5 min",
+        "sections": [
+            {
+                "heading": "🐕 Key genetic diseases in Chihuahuas",
+                "body": (
+                    "・<strong>Hydrocephalus</strong> — most prevalent in Chihuahuas. Often accompanied by an open molera (incomplete frontal-bone closure).<br>"
+                    "・<strong>Patellar luxation</strong> — common in toy breeds.<br>"
+                    "・<strong>Hypoglycemia</strong> — serious risk in puppyhood.<br>"
+                    "・<strong>Dental disease</strong> — retained deciduous teeth, periodontitis.<br>"
+                    "・<strong>Mitral Valve Disease (MVD)</strong> — onset in middle to senior years.<br>"
+                    "・<strong>Tracheal collapse</strong><br>"
+                    "・<strong>Progressive Retinal Atrophy (PRA)</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 Chihuahua coat and color",
+                "body": (
+                    "<strong>Coat types</strong>: smooth (short, L/L), long (l/l).<br>"
+                    "<strong>Colors</strong>: diverse — fawn (ay), chocolate (bb), blue (dd), black-and-tan (at/at), parti (sp/sp), merle (M/_).<br>"
+                    "<strong>Strictly no Merle × Merle</strong> (also non-FCI in Chihuahuas, with health risk)."
+                ),
+            },
+            {
+                "heading": "💡 Chihuahua care recommendations",
+                "body": (
+                    "・<strong>Hypoglycemia management</strong> in puppyhood<br>"
+                    "・<strong>Head protection</strong> — watch for impact at the molera<br>"
+                    "・<strong>Weight management</strong> — excess weight stresses knees and trachea<br>"
+                    "・<strong>Lifelong dental care</strong><br>"
+                    "・Cardiac screening (MVD scoring) from adulthood"
+                ),
+            },
+        ],
+    },
+    "yorkshire-terrier-genetic-health-guide": {
+        "title": "Yorkshire Terrier Genetic Testing & Health Guide",
+        "summary": "Important conditions in Yorkies — portosystemic shunt, tracheal collapse, and dental disease.",
+        "category": "🐕 Breed-specific",
+        "reading_time": "5 min",
+        "sections": [
+            {
+                "heading": "🐕 Key genetic diseases in Yorkies",
+                "body": (
+                    "・<strong>Portosystemic Shunt (PSS)</strong> — high prevalence in Yorkies. Stunted growth and neurological signs.<br>"
+                    "・<strong>Tracheal collapse</strong> — frequent in this toy breed.<br>"
+                    "・<strong>Patellar luxation</strong><br>"
+                    "・<strong>Legg-Calvé-Perthes disease</strong> — femoral head necrosis. Common in toy breeds.<br>"
+                    "・<strong>Dental disease</strong> — retained deciduous teeth, early periodontitis.<br>"
+                    "・<strong>Hypoglycemia</strong> (puppyhood)<br>"
+                    "・<strong>Progressive Retinal Atrophy</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 Yorkie coat and color",
+                "body": (
+                    "<strong>Standard color</strong>: black-and-tan → adult shifts to 'steel blue and tan' (G-locus fading).<br>"
+                    "<strong>Coat</strong>: long (l/l), straight (not curly).<br>"
+                    "<strong>Furnishings (F/F)</strong>: abundant facial / muzzle hair.<br>"
+                    "Puppies are predominantly black, with the back gradually fading to blue-silver between 1 and 3 years of age."
+                ),
+            },
+            {
+                "heading": "💡 Yorkie care recommendations",
+                "body": (
+                    "・<strong>Bile acid testing</strong> in puppyhood — for early PSS detection<br>"
+                    "・<strong>Tracheal protection</strong>: use a harness, prevent obesity<br>"
+                    "・<strong>Lifelong dental care</strong><br>"
+                    "・<strong>Hypoglycemia management</strong> in puppyhood<br>"
+                    "・The gradual adult color shift is normal"
+                ),
+            },
+        ],
+    },
+    "pug-genetic-health-guide": {
+        "title": "Pug Genetic Testing & Health Guide",
+        "summary": "Pug-specific conditions — Pug Dog Encephalitis (NME), brachycephalic disease, and skin conditions.",
+        "category": "🐕 Breed-specific",
+        "reading_time": "5 min",
+        "sections": [
+            {
+                "heading": "🐕 Key genetic diseases in Pugs",
+                "body": (
+                    "・<strong>Necrotizing Meningoencephalitis (NME / Pug Dog Encephalitis)</strong> — breed-specific fatal encephalitis. Seizures and progressive neurological signs.<br>"
+                    "・<strong>Brachycephalic Obstructive Airway Syndrome (BOAS)</strong> — respiratory burden, elevated anesthetic risk.<br>"
+                    "・<strong>Hemivertebrae</strong> — vertebral malformation in curly-tailed breeds.<br>"
+                    "・<strong>Pug Myelopathy</strong> — hindlimb ataxia.<br>"
+                    "・<strong>Pigmentary Keratitis</strong> — pigment deposition on the cornea.<br>"
+                    "・<strong>Keratoconjunctivitis Sicca (KCS / dry eye)</strong><br>"
+                    "・<strong>Skin-fold dermatitis</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 Pug colors",
+                "body": (
+                    "Only four FCI-accepted colors:<br>"
+                    "<strong>Fawn</strong>: ay + Em (black mask)<br>"
+                    "<strong>Apricot</strong>: ay + intensity via KITLG / I locus<br>"
+                    "<strong>Silver</strong>: G-locus fading in some lines<br>"
+                    "<strong>Black</strong>: KB_ + E_, or recessive black a/a<br>"
+                    "All Pugs carry the Em variant at the E locus, giving the characteristic black mask."
+                ),
+            },
+            {
+                "heading": "💡 Pug care recommendations",
+                "body": (
+                    "・<strong>NME testing</strong> (the Pug Dog Club's recommended marker)<br>"
+                    "・Breed only from BOAS-scored dogs<br>"
+                    "・<strong>Spinal radiographs</strong> to screen for vertebral malformation<br>"
+                    "・<strong>Routine corneal / ophthalmic exams</strong><br>"
+                    "・<strong>Daily skin-fold cleaning</strong><br>"
+                    "・Avoid hot and humid environments (high heatstroke risk)"
+                ),
+            },
+        ],
+    },
+    "siberian-husky-genetic-health-guide": {
+        "title": "Siberian Husky Genetic Testing & Health Guide",
+        "summary": "Important conditions in Huskies — PRA, cataract, hypothyroidism — plus coat-color genetics including ALX4 blue eyes.",
+        "category": "🐕 Breed-specific",
+        "reading_time": "6 min",
+        "sections": [
+            {
+                "heading": "🐕 Key genetic diseases in Siberian Huskies",
+                "body": (
+                    "・<strong>Progressive Retinal Atrophy (X-linked PRA)</strong> — an X-linked PRA reported in Huskies.<br>"
+                    "・<strong>Hereditary cataract (HSF4)</strong> — juvenile cataract.<br>"
+                    "・<strong>Hypothyroidism</strong> — autoimmune, middle to senior age.<br>"
+                    "・<strong>Glaucoma</strong> — reported in some lines.<br>"
+                    "・<strong>Zinc-responsive dermatosis</strong> — common in northern breeds; impaired zinc absorption.<br>"
+                    "・<strong>Polyangiitis</strong>, <strong>epilepsy</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 Husky coat and eye genetics",
+                "body": (
+                    "Huskies have a particularly wide range of coat and eye color combinations:<br>"
+                    "<strong>Colors</strong>: black-and-white, agouti-and-white (aw), gray-and-white, red-and-white (e/e), sable.<br>"
+                    "<strong>Pied markings</strong>: S-locus sp/sp is fixed in the breed.<br>"
+                    "<strong>ALX4 Blue Eyes</strong>: the primary cause of blue or odd eyes in Huskies. Independent of merle / white-spotting mechanisms.<br>"
+                    "<strong>Domino (MC1R Ea)</strong>: contributes to lightened facial mask patterns.<br>"
+                    "<strong>Merle is not accepted</strong>: the M locus is not native to the Husky."
+                ),
+            },
+            {
+                "heading": "💡 Husky care recommendations",
+                "body": (
+                    "・<strong>HSF4 / PRA testing</strong><br>"
+                    "・<strong>Periodic thyroid testing</strong><br>"
+                    "・<strong>ALX4 blue-eye test</strong>: to understand the genetic basis of blue eyes<br>"
+                    "・Provide ample exercise (athletic breed)<br>"
+                    "・Summer heat precautions (northern breed, heat-sensitive)<br>"
+                    "・<strong>If merle ancestry is suspected</strong>, run M-locus testing"
+                ),
+            },
+        ],
+    },
+    "australian-shepherd-genetic-health-guide": {
+        "title": "Australian Shepherd Genetic Testing & Health Guide",
+        "summary": "Important conditions in Aussies — MDR1, CEA, PRA, merle — and coat-color genetics including Cocoa (HPS3).",
+        "category": "🐕 Breed-specific",
+        "reading_time": "7 min",
+        "sections": [
+            {
+                "heading": "🐕 Key genetic diseases in Australian Shepherds",
+                "body": (
+                    "・<strong>MDR1 (Multi-Drug Resistance)</strong> — the most prevalent drug-sensitivity gene in Aussies. Contraindicated drugs include ivermectin and loperamide.<br>"
+                    "・<strong>CEA (Collie Eye Anomaly)</strong> — developmental ocular anomaly.<br>"
+                    "・<strong>Progressive Retinal Atrophy (prcd-PRA)</strong><br>"
+                    "・<strong>Hereditary cataract (HSF4)</strong><br>"
+                    "・<strong>Degenerative Myelopathy (DM)</strong> — high SOD1 risk-allele frequency.<br>"
+                    "・<strong>Epilepsy</strong> — polygenic.<br>"
+                    "・<strong>Neuronal Ceroid Lipofuscinosis (NCL)</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 Wide-ranging Aussie colors",
+                "body": (
+                    "<strong>Standard colors</strong>: black, red, blue merle (M/m), red merle.<br>"
+                    "<strong>Plus tan-point (at/at) and white spotting (sp/sp)</strong>: 16+ combinations.<br>"
+                    "<strong>Cocoa (HPS3)</strong>: a recessive chocolate reported in some lines. Independent of the B locus.<br>"
+                    "<strong>⚠️ Strictly no Merle × Merle</strong>: M/M double merle carries blindness and deafness risk."
+                ),
+            },
+            {
+                "heading": "💡 Australian Shepherd recommendations",
+                "body": (
+                    "・<strong>MDR1 testing is essential</strong>: recommended for all dogs. Always share results with your veterinarian<br>"
+                    "・<strong>CEA / PRA / HSF4 / DM</strong> genetic testing<br>"
+                    "・<strong>M-locus testing</strong>: required before any merle pairing<br>"
+                    "・<strong>Cocoa testing</strong>: additional consideration for rare-color breeders<br>"
+                    "・Provide ample exercise and mental stimulation (herding-breed instincts)"
+                ),
+            },
+        ],
+    },
     "mini-schnauzer-genetic-health-guide": {
         "title": "Miniature Schnauzer Genetic Testing & Health Guide",
         "summary": "PMDS, hyperlipidemia, and juvenile cataracts are particularly important in this breed.",

@@ -2953,6 +2953,345 @@ GUIDES = [
         "related_disease_slugs": ["persistent-mullerian-duct-syndrome", "hereditary-cataract", "progressive-rod-cone"],
         "related_trait_slugs": ["a-locus", "g-locus", "b-locus", "s-locus"],
     },
+    # === 追加犬種別ガイド（人気 8 犬種） ===
+    {
+        "slug": "golden-retriever-genetic-health-guide",
+        "title": "ゴールデン・レトリーバーの遺伝子検査・健康ガイド",
+        "summary": "ゴールデン・レトリーバーで特に重要な GR-PRA・Ichthyosis・関節疾患・腫瘍リスクを解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🐕 ゴールデン・レトリーバーで特に重要な遺伝病",
+                "body": (
+                    "・<strong>GR-PRA1 / GR-PRA2 / prcd-PRA</strong> — ゴールデン特有の3種類の進行性網膜萎縮症。中年期からの失明リスク。<br>"
+                    "・<strong>Ichthyosis (PNPLA1)</strong> — 鱗状の皮膚・フケ。ゴールデンで頻発。<br>"
+                    "・<strong>HSF4 白内障</strong> — 若年性白内障。<br>"
+                    "・<strong>変性性脊髄症 (DM)</strong> — SOD1 リスクアレル保有。<br>"
+                    "・<strong>股関節・肘関節形成不全</strong> — 大型犬として注意。<br>"
+                    "・<strong>感覚性神経障害 (SN)</strong> — 自咬・神経麻痺。一部ラインで報告。<br>"
+                    "・<strong>腫瘍素因</strong> — 血管肉腫・リンパ腫・骨肉腫（多因子だが家族歴重要）"
+                ),
+            },
+            {
+                "heading": "🎨 ゴールデンの毛色",
+                "body": (
+                    "ゴールデンは E座位 e/e の劣性レッドが固定された犬種:<br>"
+                    "・<strong>標準色</strong>: 全頭が e/e でクリーム〜濃いゴールド<br>"
+                    "・<strong>KITLG / I 座位</strong>: 黄色濃度の主因。イングリッシュ・クリームの淡色から濃いレッドまで幅広い<br>"
+                    "・<strong>稀色</strong>: ブラック（黒）が出る場合はゴールデン以外の血が混入（K + E_）"
+                ),
+            },
+            {
+                "heading": "💡 ゴールデン繁殖の推奨パネル",
+                "body": (
+                    "・<strong>3種類の PRA 全て</strong>（GR-PRA1 / GR-PRA2 / prcd）<br>"
+                    "・<strong>Ichthyosis</strong> — 健康な被毛維持に必須<br>"
+                    "・<strong>DM / HSF4 / SN</strong><br>"
+                    "・<strong>股関節 OFA / PennHIP</strong> 12ヶ月齢以降<br>"
+                    "・腫瘍歴の家族歴確認（特に血管肉腫の高い犬種内発生率）"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["progressive-rod-cone", "ichthyosis", "hereditary-cataract", "degenerative-myelopathy", "sensory-neuropathy"],
+        "related_trait_slugs": ["e-locus", "kitlg", "i-locus", "k-locus"],
+    },
+    {
+        "slug": "welsh-corgi-genetic-health-guide",
+        "title": "ウェルシュ・コーギーの遺伝子検査・健康ガイド",
+        "summary": "ペンブローク／カーディガンで重要な DM・椎間板疾患・自然短尾（BT）を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🐕 ウェルシュ・コーギーで特に重要な遺伝病",
+                "body": (
+                    "・<strong>変性性脊髄症 (DM)</strong> — ペンブロークは SOD1 リスクアレル頻度が最も高い犬種の1つ。発症率高。<br>"
+                    "・<strong>CDDY + IVDD（椎間板疾患）</strong> — 短足犬種として椎間板リスクが付随。<br>"
+                    "・<strong>フォン・ヴィレブランド病 I型 (vWD1)</strong> — 一部ラインで報告。<br>"
+                    "・<strong>運動誘発性虚脱 (EIC)</strong> — ペンブロークで報告例あり。<br>"
+                    "・<strong>進行性網膜萎縮症 (prcd-PRA)</strong> — カーディガンで報告。<br>"
+                    "・<strong>股関節形成不全</strong> — 重い体重と短足のため注意。"
+                ),
+            },
+            {
+                "heading": "🎨 コーギーの毛色・形質",
+                "body": (
+                    "<strong>ペンブローク標準色</strong>: レッド (ay)・セーブル (ay)・トライカラー (at/at)・フォーン<br>"
+                    "<strong>カーディガン</strong>: 上記 + ブリンドル (kbr)・ブルーマール (M/m)<br>"
+                    "<strong>自然短尾 (BT 座位 / Brachyury)</strong>: ペンブロークの一部は生まれつき短尾。BT/BT は胚致死のため BT/N × N/N が標準。<br>"
+                    "<strong>カーディガンは長尾</strong>: BT 検査不要。"
+                ),
+            },
+            {
+                "heading": "💡 コーギー繁殖の推奨",
+                "body": (
+                    "・<strong>DM 検査必須</strong> — ペンブロークでは特に。P/P × P/P は厳禁、可能なら P/N × N/N で頻度を下げる<br>"
+                    "・<strong>CDDY 検査</strong>と椎間板予防の生活管理（体重・階段制限）<br>"
+                    "・<strong>BT 検査</strong>: ペンブロークは BT/BT 交配を必ず避ける<br>"
+                    "・<strong>カーディガンのマール × マール厳禁</strong>（ダブルマール失明・難聴）"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["degenerative-myelopathy", "chondrodystrophy", "willebrand-type-1", "exercise-induced-collapse", "progressive-rod-cone"],
+        "related_trait_slugs": ["a-locus", "k-locus", "m-locus", "bob-tail"],
+    },
+    {
+        "slug": "pomeranian-genetic-health-guide",
+        "title": "ポメラニアンの遺伝子検査・健康ガイド",
+        "summary": "ポメで特に重要な脱毛症 X・気管虚脱・膝蓋骨脱臼・歯科疾患を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "🐕 ポメラニアンで特に重要な遺伝病",
+                "body": (
+                    "・<strong>脱毛症 X (Alopecia X)</strong> — 体幹両側の対称性脱毛。原因遺伝子は研究中だが家族性顕著。<br>"
+                    "・<strong>膝蓋骨脱臼</strong> — 小型犬として高頻度。<br>"
+                    "・<strong>気管虚脱</strong> — 小型犬特有のリスク。<br>"
+                    "・<strong>低血糖</strong> — 子犬期の重大リスク。<br>"
+                    "・<strong>歯科疾患</strong> — 早期歯石・歯周病。<br>"
+                    "・<strong>白内障 (HSF4)</strong>・<strong>進行性網膜萎縮症</strong><br>"
+                    "・<strong>水頭症</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 ポメラニアンの多彩な毛色",
+                "body": (
+                    "ポメは犬種内で最も多彩な毛色を持つ犬種の1つ:<br>"
+                    "<strong>標準色</strong>: オレンジ (ay)・クリーム (e/e)・セーブル・ブラック&タン (at/at)・ブラック・チョコ (bb)・ブルー (dd)<br>"
+                    "<strong>パーティカラー (sp/sp)</strong>・<strong>マール (M/_)</strong> — マール × マール厳禁<br>"
+                    "<strong>I 座位 / KITLG</strong>: オレンジの濃度に影響"
+                ),
+            },
+            {
+                "heading": "💡 ポメ飼育の推奨",
+                "body": (
+                    "・<strong>子犬期の低血糖管理</strong> — 頻繁な少量給餌<br>"
+                    "・<strong>気管虚脱予防</strong>: 首輪ではなくハーネス推奨<br>"
+                    "・<strong>歯磨き習慣化</strong><br>"
+                    "・<strong>PRA / HSF4 検査</strong><br>"
+                    "・脱毛症 X 発症時は獣医師に相談（去勢・避妊で改善する場合あり）"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["hereditary-cataract", "progressive-rod-cone"],
+        "related_trait_slugs": ["a-locus", "e-locus", "b-locus", "d-locus", "m-locus", "s-locus", "i-locus", "kitlg"],
+    },
+    {
+        "slug": "chihuahua-genetic-health-guide",
+        "title": "チワワの遺伝子検査・健康ガイド",
+        "summary": "チワワで特に重要な水頭症・膝蓋骨脱臼・低血糖・歯科疾患を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "🐕 チワワで特に重要な遺伝病",
+                "body": (
+                    "・<strong>水頭症</strong> — チワワで最頻発。モレラ（前頭骨の閉鎖不全）を伴うことも。<br>"
+                    "・<strong>膝蓋骨脱臼</strong> — 小型犬として高頻度。<br>"
+                    "・<strong>低血糖</strong> — 子犬期の重大リスク。<br>"
+                    "・<strong>歯科疾患</strong> — 乳歯遺残・歯周病。<br>"
+                    "・<strong>僧帽弁疾患 (MVD)</strong> — 中高齢期から。<br>"
+                    "・<strong>気管虚脱</strong><br>"
+                    "・<strong>進行性網膜萎縮症 (PRA)</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 チワワの毛色・被毛",
+                "body": (
+                    "<strong>被毛タイプ</strong>: スムース (短毛・L/L)、ロング (l/l)<br>"
+                    "<strong>毛色</strong>: 多彩 — フォーン (ay)・チョコ (bb)・ブルー (dd)・ブラックタン (at/at)・パーティ (sp/sp)・マール (M/_)<br>"
+                    "<strong>マール × マール厳禁</strong>（チワワでも FCI 非認可かつ健康リスク）"
+                ),
+            },
+            {
+                "heading": "💡 チワワ飼育の推奨",
+                "body": (
+                    "・<strong>子犬期の低血糖管理</strong><br>"
+                    "・<strong>頭部の保護</strong> — モレラ部の打撲リスクに注意<br>"
+                    "・<strong>体重管理</strong> — 過体重は膝・気管に負担<br>"
+                    "・<strong>歯科ケア</strong>を生涯にわたって継続<br>"
+                    "・心臓検査（MVD スコアリング）を成犬期から"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["progressive-rod-cone", "hereditary-cataract"],
+        "related_trait_slugs": ["a-locus", "b-locus", "d-locus", "m-locus", "s-locus", "l-locus"],
+    },
+    {
+        "slug": "yorkshire-terrier-genetic-health-guide",
+        "title": "ヨークシャー・テリアの遺伝子検査・健康ガイド",
+        "summary": "ヨーキーで特に重要な門脈体循環シャント・気管虚脱・歯科疾患を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "🐕 ヨーキーで特に重要な遺伝病",
+                "body": (
+                    "・<strong>門脈体循環シャント (PSS)</strong> — ヨーキーで高頻度。発育不良・神経症状。<br>"
+                    "・<strong>気管虚脱</strong> — 小型犬特有のリスクとして頻発。<br>"
+                    "・<strong>膝蓋骨脱臼</strong><br>"
+                    "・<strong>レッグ・カルベ・ペルテス病</strong> — 大腿骨頭壊死。小型犬で頻発。<br>"
+                    "・<strong>歯科疾患</strong> — 乳歯遺残・早期歯周病。<br>"
+                    "・<strong>低血糖</strong>（子犬期）<br>"
+                    "・<strong>進行性網膜萎縮症</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 ヨーキーの毛色・被毛",
+                "body": (
+                    "<strong>標準色</strong>: ブラック&タン → 成犬で『スチール・ブルー&タン』に変化（G座位の退色作用）<br>"
+                    "<strong>被毛</strong>: 長毛 (l/l)・直毛（カーリーではない）<br>"
+                    "<strong>ファーニシング (F/F)</strong>: 顔毛・髭が豊富<br>"
+                    "子犬期は黒主体、生後 1〜3 年で背中部が退色してブルーシルバーに変化していきます。"
+                ),
+            },
+            {
+                "heading": "💡 ヨーキー飼育の推奨",
+                "body": (
+                    "・<strong>胆汁酸検査</strong>を子犬期に — PSS の早期発見<br>"
+                    "・<strong>気管虚脱予防</strong>: ハーネス使用、肥満予防<br>"
+                    "・<strong>歯科ケア</strong>を生涯継続<br>"
+                    "・<strong>子犬期の低血糖管理</strong><br>"
+                    "・成犬期の段階的な毛色変化は正常"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["progressive-rod-cone"],
+        "related_trait_slugs": ["a-locus", "g-locus", "l-locus", "furnishings"],
+    },
+    {
+        "slug": "pug-genetic-health-guide",
+        "title": "パグの遺伝子検査・健康ガイド",
+        "summary": "パグ特有の壊死性髄膜脳炎 (PDE)・短頭種疾患・皮膚疾患を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "5 分",
+        "sections": [
+            {
+                "heading": "🐕 パグで特に重要な遺伝病",
+                "body": (
+                    "・<strong>壊死性髄膜脳炎 (NME / PDE — Pug Dog Encephalitis)</strong> — パグ特有の致死性脳炎。発作・進行性神経症状。<br>"
+                    "・<strong>短頭種気道症候群 (BOAS)</strong> — 呼吸器負担、麻酔リスク。<br>"
+                    "・<strong>椎骨形成異常 (Hemivertebrae)</strong> — 巻き尾犬種の脊椎奇形。<br>"
+                    "・<strong>パグ脊髄症 (Pug Myelopathy)</strong> — 後肢失調。<br>"
+                    "・<strong>色素性角膜炎 (Pigmentary Keratitis)</strong> — 角膜への色素沈着。<br>"
+                    "・<strong>乾燥性角結膜炎 (KCS / ドライアイ)</strong><br>"
+                    "・<strong>皮膚襞皮膚炎</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 パグの毛色",
+                "body": (
+                    "FCI 認可色は4色のみ:<br>"
+                    "<strong>フォーン</strong>: ay + Em（黒マスク）<br>"
+                    "<strong>アプリコット</strong>: ay + KITLG/I 座位による濃淡<br>"
+                    "<strong>シルバー</strong>: 一部に G 座位の退色<br>"
+                    "<strong>ブラック</strong>: KB_ + E_ または a/a 劣性ブラック<br>"
+                    "全パグは E座位の Em バリアントを持ち、黒マスクが特徴。"
+                ),
+            },
+            {
+                "heading": "💡 パグ飼育の推奨",
+                "body": (
+                    "・<strong>NME 検査</strong>（パグ協会推奨マーカー）<br>"
+                    "・<strong>BOAS スコアリング</strong>を実施した個体での繁殖<br>"
+                    "・<strong>椎骨レントゲン</strong>で奇形確認<br>"
+                    "・<strong>角膜・眼科検診</strong>を定期的に<br>"
+                    "・<strong>皮膚襞の清拭</strong>を日常的に<br>"
+                    "・高温多湿環境は厳禁（熱中症リスク大）"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["necrotizing-meningoencephalitis", "hereditary-cataract"],
+        "related_trait_slugs": ["a-locus", "em-locus", "k-locus", "g-locus", "kitlg"],
+    },
+    {
+        "slug": "siberian-husky-genetic-health-guide",
+        "title": "シベリアン・ハスキーの遺伝子検査・健康ガイド",
+        "summary": "ハスキーで重要な PRA・白内障・甲状腺機能低下症と、ALX4 ブルーアイ等の毛色遺伝学を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "6 分",
+        "sections": [
+            {
+                "heading": "🐕 シベリアン・ハスキーで特に重要な遺伝病",
+                "body": (
+                    "・<strong>進行性網膜萎縮症 (X-linked PRA)</strong> — ハスキーで報告される X 連鎖性 PRA。<br>"
+                    "・<strong>遺伝性白内障 (HSF4)</strong> — 若年性白内障。<br>"
+                    "・<strong>甲状腺機能低下症</strong> — 自己免疫性、中高齢期から。<br>"
+                    "・<strong>緑内障</strong> — 一部ラインで報告。<br>"
+                    "・<strong>亜鉛応答性皮膚症</strong> — 北方犬種に多い皮膚異常。亜鉛吸収障害。<br>"
+                    "・<strong>多発性血管症</strong>・<strong>てんかん</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 ハスキーの毛色・目色の遺伝学",
+                "body": (
+                    "ハスキーは目色・毛色のバリエーションが非常に豊富:<br>"
+                    "<strong>毛色</strong>: ブラック&ホワイト・アグーチ&ホワイト (aw)・グレー&ホワイト・レッド&ホワイト (e/e)・サブル<br>"
+                    "<strong>パイド模様</strong>: S 座位 sp/sp が固定<br>"
+                    "<strong>ALX4 ブルーアイ</strong>: ハスキーの青目・オッドアイの主原因。マールや白斑経由とは別機構。<br>"
+                    "<strong>Domino (MC1R Ea)</strong>: 顔マスクの色抜けパターンの一因。<br>"
+                    "<strong>マールは非認可</strong>: ハスキーには本来 M 座位は存在しない。"
+                ),
+            },
+            {
+                "heading": "💡 ハスキー飼育の推奨",
+                "body": (
+                    "・<strong>HSF4 / PRA 検査</strong><br>"
+                    "・<strong>甲状腺機能検査</strong>を定期的に<br>"
+                    "・<strong>ALX4 ブルーアイ検査</strong>: 青目の遺伝メカニズム把握用<br>"
+                    "・運動量の確保（運動犬種としての本能）<br>"
+                    "・夏期の高温対策（北方犬種のため熱に弱い）<br>"
+                    "・<strong>マールの混入が疑われる個体</strong>は M 座位検査推奨"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["hereditary-cataract", "progressive-rod-cone", "glaucoma"],
+        "related_trait_slugs": ["a-locus", "e-locus", "s-locus", "alx4", "domino", "m-locus"],
+    },
+    {
+        "slug": "australian-shepherd-genetic-health-guide",
+        "title": "オーストラリアン・シェパードの遺伝子検査・健康ガイド",
+        "summary": "オーシーで重要な MDR1・CEA・PRA・マール、Cocoa（HPS3）等の毛色遺伝学を解説。",
+        "category": "🐕 犬種別",
+        "reading_time": "7 分",
+        "sections": [
+            {
+                "heading": "🐕 オーシーで特に重要な遺伝病",
+                "body": (
+                    "・<strong>MDR1 (多剤耐性)</strong> — オーシーで最頻発の薬剤過敏症遺伝子。イベルメクチン・ロペラミド等の禁忌。<br>"
+                    "・<strong>CEA (コリーアイ症候群)</strong> — 眼球発達異常。<br>"
+                    "・<strong>進行性網膜萎縮症 (prcd-PRA)</strong><br>"
+                    "・<strong>遺伝性白内障 (HSF4)</strong><br>"
+                    "・<strong>変性性脊髄症 (DM)</strong> — SOD1 リスクアレル保有率高。<br>"
+                    "・<strong>てんかん</strong> — 多因子。<br>"
+                    "・<strong>神経セロイドリポフスチン症 (NCL)</strong>"
+                ),
+            },
+            {
+                "heading": "🎨 オーシーの多彩な毛色",
+                "body": (
+                    "<strong>標準色</strong>: ブラック・レッド・ブルーマール (M/m)・レッドマール<br>"
+                    "<strong>+ タンポイント (at/at)・+ 白斑 (sp/sp)</strong>: 計16通り以上の組み合わせ<br>"
+                    "<strong>Cocoa (HPS3)</strong>: 一部ラインで報告されている劣性チョコ。B 座位とは別。<br>"
+                    "<strong>⚠️ マール × マール厳禁</strong>: M/M ダブルマールで失明・難聴のリスク。"
+                ),
+            },
+            {
+                "heading": "💡 オーシー飼育の推奨",
+                "body": (
+                    "・<strong>MDR1 検査必須</strong>: 全頭推奨。獣医師に必ず結果を共有<br>"
+                    "・<strong>CEA / PRA / HSF4 / DM</strong> の遺伝子検査<br>"
+                    "・<strong>M 座位検査</strong>: マール交配計画の必須条件<br>"
+                    "・<strong>Cocoa 検査</strong>: 希少色ブリーダーは追加検討<br>"
+                    "・運動量・知的刺激の確保（牧羊犬種としての本能）"
+                ),
+            },
+        ],
+        "related_disease_slugs": ["multidrug-resistance", "collie-eye-anomaly", "progressive-rod-cone", "hereditary-cataract", "degenerative-myelopathy", "neuronal-ceroid-lipofuscinosis"],
+        "related_trait_slugs": ["a-locus", "k-locus", "m-locus", "s-locus", "cocoa", "b-locus"],
+    },
 ]
 
 # Slug ベースで guides を引けるよう辞書化
