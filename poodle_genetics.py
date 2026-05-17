@@ -2814,6 +2814,25 @@ GUIDES = [
 GUIDES_INDEX = {g["slug"]: g for g in GUIDES}
 
 
+# 逆引きインデックス: disease_slug → [guides], trait_slug → [guides]
+def _build_guide_reverse_index():
+    """各疾患/形質 slug がどのガイドから参照されているかの逆引き辞書を構築。
+
+    関連ガイドリンクを疾患/形質個別ページに表示するため。
+    """
+    disease_to_guides = {}
+    trait_to_guides = {}
+    for g in GUIDES:
+        for slug in g.get("related_disease_slugs", []):
+            disease_to_guides.setdefault(slug, []).append(g)
+        for slug in g.get("related_trait_slugs", []):
+            trait_to_guides.setdefault(slug, []).append(g)
+    return disease_to_guides, trait_to_guides
+
+
+GUIDES_BY_DISEASE, GUIDES_BY_TRAIT = _build_guide_reverse_index()
+
+
 def get_trait_detail(test_name: str) -> Optional[dict]:
     """形質名から詳細解説を取得する。"""
     if not test_name:

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="{{ lang or 'ja' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>遺伝子疾患・形質 辞書 — Orivet Genetics Suite</title>
+<title>{% if lang == 'en' %}Genetic Disease & Trait Glossary — Orivet Genetics Suite{% else %}遺伝子疾患・形質 辞書 — Orivet Genetics Suite{% endif %}</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7c3aed">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -142,8 +142,8 @@
 <header>
   <div class="container">
     <div>
-      <h1>📖 遺伝子疾患・形質 辞書</h1>
-      <p>全 {{ total_diseases }} 疾患 / {{ total_traits }} 形質座位 を解説</p>
+      <h1>{% if lang == 'en' %}📖 Genetic Disease & Trait Glossary{% else %}📖 遺伝子疾患・形質 辞書{% endif %}</h1>
+      <p>{% if lang == 'en' %}{{ total_diseases }} diseases / {{ total_traits }} traits documented{% else %}全 {{ total_diseases }} 疾患 / {{ total_traits }} 形質座位 を解説{% endif %}</p>
     </div>
     <div class="nav">
       <a href="/">{% if lang == 'en' %}New analysis{% else %}新しい解析{% endif %}</a>
@@ -165,49 +165,46 @@
 
   <!-- 検索ボックス -->
   <form class="search-box" method="get" action="/glossary" role="search">
-    <input type="search" name="q" placeholder="疾患名・遺伝子・症状などで検索 (例: PRA, ブラウン, 椎間板)" value="{{ query }}" aria-label="検索クエリ">
-    <button type="submit">検索</button>
+    {% if lang == 'en' %}<input type="hidden" name="lang" value="en">{% endif %}
+    <input type="search" name="q" placeholder="{% if lang == 'en' %}Search by disease, gene, or symptom (e.g. PRA, brown, IVDD){% else %}疾患名・遺伝子・症状などで検索 (例: PRA, ブラウン, 椎間板){% endif %}" value="{{ query }}" aria-label="{% if lang == 'en' %}Search query{% else %}検索クエリ{% endif %}">
+    <button type="submit">{% if lang == 'en' %}Search{% else %}検索{% endif %}</button>
     {% if query %}
-    <a href="/glossary" style="color:#6b7280;font-size:0.85em;">クリア</a>
+    <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" style="color:#6b7280;font-size:0.85em;">{% if lang == 'en' %}Clear{% else %}クリア{% endif %}</a>
     {% endif %}
-    <span class="stat">疾患 {{ diseases|length }} / 形質 {{ traits|length }} 件ヒット</span>
+    <span class="stat">{% if lang == 'en' %}{{ diseases|length }} diseases / {{ traits|length }} traits matched{% else %}疾患 {{ diseases|length }} / 形質 {{ traits|length }} 件ヒット{% endif %}</span>
   </form>
 
   <!-- 重症度フィルター（疾患タブのみ適用） -->
-  <div class="severity-filter" aria-label="重症度フィルター">
-    <span class="severity-filter-label">🚦 重症度:</span>
-    {# 既存クエリ q を保持する helper #}
-    {% set base = '?' ~ ('q=' ~ query if query else '') %}
-    <a href="/glossary{{ base }}" class="{% if not severity_filter or severity_filter not in ['high','medium','low'] %}active{% endif %}">
-      すべて<span class="badge-count">{{ severity_counts.high + severity_counts.medium + severity_counts.low }}</span>
+  <div class="severity-filter" aria-label="{% if lang == 'en' %}Severity filter{% else %}重症度フィルター{% endif %}">
+    <span class="severity-filter-label">{% if lang == 'en' %}🚦 Severity:{% else %}🚦 重症度:{% endif %}</span>
+    {% set lang_param = ('lang=' ~ lang) if lang == 'en' else '' %}
+    {% set q_param = ('q=' ~ query) if query else '' %}
+    {% set base_query = ('?' ~ lang_param ~ ('&' if lang_param and q_param else '') ~ q_param) if (lang_param or q_param) else '' %}
+    <a href="/glossary{{ base_query }}" class="{% if not severity_filter or severity_filter not in ['high','medium','low'] %}active{% endif %}">
+      {% if lang == 'en' %}All{% else %}すべて{% endif %}<span class="badge-count">{{ severity_counts.high + severity_counts.medium + severity_counts.low }}</span>
     </a>
-    <a href="/glossary?severity=high{% if query %}&q={{ query }}{% endif %}" class="{% if severity_filter == 'high' %}active{% endif %}">
-      {{ severity_labels.high.emoji }} 高<span class="badge-count">{{ severity_counts.high }}</span>
+    {% for level in ['high','medium','low'] %}
+    <a href="/glossary?severity={{ level }}{% if lang == 'en' %}&lang=en{% endif %}{% if query %}&q={{ query }}{% endif %}" class="{% if severity_filter == level %}active{% endif %}">
+      {{ severity_labels[level].emoji }} {% if lang == 'en' %}{{ severity_labels_en[level].label }}{% else %}{% if level == 'high' %}高{% elif level == 'medium' %}中{% else %}低{% endif %}{% endif %}<span class="badge-count">{{ severity_counts[level] }}</span>
     </a>
-    <a href="/glossary?severity=medium{% if query %}&q={{ query }}{% endif %}" class="{% if severity_filter == 'medium' %}active{% endif %}">
-      {{ severity_labels.medium.emoji }} 中<span class="badge-count">{{ severity_counts.medium }}</span>
-    </a>
-    <a href="/glossary?severity=low{% if query %}&q={{ query }}{% endif %}" class="{% if severity_filter == 'low' %}active{% endif %}">
-      {{ severity_labels.low.emoji }} 低<span class="badge-count">{{ severity_counts.low }}</span>
-    </a>
+    {% endfor %}
   </div>
 
   <!-- 症状ベースフィルター（折りたたみ） -->
   <details class="severity-legend" {% if symptom_filter %}open{% endif %}>
-    <summary>🔍 症状から疾患を探す</summary>
+    <summary>{% if lang == 'en' %}🔍 Find diseases by symptom{% else %}🔍 症状から疾患を探す{% endif %}</summary>
     <div class="legend-body">
       <p style="font-size:0.85em; color:#6b7280; margin-bottom:10px;">
-        愛犬の気になる症状から、関連する可能性のある遺伝性疾患を探せます。
-        ※ 症状の原因は遺伝性疾患以外にも多数あります。獣医師にご相談ください。
+        {% if lang == 'en' %}Find genetic diseases that may relate to your dog's symptoms. Note: Many symptoms have non-genetic causes. Consult a veterinarian.{% else %}愛犬の気になる症状から、関連する可能性のある遺伝性疾患を探せます。※ 症状の原因は遺伝性疾患以外にも多数あります。獣医師にご相談ください。{% endif %}
       </p>
-      <div class="severity-filter" aria-label="症状フィルター">
+      <div class="severity-filter" aria-label="{% if lang == 'en' %}Symptom filter{% else %}症状フィルター{% endif %}">
         {% if symptom_filter %}
-        <a href="/glossary{% if query %}?q={{ query }}{% endif %}" style="background:#f3f4f6;color:#374151;">✕ クリア</a>
+        <a href="/glossary?{% if lang == 'en' %}lang=en{% endif %}{% if query %}{% if lang == 'en' %}&{% endif %}q={{ query }}{% endif %}" style="background:#f3f4f6;color:#374151;">✕ {% if lang == 'en' %}Clear{% else %}クリア{% endif %}</a>
         {% endif %}
         {% for sym in symptom_index %}
-        <a href="/glossary?symptom={{ sym.id }}{% if query %}&q={{ query }}{% endif %}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}"
+        <a href="/glossary?symptom={{ sym.id }}{% if lang == 'en' %}&lang=en{% endif %}{% if query %}&q={{ query }}{% endif %}{% if severity_filter %}&severity={{ severity_filter }}{% endif %}"
            class="{% if symptom_filter == sym.id %}active{% endif %}">
-          {{ sym.label }}
+          {% if lang == 'en' and symptom_labels_en.get(sym.id) %}{{ symptom_labels_en[sym.id] }}{% else %}{{ sym.label }}{% endif %}
         </a>
         {% endfor %}
       </div>
@@ -216,37 +213,29 @@
 
   <!-- 重症度凡例（折りたたみ） -->
   <details class="severity-legend">
-    <summary>🚦 重症度バッジの意味を確認する</summary>
+    <summary>{% if lang == 'en' %}🚦 What do the severity badges mean?{% else %}🚦 重症度バッジの意味を確認する{% endif %}</summary>
     <div class="legend-body">
       <div class="legend-row">
-        <span class="legend-badge" style="background:{{ severity_labels.high.bg }};color:{{ severity_labels.high.color }};">{{ severity_labels.high.emoji }} {{ severity_labels.high.label }}</span>
+        <span class="legend-badge" style="background:{{ severity_labels.high.bg }};color:{{ severity_labels.high.color }};">{{ severity_labels.high.emoji }} {% if lang == 'en' %}{{ severity_labels_en.high.label }}{% else %}{{ severity_labels.high.label }}{% endif %}</span>
         <span class="legend-desc">
-          <strong>予後不良・致死性が高い</strong>か、生命に関わる重篤な疾患。
-          発症すると治療困難なものが多く、繁殖前検査が特に重要。
-          例: GM2/GM1 ガングリオシドーシス、NCL、Krabbe、NEwS、SCID 等
+          {% if lang == 'en' %}<strong>Poor prognosis or life-threatening</strong> diseases. Often difficult to treat once developed; pre-breeding testing is especially important. Examples: GM1/GM2 Gangliosidosis, NCL, Krabbe, NEwS, SCID.{% else %}<strong>予後不良・致死性が高い</strong>か、生命に関わる重篤な疾患。発症すると治療困難なものが多く、繁殖前検査が特に重要。例: GM2/GM1 ガングリオシドーシス、NCL、Krabbe、NEwS、SCID 等{% endif %}
         </span>
       </div>
       <div class="legend-row">
-        <span class="legend-badge" style="background:{{ severity_labels.medium.bg }};color:{{ severity_labels.medium.color }};">{{ severity_labels.medium.emoji }} {{ severity_labels.medium.label }}</span>
+        <span class="legend-badge" style="background:{{ severity_labels.medium.bg }};color:{{ severity_labels.medium.color }};">{{ severity_labels.medium.emoji }} {% if lang == 'en' %}{{ severity_labels_en.medium.label }}{% else %}{{ severity_labels.medium.label }}{% endif %}</span>
         <span class="legend-desc">
-          <strong>進行性または対症療法が必要</strong>な疾患。
-          発症犬は獣医師の継続管理が必要だが、QOL を維持しながら生活できることが多い。
-          例: CDDY+IVDD、DM、PRA、コリーアイ、CEA、CMR、白内障 等
+          {% if lang == 'en' %}<strong>Progressive or requiring symptomatic treatment</strong>. Affected dogs need ongoing veterinary care but can maintain quality of life. Examples: CDDY+IVDD, DM, PRA, CEA, CMR, cataracts.{% else %}<strong>進行性または対症療法が必要</strong>な疾患。発症犬は獣医師の継続管理が必要だが、QOL を維持しながら生活できることが多い。例: CDDY+IVDD、DM、PRA、コリーアイ、CEA、CMR、白内障 等{% endif %}
         </span>
       </div>
       <div class="legend-row">
-        <span class="legend-badge" style="background:{{ severity_labels.low.bg }};color:{{ severity_labels.low.color }};">{{ severity_labels.low.emoji }} {{ severity_labels.low.label }}</span>
+        <span class="legend-badge" style="background:{{ severity_labels.low.bg }};color:{{ severity_labels.low.color }};">{{ severity_labels.low.emoji }} {% if lang == 'en' %}{{ severity_labels_en.low.label }}{% else %}{{ severity_labels.low.label }}{% endif %}</span>
         <span class="legend-desc">
-          <strong>通常無症状または軽微</strong>な疾患。
-          手術前の事前申告など限定的な注意で済む場合が多い。
-          例: 第VII因子欠損症、Prekallikrein 欠乏症、HNPK、魚鱗癬、CDA 等
+          {% if lang == 'en' %}<strong>Typically asymptomatic or mild</strong>. Often only require precautions like pre-surgery disclosure. Examples: Factor VII Deficiency, Prekallikrein Deficiency, HNPK, Ichthyosis, CDA.{% else %}<strong>通常無症状または軽微</strong>な疾患。手術前の事前申告など限定的な注意で済む場合が多い。例: 第VII因子欠損症、Prekallikrein 欠乏症、HNPK、魚鱗癬、CDA 等{% endif %}
         </span>
       </div>
       <div class="legend-row" style="border-top:1px solid #e5e7eb;margin-top:6px;padding-top:10px;">
         <span class="legend-desc" style="color:#6b7280;font-size:0.82em;">
-          ⚠️ <strong>免責:</strong> 重症度は KB テキストからの自動推定 + 手動補正です。
-          実際の予後は犬種・遺伝子型 (P/N or P/P) ・併発疾患により異なります。
-          診断・治療判断は必ず獣医師にご相談ください。
+          {% if lang == 'en' %}⚠️ <strong>Disclaimer:</strong> Severity is auto-estimated from KB text + manual corrections. Actual prognosis depends on breed, genotype (P/N or P/P), and comorbidities. Always consult a veterinarian for diagnosis and treatment.{% else %}⚠️ <strong>免責:</strong> 重症度は KB テキストからの自動推定 + 手動補正です。実際の予後は犬種・遺伝子型 (P/N or P/P) ・併発疾患により異なります。診断・治療判断は必ず獣医師にご相談ください。{% endif %}
         </span>
       </div>
     </div>
@@ -255,10 +244,10 @@
   <!-- セクションタブ -->
   <div class="section-tab" role="tablist">
     <button type="button" class="active" role="tab" aria-controls="section-diseases" onclick="showSection('diseases', this)">
-      🩺 健康疾患<span class="count">{{ diseases|length }}</span>
+      {% if lang == 'en' %}🩺 Health Diseases{% else %}🩺 健康疾患{% endif %}<span class="count">{{ diseases|length }}</span>
     </button>
     <button type="button" role="tab" aria-controls="section-traits" onclick="showSection('traits', this)">
-      🎨 毛色・形質<span class="count">{{ traits|length }}</span>
+      {% if lang == 'en' %}🎨 Coat / Traits{% else %}🎨 毛色・形質{% endif %}<span class="count">{{ traits|length }}</span>
     </button>
   </div>
 
@@ -267,18 +256,18 @@
     {% if disease_groups %}
 
       <!-- 目次 -->
-      <div class="toc" aria-label="カテゴリ目次">
-        <div class="toc-title">📑 目次 — カテゴリでジャンプ</div>
+      <div class="toc" aria-label="{% if lang == 'en' %}Category index{% else %}カテゴリ目次{% endif %}">
+        <div class="toc-title">{% if lang == 'en' %}📑 Jump to category{% else %}📑 目次 — カテゴリでジャンプ{% endif %}</div>
         <div class="toc-links">
           {% for cat, items in disease_groups %}
-          <a href="#cat-{{ loop.index }}">{{ cat }} ({{ items|length }})</a>
+          <a href="#cat-{{ loop.index }}">{% if lang == 'en' and category_labels_en.get(cat) %}{{ category_labels_en[cat] }}{% else %}{{ cat }}{% endif %} ({{ items|length }})</a>
           {% endfor %}
         </div>
       </div>
 
       {% for cat, items in disease_groups %}
       <section class="cat-section" id="cat-{{ loop.index }}">
-        <h3>{{ cat }}<span class="cat-count">{{ items|length }}</span></h3>
+        <h3>{% if lang == 'en' and category_labels_en.get(cat) %}{{ category_labels_en[cat] }}{% else %}{{ cat }}{% endif %}<span class="cat-count">{{ items|length }}</span></h3>
         <div class="entries">
           {% for d in items %}
           {% set sev = get_severity(d) %}
@@ -286,14 +275,14 @@
           <details class="entry">
             <summary>{{ d.title }}<span class="sev-badge" style="background:{{ sev_info.bg }};color:{{ sev_info.color }};">{{ sev_info.emoji }} {{ sev_info.label }}</span>{% if d._slug %}<a href="/glossary/disease/{{ d._slug }}" style="float:right;font-size:0.75em;color:#7c3aed;text-decoration:none;margin-left:6px;" title="個別ページで見る">🔗</a>{% endif %}</summary>
             <div class="body">
-              {% if d.summary %}<div class="field"><span class="field-label">📋 概要</span>{{ d.summary }}</div>{% endif %}
-              {% if d.mechanism %}<div class="field"><span class="field-label">🧬 メカニズム</span>{{ d.mechanism }}</div>{% endif %}
-              {% if d.symptoms %}<div class="field"><span class="field-label">⚠️ 症状</span>{{ d.symptoms }}</div>{% endif %}
-              {% if d.inheritance %}<div class="field"><span class="field-label">🧪 遺伝様式</span>{{ d.inheritance }}</div>{% endif %}
-              {% if d.advice %}<div class="field"><span class="field-label">💡 アドバイス</span>{{ d.advice }}</div>{% endif %}
+              {% if d.summary %}<div class="field"><span class="field-label">{% if lang == 'en' %}📋 Overview{% else %}📋 概要{% endif %}</span>{{ d.summary }}</div>{% endif %}
+              {% if d.mechanism %}<div class="field"><span class="field-label">{% if lang == 'en' %}🧬 Mechanism{% else %}🧬 メカニズム{% endif %}</span>{{ d.mechanism }}</div>{% endif %}
+              {% if d.symptoms %}<div class="field"><span class="field-label">{% if lang == 'en' %}⚠️ Symptoms{% else %}⚠️ 症状{% endif %}</span>{{ d.symptoms }}</div>{% endif %}
+              {% if d.inheritance %}<div class="field"><span class="field-label">{% if lang == 'en' %}🧪 Inheritance{% else %}🧪 遺伝様式{% endif %}</span>{{ d.inheritance }}</div>{% endif %}
+              {% if d.advice %}<div class="field"><span class="field-label">{% if lang == 'en' %}💡 Advice{% else %}💡 アドバイス{% endif %}</span>{{ d.advice }}</div>{% endif %}
               {% if d.references %}
               <div class="refs">
-                <span class="field-label">🔗 参考リンク</span>
+                <span class="field-label">{% if lang == 'en' %}🔗 References{% else %}🔗 参考リンク{% endif %}</span>
                 {% for ref in d.references %}
                 <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
                 {% endfor %}
@@ -307,7 +296,7 @@
       {% endfor %}
 
     {% else %}
-    <div class="empty-state">「{{ query }}」に該当する疾患は見つかりませんでした。</div>
+    <div class="empty-state">{% if lang == 'en' %}No diseases found matching "{{ query }}".{% else %}「{{ query }}」に該当する疾患は見つかりませんでした。{% endif %}</div>
     {% endif %}
   </div>
 
@@ -319,13 +308,13 @@
       <details class="entry">
         <summary>{{ t.title }}{% if t._slug %}<a href="/glossary/trait/{{ t._slug }}" style="float:right;font-size:0.75em;color:#7c3aed;text-decoration:none;margin-left:6px;" title="個別ページで見る">🔗</a>{% endif %}</summary>
         <div class="body">
-          {% if t.summary %}<div class="field"><span class="field-label">📋 概要</span>{{ t.summary }}</div>{% endif %}
-          {% if t.mechanism %}<div class="field"><span class="field-label">🧬 メカニズム</span>{{ t.mechanism }}</div>{% endif %}
-          {% if t.phenotype %}<div class="field" style="white-space:pre-line"><span class="field-label">🎨 表現型</span>{{ t.phenotype }}</div>{% endif %}
-          {% if t.advice %}<div class="field"><span class="field-label">💡 アドバイス</span>{{ t.advice }}</div>{% endif %}
+          {% if t.summary %}<div class="field"><span class="field-label">{% if lang == 'en' %}📋 Overview{% else %}📋 概要{% endif %}</span>{{ t.summary }}</div>{% endif %}
+          {% if t.mechanism %}<div class="field"><span class="field-label">{% if lang == 'en' %}🧬 Mechanism{% else %}🧬 メカニズム{% endif %}</span>{{ t.mechanism }}</div>{% endif %}
+          {% if t.phenotype %}<div class="field" style="white-space:pre-line"><span class="field-label">{% if lang == 'en' %}🎨 Phenotype{% else %}🎨 表現型{% endif %}</span>{{ t.phenotype }}</div>{% endif %}
+          {% if t.advice %}<div class="field"><span class="field-label">{% if lang == 'en' %}💡 Advice{% else %}💡 アドバイス{% endif %}</span>{{ t.advice }}</div>{% endif %}
           {% if t.references %}
           <div class="refs">
-            <span class="field-label">🔗 参考リンク</span>
+            <span class="field-label">{% if lang == 'en' %}🔗 References{% else %}🔗 参考リンク{% endif %}</span>
             {% for ref in t.references %}
             <a href="{{ ref.url }}" target="_blank" rel="noopener noreferrer">{{ ref.label }} ↗</a>
             {% endfor %}
@@ -336,7 +325,7 @@
       {% endfor %}
     </div>
     {% else %}
-    <div class="empty-state">「{{ query }}」に該当する形質は見つかりませんでした。</div>
+    <div class="empty-state">{% if lang == 'en' %}No traits found matching "{{ query }}".{% else %}「{{ query }}」に該当する形質は見つかりませんでした。{% endif %}</div>
     {% endif %}
   </div>
 

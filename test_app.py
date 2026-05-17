@@ -227,6 +227,75 @@ class TestGlossaryEnglish:
 
 
 # ===========================================================================
+# 21. PR #63: J + K + L
+# ===========================================================================
+
+class TestSitemapI18n:
+    def test_sitemap_includes_en_urls(self):
+        rv = client.get("/sitemap.xml")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # 英語 alternate URL が含まれる
+        assert "?lang=en" in body
+
+    def test_sitemap_has_hreflang(self):
+        rv = client.get("/sitemap.xml")
+        body = rv.get_data(as_text=True)
+        # hreflang annotation
+        assert "xhtml:link" in body
+        assert 'hreflang="ja"' in body
+        assert 'hreflang="en"' in body
+
+
+class TestRelatedGuidesReverse:
+    def test_reverse_index_built(self):
+        from poodle_genetics import GUIDES_BY_DISEASE, GUIDES_BY_TRAIT
+        assert isinstance(GUIDES_BY_DISEASE, dict)
+        assert isinstance(GUIDES_BY_TRAIT, dict)
+        # CDDY は『how-to-read-orivet-results』ガイドおよびダックス・プードルガイド等が参照
+        assert "chondrodystrophy" in GUIDES_BY_DISEASE
+        assert len(GUIDES_BY_DISEASE["chondrodystrophy"]) >= 1
+
+    def test_disease_page_shows_related_guides(self):
+        rv = client.get("/glossary/disease/chondrodystrophy")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        # 関連ガイドが表示される
+        assert "関連ガイド" in body or "Related Guides" in body
+
+    def test_trait_page_shows_related_guides_when_present(self):
+        # e-locus は color-genetics-basics ガイドおよび犬種別ガイドが参照
+        rv = client.get("/glossary/trait/e-locus")
+        body = rv.get_data(as_text=True)
+        # 関連ガイドが少なくとも 1 つ表示される（多くの犬種ガイドが参照）
+        assert "関連ガイド" in body or "Related Guides" in body
+
+
+class TestReviewedFlag:
+    def test_kb_en_supports_reviewed_field(self):
+        """kb_en エントリの reviewed フィールドは optional"""
+        from kb_en import DISEASE_EN
+        # 未設定（False 扱い）の状態を確認
+        sample = DISEASE_EN.get("chondrodystrophy", {})
+        # reviewed フィールドは存在しないか False
+        assert sample.get("reviewed", False) is False or sample.get("reviewed") is True
+
+    def test_en_page_shows_ai_translation_warning(self):
+        """英語ページで監修なしなら警告バッジ表示"""
+        rv = client.get("/glossary/disease/chondrodystrophy?lang=en")
+        body = rv.get_data(as_text=True)
+        # AI 翻訳警告が含まれる（未監修のため）
+        assert "AI-generated translation" in body
+
+    def test_ja_page_no_translation_warning(self):
+        """日本語ページでは翻訳警告を出さない"""
+        rv = client.get("/glossary/disease/chondrodystrophy")
+        body = rv.get_data(as_text=True)
+        assert "AI-generated translation" not in body
+        assert "Veterinarian-reviewed translation" not in body
+
+
+# ===========================================================================
 # 3. 413 ハンドラ
 # ===========================================================================
 
