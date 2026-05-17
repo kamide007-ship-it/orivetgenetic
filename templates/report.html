@@ -51,6 +51,43 @@
             border: none;
             min-height: calc(100dvh - 52px); /* iOS Safari 100vh バグ回避 */
         }
+        .breed-recs {
+            background: #fffbeb;
+            border-bottom: 1px solid #fde68a;
+            padding: 10px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88em;
+            color: #92400e;
+        }
+        .breed-recs .label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .breed-recs a {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 12px;
+            background: #fff;
+            color: #92400e;
+            text-decoration: none;
+            border-radius: 14px;
+            border: 1px solid #fde68a;
+            transition: background 0.15s;
+        }
+        .breed-recs a:hover { background: #fef3c7; }
+        .breed-recs .close-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: #92400e;
+            cursor: pointer;
+            font-size: 1.1em;
+            padding: 0 4px;
+        }
     </style>
 </head>
 <body>
@@ -66,6 +103,15 @@
             <a href="/" id="linkNew">新しい解析</a>
         </div>
     </div>
+    {% if breed_guides %}
+    <div class="breed-recs" id="breedRecs">
+      <span class="label" id="breedRecsLabel">🐶 検出された犬種:</span>
+      {% for b in breed_guides %}
+      <a href="/guides/{{ b.slug }}" target="_blank" rel="noopener" data-breed-ja="{{ b.ja }}" data-breed-en="{{ b.en }}">📘 <span class="bname">{{ b.ja }}</span> <span class="bsuffix">ガイドを開く</span></a>
+      {% endfor %}
+      <button type="button" class="close-btn" onclick="document.getElementById('breedRecs').style.display='none'" aria-label="閉じる">×</button>
+    </div>
+    {% endif %}
     <iframe class="report-frame" id="reportFrame" srcdoc="{{ report_html | e }}"></iframe>
     <script>
         const TOOLBAR_I18N = {
@@ -74,14 +120,18 @@
                 linkSim: "Use in Simulator",
                 linkGlossary: "📖 Glossary",
                 linkXlsx: "Download Excel",
-                linkNew: "New Analysis"
+                linkNew: "New Analysis",
+                breedRecsLabel: "🐶 Detected breed:",
+                breedRecsSuffix: "Open guide"
             },
             ja: {
                 toolbarTitle: "Orivet Genetics Suite - レポート",
                 linkSim: "シミュレーターで使う",
                 linkGlossary: "📖 辞書",
                 linkXlsx: "Excel ダウンロード",
-                linkNew: "新しい解析"
+                linkNew: "新しい解析",
+                breedRecsLabel: "🐶 検出された犬種:",
+                breedRecsSuffix: "ガイドを開く"
             }
         };
 
@@ -95,6 +145,20 @@
             }
             document.getElementById('langToggle').textContent = lang === 'ja' ? 'English' : '日本語';
             document.title = lang === 'en' ? 'Analysis Report - Orivet Genetics Suite' : '解析レポート - Orivet Genetics Suite';
+            // Localize breed-rec chips (label + each breed name)
+            document.querySelectorAll('.breed-recs a').forEach(a => {
+                const ja = a.getAttribute('data-breed-ja');
+                const en = a.getAttribute('data-breed-en');
+                const nameEl = a.querySelector('.bname');
+                const suffixEl = a.querySelector('.bsuffix');
+                if (nameEl && ja && en) nameEl.textContent = (lang === 'en') ? en : ja;
+                if (suffixEl) suffixEl.textContent = dict.breedRecsSuffix;
+                // Append ?lang=en to guide links in EN mode (idempotent)
+                const url = new URL(a.href, location.origin);
+                if (lang === 'en') url.searchParams.set('lang', 'en');
+                else url.searchParams.delete('lang');
+                a.href = url.toString();
+            });
         }
 
         function applyIframeLang(lang) {

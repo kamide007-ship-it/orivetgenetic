@@ -338,6 +338,100 @@ function showSection(name, btn) {
   btn.classList.add('active');
   document.getElementById('section-' + name).classList.add('active');
 }
+
+// ===== Live filter (client-side, no roundtrip) =====
+// Reduces typing latency: filters the already-rendered DOM as the user types.
+// Server-side search still runs on form submit for the *full* KB (covers
+// matches that didn't make it into the initial render via category grouping).
+(function() {
+  const input = document.querySelector('.search-box input[type="search"]');
+  if (!input) return;
+
+  const debounce = (fn, ms) => {
+    let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+  };
+
+  const normalize = s => (s || '').toLowerCase().normalize('NFKC');
+
+  function applyFilter(rawQuery) {
+    const q = normalize(rawQuery).trim();
+    let dCount = 0, tCount = 0;
+
+    // Disease entries (grouped by category)
+    document.querySelectorAll('#section-diseases .cat-section').forEach(sec => {
+      let visibleInSec = 0;
+      sec.querySelectorAll('.entry').forEach(entry => {
+        const text = normalize(entry.textContent);
+        const hit = !q || text.includes(q);
+        entry.style.display = hit ? '' : 'none';
+        if (hit) { visibleInSec++; dCount++; }
+      });
+      sec.style.display = visibleInSec ? '' : 'none';
+      const countSpan = sec.querySelector('.cat-count');
+      if (countSpan) countSpan.dataset.original = countSpan.dataset.original || countSpan.textContent;
+      if (countSpan && q) countSpan.textContent = visibleInSec;
+      else if (countSpan && countSpan.dataset.original) countSpan.textContent = countSpan.dataset.original;
+    });
+
+    // Hide TOC links whose section is hidden
+    document.querySelectorAll('#section-diseases .toc-links a').forEach((a, i) => {
+      const targetId = a.getAttribute('href').replace('#', '');
+      const tgt = document.getElementById(targetId);
+      a.style.display = (tgt && tgt.style.display === 'none') ? 'none' : '';
+    });
+
+    // Trait entries (flat)
+    document.querySelectorAll('#section-traits .entry').forEach(entry => {
+      const text = normalize(entry.textContent);
+      const hit = !q || text.includes(q);
+      entry.style.display = hit ? '' : 'none';
+      if (hit) tCount++;
+    });
+
+    // Update tab counts
+    const tabs = document.querySelectorAll('.section-tab button .count');
+    if (tabs[0]) {
+      tabs[0].dataset.original = tabs[0].dataset.original || tabs[0].textContent;
+      tabs[0].textContent = q ? dCount : tabs[0].dataset.original;
+    }
+    if (tabs[1]) {
+      tabs[1].dataset.original = tabs[1].dataset.original || tabs[1].textContent;
+      tabs[1].textContent = q ? tCount : tabs[1].dataset.original;
+    }
+
+    // Live empty state
+    let emptyHint = document.getElementById('live-empty-hint');
+    const totalVisible = dCount + tCount;
+    if (q && totalVisible === 0) {
+      if (!emptyHint) {
+        emptyHint = document.createElement('div');
+        emptyHint.id = 'live-empty-hint';
+        emptyHint.className = 'empty-state';
+        emptyHint.style.marginTop = '14px';
+        document.querySelector('.search-box').insertAdjacentElement('afterend', emptyHint);
+      }
+      const isEn = document.documentElement.lang === 'en';
+      emptyHint.innerHTML = (isEn
+        ? `No live matches for "<strong>${rawQuery}</strong>". Submit to search the full knowledge base.`
+        : `「<strong>${rawQuery}</strong>」のライブヒットなし。サブミットすると全文検索します。`);
+      emptyHint.style.display = '';
+    } else if (emptyHint) {
+      emptyHint.style.display = 'none';
+    }
+  }
+
+  input.addEventListener('input', debounce(e => applyFilter(e.target.value), 80));
+
+  // Keyboard shortcut: "/" focuses the search box (skips when typing in another field).
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== input
+        && !['INPUT','TEXTAREA','SELECT'].includes((document.activeElement || {}).tagName)) {
+      e.preventDefault();
+      input.focus();
+      input.select();
+    }
+  });
+})();
 </script>
 
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});}</script>

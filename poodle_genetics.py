@@ -3298,23 +3298,117 @@ GUIDES = [
 GUIDES_INDEX = {g["slug"]: g for g in GUIDES}
 
 
+# 犬種ガイドの slug → 犬種表示名（JA / EN）
+# 5 基礎ガイド（how-to-read 等）は犬種に紐付かないので除外。
+GUIDE_BREED_NAMES = {
+    "poodle-genetic-health-guide":             {"ja": "プードル", "en": "Poodle"},
+    "labrador-genetic-health-guide":           {"ja": "ラブラドール", "en": "Labrador"},
+    "doodle-genetic-health-guide":             {"ja": "ドゥードゥル系", "en": "Doodle breeds"},
+    "shiba-genetic-health-guide":              {"ja": "柴犬", "en": "Shiba Inu"},
+    "akita-genetic-health-guide":              {"ja": "秋田犬", "en": "Akita Inu"},
+    "shar-pei-genetic-health-guide":           {"ja": "シャー・ペイ", "en": "Shar-Pei"},
+    "chin-genetic-health-guide":               {"ja": "狆", "en": "Japanese Chin"},
+    "dachshund-genetic-health-guide":          {"ja": "ダックスフンド", "en": "Dachshund"},
+    "french-bulldog-genetic-health-guide":     {"ja": "フレンチブルドッグ", "en": "French Bulldog"},
+    "cavalier-genetic-health-guide":           {"ja": "キャバリア", "en": "Cavalier KCS"},
+    "border-collie-genetic-health-guide":      {"ja": "ボーダーコリー", "en": "Border Collie"},
+    "german-shepherd-genetic-health-guide":    {"ja": "ジャーマンシェパード", "en": "German Shepherd"},
+    "mini-schnauzer-genetic-health-guide":     {"ja": "ミニチュアシュナウザー", "en": "Miniature Schnauzer"},
+    "golden-retriever-genetic-health-guide":   {"ja": "ゴールデン", "en": "Golden Retriever"},
+    "welsh-corgi-genetic-health-guide":        {"ja": "ウェルシュ・コーギー", "en": "Welsh Corgi"},
+    "pomeranian-genetic-health-guide":         {"ja": "ポメラニアン", "en": "Pomeranian"},
+    "chihuahua-genetic-health-guide":          {"ja": "チワワ", "en": "Chihuahua"},
+    "yorkshire-terrier-genetic-health-guide":  {"ja": "ヨークシャー・テリア", "en": "Yorkshire Terrier"},
+    "pug-genetic-health-guide":                {"ja": "パグ", "en": "Pug"},
+    "siberian-husky-genetic-health-guide":     {"ja": "シベリアン・ハスキー", "en": "Siberian Husky"},
+    "australian-shepherd-genetic-health-guide": {"ja": "オーストラリアン・シェパード", "en": "Australian Shepherd"},
+}
+
+
 # 逆引きインデックス: disease_slug → [guides], trait_slug → [guides]
 def _build_guide_reverse_index():
     """各疾患/形質 slug がどのガイドから参照されているかの逆引き辞書を構築。
 
     関連ガイドリンクを疾患/形質個別ページに表示するため。
+    また、disease/trait slug → [breed dict] の逆引きも生成する。
     """
     disease_to_guides = {}
     trait_to_guides = {}
+    disease_to_breeds = {}
+    trait_to_breeds = {}
     for g in GUIDES:
-        for slug in g.get("related_disease_slugs", []):
-            disease_to_guides.setdefault(slug, []).append(g)
-        for slug in g.get("related_trait_slugs", []):
-            trait_to_guides.setdefault(slug, []).append(g)
-    return disease_to_guides, trait_to_guides
+        slug = g["slug"]
+        breed = GUIDE_BREED_NAMES.get(slug)
+        for d_slug in g.get("related_disease_slugs", []):
+            disease_to_guides.setdefault(d_slug, []).append(g)
+            if breed:
+                bucket = disease_to_breeds.setdefault(d_slug, [])
+                if {"slug": slug, **breed} not in bucket:
+                    bucket.append({"slug": slug, **breed})
+        for t_slug in g.get("related_trait_slugs", []):
+            trait_to_guides.setdefault(t_slug, []).append(g)
+            if breed:
+                bucket = trait_to_breeds.setdefault(t_slug, [])
+                if {"slug": slug, **breed} not in bucket:
+                    bucket.append({"slug": slug, **breed})
+    return disease_to_guides, trait_to_guides, disease_to_breeds, trait_to_breeds
 
 
-GUIDES_BY_DISEASE, GUIDES_BY_TRAIT = _build_guide_reverse_index()
+GUIDES_BY_DISEASE, GUIDES_BY_TRAIT, BREEDS_BY_DISEASE, BREEDS_BY_TRAIT = _build_guide_reverse_index()
+
+
+# 犬種文字列 → 犬種ガイド検出のためのキーワード辞書
+# 「トイプードル」「ミニチュアダックスフンド」のようなサイズ違いも吸収するため
+# 部分一致のキーワードと、追加で英名のキーワードも含める。
+_BREED_GUIDE_KEYWORDS = {
+    "poodle-genetic-health-guide":             ["プードル", "poodle"],
+    "labrador-genetic-health-guide":           ["ラブラドール", "labrador"],
+    "doodle-genetic-health-guide":             ["ドゥードゥル", "doodle", "ラブラドゥードル", "ゴールデンドゥードル"],
+    "shiba-genetic-health-guide":              ["柴犬", "shiba"],
+    "akita-genetic-health-guide":              ["秋田", "akita"],
+    "shar-pei-genetic-health-guide":           ["シャー", "shar-pei", "shar pei"],
+    "chin-genetic-health-guide":               ["狆", "chin"],
+    "dachshund-genetic-health-guide":          ["ダックス", "dachshund"],
+    "french-bulldog-genetic-health-guide":     ["フレンチ", "フレブル", "french bulldog"],
+    "cavalier-genetic-health-guide":           ["キャバリア", "cavalier"],
+    "border-collie-genetic-health-guide":      ["ボーダーコリー", "border collie"],
+    "german-shepherd-genetic-health-guide":    ["ジャーマン", "シェパード", "german shepherd"],
+    "mini-schnauzer-genetic-health-guide":     ["シュナウザー", "schnauzer"],
+    "golden-retriever-genetic-health-guide":   ["ゴールデン", "golden retriever"],
+    "welsh-corgi-genetic-health-guide":        ["コーギー", "corgi"],
+    "pomeranian-genetic-health-guide":         ["ポメ", "pomeranian"],
+    "chihuahua-genetic-health-guide":          ["チワワ", "chihuahua"],
+    "yorkshire-terrier-genetic-health-guide":  ["ヨーキー", "ヨークシャー", "yorkshire"],
+    "pug-genetic-health-guide":                ["パグ", "pug"],
+    "siberian-husky-genetic-health-guide":     ["ハスキー", "husky"],
+    "australian-shepherd-genetic-health-guide": ["オーストラリアン", "オーシー", "australian shepherd", "aussie"],
+}
+
+
+def detect_breed_guides(breed_strings) -> list:
+    """犬種文字列のリストから該当する犬種ガイドを検出。
+
+    PDF から抽出された breed フィールド（"POODLE (トイプードル)" 等）に対し、
+    GUIDE_BREED_NAMES に対応する候補を抽出して返す。複数犬の解析時はマージ。
+
+    Returns:
+        [{"slug": "...", "ja": "...", "en": "..."}, ...]  重複排除済
+    """
+    if isinstance(breed_strings, str):
+        breed_strings = [breed_strings]
+    if not breed_strings:
+        return []
+    joined = " ".join(str(s) for s in breed_strings if s).lower()
+    seen = set()
+    result = []
+    for slug, keywords in _BREED_GUIDE_KEYWORDS.items():
+        if any(kw.lower() in joined for kw in keywords):
+            if slug in seen:
+                continue
+            seen.add(slug)
+            name = GUIDE_BREED_NAMES.get(slug, {})
+            result.append({"slug": slug, "ja": name.get("ja", slug), "en": name.get("en", slug)})
+    return result
 
 
 # ============================================================

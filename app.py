@@ -117,6 +117,7 @@ from poodle_genetics import (
     SYMPTOM_INDEX, filter_by_symptom,
     DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug,
     GUIDES, GUIDES_INDEX, GUIDES_BY_DISEASE, GUIDES_BY_TRAIT,
+    BREEDS_BY_DISEASE, BREEDS_BY_TRAIT, detect_breed_guides,
     get_disease_kb_localized, get_trait_kb_localized,
     get_guides_localized, get_guide_localized, HAS_EN_GUIDES,
     HAS_EN_KB, SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN,
@@ -464,8 +465,21 @@ def report(session_id):
     with open(html_path, "r", encoding="utf-8") as f:
         report_html = f.read()
 
+    # 検出した犬種から推奨ガイドを抽出（dogs.json があれば利用）
+    breed_guides = []
+    dogs_json_path = os.path.join(report_dir, "dogs.json")
+    if os.path.exists(dogs_json_path):
+        try:
+            with open(dogs_json_path, "r", encoding="utf-8") as fj:
+                dogs_data = json.load(fj)
+            breeds = [d.get("breed", "") for d in dogs_data if isinstance(d, dict)]
+            breed_guides = detect_breed_guides(breeds)
+        except (OSError, ValueError):
+            pass
+
     return render_template("report.html", report_html=report_html,
-                           session_id=session_id, xlsx_exists=xlsx_exists)
+                           session_id=session_id, xlsx_exists=xlsx_exists,
+                           breed_guides=breed_guides)
 
 
 @app.route("/api/dogs/<session_id>")
@@ -625,6 +639,7 @@ def disease_detail_page(slug):
         entry = merged
     severity = get_disease_severity(entry)
     related_guides = GUIDES_BY_DISEASE.get(slug, [])
+    related_breeds = BREEDS_BY_DISEASE.get(slug, [])
     # 英語表示時のみ監修状態を表示する
     en_reviewed = False
     if lang == "en":
@@ -638,6 +653,7 @@ def disease_detail_page(slug):
         severity=severity,
         severity_labels=SEVERITY_LABELS,
         related_guides=related_guides,
+        related_breeds=related_breeds,
         en_reviewed=en_reviewed,
         canonical=request.url_root.rstrip("/") + f"/glossary/disease/{slug}",
         lang=lang,
@@ -665,6 +681,7 @@ def trait_detail_page(slug):
         merged["references"] = entry.get("references", [])
         entry = merged
     related_guides = GUIDES_BY_TRAIT.get(slug, [])
+    related_breeds = BREEDS_BY_TRAIT.get(slug, [])
     en_reviewed = False
     if lang == "en":
         original = TRAIT_SLUG_INDEX.get(slug, {})
@@ -675,6 +692,7 @@ def trait_detail_page(slug):
         entry=entry,
         slug=slug,
         related_guides=related_guides,
+        related_breeds=related_breeds,
         en_reviewed=en_reviewed,
         canonical=request.url_root.rstrip("/") + f"/glossary/trait/{slug}",
         lang=lang,
