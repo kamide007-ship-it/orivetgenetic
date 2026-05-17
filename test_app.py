@@ -295,6 +295,82 @@ class TestReviewedFlag:
         assert "Veterinarian-reviewed translation" not in body
 
 
+class TestBreedReverseIndex:
+    """形質→犬種 / 疾患→犬種の逆引きインデックス"""
+
+    def test_breeds_by_trait_returns_breeds(self):
+        from poodle_genetics import BREEDS_BY_TRAIT
+        kitlg_breeds = BREEDS_BY_TRAIT.get("kitlg", [])
+        assert any(b["ja"] == "ゴールデン" for b in kitlg_breeds)
+        assert any(b["en"] == "Pug" for b in kitlg_breeds)
+
+    def test_breeds_by_disease_returns_breeds(self):
+        from poodle_genetics import BREEDS_BY_DISEASE
+        dm_breeds = BREEDS_BY_DISEASE.get("degenerative-myelopathy", [])
+        breed_jas = [b["ja"] for b in dm_breeds]
+        assert "ウェルシュ・コーギー" in breed_jas
+        assert "ジャーマンシェパード" in breed_jas
+
+    def test_breed_chips_render_on_trait_page(self):
+        rv = client.get("/glossary/trait/m-locus")
+        body = rv.get_data(as_text=True)
+        assert "🐶" in body
+        assert "関連する犬種" in body
+        # M-locus は複数犬種ガイドで参照されている
+        assert "ボーダーコリー" in body or "ダックスフンド" in body
+
+    def test_breed_chips_render_on_disease_page_en(self):
+        rv = client.get("/glossary/disease/multidrug-resistance?lang=en")
+        body = rv.get_data(as_text=True)
+        assert "Relevant Breeds" in body
+        assert "Border Collie" in body or "Australian Shepherd" in body
+
+    def test_unmapped_slug_returns_empty(self):
+        from poodle_genetics import BREEDS_BY_TRAIT
+        # ridge は犬種ガイドなし → 空リスト
+        assert BREEDS_BY_TRAIT.get("ridge", []) == []
+
+
+class TestDetectBreedGuides:
+    """detect_breed_guides の犬種文字列マッチング"""
+
+    def test_japanese_breed_keyword(self):
+        from poodle_genetics import detect_breed_guides
+        result = detect_breed_guides(["POODLE (トイプードル)"])
+        slugs = [r["slug"] for r in result]
+        assert "poodle-genetic-health-guide" in slugs
+
+    def test_multiple_breeds_dedup(self):
+        from poodle_genetics import detect_breed_guides
+        result = detect_breed_guides(["プードル", "プードル"])
+        slugs = [r["slug"] for r in result]
+        assert slugs.count("poodle-genetic-health-guide") == 1
+
+    def test_empty_input_returns_empty(self):
+        from poodle_genetics import detect_breed_guides
+        assert detect_breed_guides([]) == []
+        assert detect_breed_guides("") == []
+
+    def test_unknown_breed_returns_empty(self):
+        from poodle_genetics import detect_breed_guides
+        assert detect_breed_guides(["Imaginary Wonder Hound XYZ"]) == []
+
+
+class TestGlossarySearchUI:
+    """ライブフィルタの JS が glossary.html に含まれていることを確認"""
+
+    def test_glossary_has_live_filter_script(self):
+        rv = client.get("/glossary")
+        body = rv.get_data(as_text=True)
+        assert "Live filter" in body or "applyFilter" in body
+        assert "addEventListener('input'" in body
+
+    def test_glossary_has_keyboard_shortcut(self):
+        rv = client.get("/glossary")
+        body = rv.get_data(as_text=True)
+        assert "e.key === '/'" in body
+
+
 class TestEnglishGuides:
     """guides_en.py の英訳ガイドを検証"""
 
