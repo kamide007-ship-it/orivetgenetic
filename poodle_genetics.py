@@ -1925,6 +1925,62 @@ TRAIT_KB = [
             {"label": "詳細を検索 (ALX4 Blue Eyes)", "url": _google_search("ALX4 blue eyes Siberian Husky")},
         ],
     },
+    # === 毛色濃度・パターン補助遺伝子 ===
+    {
+        "match": ["kitlg", "fox red", "intense yellow", "フォックスレッド", "ディープレッド"],
+        "title": "KITLG — フォックスレッド / 黄色濃度",
+        "summary": "黄ラブラドールの『フォックスレッド』など、フェオメラニン（黄/赤系）の発色濃度を決める補助遺伝子。",
+        "mechanism": "KITLG 遺伝子近傍の調節領域変異がメラノサイトの分化と色素生成を調節。e/e (E座位) 犬で coat の黄色濃度に強く影響します。",
+        "phenotype": "Intense allele 2 コピー: フォックスレッド〜ディープレッド\\nIntense allele 1 コピー: 中間色（中程度のイエロー）\\n通常型 2 コピー: 淡いイエロー〜クリーム",
+        "advice": "ラブラドール、ノバスコシア・ダックトーリング・レトリーバー、レッド系ゴールデンで重要。I座位 (MFSD12) と組み合わせて使うと黄〜赤色の濃淡をより正確に予測できます。健康影響なし。",
+        "references": [
+            {"label": "詳細を検索 (KITLG)", "url": _google_search("KITLG fox red Labrador phaeomelanin")},
+        ],
+    },
+    {
+        "match": ["saddle tan", "raly", "saddle pattern", "サドルタン", "サドル模様"],
+        "title": "Saddle Tan (RALY) — サドル模様",
+        "summary": "生まれた時はブラックタン（タンポイント）だが、成長と共に背中の黒色が後退し『サドル』模様になる遺伝子。ジャーマンシェパードの典型パターン。",
+        "mechanism": "RALY 遺伝子の調節領域変異が優性。A座位 at/at の犬で、成長に伴い背中の eumelanin 領域が縮小して褐色（タン）が広がります。",
+        "phenotype": "I/I or I/i: 成犬でサドルタン（背中のみ黒、四肢・顔は褐色）\\ni/i: ブラックタン（黒主体のまま）",
+        "advice": "ジャーマンシェパード、エアデール・テリア、ビーグル、ベルジアン・タービュレン等で典型。子犬期はブラックタンに見えても、6ヶ月〜2歳でサドル模様に変化します。A座位 at/at が必須前提。",
+        "references": [
+            {"label": "詳細を検索 (Saddle Tan)", "url": _google_search("RALY saddle tan dog German Shepherd")},
+        ],
+    },
+    {
+        "match": ["domino", "grizzle", "ea allele", "mc1r ea", "ドミノ", "グリズル"],
+        "title": "Domino / Grizzle (MC1R Ea) — 顔マスクの色抜け",
+        "summary": "サイトハウンド系特有の『顔のマスク領域の色が抜けて薄く見える』パターン。アフガン、サルーキ、ボルゾイ、シベリアンハスキーで報告。",
+        "mechanism": "MC1R の Ea (Edomino) バリアントが eumelanin 産生をマスク領域で部分抑制。E座位の派生アレルで、E > Eg > Ea > e の優位序列。",
+        "phenotype": "Ea/Ea or Ea/e: ドミノ/グリズル（顔の黒抜け、淡色マスク）\\nEa/E_ (E 優性): 通常",
+        "advice": "アフガンハウンドの『ドミノ』、サルーキの『グリズル』、シベリアンハスキーの『アグーチ』様パターンの一因。Em マスク（黒マスク）とは反対方向の作用。E座位の検査で Ea バリアントを含めない検査もあるため、サイトハウンドブリーダーは検査内容を確認推奨。",
+        "references": [
+            {"label": "詳細を検索 (Domino)", "url": _google_search("MC1R domino grizzle Afghan Saluki Ea")},
+        ],
+    },
+    {
+        "match": ["improper coat", "ic locus", "smooth doodle", "incorrect coat", "インプロパーコート"],
+        "title": "Improper Coat (IC / RSPO2 variant)",
+        "summary": "ポーチュギーズ・ウォーター・ドッグや Doodle 系で出現する『スムースな顔（ファーニシングなし）+ 短毛』の劣性表現型。",
+        "mechanism": "RSPO2 のファーニシング変異の保有なし（ic/ic ホモ）が原因。F 座位の f/f に相当し、顔毛・眉毛・髭の発達が抑制されます。",
+        "phenotype": "IC/IC or IC/ic: 標準的なファーニッシュコート（眉・髭あり）\\nic/ic: スムースコート（顔毛なし、ラブ/ゴールデン的な外観）",
+        "advice": "ポーチュギーズ・ウォーター・ドッグ、ラゴット・ロマニョーロでは血統書失格、Doodle 系（ラブラドゥードル/ゴールデンドゥードル）では『hypoallergenic 失敗』と扱われます。F座位 (RSPO2) ファーニシング検査と同時に確認推奨。健康影響なし。",
+        "references": [
+            {"label": "詳細を検索 (Improper Coat)", "url": _google_search("improper coat IC RSPO2 Portuguese Water Dog Doodle")},
+        ],
+    },
+    {
+        "match": ["albinism", "oca", "tyr", "slc45a2", "oculocutaneous albinism", "アルビニズム", "白皮症"],
+        "title": "Albinism (TYR / SLC45A2) — 眼皮膚白皮症",
+        "summary": "メラニン生成が極度に低下する遺伝性白皮症。被毛・皮膚が白く、虹彩が淡色〜赤目、視覚障害を伴うことが多い。",
+        "mechanism": "TYR (チロシナーゼ) や SLC45A2 などのメラニン合成経路遺伝子の劣性変異により、メラニン生成が極端に低下。優性ホワイト（マールやパイドの白）とは区別される真のアルビニズム。",
+        "phenotype": "A/A or A/oca: 通常色\\noca/oca: アルビノ（被毛・皮膚白、赤目〜淡色虹彩、羞明・視覚低下）",
+        "advice": "ドーベルマン (Z-factor)・ペキニーズ・ラサ・アプソ等で報告。⚠️ **健康影響あり**: 紫外線過敏（皮膚がん発症率上昇）・視覚障害・羞明。アルビノ犬の繁殖は倫理的に推奨されません。屋外活動時の遮光保護と定期皮膚検診が必須。",
+        "references": [
+            {"label": "詳細を検索 (Albinism)", "url": _google_search("dog albinism TYR SLC45A2 Doberman Z-factor")},
+        ],
+    },
 ]
 
 

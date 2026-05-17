@@ -845,4 +845,40 @@ TRAIT_EN = {
         "phenotype": "BE/BE or BE/be: Blue eye(s) (unilateral or bilateral)\nbe/be: Normal eye color (brown to amber)",
         "advice": "The primary cause of blue or odd eyes in Siberian Huskies. Unlike merle- or white-spotting-mediated blue eyes, no association with vision or hearing impairment has been reported. Distinct from merle-mediated blue eyes in Australian Shepherds.",
     },
+    # === Coat-color modifier and pattern genes ===
+    "kitlg": {
+        "title": "KITLG — Fox Red / Yellow Intensity",
+        "summary": "A modifier gene that drives phaeomelanin (yellow/red) intensity, producing the 'fox red' shade in yellow Labradors.",
+        "mechanism": "Regulatory variants near KITLG modulate melanocyte differentiation and pigment output. The effect is most visible in E-locus e/e dogs, where coat color is purely phaeomelanin.",
+        "phenotype": "2 intense alleles: Fox red to deep red\n1 intense allele: Intermediate yellow\n2 standard alleles: Pale yellow to cream",
+        "advice": "Important in Labradors, Nova Scotia Duck Tolling Retrievers, and red-shaded Goldens. Combined with the I locus (MFSD12), KITLG gives more accurate predictions across the cream-to-deep-red spectrum. No known health impact.",
+    },
+    "saddle-tan": {
+        "title": "Saddle Tan (RALY) — Saddle Pattern",
+        "summary": "Dogs are born black-and-tan (tan-point) but progressively shift to a 'saddle' pattern as the black recedes from the body during growth. The classic German Shepherd pattern.",
+        "mechanism": "A dominant regulatory variant in RALY. In A-locus at/at dogs, eumelanin areas on the back shrink with age, exposing more tan (phaeomelanin) coloration.",
+        "phenotype": "I/I or I/i: Adult saddle-tan (black confined to the saddle; legs and face tan)\ni/i: Remains predominantly black-and-tan into adulthood",
+        "advice": "Typical of German Shepherds, Airedale Terriers, Beagles, and Belgian Tervurens. Puppies may look black-and-tan but transition to the saddle pattern between 6 months and 2 years. A-locus at/at is a prerequisite.",
+    },
+    "domino": {
+        "title": "Domino / Grizzle (MC1R Ea) — Lightened Facial Mask",
+        "summary": "A pattern of lightened pigment in the facial mask region, characteristic of sighthounds. Reported in Afghans, Salukis, Borzois, and Siberian Huskies.",
+        "mechanism": "The Ea (Edomino) variant of MC1R partially suppresses eumelanin in the mask region. A derived E-locus allele, with dominance hierarchy E > Eg > Ea > e.",
+        "phenotype": "Ea/Ea or Ea/e: Domino / grizzle (lightened facial mask)\nEa/E_ (E dominant): Standard coloring",
+        "advice": "Underlies the 'domino' pattern in Afghan Hounds, 'grizzle' in Salukis, and agouti-like patterns in Siberian Huskies. Effect is opposite to the Em mask (black mask). Some E-locus panels omit the Ea variant — sighthound breeders should verify panel coverage.",
+    },
+    "improper-coat": {
+        "title": "Improper Coat (IC / RSPO2 variant)",
+        "summary": "A recessive phenotype seen in Portuguese Water Dogs and doodle breeds: a smooth face (no furnishings) and short coat.",
+        "mechanism": "Caused by homozygous absence of the RSPO2 furnishings variant (ic/ic). Equivalent to f/f at the F locus, suppressing development of facial furnishings, eyebrows, and beard.",
+        "phenotype": "IC/IC or IC/ic: Standard furnished coat (eyebrows and beard present)\nic/ic: Smooth coat (no facial furnishings, Lab/Golden-like appearance)",
+        "advice": "Disqualifying in Portuguese Water Dogs and Lagotto Romagnolos. In doodle breeds (Labradoodle / Goldendoodle), this is treated as a 'hypoallergenic failure'. Recommended alongside the F-locus (RSPO2) furnishings test. No known health impact.",
+    },
+    "albinism": {
+        "title": "Albinism (TYR / SLC45A2) — Oculocutaneous Albinism",
+        "summary": "Hereditary albinism with severely reduced melanin synthesis: white coat and skin, pale to red eyes, and frequent vision impairment.",
+        "mechanism": "Recessive variants in melanin-synthesis genes such as TYR (tyrosinase) and SLC45A2 sharply reduce melanin output. This is true albinism, distinct from dominant-white phenotypes such as merle or piebald.",
+        "phenotype": "A/A or A/oca: Normal coloring\noca/oca: Albino (white coat and skin, red to pale iris, photophobia, reduced vision)",
+        "advice": "Reported in Dobermans (Z-factor), Pekingese, Lhasa Apsos, and others. ⚠️ <strong>Health impact</strong>: UV sensitivity (elevated skin cancer risk), vision impairment, and photophobia. Breeding albino dogs is ethically discouraged. Affected dogs require sun protection outdoors and routine dermatologic monitoring.",
+    },
 }
