@@ -834,6 +834,88 @@ class TestCleanOcrText:
         original = "JAPAN KENNEL CLUB POODLE"
         assert _clean_ocr_text(original) == original
 
+    # --- 拡張 OCR クリーニングのテスト ---
+    def test_fullwidth_to_halfwidth_ascii(self):
+        """全角 ASCII（ＳＩＲＥ）→ 半角に正規化される"""
+        assert "SIRE" in _clean_ocr_text("ＳＩＲＥ: ＲＥＸ")
+
+    def test_fullwidth_colon_normalized(self):
+        assert "Sire:" in _clean_ocr_text("Sire：REX")
+
+    def test_japanese_label_spacing(self):
+        """OCR が "犬 名" のように空白を挿入したケース"""
+        assert "犬名" in _clean_ocr_text("犬 名 : サンプル太郎")
+        assert "生年月日" in _clean_ocr_text("生 年 月 日 : 2020/01/01")
+
+    def test_whitespace_inserted_label(self):
+        """OCR が "P E D I G R E E" のように字間に空白を入れたケース"""
+        assert "PEDIGREE" in _clean_ocr_text("P E D I G R E E")
+        assert "KENNEL" in _clean_ocr_text("K E N N E L CLUB")
+        assert "JKC" in _clean_ocr_text("J K C - PT")
+
+    def test_jkc_registration_format(self):
+        """JKC 登録番号の余分なスペース・ハイフン揺れを正規化"""
+        out = _clean_ocr_text("JKC - PT - 12345 / 67")
+        assert "JKC-PT-12345/67" in out
+
+    def test_uppercase_misreads_extended(self):
+        """新規追加の大文字ラベル誤認識"""
+        assert "KENNEL" in _clean_ocr_text("KENNEI CLUB")
+        assert "JAPAN" in _clean_ocr_text("J4PAN KENNEL")
+        assert "DAM" in _clean_ocr_text("DAlVl: BELLA")
+        assert "FEMALE" in _clean_ocr_text("Sex: FEM4LE")
+        assert "BREED" in _clean_ocr_text("BR3ED: POODLE")
+        assert "BIRTH" in _clean_ocr_text("BIRTII DATE")
+        assert "CHAMPION" in _clean_ocr_text("INT CHAMP10N")
+
+    def test_control_chars_stripped(self):
+        """制御文字（BOM, 各種ZWSP）が除去される"""
+        # BOM, ZWSP を含む文字列
+        msg = "﻿SIRE​: REX"
+        out = _clean_ocr_text(msg)
+        assert "﻿" not in out
+        assert "​" not in out
+        assert "SIRE: REX" in out
+
+    def test_collapse_consecutive_blank_lines(self):
+        """連続空行が圧縮される（パース安定化）"""
+        out = _clean_ocr_text("LINE1\n\n\n\n\nLINE2")
+        # 3 行以上の連続改行は 2 行に
+        assert "\n\n\n" not in out
+        assert "LINE1\n\nLINE2" in out
+
+    def test_dam_dalvl_recognized(self):
+        """DAM が小文字Lで誤認識されたケース"""
+        out = _clean_ocr_text("DAlVl: BELLA")
+        assert "DAM" in out
+
+
+class TestOcrScoring:
+    """OCR 出力スコアリング（高品質なバリアントを選ぶための基盤）"""
+
+    def test_score_increases_with_domain_keywords(self):
+        from poodle_genetics import _score_ocr_text
+        plain = "abc def 123 456" * 20
+        rich = "PEDIGREE SIRE DAM KENNEL JAPAN " + plain
+        assert _score_ocr_text(rich) > _score_ocr_text(plain)
+
+    def test_score_zero_for_empty(self):
+        from poodle_genetics import _score_ocr_text
+        assert _score_ocr_text("") == 0.0
+        assert _score_ocr_text(None) == 0.0
+
+    def test_score_penalizes_noise(self):
+        from poodle_genetics import _score_ocr_text
+        clean = "PEDIGREE SIRE DAM KENNEL JAPAN owner breeder " * 4
+        noisy = clean.replace("a", "@").replace("e", "#") + "~^`'\"|" * 50
+        assert _score_ocr_text(clean) > _score_ocr_text(noisy)
+
+    def test_score_rewards_japanese_keywords(self):
+        from poodle_genetics import _score_ocr_text
+        s = "犬名 犬種 性別 毛色 生年月日 ジャパンケネルクラブ"
+        # 日本語キーワード 5+ で 100 点以上
+        assert _score_ocr_text(s) >= 100
+
 
 @pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
 class TestHtmlEscape:

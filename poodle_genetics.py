@@ -4100,81 +4100,204 @@ def parse_pedigree_pdf(pdf_path: str) -> Optional[Pedigree]:
 # PART 2: 血統書 OCR + COI 算出
 # ████████████████████████████████████████████████████████████
 
+_OCR_DOMAIN_KEYWORDS = (
+    # 構造ラベル: ヒット数を増やすほどスコア優位 → 質の高い OCR
+    "PEDIGREE", "JKC", "SIRE", "DAM", "BREED", "COLOR", "BIRTH",
+    "KENNEL", "JAPAN", "OWNER", "BREEDER", "REGIST", "CHAMP",
+    "ジャパンケネルクラブ", "犬名", "犬種", "性別", "毛色",
+    "生年月日", "登録番号", "父", "母", "祖父", "祖母", "ブリーダー",
+)
+
+
+def _score_ocr_text(text: str) -> float:
+    """OCR 結果の品質を粗くスコア化（高いほど良好）。
+
+    - 制御文字・記号過多は減点
+    - 血統書ドメインキーワードの出現でブースト
+    - 単語密度（連続英字 + カタカナ / 漢字）
+    """
+    if not text:
+        return 0.0
+    s = text
+    n = len(s)
+    if n == 0:
+        return 0.0
+    # ドメインキーワード: 各 +25 点
+    kw_score = sum(25 for kw in _OCR_DOMAIN_KEYWORDS if kw in s.upper() or kw in s)
+    # 英字 / かな / 漢字の比率: 0–1
+    letters = sum(1 for ch in s if ch.isalnum() or ("぀" <= ch <= "ヿ") or ("一" <= ch <= "鿿"))
+    letter_ratio = letters / n
+    # 記号過多ペナルティ
+    noise = sum(1 for ch in s if ch in "~^`'\"|\\<>*=#@$%")
+    noise_ratio = noise / max(n, 1)
+    return kw_score + 50 * letter_ratio - 80 * noise_ratio + min(n, 2000) / 50
+
+
+def _adaptive_threshold_pil(gray):
+    """numpy なしの局所平均ベース適応的二値化。
+
+    画像を 16×16 のグリッドに分割し、各セルの平均輝度より少し下を閾値に。
+    画像全体に強い陰影がある写真でも文字が消えにくい。
+    """
+    from PIL import Image as _Image
+    w, h = gray.size
+    grid = gray.resize((16, 16), _Image.LANCZOS)
+    grid_pixels = list(grid.getdata())  # length 256
+    # セルあたりの幅 / 高さ
+    cw, ch = max(w // 16, 1), max(h // 16, 1)
+    binarized = gray.copy()
+    px = binarized.load()
+    src = gray.load()
+    for cy in range(16):
+        for cx in range(16):
+            mean = grid_pixels[cy * 16 + cx]
+            thr = max(mean - 20, 60)
+            x0 = cx * cw
+            x1 = (cx + 1) * cw if cx < 15 else w
+            y0 = cy * ch
+            y1 = (cy + 1) * ch if cy < 15 else h
+            for y in range(y0, y1):
+                for x in range(x0, x1):
+                    px[x, y] = 255 if src[x, y] > thr else 0
+    return binarized
+
+
+def _ocr_preprocess_variants(img):
+    """1 枚の画像から OCR 用の派生バリアントを複数生成。
+
+    異なる前処理それぞれで OCR にかけ、スコア最良を採用する。
+    変換コストの低い順に並べる（早期終了可能なため）。
+    """
+    from PIL import ImageEnhance, ImageFilter, ImageOps
+    # 共通: グレースケール + 軽い denoise
+    gray = img.convert("L")
+    gray = gray.filter(ImageFilter.MedianFilter(size=3))
+
+    variants = []
+
+    # v1: シンプルなグレースケール（多くのケースでこれが最良）
+    variants.append(("gray", gray))
+
+    # v2: コントラスト + シャープネス強化
+    enhanced = ImageEnhance.Contrast(gray).enhance(2.2)
+    enhanced = ImageEnhance.Sharpness(enhanced).enhance(2.2)
+    variants.append(("enhanced", enhanced))
+
+    # v3: 局所適応的二値化（陰影のある写真に強い）
+    try:
+        adaptive = _adaptive_threshold_pil(enhanced)
+        variants.append(("adaptive", adaptive))
+    except Exception:
+        pass
+
+    # v4: 自動コントラスト + 反転判定（白背景 / 黒背景の対応）
+    try:
+        autocontrast = ImageOps.autocontrast(gray, cutoff=2)
+        variants.append(("autocontrast", autocontrast))
+        # ヒストグラムが暗側に偏っていれば反転を追加（白黒反転スキャン対応）
+        hist = autocontrast.histogram()
+        dark = sum(hist[:128])
+        light = sum(hist[128:])
+        if dark > light * 2:
+            variants.append(("inverted", ImageOps.invert(autocontrast)))
+    except Exception:
+        pass
+
+    return variants
+
+
+def _ocr_run_passes(img, lang_pref="eng+jpn"):
+    """前処理バリアント × PSM モードを総当たりし、スコア最良の text を返す。
+
+    早期終了: 十分高スコアな出力が得られたら以降をスキップ。
+    """
+    ocr_timeout = 90
+    # PSM (Page Segmentation Mode):
+    #   6 = uniform block of text (デフォルト、多くの blood line で良好)
+    #   4 = single column of variable size
+    #   11 = sparse text (キャプション・短い文字列が散らばっているケース)
+    psm_configs = ['--psm 6 --oem 3', '--psm 4 --oem 3', '--psm 11 --oem 3']
+    best_text = ""
+    best_score = 0.0
+
+    for variant_name, v_img in _ocr_preprocess_variants(img):
+        for cfg in psm_configs:
+            try:
+                text = pytesseract.image_to_string(v_img, lang=lang_pref, config=cfg, timeout=ocr_timeout)
+            except RuntimeError:
+                continue
+            if not text:
+                continue
+            score = _score_ocr_text(text)
+            if score > best_score:
+                best_score = score
+                best_text = text
+            # 十分なドメイン語数 + 長さがあれば早期終了
+            if best_score >= 250 and len(best_text) > 400:
+                return best_text
+    return best_text
+
+
 def try_ocr(image_path: str) -> str:
-    """画像からテキストを抽出（Tesseract OCR）— 写真向け前処理付き"""
+    """画像からテキストを抽出（Tesseract OCR）— 多パス前処理 + スコア選択。
+
+    特長:
+      - EXIF 回転自動補正
+      - 4 種類の前処理バリアント × 3 種類の PSM モードを試行
+      - OCR 出力をドメインキーワード / 文字密度 / ノイズ率でスコア化
+      - 最良スコアの出力を採用し、結果テキストは `_clean_ocr_text` で補正
+      - 横向き写真にも対応するため、初回スコアが低い場合は 90°/270°
+        回転版も試行
+    """
     if not HAS_OCR:
         print("  pytesseract が未インストールです。")
         print("  pip install pytesseract Pillow")
         print("  + Tesseract OCR本体: sudo apt install tesseract-ocr tesseract-ocr-jpn")
         return ""
     try:
-        from PIL import ImageEnhance, ImageFilter, ImageOps
+        from PIL import ImageOps
         img = Image.open(image_path)
-        # HEIC/WEBP等をRGBに変換
         if img.mode not in ("RGB", "L"):
             img = img.convert("RGB")
 
-        # EXIF回転情報を適用（写真の向き補正）
+        # EXIF 回転補正
         try:
             img = ImageOps.exif_transpose(img)
         except Exception:
             pass
 
-        # --- 写真向け前処理 ---
-        # 1. リサイズ（速度改善 + Tesseract最適解像度）
-        max_dim = 2000
+        # リサイズ（Tesseract の最適解像度域へ）
+        max_dim = 2200
         if max(img.size) > max_dim:
             ratio = max_dim / max(img.size)
             img = img.resize((int(img.width * ratio), int(img.height * ratio)), Image.LANCZOS)
 
-        # 2. グレースケール変換
-        gray = img.convert("L")
+        # 1st pass: そのまま
+        text = _ocr_run_passes(img, lang_pref="eng+jpn")
+        score = _score_ocr_text(text)
 
-        # 3. コントラスト・シャープネス強化
-        gray = ImageEnhance.Contrast(gray).enhance(2.0)
-        gray = ImageEnhance.Sharpness(gray).enhance(2.0)
+        # スコアが低い場合は回転を試す（スマホ撮影で横向きになりがち）
+        if score < 120:
+            for angle in (90, 270, 180):
+                try:
+                    rot = img.rotate(angle, expand=True)
+                except Exception:
+                    continue
+                t2 = _ocr_run_passes(rot, lang_pref="eng+jpn")
+                s2 = _score_ocr_text(t2)
+                if s2 > score:
+                    text, score = t2, s2
+                if score >= 250:
+                    break
 
-        # 4. 軽いノイズ除去（MedianFilter）
-        gray = gray.filter(ImageFilter.MedianFilter(size=3))
+        # 日本語優先パスも 1 回だけ追加で試す（カナ・漢字主体の血統書向け）
+        if score < 200:
+            t3 = _ocr_run_passes(img, lang_pref="jpn+eng")
+            s3 = _score_ocr_text(t3)
+            if s3 > score:
+                text, score = t3, s3
 
-        # 5. 適応的二値化（ブロック平均ベース）
-        # numpy不要の簡易実装: 全体平均から閾値を決定
-        stat = gray.resize((1, 1), Image.LANCZOS).getpixel((0, 0))
-        threshold = max(stat - 30, 80)
-        binarized = gray.point(lambda x: 255 if x > threshold else 0)
-
-        # OCR実行（1パスで高速化）
-        # 血統書の主要情報は英語表記が多いため eng+jpn 順で優先
-        ocr_timeout = 120
-        best_text = ""
-
-        # パス1: 英語優先（高速・血統書の構造テキストに最適）
-        try:
-            text = pytesseract.image_to_string(
-                binarized, lang='eng+jpn', config='--psm 6 --oem 3',
-                timeout=ocr_timeout
-            )
-            if text:
-                best_text = text
-        except RuntimeError:
-            pass
-
-        # 十分なテキストが取れた場合は早期終了
-        if len(best_text) > 300 and re.search(r'SIRE|DAM|JKC|PEDIGREE|血統', best_text, re.IGNORECASE):
-            return best_text
-
-        # パス2: フォールバック（グレースケール + 日本語優先）
-        try:
-            text = pytesseract.image_to_string(
-                gray, lang='jpn+eng', config='--psm 6 --oem 3',
-                timeout=ocr_timeout
-            )
-            if len(text) > len(best_text):
-                best_text = text
-        except RuntimeError:
-            pass
-
-        return best_text
+        return text
     except Exception as e:
         print(f"  OCRエラー: {e}")
         return ""
@@ -4478,27 +4601,139 @@ def parse_jkc_pedigree_text(text: str) -> Optional[Pedigree]:
     return parse_pedigree_text(text)
 
 
+# OCR ラベル誤認識: 大文字ラベル系
+_OCR_LABEL_FIXES_UPPER = {
+    # KENNEL CLUB 系
+    'KENNE1': 'KENNEL', 'KENNE!': 'KENNEL', 'KENNEI': 'KENNEL', 'KENN3L': 'KENNEL',
+    'K3NNEL': 'KENNEL', 'KENNF1': 'KENNEL',
+    'C1UB': 'CLUB', 'CIUB': 'CLUB', 'CLU8': 'CLUB', 'CL[J]B': 'CLUB', 'C|UB': 'CLUB',
+    # JAPAN
+    'J@PAN': 'JAPAN', 'JAP@N': 'JAPAN', 'J4PAN': 'JAPAN', 'JAP4N': 'JAPAN',
+    'JAFAN': 'JAPAN', 'JAPAH': 'JAPAN', '|APAN': 'JAPAN',
+    # POODLE
+    'P00DLE': 'POODLE', 'P0ODLE': 'POODLE', 'POOD1E': 'POODLE', 'POODIE': 'POODLE',
+    'PO0DLE': 'POODLE',
+    # MALE / FEMALE
+    'MA1E': 'MALE', 'MAIE': 'MALE', 'MAL3': 'MALE',
+    'FEMA1E': 'FEMALE', 'FEMAIE': 'FEMALE', 'FEMAL3': 'FEMALE', 'FEM4LE': 'FEMALE',
+    # PEDIGREE
+    'PEDI6REE': 'PEDIGREE', 'PEDIGR3E': 'PEDIGREE', 'PEDIGR EE': 'PEDIGREE',
+    'PED1GREE': 'PEDIGREE', 'PEDIGR££': 'PEDIGREE', 'PEDlGREE': 'PEDIGREE',
+    # SIRE / DAM
+    'S1RE': 'SIRE', 'SlRE': 'SIRE', 'S|RE': 'SIRE', 'SI RE': 'SIRE',
+    'DAlVl': 'DAM', 'DAlVI': 'DAM', 'D4M': 'DAM',
+    # BREED / COLOR / BIRTH / OWNER / BREEDER
+    'BR33D': 'BREED', 'BRE3D': 'BREED', 'BR3ED': 'BREED', 'BREEED': 'BREED',
+    'C0LOR': 'COLOR', 'COL0R': 'COLOR', 'COLDR': 'COLOR',
+    'B1RTH': 'BIRTH', 'BIRTII': 'BIRTH', 'B|RTH': 'BIRTH',
+    'OWN3R': 'OWNER', 'OVVNER': 'OWNER',
+    'BR33DER': 'BREEDER', 'BREE0ER': 'BREEDER',
+    # 登録番号系
+    'REGI5T': 'REGIST', 'REG1ST': 'REGIST', 'R3GIST': 'REGIST',
+    'JKC PT': 'JKC-PT',
+    # チャンピオン称号
+    'CHAMP10N': 'CHAMPION', 'CH4MPION': 'CHAMPION', 'CHAMPlON': 'CHAMPION',
+    'INT CH': 'INT.CH',
+}
+
+# 混在ラベル / 小文字混じり
+_OCR_LABEL_FIXES_MIXED = {
+    'Nam3': 'Name', 'Narne': 'Name', 'NarrIe': 'Name', 'Naine': 'Name',
+    'D0g': 'Dog', 'D09': 'Dog',
+    'Br33d': 'Breed', 'Bre3d': 'Breed', 'Brced': 'Breed',
+    'C0lor': 'Color', 'Col0r': 'Color', 'Colcr': 'Color',
+    'Bi rth': 'Birth', 'Birth date': 'Birth Date', 'Birthdate': 'Birth Date',
+    'Sex:': 'Sex:', 'S ex': 'Sex',
+    'Sire :': 'Sire:', 'Dam :': 'Dam:',
+    'Reg.No': 'Reg. No', 'RegNo': 'Reg. No',
+}
+
+# 日本語ラベルの誤認識（OCR が漢字を分解 / 誤判別しがち）
+_OCR_LABEL_FIXES_JA = {
+    'ジャパン ケネル クラブ': 'ジャパンケネルクラブ',
+    'ジヤパン': 'ジャパン',
+    'ケンネル': 'ケネル',
+    'クラフ': 'クラブ', 'クラフ ': 'クラブ ',
+    '犬 名': '犬名',
+    '犬 種': '犬種',
+    '性 別': '性別',
+    '毛 色': '毛色',
+    '生 年 月 日': '生年月日', '生年 月日': '生年月日',
+    '登録 番号': '登録番号', '登 録番号': '登録番号',
+    'ブ リーダー': 'ブリーダー',
+    '父 ': '父 ', '母 ': '母 ',
+}
+
+
+def _normalize_ocr_unicode(text: str) -> str:
+    """OCR 出力の Unicode 揺らぎを正規化。
+
+    - 全角英数 → 半角（ラベル抽出の正規表現が機能するため）
+    - 制御文字・ゼロ幅文字を除去
+    - 連続空白を圧縮、行末空白を削除
+    - 全角コロン → 半角コロン（ラベル直後の値抽出に必要）
+    """
+    if not text:
+        return text
+    # ゼロ幅・BOM・制御文字（改行/タブは保持）
+    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', text)
+    # Unicode 不可視文字（ZWSP/ZWJ/BOM 等）
+    text = re.sub('[\u200b-\u200f\u202a-\u202e\u2060\ufeff]', '', text)
+    # 全角 ASCII → 半角（ASCII レンジ + 全角スペース）
+    out_chars = []
+    for ch in text:
+        code = ord(ch)
+        if 0xff01 <= code <= 0xff5e:
+            out_chars.append(chr(code - 0xfee0))
+        elif code == 0x3000:
+            out_chars.append(' ')
+        else:
+            out_chars.append(ch)
+    text = ''.join(out_chars)
+    # 全角コロン・括弧
+    text = text.replace('：', ':').replace('，', ',').replace('．', '.')
+    # 行末スペース、連続スペース
+    lines = []
+    for line in text.split('\n'):
+        line = re.sub(r'[ \t]+', ' ', line).rstrip()
+        lines.append(line)
+    text = '\n'.join(lines)
+    # 連続空行を 1 行に
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text
+
+
 def _clean_ocr_text(text: str) -> str:
-    """OCR特有の文字化けを補正"""
-    # 行ごとに処理（犬名等の固有名詞はそのまま、ラベル部分のみ補正）
-    label_fixes = {
-        # よくあるOCR誤認識パターン（ラベル・キーワード向け）
-        'KENNE1': 'KENNEL', 'KENNE!': 'KENNEL',
-        'C1UB': 'CLUB', 'CIUB': 'CLUB',
-        'J@PAN': 'JAPAN', 'JAP@N': 'JAPAN',
-        'P00DLE': 'POODLE', 'P0ODLE': 'POODLE',
-        'MA1E': 'MALE', 'MAIE': 'MALE',
-        'FEMA1E': 'FEMALE', 'FEMAIE': 'FEMALE',
-        'PEDI6REE': 'PEDIGREE', 'PEDIGR3E': 'PEDIGREE',
-        'S1RE': 'SIRE', 'SlRE': 'SIRE',
-        'Nam3': 'Name', 'Narne': 'Name',
-        'D0g': 'Dog',
-        'Br33d': 'Breed', 'Bre3d': 'Breed',
-        'C0lor': 'Color', 'Col0r': 'Color',
-        'Bi rth': 'Birth',
-    }
-    for wrong, right in label_fixes.items():
+    """OCR 出力をパース可能な形に整える。
+
+    1. Unicode 正規化（全角→半角・制御文字除去・空白圧縮）
+    2. 大文字ラベルの典型的な誤認識を辞書置換（KENNE1→KENNEL 等）
+    3. 大小混在ラベルの誤認識
+    4. 日本語ラベルの分かち書き誤認識（"犬 名"→"犬名" 等）
+    5. 空白挿入耐性パターン（"P E D I G R E E"→"PEDIGREE" 等）
+
+    既存呼び出し側との互換性を維持するため、入力空文字列はそのまま返す。
+    """
+    if not text:
+        return text
+    text = _normalize_ocr_unicode(text)
+    # 全置換
+    for wrong, right in _OCR_LABEL_FIXES_UPPER.items():
         text = text.replace(wrong, right)
+    for wrong, right in _OCR_LABEL_FIXES_MIXED.items():
+        text = text.replace(wrong, right)
+    for wrong, right in _OCR_LABEL_FIXES_JA.items():
+        text = text.replace(wrong, right)
+    # 空白挿入耐性: ラベル間にスペースが混入したケース
+    # "P E D I G R E E" 等の単語間スペースを除去
+    text = re.sub(r'\bP\s*E\s*D\s*I\s*G\s*R\s*E\s*E\b', 'PEDIGREE', text, flags=re.IGNORECASE)
+    text = re.sub(r'\bS\s*I\s*R\s*E\b', 'SIRE', text)
+    text = re.sub(r'\bD\s*A\s*M\b', 'DAM', text)
+    text = re.sub(r'\bK\s*E\s*N\s*N\s*E\s*L\b', 'KENNEL', text)
+    text = re.sub(r'\bJ\s*A\s*P\s*A\s*N\b', 'JAPAN', text)
+    text = re.sub(r'\bJ\s*K\s*C\b', 'JKC', text)
+    # JKC 登録番号: "JKC - PT - 12345 / 67" のような揺らぎを正規化
+    text = re.sub(r'JKC\s*-?\s*PT\s*-?\s*(\d+)\s*/\s*(\d+)', r'JKC-PT-\1/\2', text)
     return text
 
 
