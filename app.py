@@ -201,6 +201,7 @@ def extract_sim_data(dog):
         "sex": sex,
         "color": color,
         "health": health,
+        "breed": dog.breed or "",
     }
 
 
@@ -905,6 +906,58 @@ def simulator():
     window.location.search から取り出して /api/dogs|pedigrees を呼ぶ）"""
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)),
                                "breeding_simulator.html")
+
+
+@app.route("/api/simulator/parse", methods=["POST"])
+def api_simulator_parse():
+    """軽量 PDF 解析エンドポイント（繁殖シミュレーター直接アップロード用）。
+
+    1〜2 個の Orivet 遺伝子検査 PDF を受け取り、遺伝子型を JSON で返す。
+    レポート HTML / Excel 生成・session_id 発行を行わず、最小コストで
+    シミュレーター UI へ流すための専用 API。
+    """
+    request_id = uuid.uuid4().hex[:8]
+    files = request.files.getlist("pdf_files")
+    files = [f for f in files if f and f.filename]
+    if not files:
+        return jsonify({"error": "no_files", "message": "PDF ファイルが添付されていません"}), 400
+    if len(files) > 4:
+        return jsonify({"error": "too_many_files", "message": "一度に処理できるのは最大 4 ファイルです"}), 400
+    if not HAS_PDFPLUMBER:
+        return jsonify({"error": "pdf_unavailable", "message": "サーバーで PDF 解析機能が利用できません"}), 503
+
+    # アップロード用の使い捨て一時ディレクトリ。終了時に必ず削除する。
+    tmp_dir = os.path.join(UPLOAD_FOLDER, f"sim_{request_id}_{uuid.uuid4().hex[:8]}")
+    os.makedirs(tmp_dir, exist_ok=True)
+    parsed = []
+    errors = []
+    try:
+        for f in files:
+            if not allowed_file(f.filename, ALLOWED_PDF_EXT):
+                errors.append({"file": f.filename, "message": "PDF 以外は受け付けていません"})
+                continue
+            safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.pdf'}"
+            path = os.path.join(tmp_dir, safe_name)
+            f.save(path)
+            if not _is_valid_pdf(path):
+                errors.append({"file": f.filename, "message": "PDF として認識できませんでした"})
+                continue
+            try:
+                dog = parse_pdf(path)
+            except Exception as e:
+                eid = _log_exc("simulator_parse_pdf", f.filename, e, request_id)
+                errors.append({"file": f.filename, "message": f"PDF 解析中にエラーが発生しました（{type(e).__name__} / error_id={eid}）"})
+                continue
+            if not dog:
+                errors.append({"file": f.filename, "message": "Orivet 遺伝子検査 PDF として認識できませんでした"})
+                continue
+            parsed.append(extract_sim_data(dog))
+
+        if not parsed:
+            return jsonify({"dogs": [], "errors": errors, "message": "解析できた犬がいませんでした"}), 200
+        return jsonify({"dogs": parsed, "errors": errors}), 200
+    finally:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":
