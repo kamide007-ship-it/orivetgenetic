@@ -219,6 +219,32 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
 </header>
 
 <div class="container">
+
+  <!-- ================================================================ -->
+  <!-- PDF アップロード（Orivet 遺伝子検査 PDF を直接シミュレーターに） -->
+  <!-- ================================================================ -->
+  <details class="card" id="pdf-upload-card" style="background:#fffbeb;border:1px solid #fde68a;margin-bottom:18px;" open>
+    <summary style="cursor:pointer;font-weight:600;color:#92400e;font-size:1.05em;list-style:none;display:flex;align-items:center;gap:8px;">
+      📄 <span>Orivet 遺伝子検査 PDF をシミュレーターに貼り付ける</span>
+      <span style="margin-left:auto;font-size:0.85em;color:#a16207;font-weight:500;">▾ 開閉</span>
+    </summary>
+    <div style="margin-top:12px;font-size:0.9em;color:#374151;">
+      <p style="margin-bottom:10px;">
+        Orivet 遺伝子検査の PDF を最大 4 ファイルまで選択すると、自動で解析して父犬・母犬の遺伝子型欄に投入します。<br>
+        <span style="color:#6b7280;font-size:0.9em;">※ レポートは生成されません。シミュレーター専用の軽量解析です。</span>
+      </p>
+      <form id="sim-pdf-form" onsubmit="return handleSimulatorPdfUpload(event)" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+        <input type="file" name="pdf_files" accept="application/pdf,.pdf" multiple required
+               style="font-size:0.95em;padding:8px;background:#fff;border:1px solid #fde68a;border-radius:8px;flex:1;min-width:200px;">
+        <button type="submit" class="btn" style="background:#7c3aed;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-weight:600;cursor:pointer;">
+          📤 解析して投入
+        </button>
+        <span id="sim-pdf-status" role="status" aria-live="polite" style="font-size:0.85em;color:#374151;"></span>
+      </form>
+      <div id="sim-pdf-errors" style="margin-top:8px;font-size:0.85em;"></div>
+    </div>
+  </details>
+
   <div class="tabs" role="tablist">
     <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="color" onclick="showTab('color')">毛色シミュレーション</div>
     <div class="tab" role="tab" tabindex="0" aria-selected="false" aria-controls="health" onclick="showTab('health')">健康リスク分析</div>
@@ -1172,13 +1198,65 @@ function calcCOI() {
   document.getElementById('coi-output').innerHTML = html;
 }
 
-// PDF解析データからシミュレーターに自動反映
+// シミュレーターに犬の遺伝子型を登録し、セレクトに項目を追加して自動選択する。
+// keyPrefix を切り替えれば、PDF解析セッションと直接アップロード分を別々に管理可能。
+let _SIM_DOG_COUNTER = 0;
+function addDogsToSimulator(dogs, keyPrefix) {
+  if (!dogs || dogs.length === 0) return [];
+  keyPrefix = keyPrefix || 'pdf_';
+  const addedKeys = [];
+
+  dogs.forEach(dog => {
+    const key = keyPrefix + (_SIM_DOG_COUNTER++);
+    DOGS[key] = {
+      name: dog.name,
+      sex: dog.sex,
+      color: dog.color || {},
+      health: dog.health || {}
+    };
+    addedKeys.push({ key: key, sex: dog.sex });
+
+    const colorLabel = dog.name + ' (' + Object.values(dog.color || {}).join(', ') + ')';
+    const sireColor = document.getElementById('sire-color');
+    const damColor = document.getElementById('dam-color');
+    sireColor.insertBefore(new Option(colorLabel, key), sireColor.firstChild);
+    damColor.insertBefore(new Option(colorLabel, key), damColor.firstChild);
+
+    const sireHealth = document.getElementById('sire-health');
+    const damHealth = document.getElementById('dam-health');
+    sireHealth.insertBefore(new Option(dog.name, key), sireHealth.firstChild);
+    damHealth.insertBefore(new Option(dog.name, key), damHealth.firstChild);
+  });
+
+  // オス/メスを優先的に父/母セレクトに自動選択
+  const male = addedKeys.find(k => k.sex === 'male');
+  const female = addedKeys.find(k => k.sex === 'female');
+  if (male) {
+    document.getElementById('sire-color').value = male.key;
+    document.getElementById('sire-health').value = male.key;
+  } else if (addedKeys[0]) {
+    document.getElementById('sire-color').value = addedKeys[0].key;
+    document.getElementById('sire-health').value = addedKeys[0].key;
+  }
+  if (female) {
+    document.getElementById('dam-color').value = female.key;
+    document.getElementById('dam-health').value = female.key;
+  } else if (addedKeys[1]) {
+    document.getElementById('dam-color').value = addedKeys[1].key;
+    document.getElementById('dam-health').value = addedKeys[1].key;
+  }
+
+  runColorSim();
+  runHealthSim();
+  return addedKeys;
+}
+
+// PDF解析セッションからシミュレーターに自動反映（?session=XXX 経由）
 function loadDogsFromSession() {
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session');
   if (!sessionId) return;
 
-  // レポートへ戻るボタンを表示
   const reportBtn = document.getElementById('nav-report');
   if (reportBtn) {
     reportBtn.href = '/report/' + encodeURIComponent(sessionId);
@@ -1187,63 +1265,54 @@ function loadDogsFromSession() {
 
   fetch('/api/dogs/' + encodeURIComponent(sessionId))
     .then(r => r.json())
-    .then(dogs => {
-      if (!dogs || dogs.length === 0) return;
-
-      // 各犬をDOGSに登録し、セレクトボックスに追加
-      dogs.forEach((dog, idx) => {
-        const key = 'pdf_' + idx;
-        DOGS[key] = {
-          name: dog.name,
-          sex: dog.sex,
-          color: dog.color || {},
-          health: dog.health || {}
-        };
-
-        // 毛色シミュレーター用セレクトに追加
-        const colorLabel = dog.name + ' (' + Object.values(dog.color || {}).join(', ') + ')';
-        const sireColor = document.getElementById('sire-color');
-        const damColor = document.getElementById('dam-color');
-        const opt1 = new Option(colorLabel, key);
-        const opt2 = new Option(colorLabel, key);
-        sireColor.insertBefore(opt1, sireColor.firstChild);
-        damColor.insertBefore(opt2, damColor.firstChild);
-
-        // 健康リスク用セレクトに追加
-        const sireHealth = document.getElementById('sire-health');
-        const damHealth = document.getElementById('dam-health');
-        const opt3 = new Option(dog.name, key);
-        const opt4 = new Option(dog.name, key);
-        sireHealth.insertBefore(opt3, sireHealth.firstChild);
-        damHealth.insertBefore(opt4, damHealth.firstChild);
-      });
-
-      // 最初の犬を自動選択
-      if (dogs.length >= 1) {
-        const maleIdx = dogs.findIndex(d => d.sex === 'male');
-        const femaleIdx = dogs.findIndex(d => d.sex === 'female');
-
-        if (maleIdx >= 0) {
-          document.getElementById('sire-color').value = 'pdf_' + maleIdx;
-          document.getElementById('sire-health').value = 'pdf_' + maleIdx;
-        } else {
-          document.getElementById('sire-color').value = 'pdf_0';
-          document.getElementById('sire-health').value = 'pdf_0';
-        }
-
-        if (femaleIdx >= 0) {
-          document.getElementById('dam-color').value = 'pdf_' + femaleIdx;
-          document.getElementById('dam-health').value = 'pdf_' + femaleIdx;
-        } else if (dogs.length >= 2) {
-          document.getElementById('dam-color').value = 'pdf_1';
-          document.getElementById('dam-health').value = 'pdf_1';
-        }
-      }
-
-      runColorSim();
-      runHealthSim();
-    })
+    .then(dogs => addDogsToSimulator(dogs, 'pdf_'))
     .catch(err => console.warn('犬データの読み込みに失敗:', err));
+}
+
+// シミュレーター画面から直接 PDF をアップロードして解析・投入
+function handleSimulatorPdfUpload(ev) {
+  ev.preventDefault();
+  const form = ev.target;
+  const status = document.getElementById('sim-pdf-status');
+  const errBox = document.getElementById('sim-pdf-errors');
+  const submitBtn = form.querySelector('button[type="submit"]');
+  status.textContent = '⏳ 解析中…';
+  errBox.innerHTML = '';
+  submitBtn.disabled = true;
+
+  const fd = new FormData(form);
+  fetch('/api/simulator/parse', { method: 'POST', body: fd })
+    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+    .then(({ ok, data }) => {
+      if (!ok) {
+        status.textContent = '';
+        errBox.innerHTML = '<div class="warn-box">' +
+          (data && data.message ? data.message : '解析に失敗しました') + '</div>';
+        return;
+      }
+      const dogs = data.dogs || [];
+      const errors = data.errors || [];
+      if (errors.length) {
+        errBox.innerHTML = errors.map(e =>
+          '<div style="color:#92400e;background:#fef3c7;border:1px solid #fde68a;padding:6px 10px;border-radius:6px;margin-bottom:4px;">' +
+          '⚠️ ' + (e.file ? '<strong>' + e.file + '</strong>: ' : '') + e.message + '</div>'
+        ).join('');
+      }
+      if (dogs.length === 0) {
+        status.textContent = '解析できた犬がいませんでした';
+        return;
+      }
+      addDogsToSimulator(dogs, 'upload_');
+      status.textContent = '✅ ' + dogs.length + '頭を投入しました';
+      form.reset();
+    })
+    .catch(err => {
+      console.error(err);
+      status.textContent = '';
+      errBox.innerHTML = '<div class="warn-box">通信エラー: ' + (err && err.message ? err.message : err) + '</div>';
+    })
+    .finally(() => { submitBtn.disabled = false; });
+  return false;
 }
 
 // ================================================================

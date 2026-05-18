@@ -356,6 +356,47 @@ class TestDetectBreedGuides:
         assert detect_breed_guides(["Imaginary Wonder Hound XYZ"]) == []
 
 
+class TestSimulatorPdfUpload:
+    """繁殖シミュレーター直接 PDF アップロード API"""
+
+    def test_endpoint_rejects_empty(self):
+        rv = client.post("/api/simulator/parse")
+        assert rv.status_code == 400
+        body = rv.get_json()
+        assert body["error"] == "no_files"
+
+    def test_endpoint_rejects_non_pdf(self):
+        import io
+        data = {"pdf_files": (io.BytesIO(b"not a pdf"), "fake.txt")}
+        rv = client.post("/api/simulator/parse", data=data,
+                         content_type="multipart/form-data")
+        # 拒否されるか、errors に分類されて 200
+        if rv.status_code == 200:
+            body = rv.get_json()
+            assert body["dogs"] == []
+            assert body["errors"]
+        else:
+            assert rv.status_code == 400
+
+    def test_endpoint_rejects_too_many_files(self):
+        import io
+        data = {"pdf_files": [
+            (io.BytesIO(b"%PDF-1.4\n%EOF"), f"f{i}.pdf") for i in range(5)
+        ]}
+        rv = client.post("/api/simulator/parse", data=data,
+                         content_type="multipart/form-data")
+        assert rv.status_code == 400
+        body = rv.get_json()
+        assert body["error"] == "too_many_files"
+
+    def test_simulator_page_has_upload_widget(self):
+        rv = client.get("/simulator")
+        body = rv.get_data(as_text=True)
+        assert "sim-pdf-form" in body
+        assert "/api/simulator/parse" in body
+        assert "addDogsToSimulator" in body
+
+
 class TestGlossarySearchUI:
     """ライブフィルタの JS が glossary.html に含まれていることを確認"""
 
