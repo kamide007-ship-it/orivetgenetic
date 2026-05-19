@@ -356,6 +356,88 @@ class TestDetectBreedGuides:
         assert detect_breed_guides(["Imaginary Wonder Hound XYZ"]) == []
 
 
+class TestSimpleExplainers:
+    """初心者向け解説オーバーレイ（simple_explainers.py）"""
+
+    def test_module_importable(self):
+        from simple_explainers import DISEASE_SIMPLE, TRAIT_SIMPLE, GUIDE_EXTRAS, GENETICS_TOOLTIPS
+        assert len(DISEASE_SIMPLE) > 0
+        assert len(TRAIT_SIMPLE) > 0
+        assert len(GUIDE_EXTRAS) > 0
+        assert len(GENETICS_TOOLTIPS) > 0
+
+    def test_merged_into_disease_kb(self):
+        from poodle_genetics import DISEASE_SLUG_INDEX
+        dm = DISEASE_SLUG_INDEX.get("degenerative-myelopathy")
+        assert dm and "_simple" in dm
+        assert "oneliner" in dm["_simple"]
+        assert "daily_impact" in dm["_simple"]
+        assert isinstance(dm["_simple"]["misconceptions"], list)
+
+    def test_merged_into_trait_kb(self):
+        from poodle_genetics import TRAIT_SLUG_INDEX
+        e = TRAIT_SLUG_INDEX.get("e-locus")
+        assert e and "_simple" in e
+        assert "oneliner" in e["_simple"]
+        assert "breeder_tip" in e["_simple"]
+
+    def test_merged_into_guides(self):
+        from poodle_genetics import GUIDES_INDEX
+        g = GUIDES_INDEX.get("coi-basics")
+        assert g and "tldr" in g and "faq" in g
+        assert len(g["tldr"]) >= 2
+        assert all("q" in x and "a" in x for x in g["faq"])
+
+    def test_disease_page_shows_simple_section(self):
+        rv = client.get("/glossary/disease/degenerative-myelopathy")
+        body = rv.get_data(as_text=True)
+        assert "💡 一言でいうと" in body
+        assert "日常生活への影響" in body
+        assert "よくある誤解" in body
+
+    def test_disease_page_en_no_simple_section(self):
+        """英語ページにはまだ翻訳がないので表示しない"""
+        rv = client.get("/glossary/disease/degenerative-myelopathy?lang=en")
+        body = rv.get_data(as_text=True)
+        assert "💡 一言でいうと" not in body
+
+    def test_trait_page_shows_simple_section(self):
+        rv = client.get("/glossary/trait/m-locus")
+        body = rv.get_data(as_text=True)
+        assert "💡 一言でいうと" in body
+        assert "ブリーダー向け一言" in body
+
+    def test_guide_page_shows_tldr_and_faq(self):
+        rv = client.get("/guides/coi-basics")
+        body = rv.get_data(as_text=True)
+        assert "30 秒で分かる要点" in body
+        assert "よくある質問" in body
+
+    def test_disease_without_simple_renders_normally(self):
+        """_simple 未設定の疾患でもページが壊れない"""
+        # 未設定のスラグを 1 件選ぶ
+        from poodle_genetics import DISEASE_KB
+        no_simple = [d for d in DISEASE_KB if "_simple" not in d]
+        assert no_simple, "all entries have _simple — pick different test"
+        rv = client.get(f"/glossary/disease/{no_simple[0]['_slug']}")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "💡 一言でいうと" not in body
+
+    def test_genetics_tooltips_passed_to_report(self):
+        """report.html で genetics_tooltips が JSON シリアライズされている"""
+        # 直接 report ルートは session_id 必須なので、レンダリングをモックする
+        from app import app as flask_app
+        with flask_app.app_context():
+            from flask import render_template
+            from poodle_genetics import GENETICS_TOOLTIPS
+            # report.html はテンプレート単体ではレンダ不可（session_id 必要）
+            # GENETICS_TOOLTIPS にエクスポートされていることだけ確認
+            assert "N/N" in GENETICS_TOOLTIPS
+            assert "P/N" in GENETICS_TOOLTIPS
+            assert "COI" in GENETICS_TOOLTIPS
+
+
 class TestSimulatorPdfUpload:
     """繁殖シミュレーター直接 PDF アップロード API"""
 

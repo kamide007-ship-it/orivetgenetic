@@ -121,6 +121,7 @@ from poodle_genetics import (
     get_disease_kb_localized, get_trait_kb_localized,
     get_guides_localized, get_guide_localized,
     HAS_EN_KB, SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN,
+    GENETICS_TOOLTIPS,
 )
 
 try:
@@ -485,7 +486,8 @@ def report(session_id):
 
     return render_template("report.html", report_html=report_html,
                            session_id=session_id, xlsx_exists=xlsx_exists,
-                           breed_guides=breed_guides)
+                           breed_guides=breed_guides,
+                           genetics_tooltips=GENETICS_TOOLTIPS)
 
 
 @app.route("/api/dogs/<session_id>")
