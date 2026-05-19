@@ -3,7 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orivet 遺伝子解析アプリケーション</title>
+    <title>Orivet 遺伝子解析 — PDF アップロードで毛色予測・健康リスク・血統分析</title>
+    <meta name="description" content="Orivet 遺伝子検査PDFをアップロードすると、毛色予測・遺伝性疾患リスク・血統分析を一括生成。72疾患・27形質・26ガイド記事を収録した辞書付き。">
+    {% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Orivet 遺伝子解析 — PDF アップロードで毛色予測・健康リスク・血統分析">
+    <meta property="og:description" content="Orivet 遺伝子検査PDFから毛色予測・健康リスク・血統分析を一括生成。獣医師・ブリーダー・愛犬家のための解析ツール。">
+    {% if canonical %}<meta property="og:url" content="{{ canonical }}">{% endif %}
+    <meta property="og:site_name" content="Orivet 遺伝子解析">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Orivet 遺伝子解析">
+    <meta name="twitter:description" content="犬の遺伝子検査PDFから毛色予測・健康リスク・血統分析を一括生成。">
+
+    {% if canonical %}
+    <link rel="alternate" hreflang="ja" href="{{ canonical }}">
+    <link rel="alternate" hreflang="en" href="{{ canonical }}?lang=en">
+    <link rel="alternate" hreflang="x-default" href="{{ canonical }}">
+    {% endif %}
+
     {# PWA 対応 (PR #58) #}
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#7c3aed">

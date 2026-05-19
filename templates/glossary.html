@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% if lang == 'en' %}Genetic Disease & Trait Glossary — Orivet Genetics Suite{% else %}遺伝子疾患・形質 辞書 — Orivet Genetics Suite{% endif %}</title>
+<meta name="description" content="{% if lang == 'en' %}A searchable glossary of {{ total_diseases }} canine genetic diseases and {{ total_traits }} coat / behavioral traits, with mechanism, inheritance, severity, and breeding advice for each.{% else %}犬の遺伝性疾患 {{ total_diseases }} 件と毛色・形質 {{ total_traits }} 件を、メカニズム・遺伝様式・重症度・繁殖アドバイス付きで検索できる辞書。{% endif %}">
+{% if canonical %}<link rel="canonical" href="{{ canonical }}">{% endif %}
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="{% if lang == 'en' %}Genetic Disease & Trait Glossary | Orivet Genetic Analysis{% else %}遺伝子疾患・形質 辞書 | Orivet 遺伝子解析{% endif %}">
+<meta property="og:description" content="{% if lang == 'en' %}{{ total_diseases }} canine genetic diseases and {{ total_traits }} traits — searchable, filterable, with breed cross-links.{% else %}犬の遺伝性疾患 {{ total_diseases }} 件と形質 {{ total_traits }} 件を検索・フィルタ・犬種クロスリンク付きで閲覧。{% endif %}">
+{% if canonical %}<meta property="og:url" content="{{ canonical }}">{% endif %}
+<meta property="og:site_name" content="{% if lang == 'en' %}Orivet Genetic Analysis{% else %}Orivet 遺伝子解析{% endif %}">
+<meta property="og:locale" content="{% if lang == 'en' %}en_US{% else %}ja_JP{% endif %}">
+<meta property="og:locale:alternate" content="{% if lang == 'en' %}ja_JP{% else %}en_US{% endif %}">
+
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{% if lang == 'en' %}Genetic Disease & Trait Glossary{% else %}遺伝子疾患・形質 辞書{% endif %}">
+<meta name="twitter:description" content="{% if lang == 'en' %}Searchable canine genetics glossary.{% else %}犬の遺伝学辞書（検索・フィルタ対応）{% endif %}">
+
+<link rel="alternate" hreflang="ja" href="{{ request.url_root.rstrip('/') }}/glossary">
+<link rel="alternate" hreflang="en" href="{{ request.url_root.rstrip('/') }}/glossary?lang=en">
+<link rel="alternate" hreflang="x-default" href="{{ request.url_root.rstrip('/') }}/glossary">
+
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7c3aed">
 <meta name="apple-mobile-web-app-capable" content="yes">

@@ -246,7 +246,12 @@ def request_entity_too_large(_e):
 
 @app.route("/")
 def index():
-    return render_template("index.html", has_pdfplumber=HAS_PDFPLUMBER, has_ocr=HAS_OCR)
+    return render_template(
+        "index.html",
+        has_pdfplumber=HAS_PDFPLUMBER,
+        has_ocr=HAS_OCR,
+        canonical=request.url_root.rstrip("/") + "/",
+    )
 
 
 @app.route("/analyze", methods=["POST"])
@@ -603,6 +608,7 @@ def glossary():
         total_diseases=len(DISEASE_KB),
         total_traits=len(TRAIT_KB),
         lang=lang,
+        canonical=request.url_root.rstrip("/") + "/glossary" + ("?lang=en" if lang == "en" else ""),
     )
 
 
