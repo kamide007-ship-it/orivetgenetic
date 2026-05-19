@@ -137,12 +137,35 @@
     {% endif %}
   </article>
 
+  {% if guide.tldr and lang != 'en' %}
+  <section class="section" style="background:linear-gradient(135deg,#ecfeff,#f0f9ff);border:1px solid #bae6fd;">
+    <h3 style="color:#0e7490;">📌 30 秒で分かる要点</h3>
+    <ul style="margin:0;padding-left:22px;color:#1f2937;line-height:1.7;">
+      {% for point in guide.tldr %}<li style="margin-bottom:6px;">{{ point | safe }}</li>{% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
   {% for section in guide.sections %}
   <section class="section">
     <h3>{{ section.heading }}</h3>
     <p>{{ section.body | safe }}</p>
   </section>
   {% endfor %}
+
+  {% if guide.faq and lang != 'en' %}
+  <section class="section" style="background:#fafafa;border:1px solid #e5e7eb;">
+    <h3 style="color:#4a1a7a;">❓ よくある質問</h3>
+    <div style="display:grid;gap:12px;">
+      {% for item in guide.faq %}
+      <details style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;">
+        <summary style="cursor:pointer;font-weight:600;color:#4a1a7a;">{{ item.q }}</summary>
+        <p style="margin-top:8px;color:#374151;line-height:1.7;">{{ item.a | safe }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
 
   {% if related_diseases or related_traits %}
   <div class="related">

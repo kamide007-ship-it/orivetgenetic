@@ -182,8 +182,90 @@
 
         applyToolbarLang(currentLang);
 
+        // ====== Tooltip injection into report iframe ======
+        // Wraps known genetics terms (P/N, P/P, COI, locus names, etc.) with an
+        // <abbr title="..."> so users get a plain-Japanese hover explanation.
+        const TOOLTIPS = {{ genetics_tooltips | tojson if genetics_tooltips else '{}' }};
+
+        function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+        function injectTooltips() {
+            const iframe = document.getElementById('reportFrame');
+            try {
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!doc || !doc.body) return;
+                if (doc.body.dataset.tooltipsApplied === '1') return;
+                doc.body.dataset.tooltipsApplied = '1';
+
+                // Build patterns. Longest first so "P/N" doesn't shadow "P/P".
+                const terms = Object.keys(TOOLTIPS).sort((a,b) => b.length - a.length);
+                if (terms.length === 0) return;
+
+                // Inject styles for the abbr-tooltip
+                const style = doc.createElement('style');
+                style.textContent = `
+                    abbr[data-vg-tip]{ text-decoration: underline dotted #7c3aed; cursor: help; }
+                    abbr[data-vg-tip]:hover{ background: #ede9fe; }
+                `;
+                doc.head.appendChild(style);
+
+                // Walk text nodes and wrap matches
+                const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+                    acceptNode(n) {
+                        if (!n.nodeValue || !n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                        const p = n.parentElement;
+                        if (!p) return NodeFilter.FILTER_REJECT;
+                        const tag = p.tagName;
+                        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'ABBR' ||
+                            tag === 'TITLE' || tag === 'TEXTAREA' || tag === 'OPTION') {
+                            return NodeFilter.FILTER_REJECT;
+                        }
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                });
+
+                const targets = [];
+                let node;
+                while ((node = walker.nextNode())) targets.push(node);
+
+                targets.forEach(textNode => {
+                    let text = textNode.nodeValue;
+                    let matched = false;
+                    const frag = doc.createDocumentFragment();
+                    while (text.length > 0) {
+                        let earliest = -1, earliestTerm = null;
+                        for (const term of terms) {
+                            const idx = text.indexOf(term);
+                            if (idx !== -1 && (earliest === -1 || idx < earliest)) {
+                                earliest = idx;
+                                earliestTerm = term;
+                            }
+                        }
+                        if (earliest === -1) {
+                            frag.appendChild(doc.createTextNode(text));
+                            break;
+                        }
+                        if (earliest > 0) {
+                            frag.appendChild(doc.createTextNode(text.slice(0, earliest)));
+                        }
+                        const abbr = doc.createElement('abbr');
+                        abbr.setAttribute('title', TOOLTIPS[earliestTerm]);
+                        abbr.setAttribute('data-vg-tip', '1');
+                        abbr.textContent = earliestTerm;
+                        frag.appendChild(abbr);
+                        text = text.slice(earliest + earliestTerm.length);
+                        matched = true;
+                    }
+                    if (matched) textNode.parentNode.replaceChild(frag, textNode);
+                });
+            } catch (e) {
+                // Cross-origin or other access issues: silently skip
+            }
+        }
+
         document.getElementById('reportFrame').addEventListener('load', function() {
             applyIframeLang(currentLang);
+            injectTooltips();
         });
     </script>
 </body>

@@ -151,6 +151,27 @@
     {% endif %}
   </article>
 
+  {% if entry._simple and lang != 'en' %}
+  <section class="section" style="background:linear-gradient(135deg,#fef3c7,#fffbeb);border:1px solid #fde68a;">
+    <h3 style="color:#92400e;">💡 一言でいうと（初心者向け）</h3>
+    <p style="font-size:1.02em;line-height:1.7;color:#1f2937;">{{ entry._simple.oneliner }}</p>
+    {% if entry._simple.daily_impact %}
+    <div style="margin-top:14px;padding-top:14px;border-top:1px dashed #fde68a;">
+      <strong style="color:#92400e;display:block;margin-bottom:6px;">🐶 日常生活への影響</strong>
+      <p style="color:#374151;">{{ entry._simple.daily_impact }}</p>
+    </div>
+    {% endif %}
+    {% if entry._simple.misconceptions %}
+    <div style="margin-top:14px;padding-top:14px;border-top:1px dashed #fde68a;">
+      <strong style="color:#92400e;display:block;margin-bottom:6px;">❗ よくある誤解</strong>
+      <ul style="color:#374151;padding-left:20px;margin:0;">
+        {% for m in entry._simple.misconceptions %}<li style="margin-bottom:6px;">{{ m }}</li>{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
+
   {% if entry.mechanism %}
   <section class="section">
     <h3>{% if lang == 'en' %}🧬 Mechanism{% else %}🧬 メカニズム{% endif %}</h3>

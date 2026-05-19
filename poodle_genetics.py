@@ -3357,6 +3357,35 @@ def _build_guide_reverse_index():
 GUIDES_BY_DISEASE, GUIDES_BY_TRAIT, BREEDS_BY_DISEASE, BREEDS_BY_TRAIT = _build_guide_reverse_index()
 
 
+# ============================================================
+# 初心者向け解説オーバーレイ（simple_explainers.py）
+# ============================================================
+# 専門用語に不慣れな飼い主さん向けのコンテンツ層。既存の DISEASE_KB /
+# TRAIT_KB / GUIDES に oneliner / daily_impact / misconceptions / tldr /
+# faq を上乗せする。テンプレートは値の有無を見て条件付きで描画する。
+try:
+    from simple_explainers import DISEASE_SIMPLE, TRAIT_SIMPLE, GUIDE_EXTRAS, GENETICS_TOOLTIPS
+    for entry in DISEASE_KB:
+        slug = entry.get("_slug")
+        if slug in DISEASE_SIMPLE:
+            entry["_simple"] = DISEASE_SIMPLE[slug]
+    for entry in TRAIT_KB:
+        slug = entry.get("_slug")
+        if slug in TRAIT_SIMPLE:
+            entry["_simple"] = TRAIT_SIMPLE[slug]
+    for g in GUIDES:
+        if g["slug"] in GUIDE_EXTRAS:
+            extras = GUIDE_EXTRAS[g["slug"]]
+            if "tldr" in extras:
+                g["tldr"] = extras["tldr"]
+            if "faq" in extras:
+                g["faq"] = extras["faq"]
+    HAS_SIMPLE_EXPLAINERS = True
+except ImportError:
+    HAS_SIMPLE_EXPLAINERS = False
+    GENETICS_TOOLTIPS = {}
+
+
 # 犬種文字列 → 犬種ガイド検出のためのキーワード辞書
 # 「トイプードル」「ミニチュアダックスフンド」のようなサイズ違いも吸収するため
 # 部分一致のキーワードと、追加で英名のキーワードも含める。
