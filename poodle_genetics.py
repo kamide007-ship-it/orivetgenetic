@@ -4015,12 +4015,12 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
     text = extract_all_text(pdf_path)
 
     if "Genetic Summary Report" not in text and "Health Tests Reported" not in text:
-        print(f"  → Orivet Genetic Summary Report ではありません。スキップします。")
+        print("  → Orivet Genetic Summary Report ではありません。スキップします。")
         return None
 
     info = parse_animal_details(text)
     if not info.get("pet_name") and not info.get("registered_name"):
-        print(f"  → 動物情報を検出できませんでした。スキップします。")
+        print("  → 動物情報を検出できませんでした。スキップします。")
         return None
 
     health_results = parse_health_tests(text)
@@ -4092,7 +4092,7 @@ def parse_pedigree_pdf(pdf_path: str) -> Optional[Pedigree]:
         print(f"  → 血統書PDF検出: {ped.dog_name}")
         return ped
     else:
-        print(f"  → 血統書データの解析に失敗しました")
+        print("  → 血統書データの解析に失敗しました")
         return None
 
 
@@ -4434,15 +4434,6 @@ def _parse_jkc_ancestors(text: str, ped: Pedigree):
 
     # --- 方法2: ラベルベース（番号ベースで取れなかったものを補完）---
     # JKC血統書のラベルパターン: "G.G.SIRE 曾祖父" / "G.SIRE 祖父" / "SIRE 父"
-    label_patterns = [
-        # (regex, position, priority) — longer patterns first to avoid partial matches
-        (r'G\.?\s*G\.?\s*SIRE\s*(?:曾祖父)?', 'sss', 7),  # 曾祖父 positions: 7,9,11,13
-        (r'G\.?\s*G\.?\s*DAM\s*(?:曾祖母)?', 'ssd', 8),    # 曾祖母 positions: 8,10,12,14
-        (r'G\.?\s*SIRE\s*(?:祖父)?', 'ss', 3),               # 祖父 positions: 3,5
-        (r'G\.?\s*DAM\s*(?:祖母)?', 'sd', 4),                 # 祖母 positions: 4,6
-        (r'\bSIRE\s*(?:父)?', 'sire', 1),
-        (r'\bDAM\s*(?:母)?', 'dam', 2),
-    ]
 
     # G.G.SIRE/G.G.DAM の位置を順番に割り当てるためのカウンター
     gg_sire_slots = ['sss', 'sds', 'dss', 'dds']
@@ -5998,8 +5989,6 @@ def main():
             print("\nエラー: pdfplumber が必要です。\n  pip install pdfplumber")
             sys.exit(1)
 
-        # Filter out option flags from file arguments
-        file_args = [a for a in remaining_args if a not in ('--output', '-o') and not (len(remaining_args) > 1 and remaining_args[remaining_args.index(a)-1] in ('--output', '-o') if a in remaining_args else False)]
         pdf_files = collect_pdf_files(remaining_args)
 
         if not pdf_files:
@@ -6049,7 +6038,7 @@ def main():
                         pedigrees.append(ped)
                         print(f"  → {ped.dog_name} の血統書を解析しました。")
                     else:
-                        print(f"  → 血統書データの解析に失敗しました。")
+                        print("  → 血統書データの解析に失敗しました。")
             else:
                 print(f"  → 不明な引数: {src}")
 
@@ -6104,7 +6093,7 @@ def main():
     generate_unified_html(dogs, pedigrees, html_path)
     generate_excel(dogs, pedigrees, xlsx_path)
 
-    print(f"\n完了! 以下のファイルが生成されました:")
+    print("\n完了! 以下のファイルが生成されました:")
     print(f"  HTML: {html_path}")
     print(f"  Excel: {xlsx_path}")
     print()

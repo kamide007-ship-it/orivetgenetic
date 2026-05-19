@@ -236,12 +236,12 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
       <form id="sim-pdf-form" onsubmit="return handleSimulatorPdfUpload(event)" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
         <input type="file" name="pdf_files" accept="application/pdf,.pdf" multiple required
                style="font-size:0.95em;padding:8px;background:#fff;border:1px solid #fde68a;border-radius:8px;flex:1;min-width:200px;">
-        <button type="submit" class="btn" style="background:#7c3aed;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-weight:600;cursor:pointer;">
-          📤 解析して投入
+        <button type="submit" id="sim-pdf-submit" class="btn" aria-busy="false" style="background:#7c3aed;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
+          <span id="sim-pdf-btn-text">📤 解析して投入</span>
         </button>
         <span id="sim-pdf-status" role="status" aria-live="polite" style="font-size:0.85em;color:#374151;"></span>
       </form>
-      <div id="sim-pdf-errors" style="margin-top:8px;font-size:0.85em;"></div>
+      <div id="sim-pdf-errors" style="margin-top:8px;font-size:0.85em;max-height:120px;overflow-y:auto;"></div>
     </div>
   </details>
 
@@ -1275,10 +1275,14 @@ function handleSimulatorPdfUpload(ev) {
   const form = ev.target;
   const status = document.getElementById('sim-pdf-status');
   const errBox = document.getElementById('sim-pdf-errors');
-  const submitBtn = form.querySelector('button[type="submit"]');
-  status.textContent = '⏳ 解析中…';
+  const submitBtn = document.getElementById('sim-pdf-submit');
+  const btnText = document.getElementById('sim-pdf-btn-text');
+  status.textContent = '';
   errBox.innerHTML = '';
   submitBtn.disabled = true;
+  submitBtn.setAttribute('aria-busy', 'true');
+  submitBtn.style.opacity = '0.65';
+  btnText.textContent = '⏳ 解析中…';
 
   const fd = new FormData(form);
   fetch('/api/simulator/parse', { method: 'POST', body: fd })
@@ -1311,7 +1315,12 @@ function handleSimulatorPdfUpload(ev) {
       status.textContent = '';
       errBox.innerHTML = '<div class="warn-box">通信エラー: ' + (err && err.message ? err.message : err) + '</div>';
     })
-    .finally(() => { submitBtn.disabled = false; });
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.setAttribute('aria-busy', 'false');
+      submitBtn.style.opacity = '';
+      btnText.textContent = '📤 解析して投入';
+    });
   return false;
 }
 

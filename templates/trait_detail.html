@@ -70,6 +70,9 @@
   .cta-row a:hover { background:#6d28d9; }
   .cta-row a.alt { background:#fff; color:#7c3aed; border:1px solid #c4b5fd; }
   :focus-visible { outline:3px solid #7c3aed; outline-offset:2px; }
+  .refs-link { min-height:44px; display:inline-flex; align-items:center; }
+  .back-btn { display:inline-flex; align-items:center; gap:6px; color:#7c3aed; text-decoration:none; font-size:0.9em; padding:6px 12px; border:1px solid #c4b5fd; border-radius:8px; background:#faf5ff; }
+  .back-btn:hover { background:#ede9fe; }
   @media (max-width:480px) {
     .container { padding:14px; }
     .entry-header { padding:18px 20px; }
@@ -98,8 +101,11 @@
 </header>
 
 <div class="container">
-  <nav class="breadcrumb" aria-label="{% if lang == 'en' %}Breadcrumb{% else %}パンくず{% endif %}">
-    <a href="/">{% if lang == 'en' %}Home{% else %}ホーム{% endif %}</a> &raquo; <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Glossary{% else %}遺伝子辞書{% endif %}</a> &raquo; <span>{{ entry.title }}</span>
+  <nav class="breadcrumb" aria-label="{% if lang == 'en' %}Breadcrumb{% else %}パンくず{% endif %}" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+    <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="back-btn">&#8592; {% if lang == 'en' %}Back to Glossary{% else %}辞書へ戻る{% endif %}</a>
+    <span style="color:#9ca3af;">
+      <a href="/">{% if lang == 'en' %}Home{% else %}ホーム{% endif %}</a> &raquo; <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Glossary{% else %}遺伝子辞書{% endif %}</a> &raquo; <span>{{ entry.title }}</span>
+    </span>
   </nav>
 
   <article class="entry-header">

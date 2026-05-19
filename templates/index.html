@@ -505,7 +505,7 @@
             </div>
 
             <div style="margin-top: 24px;">
-                <button type="submit" class="btn btn-primary" id="submitBtn" data-i18n="submit_btn" aria-label="解析を実行">解析を実行</button>
+                <button type="submit" class="btn btn-primary" id="submitBtn" data-i18n="submit_btn" aria-label="解析を実行" aria-busy="false">解析を実行</button>
             </div>
 
             <div class="loading" id="loading" role="status" aria-live="polite">
@@ -623,7 +623,9 @@
 
         // Loading state + ネットワーク失敗時のスピナー解除
         document.getElementById('analyzeForm').addEventListener('submit', function() {
-            document.getElementById('submitBtn').disabled = true;
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.setAttribute('aria-busy', 'true');
             document.getElementById('loading').style.display = 'block';
             startLoadingChoreography();
 
@@ -632,7 +634,9 @@
             window.addEventListener('pageshow', function onPageShow(e) {
                 // bfcache から復元された場合（iOSでよく起きる）
                 if (e.persisted) {
-                    document.getElementById('submitBtn').disabled = false;
+                    const btn2 = document.getElementById('submitBtn');
+                    btn2.disabled = false;
+                    btn2.setAttribute('aria-busy', 'false');
                     document.getElementById('loading').style.display = 'none';
                 }
                 window.removeEventListener('pageshow', onPageShow);

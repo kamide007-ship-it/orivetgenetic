@@ -358,18 +358,8 @@ def _parse_jkc_ancestors(text: str, ped: Pedigree):
 
 def _parse_labeled_ancestors(text: str, ped: Pedigree):
     """ラベルベースの祖先抽出（SIRE/DAM/G.SIRE/G.DAM形式 — ALAJ等）"""
-    lines = text.split('\n')
-
-    # ラベルと対応するPedigreeフィールドのマッピング
     # ALAJ形式: SIRE, DAM, G.SIRE(父方), G.DAM(父方), G.SIRE(母方), G.DAM(母方)
     # GG.SIRE/GG.DAM は曾祖父母
-
-    # ブロック単位で解析: ラベル行の後に犬名が続く
-    label_patterns = [
-        # (regex, position, context_required)
-        (r'(?:^|\n)\s*(?:SIRE|父犬)\s*(?:\n|$)', "sire"),
-        (r'(?:^|\n)\s*(?:DAM|母犬)\s*(?:\n|$)', "dam"),
-    ]
 
     # まずSIRE/DAMの位置を特定してコンテキストを分割
     sire_match = re.search(r'(?:^|\n)\s*SIRE\b', text, re.IGNORECASE)
@@ -820,9 +810,9 @@ def main():
                         pedigrees.append(ped)
                         print(f"  → {ped.dog_name} の血統書を解析しました。")
                     else:
-                        print(f"  → 血統書データの解析に失敗しました。OCR精度が不足している可能性があります。")
+                        print("  → 血統書データの解析に失敗しました。OCR精度が不足している可能性があります。")
                 else:
-                    print(f"  → テキスト抽出に失敗しました。")
+                    print("  → テキスト抽出に失敗しました。")
 
     if not pedigrees:
         print("\n血統書データがありません。")
