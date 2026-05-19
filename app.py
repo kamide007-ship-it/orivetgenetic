@@ -115,11 +115,11 @@ from poodle_genetics import (
     DISEASE_KB, TRAIT_KB, group_diseases_by_category,
     get_disease_severity, SEVERITY_LABELS,
     SYMPTOM_INDEX, filter_by_symptom,
-    DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug,
+    DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX,
     GUIDES, GUIDES_INDEX, GUIDES_BY_DISEASE, GUIDES_BY_TRAIT,
     BREEDS_BY_DISEASE, BREEDS_BY_TRAIT, detect_breed_guides,
     get_disease_kb_localized, get_trait_kb_localized,
-    get_guides_localized, get_guide_localized, HAS_EN_GUIDES,
+    get_guides_localized, get_guide_localized,
     HAS_EN_KB, SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN,
 )
 

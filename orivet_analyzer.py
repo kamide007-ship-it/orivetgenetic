@@ -283,23 +283,6 @@ def parse_health_tests(text: str) -> list:
         ("Urogenital", r"Urogenital"),
     ]
 
-    # Parse trait results (page 3 typically)
-    # Pattern: test_name followed by result on same or next line
-    trait_patterns = [
-        (r"A\s+Locus\s*\(Agouti\)(.*?)(?=\n[A-Z]|\n\n)", "A Locus (Agouti)"),
-        (r"B\s+Locus\s*[-–]\s*(?:Bd,?\s*Bs,?\s*Bc\s*\[Various Breeds\])?(.*?)(?=\n[A-Z]|\n\n)", "B Locus (Brown)"),
-        (r"Chondrodysplasia\s*\(CDPA\)(.*?)(?=\n[A-Z]|\n\n)", "Chondrodysplasia (CDPA)"),
-        (r"Curly\s+Coat/Hair\s+Variant\s+1?(.*?)(?=\n[A-Z]|\n\n)", "Curly Coat/Hair Variant 1"),
-        (r"D\s*\(Dilute\)\s+Locus(.*?)(?=\n[A-Z]|\n\n)", "D (Dilute) Locus"),
-        (r"E\s+Locus\s*[-–]\s*\(Cream/Red/Yellow\)(.*?)(?=\n[A-Z]|\n\n)", "E Locus (Cream/Red/Yellow)"),
-        (r"EM\s*\(MC1R\)\s+Locus\s*[-–]\s*Melanistic\s+Mask(.*?)(?=\n[A-Z]|\n\n)", "EM (MC1R) Locus - Melanistic Mask"),
-        (r"Furnishings\s*\(RSPO2\)(.*?)(?=\n[A-Z]|\n\n)", "Furnishings (RSPO2)"),
-        (r"K\s+Locus\s*\(Dominant\s+Black\)(.*?)(?=\n[A-Z]|\n\n)", "K Locus (Dominant Black)"),
-        (r"M\s+Locus\s*\(Merle/Dapple\)(.*?)(?=\n[A-Z]|\n\n)", "M Locus (Merle/Dapple)"),
-        (r"Pied\s*\(BOTH\s+SINE\s+and\s+REPEAT\s+VARIANTS?\)(.*?)(?=\n[A-Z]|\n\n)", "Pied"),
-        (r"Brown\s+TYRP1\s*\[.*?\]\s*=\s*Bl\s+(.*?)(?=\n[A-Z]|\n\n)", "Brown TYRP1"),
-    ]
-
     # Strategy: Use line-by-line parsing for more robust extraction
     lines = text.split('\n')
     current_category = "Trait"
@@ -457,13 +440,13 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
 
     # Must contain Genetic Summary Report or Health Tests
     if "Genetic Summary Report" not in text and "Health Tests Reported" not in text:
-        print(f"  → Orivet Genetic Summary Report ではありません。スキップします。")
+        print("  → Orivet Genetic Summary Report ではありません。スキップします。")
         return None
 
     # Extract basic info
     info = parse_animal_details(text)
     if not info.get("pet_name") and not info.get("registered_name"):
-        print(f"  → 動物情報を検出できませんでした。スキップします。")
+        print("  → 動物情報を検出できませんでした。スキップします。")
         return None
 
     # Parse health results
@@ -1033,7 +1016,7 @@ def main():
     generate_html(dogs, html_path)
     generate_excel(dogs, xlsx_path)
 
-    print(f"\n完了! 以下のファイルが生成されました:")
+    print("\n完了! 以下のファイルが生成されました:")
     print(f"  HTML: {html_path}")
     print(f"  Excel: {xlsx_path}")
     print()
