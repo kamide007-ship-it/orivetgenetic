@@ -413,16 +413,39 @@ class TestSimpleExplainers:
         assert "30 秒で分かる要点" in body
         assert "よくある質問" in body
 
-    def test_disease_without_simple_renders_normally(self):
-        """_simple 未設定の疾患でもページが壊れない"""
-        # 未設定のスラグを 1 件選ぶ
+    def test_full_coverage_diseases(self):
+        """全疾患 (72) に _simple が投入されている"""
         from poodle_genetics import DISEASE_KB
-        no_simple = [d for d in DISEASE_KB if "_simple" not in d]
-        assert no_simple, "all entries have _simple — pick different test"
-        rv = client.get(f"/glossary/disease/{no_simple[0]['_slug']}")
-        assert rv.status_code == 200
-        body = rv.get_data(as_text=True)
-        assert "💡 一言でいうと" not in body
+        no_simple = [d['_slug'] for d in DISEASE_KB if "_simple" not in d]
+        assert not no_simple, f"_simple 未投入: {no_simple}"
+
+    def test_full_coverage_traits(self):
+        """全形質 (27) に _simple が投入されている"""
+        from poodle_genetics import TRAIT_KB
+        no_simple = [t['_slug'] for t in TRAIT_KB if "_simple" not in t]
+        assert not no_simple, f"_simple 未投入: {no_simple}"
+
+    def test_full_coverage_guides(self):
+        """全ガイド (26) に tldr と faq が投入されている"""
+        from poodle_genetics import GUIDES
+        no_tldr = [g['slug'] for g in GUIDES if "tldr" not in g]
+        no_faq = [g['slug'] for g in GUIDES if "faq" not in g]
+        assert not no_tldr, f"tldr 未投入: {no_tldr}"
+        assert not no_faq, f"faq 未投入: {no_faq}"
+
+    def test_simple_oneliner_minimum_length(self):
+        """oneliner が最低限の内容量を持つ（誤って空のままになっていないか）"""
+        from poodle_genetics import DISEASE_KB, TRAIT_KB
+        for d in DISEASE_KB:
+            s = d.get("_simple", {})
+            assert s.get("oneliner") and len(s["oneliner"]) >= 20, (
+                f"disease {d['_slug']} oneliner too short: {s.get('oneliner')!r}"
+            )
+        for t in TRAIT_KB:
+            s = t.get("_simple", {})
+            assert s.get("oneliner") and len(s["oneliner"]) >= 20, (
+                f"trait {t['_slug']} oneliner too short: {s.get('oneliner')!r}"
+            )
 
     def test_genetics_tooltips_passed_to_report(self):
         """report.html で genetics_tooltips が JSON シリアライズされている"""
