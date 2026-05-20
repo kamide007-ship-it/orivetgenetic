@@ -203,6 +203,7 @@ def extract_sim_data(dog):
         "color": color,
         "health": health,
         "breed": dog.breed or "",
+        "heterozygosity": dog.heterozygosity,
     }
 
 

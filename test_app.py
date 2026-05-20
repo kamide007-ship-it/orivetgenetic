@@ -461,6 +461,59 @@ class TestSimpleExplainers:
             assert "COI" in GENETICS_TOOLTIPS
 
 
+class TestHeterozygosityParser:
+    """Orivet PDF からのヘテロ接合率抽出（ゲノム多様性指標）"""
+
+    def test_english_percent(self):
+        from poodle_genetics import parse_heterozygosity
+        assert parse_heterozygosity("Heterozygosity: 35.2%") == 35.2
+
+    def test_genetic_diversity_label(self):
+        from poodle_genetics import parse_heterozygosity
+        assert parse_heterozygosity("Genetic Diversity 41 %") == 41.0
+
+    def test_japanese_label(self):
+        from poodle_genetics import parse_heterozygosity
+        assert parse_heterozygosity("ヘテロ接合率: 28.7%") == 28.7
+        assert parse_heterozygosity("遺伝的多様性 33%") == 33.0
+
+    def test_decimal_form_converted_to_percent(self):
+        from poodle_genetics import parse_heterozygosity
+        # 0.352 (% 記号なし、1 以下) → 35.2%
+        assert parse_heterozygosity("Heterozygosity Rate: 0.352") == 35.2
+
+    def test_absent_returns_none(self):
+        from poodle_genetics import parse_heterozygosity
+        assert parse_heterozygosity("No diversity data in this report") is None
+        assert parse_heterozygosity("") is None
+        assert parse_heterozygosity(None) is None
+
+    def test_out_of_range_rejected(self):
+        from poodle_genetics import parse_heterozygosity
+        # 0-100 の範囲外は誤検出として捨てる
+        assert parse_heterozygosity("Genetic Diversity: 150%") is None
+
+    def test_dogprofile_has_field(self):
+        from poodle_genetics import DogProfile
+        d = DogProfile()
+        assert hasattr(d, "heterozygosity")
+        assert d.heterozygosity is None
+
+    def test_coi_guide_explains_difference(self):
+        """coi-basics ガイドに血統 COI vs ヘテロ接合率の節がある"""
+        rv = client.get("/guides/coi-basics")
+        body = rv.get_data(as_text=True)
+        assert "ヘテロ接合率" in body
+        assert "別指標" in body or "別々の指標" in body
+
+    def test_simulator_has_hetero_note(self):
+        """シミュレーターの COI タブに違いの注記がある"""
+        rv = client.get("/simulator")
+        body = rv.get_data(as_text=True)
+        assert "ヘテロ接合率" in body
+        assert "renderHeterozygosityPanel" in body
+
+
 class TestSimulatorPdfUpload:
     """繁殖シミュレーター直接 PDF アップロード API"""
 
