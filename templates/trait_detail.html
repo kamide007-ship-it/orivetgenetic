@@ -144,6 +144,13 @@
   </section>
   {% endif %}
 
+  {% if entry.inheritance %}
+  <section class="section">
+    <h3>{% if lang == 'en' %}🧪 Inheritance{% else %}🧪 遺伝様式{% endif %}</h3>
+    <p>{{ entry.inheritance }}</p>
+  </section>
+  {% endif %}
+
   {% if entry.phenotype %}
   <section class="section">
     <h3>{% if lang == 'en' %}🎨 Phenotype{% else %}🎨 表現型{% endif %}</h3>

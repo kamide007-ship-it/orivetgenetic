@@ -1687,6 +1687,7 @@ TRAIT_KB = [
         "summary": "コートに黒/茶色色素（eumelanin）を作るかどうかを決める『マスタースイッチ』です。",
         "mechanism": "MC1R 遺伝子が活性なら黒/茶色素を産生。e/e ホモ（劣性）では完全に活性が失われ、コートは赤/黄/クリーム/ホワイトのみになります（鼻パッドの色素は残る）。",
         "phenotype": "E/E, E/e: コートに黒/茶色素を発現可。K座位・A座位の支配を受ける。\\ne/e: コートはクリーム〜アプリコット〜レッド（KITLG が濃淡を決定）。",
+        "inheritance": "常染色体劣性（e/e ホモ接合で発現）。E/e キャリア間の交配から 25% の確率で e/e 子犬が生まれます。",
         "advice": "e/e でも鼻・パッド・アイリムの色は B 座位で決まります（黒 or ブラウン）。",
         "references": [
             {"label": "詳細を検索 (E locus)", "url": _google_search("E locus MC1R 犬 毛色")},
@@ -1698,6 +1699,7 @@ TRAIT_KB = [
         "summary": "黒一色（ソリッド）かどうかを決める優性遺伝子です。",
         "mechanism": "KB（優性）が 1コピーでもあると A 座位の表現が抑制され、コートは単色になります。ky/ky ではアグーチ模様（A座位）が現れます。kbr はブリンドル。",
         "phenotype": "KB/_ : ソリッド（黒・茶・希釈色 など、E と B で決まる）\\nky/ky : A 座位の模様（セーブル・タンポイント等）\\nkbr/_  : ブリンドル",
+        "inheritance": "常染色体優性（KB は 1コピーで優性。ky/ky が劣性ホモ）。優性序列: KB > kbr > ky。",
         "advice": "ソリッドカラーを残したいなら KB を維持。模様を出したいなら ky/ky × ky/ky に交配。",
         "references": [
             {"label": "詳細を検索 (K locus)", "url": _google_search("K locus CBD103 犬 ドミナントブラック")},
@@ -1709,6 +1711,7 @@ TRAIT_KB = [
         "summary": "K座位が ky/ky のときに発現する『毛色の模様』を決める座位です。",
         "mechanism": "ay > aw > at > a の優性順位。ay=セーブル、aw=ワイルドセーブル、at=タンポイント、a=リセッシブブラック。",
         "phenotype": "ay/_ : フォーン/セーブル\\naw/_ : ワイルドセーブル\\nat/_ : ブラックタン/トライカラー（ドーベルマン的）\\na/a : リセッシブブラック（単色黒）",
+        "inheritance": "複対立遺伝子の優性序列: ay > aw > at > a。K座位が ky/ky の場合にのみ表現型に現れます。",
         "advice": "見た目の模様パターンは A 座位＋K 座位＋E 座位の組み合わせで決まります。",
         "references": [
             {"label": "詳細を検索 (A locus)", "url": _google_search("A locus ASIP 犬 アグーチ")},
@@ -1720,6 +1723,7 @@ TRAIT_KB = [
         "summary": "黒色素を「黒」のまま発現するか「茶色」に変換するかを決めます。",
         "mechanism": "TYRP1 遺伝子の機能が失われると（bb ホモ）、すべての黒色素がブラウンに変換されます。e/e の場合はコートに eumelanin が無いため B はコートに影響せず、鼻・パッド色素のみに影響します。",
         "phenotype": "B/_ : 通常通り黒色素\\nbb : 全ての黒がブラウン（チョコレート/レバー）。ee と組み合わせるとコートはクリーム〜アプリコットだが鼻はブラウン。",
+        "inheritance": "常染色体劣性（bb ホモ接合で発現）。B/b キャリア間の交配から 25% の確率でチョコ子犬が生まれます。",
         "advice": "チョコレート色を残したい場合は bb 必須。",
         "references": [
             {"label": "詳細を検索 (B locus)", "url": _google_search("B locus TYRP1 犬 ブラウン チョコレート")},
@@ -1731,6 +1735,7 @@ TRAIT_KB = [
         "summary": "色素の濃度を薄める（希釈する）遺伝子。黒→青/ブルー、茶→ライラック/イザベラ、黄→シャンパンになります。",
         "mechanism": "MLPH 遺伝子の機能不全（dd ホモ）でメラニン顆粒が均一に分布せず、淡い色になります。",
         "phenotype": "D/_ : 通常通り\\ndd : 希釈。Black→Blue, Brown→Lilac/Isabella, Yellow→Champagne",
+        "inheritance": "常染色体劣性（dd ホモ接合で希釈発現）。D/d キャリア間の交配から 25% の確率で希釈色子犬が生まれます。",
         "advice": "ワイマラナーの『ねずみ色』、フレンチブルドッグの『ブルー』などは dd によるもの。",
         "references": [
             {"label": "詳細を検索 (D locus)", "url": _google_search("D locus MLPH 犬 dilute ブルー")},
@@ -1742,6 +1747,7 @@ TRAIT_KB = [
         "summary": "コートに不規則な色のまだら（マール）を作る遺伝子。M/M（ダブルマール）は重大な健康リスクあり。",
         "mechanism": "PMEL17 遺伝子の変異により、色素細胞の機能が部分的に失われ、まだら模様になります。M/M は失明・聴覚障害のリスクが高い。",
         "phenotype": "m/m : マールなし\\nM/m : マール表現型\\nM/M : ダブルマール（白割合増・視聴覚障害リスク大）",
+        "inheritance": "常染色体優性（不完全優性）。M/m ヘテロでマール発現。M/M ホモは視聴覚障害リスク大。M/m × M/m 交配は 25% が M/M になるため厳禁。",
         "advice": "**M/m × M/m の交配は厳禁**。25% の確率でダブルマール子犬が生まれます。",
         "references": [
             {"label": "詳細を検索 (Merle)", "url": _google_search("Merle locus PMEL17 犬 マール")},
@@ -1753,6 +1759,7 @@ TRAIT_KB = [
         "summary": "コートに白い部分（白斑）を作るかどうかを決めます。",
         "mechanism": "MITF 遺伝子のプロモーター変異により、色素細胞の分布が制限されコートに白い領域ができます。",
         "phenotype": "S/S : 白斑なし or 最小\\nS/sp : 軽度の白斑\\nsp/sp : パイド/パーティカラー（白の割合が高い）",
+        "inheritance": "常染色体（不完全優性）。sp アレルは半劣性: S/sp で軽度白斑、sp/sp でパーティカラー発現。",
         "advice": "パーティプードルなどは sp/sp。S 座位だけでなく Irish spotting 等の他遺伝子も白の表現に関与。",
         "references": [
             {"label": "詳細を検索 (S locus)", "url": _google_search("S locus MITF 犬 パイド ピーバルド")},
@@ -1764,6 +1771,7 @@ TRAIT_KB = [
         "summary": "眉毛・髭・飾り毛などの『ふさふさ』を作る遺伝子です。",
         "mechanism": "RSPO2 遺伝子の挿入変異が顔の毛量を増やします。",
         "phenotype": "F/F or F/N: ファーニシングあり（テリア・ドゥードゥル系）\\nN/N: スムースコート",
+        "inheritance": "常染色体優性（不完全優性）。F/N ヘテロでも発現。F/F ホモの方がより濃いファーニシングになる場合があります。",
         "advice": "ドゥードゥル系（ラブラドゥードル等）の見た目に大きく影響。",
         "references": [
             {"label": "詳細を検索 (Furnishings)", "url": _google_search("Furnishings RSPO2 犬 ファーニシング")},
@@ -1775,6 +1783,7 @@ TRAIT_KB = [
         "summary": "コートが直毛か巻き毛かを決める遺伝子です。",
         "mechanism": "KRT71 遺伝子の変異がカール毛を形成します。",
         "phenotype": "C/C or C/N: 巻き毛\\nN/N: 直毛",
+        "inheritance": "常染色体優性（不完全優性）。C/N ヘテロでも巻き毛が発現。C/C ホモではより強いカールになります。",
         "advice": "プードル・ビションフリーゼ等は C/C ホモ。F 座位（ファーニシング）と組み合わせると様々な毛質に。",
         "references": [
             {"label": "詳細を検索 (Curly)", "url": _google_search("Curly coat KRT71 犬 巻き毛")},
@@ -1787,6 +1796,7 @@ TRAIT_KB = [
         "summary": "短毛か長毛かを決める遺伝子です。長毛は劣性。",
         "mechanism": "FGF5 遺伝子の変異により被毛のサイクルが変化。L/L は短毛、l/l は長毛になります。",
         "phenotype": "L/L: 短毛\\nL/l: 短毛（キャリア）\\nl/l: 長毛",
+        "inheritance": "常染色体劣性（l/l ホモ接合で長毛）。L/l キャリア間の交配から 25% の確率で長毛子犬が生まれます。",
         "advice": "プードル・ヨークシャーテリア・パピヨン等は l/l ホモ。FGF5 だけでなく KRT71 (Curly)・RSPO2 (Furnishings) との組み合わせで多様な毛質に。",
         "references": [
             {"label": "詳細を検索 (Hair Length)", "url": _google_search("FGF5 犬 被毛長 短毛 長毛")},
@@ -1798,6 +1808,7 @@ TRAIT_KB = [
         "summary": "コートの抜け毛量を決める遺伝子です。多くの犬種で 1〜2 アレルを保有。",
         "mechanism": "MC5R 遺伝子の変異が被毛の脱落サイクルに影響。SD/SD ホモは抜け毛多、N/N は少なめ。",
         "phenotype": "SD/SD: 抜け毛多（重ねシェッディング）\\nSD/N: 中程度\\nN/N: 抜け毛少なめ",
+        "inheritance": "常染色体（共優性/相加的）。SD アレル数に比例して抜け毛量が増えます。",
         "advice": "プードル・ドゥードゥル系は N/N で抜け毛が少なく『ハイポアレジェニック』とされる場合あり。100% 無毛ではない点に注意。",
         "references": [
             {"label": "詳細を検索 (Shedding)", "url": _google_search("MC5R 犬 抜け毛 シェッディング")},
@@ -1809,6 +1820,7 @@ TRAIT_KB = [
         "summary": "生まれつき尻尾が短い形質を決める遺伝子です。ホモ (BT/BT) は致死。",
         "mechanism": "Brachyury (T) 遺伝子の変異により尻尾の発達が短くなります。ホモ接合は胚致死。",
         "phenotype": "BT/BT: 胚致死（生まれない）\\nBT/N: 自然短尾\\nN/N: 通常の尾長",
+        "inheritance": "常染色体優性（致死ホモ）。BT/N ヘテロで短尾発現。**BT/BT ホモは胚致死** のため、BT/N × BT/N 交配は 25% の胎児が発育しません。",
         "advice": "**BT/BT 同士の交配は厳禁** — 受胎しても胚致死で出生しません。コーギー・ボブテイル・ボクサー等で頻発。",
         "references": [
             {"label": "詳細を検索 (Bob Tail)", "url": _google_search("Brachyury 犬 自然短尾 BT")},
@@ -1820,6 +1832,7 @@ TRAIT_KB = [
         "summary": "顔に黒いマスク模様を形成する遺伝子。MC1R の特定バリアント。",
         "mechanism": "E座位 (MC1R) の Em バリアントが優性で、顔面に黒い色素を集中させます。E座位本体とは別の変異。",
         "phenotype": "Em/Em or Em/E: 黒マスクあり\\nE/E (Em なし): マスクなし",
+        "inheritance": "常染色体優性（E座位の Em アレルが優性）。Em/E または Em/Em のいずれでも発現。e/e 犬（eumelanin なし）では発現しません。",
         "advice": "ジャーマンシェパード・パグ・ボクサー等で典型。ee 犬では発現しません（eumelanin がコートに無いため）。",
         "references": [
             {"label": "詳細を検索 (Mask)", "url": _google_search("Em MC1R 犬 メラニスティックマスク 黒マスク")},
@@ -1831,6 +1844,7 @@ TRAIT_KB = [
         "summary": "子犬期は色付きで生まれ、成犬になると退色する遺伝子。プードルのシルバー・ベージュ色の原因。",
         "mechanism": "G_ は成犬期に毛色のメラニンを段階的に失わせます。1〜2歳までに退色が進行。",
         "phenotype": "g/g: 退色なし\\nG/g or G/G: 成犬で退色\\n  Black + G_  → Silver\\n  Brown + G_  → Silver Beige\\n  Blue + G_   → Silver（淡）",
+        "inheritance": "常染色体優性。G/g ヘテロでも退色が発現します。G/G ホモとの表現型差は軽微です。",
         "advice": "シルバープードルは生まれた時は黒。1〜2歳までに段階的に退色していきます。M座位 (Merle) とは別遺伝子（同じ PMEL17 でも変異位置が異なる）。",
         "references": [
             {"label": "詳細を検索 (Greying)", "url": _google_search("Greying 犬 シルバー 退色 PMEL17")},
@@ -1843,6 +1857,7 @@ TRAIT_KB = [
         "summary": "ローデシアン・リッジバック特有の、背中に逆向きの毛流が生じる形質。FGF3/FGF4/FGF19 領域の重複が原因。",
         "mechanism": "16番染色体の FGF3-FGF4-FGF19 領域に約 133kb の重複が発生し、背中の毛流が逆方向に成長します。",
         "phenotype": "R/R: リッジあり（ただしダーモイドサイナス [dermoid sinus] のリスク上昇）\\nR/r: リッジあり\\nr/r: リッジなし（FCI スタンダード違反）",
+        "inheritance": "常染色体優性。R/r ヘテロでリッジ発現。**R/R ホモはダーモイドサイナスリスク上昇** のため、R/r × r/r 交配が推奨されます。",
         "advice": "R/R ホモ接合では**ダーモイドサイナス**（神経管閉鎖不全による皮下嚢胞）の発症率が上がります。R/r ヘテロ × r/r で繁殖し、リッジを保持しつつホモ接合を避けるのが推奨。タイランドリッジバック、フーピアン (Phu Quoc) リッジバックでも同じ変異。",
         "references": [
             {"label": "詳細を検索 (Ridge)", "url": _google_search("FGF4 ridgeback dermoid sinus")},
@@ -1854,6 +1869,7 @@ TRAIT_KB = [
         "summary": "チャイニーズ・クレステッド、メキシカン・ヘアレス（ショロイツクィントレ）、ペルービアン・ヘアレスの無毛を決める遺伝子。ホモは胚致死。",
         "mechanism": "FOXI3 遺伝子の挿入変異が優性。歯や毛包の発達に関与し、変異により被毛・歯の生成が抑制されます。H/H ホモ接合は胚段階で致死。",
         "phenotype": "H/H: 胚致死（生まれない）\\nH/h: 無毛 / 部分無毛・歯の欠損あり\\nh/h: 完全な被毛 (powderpuff / coated)",
+        "inheritance": "常染色体優性（致死ホモ）。H/h ヘテロで無毛発現。**H/H ホモは胚致死**。H/h × H/h 交配は 25% の胎児が発育しません。",
         "advice": "**H/H 同士の交配は厳禁** — 全頭出生しない。チャイニーズ・クレステッドでは無毛 (H/h) × パウダーパフ (h/h) 交配が標準。皮膚保護・日焼け止め・防寒が必要な犬種。",
         "references": [
             {"label": "詳細を検索 (Hairless)", "url": _google_search("FOXI3 hairless dog Chinese Crested Xolo")},
@@ -1865,6 +1881,7 @@ TRAIT_KB = [
         "summary": "E座位 e/e のフェオメラニン（赤・黄系）の濃さを決める遺伝子。ラブラドール・プードル・ゴールデンの色の濃淡を説明。",
         "mechanism": "MFSD12 遺伝子の変異がメラノサイトでのフェオメラニン生成量を調節。i/i ホモで色素が薄くなりクリーム/ホワイト寄りになります。",
         "phenotype": "I/I: 濃い赤・ディープレッド\\nI/i: 中間（アプリコット〜レッド）\\ni/i: 淡いクリーム・ホワイト寄り",
+        "inheritance": "常染色体（不完全優性/相加的）。I/I が最濃色、I/i が中間、i/i が最淡色。",
         "advice": "イングリッシュ・クリーム・ゴールデンの淡色や、プードルのホワイト〜クリーム〜アプリコット〜レッドの幅広さの一因。E座位 ee と組み合わせて色の濃淡を予測する際に重要。E_ 犬（黒系優位）では coat 色への影響は限定的。",
         "references": [
             {"label": "詳細を検索 (Intense Red)", "url": _google_search("MFSD12 dog intense red phaeomelanin")},
@@ -1876,6 +1893,7 @@ TRAIT_KB = [
         "summary": "フレンチブルドッグで報告された B座位 (TYRP1) とは別の劣性チョコレート色。",
         "mechanism": "HPS3 遺伝子の変異が劣性で発現。BB（または Bb）でも co/co ホモであればチョコレート色になります。B座位 bb の従来チョコとは独立した遺伝子。",
         "phenotype": "Co/Co or Co/co: 通常色\\nco/co: チョコレート（B 座位とは独立に発現）",
+        "inheritance": "常染色体劣性（co/co ホモ接合で発現）。Co/co キャリア間の交配から 25% の確率で Cocoa チョコレートが生まれます。",
         "advice": "フレンチブルドッグ・オーストラリアンシェパード等で報告。B座位だけ検査して 'チョコにならないはず' の交配でも、co/co × co/co で予想外のチョコが出るため、希少色のブリーダーは両方検査推奨。CDA リスクは未確立。",
         "references": [
             {"label": "詳細を検索 (Cocoa)", "url": _google_search("HPS3 cocoa French Bulldog chocolate")},
@@ -1887,6 +1905,7 @@ TRAIT_KB = [
         "summary": "グレートデーン特有の白地に黒斑のハーレクイン模様を決める遺伝子。マールと相互作用。ホモ致死。",
         "mechanism": "PSMB7 遺伝子の変異が優性。M座位 (Merle) のメルル領域の色素を完全に脱色させ、白地に黒斑のパターンを作ります。M_ + H_ の組み合わせでのみ発現。H/H は胚致死。",
         "phenotype": "H/H: 胚致死\\nH/h + M/m: ハーレクイン（白地に黒斑）\\nH/h + m/m: 表現型に変化なし（ハーレクイン非発現の保因）\\nh/h: ハーレクイン非発現",
+        "inheritance": "常染色体優性（致死ホモ）。H/h + M/m の組み合わせでのみハーレクイン表現。**H/H ホモは胚致死**。M座位 (Merle) との同時検査が必須。",
         "advice": "**H/H × H/H 交配は禁忌** — 全頭胚致死。さらに M/M（ダブルマール）× ハーレクインの組み合わせは深刻な発達異常リスク。グレートデーンのハーレクインブリーダーは PSMB7 と PMEL17 (M) の両方を検査する必要があります。",
         "references": [
             {"label": "詳細を検索 (Harlequin)", "url": _google_search("PSMB7 harlequin Great Dane merle")},
@@ -1898,6 +1917,7 @@ TRAIT_KB = [
         "summary": "成犬になると白い部分に色付き斑点が散らばる『ローン』形質。スパニエル系・オーストラリアン・キャトルドッグ等で典型。",
         "mechanism": "原因遺伝子は未確定（USH2A 周辺が候補）。優性遺伝で、白斑領域に色素細胞が遅れて移行することで成犬期にティッキング模様が出現します。",
         "phenotype": "Rn/Rn or Rn/rn: ローンあり（成犬で発現）\\nrn/rn: ローンなし（白斑のまま）",
+        "inheritance": "常染色体優性（原因遺伝子未確定）。Rn/rn ヘテロでも発現。S座位 (パイド/白斑) の存在が前提です。",
         "advice": "イングリッシュ・コッカー・スパニエル、ジャーマン・ショートヘアード・ポインター、オーストラリアン・キャトルドッグの『ブルーヒーラー』『レッドヒーラー』はこのアレル発現。子犬期は白いが、4〜6 週齢から斑点が出始めます。",
         "references": [
             {"label": "詳細を検索 (Roan)", "url": _google_search("dog roan USH2A coat pattern")},
@@ -1909,6 +1929,7 @@ TRAIT_KB = [
         "summary": "白地に小さな色付き斑点が散らばる形質。ダルメシアンの斑点もこの遺伝子による。",
         "mechanism": "優性遺伝。原因遺伝子は未確定だが、S座位 sp/sp の白斑領域に色素細胞が遅れて移行することで斑点が出現します。Roan より斑点が小さく密度が低い。",
         "phenotype": "T/T or T/t: ティッキングあり（白地に小斑点）\\nt/t: 純白の白斑のまま",
+        "inheritance": "常染色体優性（原因遺伝子未確定）。T/t ヘテロでも発現。S座位の白斑領域に対してのみ作用します。",
         "advice": "ダルメシアン・イングリッシュ・セッター・ジャック・ラッセル・テリア等で典型。ダルメシアンでは追加で SLC2A9（高尿酸尿症 HUU）のリスクアレルが固定しており、HUU 検査と併用が標準。",
         "references": [
             {"label": "詳細を検索 (Ticking)", "url": _google_search("dog ticking T locus Dalmatian")},
@@ -1920,6 +1941,7 @@ TRAIT_KB = [
         "summary": "シベリアン・ハスキー特有の青目を決める遺伝子重複。マールやメルル以外の青目原因。",
         "mechanism": "18番染色体の ALX4 近傍に約 98kb の重複が発生し、優性遺伝で虹彩の色素生成を抑制。M座位 (Merle) や S座位 (Pied) 経由の青目とは独立の機構です。",
         "phenotype": "BE/BE or BE/be: 青目（片目または両目）\\nbe/be: 通常色（茶〜琥珀）",
+        "inheritance": "常染色体優性（遺伝子重複）。BE/be ヘテロでも青目または片目が発現します。",
         "advice": "シベリアン・ハスキーの青目・オッドアイの主因。マールや白斑経由の青目と異なり、視聴覚障害リスクとの関連は報告されていません。オーストラリアンシェパードのマール経由青目とは区別が必要。",
         "references": [
             {"label": "詳細を検索 (ALX4 Blue Eyes)", "url": _google_search("ALX4 blue eyes Siberian Husky")},
@@ -1932,6 +1954,7 @@ TRAIT_KB = [
         "summary": "黄ラブラドールの『フォックスレッド』など、フェオメラニン（黄/赤系）の発色濃度を決める補助遺伝子。",
         "mechanism": "KITLG 遺伝子近傍の調節領域変異がメラノサイトの分化と色素生成を調節。e/e (E座位) 犬で coat の黄色濃度に強く影響します。",
         "phenotype": "Intense allele 2 コピー: フォックスレッド〜ディープレッド\\nIntense allele 1 コピー: 中間色（中程度のイエロー）\\n通常型 2 コピー: 淡いイエロー〜クリーム",
+        "inheritance": "常染色体（相加的）。Intense アレル数に比例して赤色濃度が上がります。",
         "advice": "ラブラドール、ノバスコシア・ダックトーリング・レトリーバー、レッド系ゴールデンで重要。I座位 (MFSD12) と組み合わせて使うと黄〜赤色の濃淡をより正確に予測できます。健康影響なし。",
         "references": [
             {"label": "詳細を検索 (KITLG)", "url": _google_search("KITLG fox red Labrador phaeomelanin")},
@@ -1943,6 +1966,7 @@ TRAIT_KB = [
         "summary": "生まれた時はブラックタン（タンポイント）だが、成長と共に背中の黒色が後退し『サドル』模様になる遺伝子。ジャーマンシェパードの典型パターン。",
         "mechanism": "RALY 遺伝子の調節領域変異が優性。A座位 at/at の犬で、成長に伴い背中の eumelanin 領域が縮小して褐色（タン）が広がります。",
         "phenotype": "I/I or I/i: 成犬でサドルタン（背中のみ黒、四肢・顔は褐色）\\ni/i: ブラックタン（黒主体のまま）",
+        "inheritance": "常染色体優性（不完全優性）。I/i ヘテロでもサドルタンが発現。A座位 at/at であることが前提条件。",
         "advice": "ジャーマンシェパード、エアデール・テリア、ビーグル、ベルジアン・タービュレン等で典型。子犬期はブラックタンに見えても、6ヶ月〜2歳でサドル模様に変化します。A座位 at/at が必須前提。",
         "references": [
             {"label": "詳細を検索 (Saddle Tan)", "url": _google_search("RALY saddle tan dog German Shepherd")},
@@ -1954,6 +1978,7 @@ TRAIT_KB = [
         "summary": "サイトハウンド系特有の『顔のマスク領域の色が抜けて薄く見える』パターン。アフガン、サルーキ、ボルゾイ、シベリアンハスキーで報告。",
         "mechanism": "MC1R の Ea (Edomino) バリアントが eumelanin 産生をマスク領域で部分抑制。E座位の派生アレルで、E > Eg > Ea > e の優位序列。",
         "phenotype": "Ea/Ea or Ea/e: ドミノ/グリズル（顔の黒抜け、淡色マスク）\\nEa/E_ (E 優性): 通常",
+        "inheritance": "E座位の複対立遺伝子。優性序列: E > Eg > Ea > e。Ea/e または Ea/Ea のみで発現（E/_ または Em/_ が存在すると抑制）。",
         "advice": "アフガンハウンドの『ドミノ』、サルーキの『グリズル』、シベリアンハスキーの『アグーチ』様パターンの一因。Em マスク（黒マスク）とは反対方向の作用。E座位の検査で Ea バリアントを含めない検査もあるため、サイトハウンドブリーダーは検査内容を確認推奨。",
         "references": [
             {"label": "詳細を検索 (Domino)", "url": _google_search("MC1R domino grizzle Afghan Saluki Ea")},
@@ -1965,6 +1990,7 @@ TRAIT_KB = [
         "summary": "ポーチュギーズ・ウォーター・ドッグや Doodle 系で出現する『スムースな顔（ファーニシングなし）+ 短毛』の劣性表現型。",
         "mechanism": "RSPO2 のファーニシング変異の保有なし（ic/ic ホモ）が原因。F 座位の f/f に相当し、顔毛・眉毛・髭の発達が抑制されます。",
         "phenotype": "IC/IC or IC/ic: 標準的なファーニッシュコート（眉・髭あり）\\nic/ic: スムースコート（顔毛なし、ラブ/ゴールデン的な外観）",
+        "inheritance": "常染色体劣性（ic/ic ホモ接合でスムースコート発現）。IC/ic キャリア間の交配から 25% の確率でインプロパーコートが生まれます。",
         "advice": "ポーチュギーズ・ウォーター・ドッグ、ラゴット・ロマニョーロでは血統書失格、Doodle 系（ラブラドゥードル/ゴールデンドゥードル）では『hypoallergenic 失敗』と扱われます。F座位 (RSPO2) ファーニシング検査と同時に確認推奨。健康影響なし。",
         "references": [
             {"label": "詳細を検索 (Improper Coat)", "url": _google_search("improper coat IC RSPO2 Portuguese Water Dog Doodle")},
@@ -1976,6 +2002,7 @@ TRAIT_KB = [
         "summary": "メラニン生成が極度に低下する遺伝性白皮症。被毛・皮膚が白く、虹彩が淡色〜赤目、視覚障害を伴うことが多い。",
         "mechanism": "TYR (チロシナーゼ) や SLC45A2 などのメラニン合成経路遺伝子の劣性変異により、メラニン生成が極端に低下。優性ホワイト（マールやパイドの白）とは区別される真のアルビニズム。",
         "phenotype": "A/A or A/oca: 通常色\\noca/oca: アルビノ（被毛・皮膚白、赤目〜淡色虹彩、羞明・視覚低下）",
+        "inheritance": "常染色体劣性（oca/oca ホモ接合で発現）。A/oca キャリア間の交配から 25% の確率でアルビノ子犬が生まれます。",
         "advice": "ドーベルマン (Z-factor)・ペキニーズ・ラサ・アプソ等で報告。⚠️ **健康影響あり**: 紫外線過敏（皮膚がん発症率上昇）・視覚障害・羞明。アルビノ犬の繁殖は倫理的に推奨されません。屋外活動時の遮光保護と定期皮膚検診が必須。",
         "references": [
             {"label": "詳細を検索 (Albinism)", "url": _google_search("dog albinism TYR SLC45A2 Doberman Z-factor")},
