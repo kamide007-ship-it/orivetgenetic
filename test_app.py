@@ -493,6 +493,77 @@ class TestHeterozygosityParser:
         # 0-100 の範囲外は誤検出として捨てる
         assert parse_heterozygosity("Genetic Diversity: 150%") is None
 
+    def test_parenthetical_annotation(self):
+        """ラベルと値の間に括弧注記があっても拾える"""
+        from poodle_genetics import parse_heterozygosity
+        assert parse_heterozygosity("遺伝的多様性（ヘテロ接合率）: 0.412") == 41.2
+
+    def test_qualifier_word(self):
+        """Score / Rate 等の限定語があっても拾える"""
+        from poodle_genetics import parse_heterozygosity
+        assert parse_heterozygosity("Genetic Diversity Score   29 %") == 29.0
+        assert parse_heterozygosity("Breed average heterozygosity rate 0.35") == 35.0
+
+    def test_no_false_positive_in_prose(self):
+        """無関係な文章中の数値を誤って拾わない"""
+        from poodle_genetics import parse_heterozygosity
+        assert parse_heterozygosity("This dog is a 5 year old poodle.") is None
+
+    def test_realistic_report_context(self):
+        """レポート全文を模した文脈付きテキストから抽出できる"""
+        from poodle_genetics import parse_heterozygosity
+        text = "Genetic Summary Report\nBreed: Poodle\nHeterozygosity: 38.4%\nHealth Tests Reported\n"
+        assert parse_heterozygosity(text) == 38.4
+
+    def test_real_orivet_heterozygosity_details_page(self):
+        """実際の Orivet『Heterozygosity Details』ページ形式から Score を優先抽出"""
+        from poodle_genetics import parse_heterozygosity
+        text = (
+            "Heterozygosity Details\n"
+            "Pet Name : Angel of Music\n"
+            "Inbreeding level: High genetic diversity, often seen in broader "
+            "ancestral background such outcrossed or mixed-breed dogs 37.30%\n"
+            "Heterozygosity Score: 0.373\n"
+            "For purebreds, moderate scores like 28% are not unusual ...\n"
+            "All Toy Poodle\n"
+            "Typical range 23.4% - 32.6%"
+        )
+        # prose の 28% やレンジの 23.4% ではなく、Score 0.373 → 37.3% を拾う
+        assert parse_heterozygosity(text) == 37.3
+
+    def test_heterozygosity_score_label_priority(self):
+        """'Heterozygosity Score: 0.388' が小数で正しく % 換算される"""
+        from poodle_genetics import parse_heterozygosity
+        assert parse_heterozygosity("Heterozygosity Score: 0.388") == 38.8
+
+    def test_typical_range_parser(self):
+        """犬種別 Typical range の抽出"""
+        from poodle_genetics import parse_heterozygosity_range
+        assert parse_heterozygosity_range("Typical range 23.4% - 32.6%") == (23.4, 32.6)
+        assert parse_heterozygosity_range("Typical range: 20 - 40") == (20.0, 40.0)
+        assert parse_heterozygosity_range("標準域 23.4% 〜 32.6%") == (23.4, 32.6)
+
+    def test_typical_range_absent(self):
+        from poodle_genetics import parse_heterozygosity_range
+        assert parse_heterozygosity_range("no range here") is None
+        assert parse_heterozygosity_range("") is None
+
+    def test_dogprofile_has_range_field(self):
+        from poodle_genetics import DogProfile
+        d = DogProfile()
+        assert hasattr(d, "heterozygosity_range")
+        assert d.heterozygosity_range is None
+
+    def test_extract_sim_data_forwards_range(self):
+        """extract_sim_data が heterozygosity_range を転送する"""
+        import app as _appmod
+        from poodle_genetics import DogProfile
+        d = DogProfile(pet_name="X", sex="Male", heterozygosity=37.3,
+                       heterozygosity_range=[23.4, 32.6])
+        sim = _appmod.extract_sim_data(d)
+        assert sim["heterozygosity"] == 37.3
+        assert sim["heterozygosity_range"] == [23.4, 32.6]
+
     def test_dogprofile_has_field(self):
         from poodle_genetics import DogProfile
         d = DogProfile()

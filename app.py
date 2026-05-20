@@ -204,6 +204,7 @@ def extract_sim_data(dog):
         "health": health,
         "breed": dog.breed or "",
         "heterozygosity": dog.heterozygosity,
+        "heterozygosity_range": dog.heterozygosity_range,
     }
 
 

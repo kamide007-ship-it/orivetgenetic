@@ -1221,7 +1221,8 @@ function addDogsToSimulator(dogs, keyPrefix) {
       sex: dog.sex,
       color: dog.color || {},
       health: dog.health || {},
-      heterozygosity: dog.heterozygosity
+      heterozygosity: dog.heterozygosity,
+      heterozygosity_range: dog.heterozygosity_range || null
     };
     addedKeys.push({ key: key, sex: dog.sex });
 
@@ -1279,11 +1280,25 @@ function renderHeterozygosityPanel() {
     + '数値を直接比較しないでください（高ヘテロ接合率＝多様性が高い＝一般に良好）。</p>'
     + '<table style="width:100%;border-collapse:collapse;font-size:0.9em;">'
     + '<tr style="background:#f3f4f6;"><th style="padding:6px 10px;text-align:left;">犬</th>'
-    + '<th style="padding:6px 10px;text-align:left;">ヘテロ接合率</th></tr>';
+    + '<th style="padding:6px 10px;text-align:left;">ヘテロ接合率</th>'
+    + '<th style="padding:6px 10px;text-align:left;">犬種標準域との比較</th></tr>';
   dogsWithHet.forEach(d => {
+    let comparison = '<span style="color:var(--gray);">—</span>';
+    const r = d.heterozygosity_range;
+    if (Array.isArray(r) && r.length === 2) {
+      const [low, high] = r;
+      const v = d.heterozygosity;
+      let label, color;
+      if (v < low) { label = '標準域より低い（多様性やや低め）'; color = '#92400e'; }
+      else if (v > high) { label = '標準域より高い（多様性良好）'; color = '#166534'; }
+      else { label = '標準域内'; color = '#0e7490'; }
+      comparison = '<span style="color:' + color + ';">' + label + '</span>'
+        + '<br><span style="font-size:0.82em;color:var(--gray);">標準域 ' + low + '%–' + high + '%</span>';
+    }
     html += '<tr><td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;">' + escapeHtml(d.name) + '</td>'
       + '<td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;font-weight:700;color:#0e7490;">'
-      + d.heterozygosity + '%</td></tr>';
+      + d.heterozygosity + '%</td>'
+      + '<td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;">' + comparison + '</td></tr>';
   });
   html += '</table>';
   panel.innerHTML = html;

@@ -105,6 +105,8 @@ class DogProfile:
     # ゲノム多様性指標（Orivet 等の DNA 検査が報告するヘテロ接合率）。
     # 血統ベース COI とは別指標。PDF に記載があれば % 値（0-100）を格納。
     heterozygosity: Optional[float] = None
+    # 犬種別の標準域（Typical range）。[low, high] の % 値。個体値の位置比較に使う。
+    heterozygosity_range: Optional[list] = None
 
 @dataclass
 class Ancestor:
@@ -4059,28 +4061,82 @@ def parse_heterozygosity(text: str) -> Optional[float]:
     """
     if not text:
         return None
-    # ラベル候補（英日両方）。値はパーセント（35.2%）か小数（0.352）。
+
+    def _to_percent(num_str, has_percent):
+        try:
+            v = float(num_str)
+        except (TypeError, ValueError):
+            return None
+        # 小数表記（0.373 など、% 記号なしで 1 以下）は % に換算
+        if not has_percent and v <= 1.0:
+            v *= 100.0
+        if v < 0 or v > 100:
+            return None
+        return round(v, 1)
+
+    # 1) Orivet の正準ラベル "Heterozygosity Score: 0.373" を最優先で拾う
+    #    （prose 中の「28%」やレンジの「23.4%」を誤検出しないため）
+    m = re.search(
+        r"heterozygosity\s*score\s*[:：]?\s*([0-9]+(?:\.[0-9]+)?)\s*(%|％)?",
+        text, re.IGNORECASE,
+    )
+    if m:
+        v = _to_percent(m.group(1), bool(m.group(2)))
+        if v is not None:
+            return v
+
+    # 2) 一般ラベル（英日両方）。値はパーセント（35.2%）か小数（0.352）。
     label = (
-        r"(?:heterozygosity(?:\s*rate)?|genetic\s+diversity|genomic\s+diversity"
+        r"(?:heterozygosity|genetic\s+diversity|genomic\s+diversity"
         r"|ヘテロ接合率|ヘテロ接合性|遺伝的多様性|ゲノム多様性)"
     )
-    # ラベル → 区切り（:／空白） → 数値 → 任意の %
-    pattern = re.compile(label + r"\s*[:：]?\s*([0-9]+(?:\.[0-9]+)?)\s*(%|％)?", re.IGNORECASE)
+    # ラベル直後に許容する任意の修飾:
+    #   - 括弧注記        例: 遺伝的多様性（ヘテロ接合率）
+    #   - 限定語          例: Heterozygosity Rate / Diversity Score / 多様性スコア
+    qualifier = (
+        r"(?:\s*[（(][^）)\n]{0,20}[）)])?"
+        r"(?:\s*(?:rate|score|index|value|スコア|率|指数|値))?"
+    )
+    pattern = re.compile(
+        label + qualifier + r"\s*[:：]?\s*([0-9]+(?:\.[0-9]+)?)\s*(%|％)?",
+        re.IGNORECASE,
+    )
     m = pattern.search(text)
     if not m:
         return None
+    return _to_percent(m.group(1), bool(m.group(2)))
+
+
+def parse_heterozygosity_range(text: str):
+    """Orivet PDF の犬種別『Typical range 23.4% - 32.6%』を抽出。
+
+    犬種ごとのヘテロ接合率の標準域。個体値がこの範囲の上か下かを示すために使う。
+    見つからなければ None、見つかれば (low, high) のタプル（% 値）。
+    """
+    if not text:
+        return None
+    m = re.search(
+        r"typical\s+range\s*[:：]?\s*"
+        r"([0-9]+(?:\.[0-9]+)?)\s*(?:%|％)?\s*[-–~〜]\s*([0-9]+(?:\.[0-9]+)?)\s*(?:%|％)?",
+        text, re.IGNORECASE,
+    )
+    if not m:
+        # 日本語表記「標準域 23.4% 〜 32.6%」も試す
+        m = re.search(
+            r"(?:標準域|標準範囲|典型的範囲|典型値)\s*[:：]?\s*"
+            r"([0-9]+(?:\.[0-9]+)?)\s*(?:%|％)?\s*[-–~〜]\s*([0-9]+(?:\.[0-9]+)?)\s*(?:%|％)?",
+            text,
+        )
+    if not m:
+        return None
     try:
-        value = float(m.group(1))
+        low = float(m.group(1))
+        high = float(m.group(2))
     except (TypeError, ValueError):
         return None
-    has_percent = bool(m.group(2))
-    # 小数表記（0.352 など、% 記号なしで 1 以下）は % に換算
-    if not has_percent and value <= 1.0:
-        value *= 100.0
-    # 妥当性チェック: 0-100 の範囲外は誤検出として捨てる
-    if value < 0 or value > 100:
+    if not (0 <= low <= 100 and 0 <= high <= 100) or low > high:
         return None
-    return round(value, 1)
+    return (round(low, 1), round(high, 1))
 
 
 def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
@@ -4131,6 +4187,7 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
         trait_results=trait_results,
         source_file=basename,
         heterozygosity=parse_heterozygosity(text),
+        heterozygosity_range=(lambda r: list(r) if r else None)(parse_heterozygosity_range(text)),
     )
 
     print(f"  → {dog.pet_name or dog.registered_name}: 健康{len(health_results)}項目, 形質{len(trait_results)}項目")
