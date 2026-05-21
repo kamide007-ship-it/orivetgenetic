@@ -1411,6 +1411,40 @@ class TestDiseaseKB:
         # PR #49 後で 73 以上
         assert len(DISEASE_KB) >= 70, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
 
+    def test_pll(self):
+        d = get_disease_detail("PLL")
+        assert d is not None and "水晶体脱臼" in d.get("title", "")
+
+    def test_pfk_deficiency(self):
+        d = get_disease_detail("pfk deficiency")
+        assert d is not None and "PFKM" in d.get("title", "")
+
+    def test_arvc(self):
+        d = get_disease_detail("ARVC")
+        assert d is not None and "Striatin" in d.get("title", "")
+
+    def test_dcm1(self):
+        d = get_disease_detail("dcm1")
+        assert d is not None and "PDK4" in d.get("title", "")
+
+    def test_bfje(self):
+        d = get_disease_detail("BFJE")
+        assert d is not None and "LGI2" in d.get("title", "")
+
+    def test_heart_category_exists(self):
+        from poodle_genetics import DISEASE_CATEGORIES
+        cats = [c for c, _ in DISEASE_CATEGORIES]
+        assert any("心臓" in c for c in cats), "心臓系 category not found in DISEASE_CATEGORIES"
+
+    def test_heart_diseases_in_category(self):
+        from poodle_genetics import group_diseases_by_category, DISEASE_KB
+        grouped = group_diseases_by_category(DISEASE_KB)
+        heart_items = next((items for cat, items in grouped if "心臓" in cat), [])
+        assert len(heart_items) >= 2, f"Expected ≥2 heart diseases, got {len(heart_items)}"
+
+    def test_full_panel_min_coverage_updated(self):
+        assert len(DISEASE_KB) >= 77, f"DISEASE_KB has only {len(DISEASE_KB)} entries"
+
 
 # ===========================================================================
 # 14. PR #49 トレイトKB拡張 (14+ 座位)
