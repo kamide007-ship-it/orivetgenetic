@@ -316,7 +316,11 @@
       {% endfor %}
 
     {% else %}
-    <div class="empty-state">{% if lang == 'en' %}No diseases found matching "{{ query }}".{% else %}「{{ query }}」に該当する疾患は見つかりませんでした。{% endif %}</div>
+    <div class="empty-state">
+      <p style="font-size:1.1em;margin-bottom:10px;">{% if lang == 'en' %}No diseases found matching <strong>"{{ query }}"</strong>.{% else %}「<strong>{{ query }}</strong>」に該当する疾患は見つかりませんでした。{% endif %}</p>
+      <p style="font-size:0.9em;color:#9ca3af;margin-bottom:14px;">{% if lang == 'en' %}Try searching by English name, Japanese name, gene symbol, or symptom keyword.{% else %}英語名・日本語名・遺伝子記号・症状キーワードで試してみてください。{% endif %}</p>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" style="display:inline-block;background:#7c3aed;color:#fff;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:0.9em;">{% if lang == 'en' %}✕ Clear search{% else %}✕ 検索をクリア{% endif %}</a>
+    </div>
     {% endif %}
   </div>
 
@@ -345,7 +349,11 @@
       {% endfor %}
     </div>
     {% else %}
-    <div class="empty-state">{% if lang == 'en' %}No traits found matching "{{ query }}".{% else %}「{{ query }}」に該当する形質は見つかりませんでした。{% endif %}</div>
+    <div class="empty-state">
+      <p style="font-size:1.1em;margin-bottom:10px;">{% if lang == 'en' %}No traits found matching <strong>"{{ query }}"</strong>.{% else %}「<strong>{{ query }}</strong>」に該当する形質は見つかりませんでした。{% endif %}</p>
+      <p style="font-size:0.9em;color:#9ca3af;margin-bottom:14px;">{% if lang == 'en' %}Try searching by locus name (e.g. B locus, M locus), gene symbol, or coat color keyword.{% else %}座位名（例: B 座位、マール）・遺伝子記号・毛色キーワードで試してみてください。{% endif %}</p>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" style="display:inline-block;background:#7c3aed;color:#fff;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:0.9em;">{% if lang == 'en' %}✕ Clear search{% else %}✕ 検索をクリア{% endif %}</a>
+    </div>
     {% endif %}
   </div>
 
