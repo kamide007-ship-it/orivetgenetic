@@ -394,11 +394,19 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
       <h2>近親交配係数 (COI) 算出
         <button type="button" class="kb-help" onclick="showCoiInfo()" aria-label="COIとは何か" style="vertical-align:middle;margin-left:8px;">?</button>
       </h2>
-      <p style="color:var(--gray); font-size:0.9em; margin-bottom:16px;">
+      <p style="color:var(--gray); font-size:0.9em; margin-bottom:12px;">
         3世代（曾祖父母まで）の血統情報を入力して、Wright's Coefficient of Inbreeding を算出します。<br>
         同じ祖先が父方・母方の両方に出現する場合、COIが上昇します。
         <a href="javascript:void(0)" onclick="showCoiInfo()" style="color:var(--purple);font-weight:600;">📖 COI の意味を詳しく見る</a>
       </p>
+
+      <div style="margin-bottom:16px; padding:12px 16px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; font-size:0.86em; color:#1e3a8a;">
+        🔬 <strong>Orivet の検査結果と数値が違う場合</strong><br>
+        本ツールは血統書から予測する<strong>血統ベース COI</strong>を算出します。Orivet の DNA 検査が示す<strong>ヘテロ接合率（ゲノム多様性）</strong>とは<strong>測定するものが異なる別指標</strong>のため、数値は一致しません。
+        <a href="javascript:void(0)" onclick="showCoiInfo()" style="color:#2563eb;font-weight:600;">違いを詳しく見る →</a>
+      </div>
+
+      <div id="hetero-panel" style="display:none; margin-bottom:16px; padding:14px 18px; background:#ecfeff; border:1px solid #a5f3fc; border-radius:8px;"></div>
 
       <div id="ped-loader" style="display:none; margin-bottom:16px; padding:12px 16px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px;">
         <strong style="color:#166534;">血統書データが見つかりました</strong>
@@ -1215,7 +1223,9 @@ function addDogsToSimulator(dogs, keyPrefix) {
       name: dog.name,
       sex: dog.sex,
       color: dog.color || {},
-      health: dog.health || {}
+      health: dog.health || {},
+      heterozygosity: dog.heterozygosity,
+      heterozygosity_range: dog.heterozygosity_range || null
     };
     addedKeys.push({ key: key, sex: dog.sex });
 
@@ -1251,7 +1261,57 @@ function addDogsToSimulator(dogs, keyPrefix) {
 
   runColorSim();
   runHealthSim();
+  renderHeterozygosityPanel();
   return addedKeys;
+}
+
+// 検査済みヘテロ接合率（ゲノム多様性）を COI タブに表示。
+// 血統ベース COI とは別指標であることを明示する。
+function renderHeterozygosityPanel() {
+  const panel = document.getElementById('hetero-panel');
+  if (!panel) return;
+  const dogsWithHet = Object.values(DOGS).filter(
+    d => d.heterozygosity !== null && d.heterozygosity !== undefined
+  );
+  if (dogsWithHet.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+  let html = '<h3 style="margin-bottom:6px;">🔬 検査済みヘテロ接合率（ゲノム多様性）</h3>'
+    + '<p style="font-size:0.85em;color:var(--gray);margin-bottom:10px;">'
+    + 'Orivet 等の DNA 検査で実測されたヘテロ接合率です。下で算出する<strong>血統ベース COI とは別指標</strong>のため、'
+    + '数値を直接比較しないでください（高ヘテロ接合率＝多様性が高い＝一般に良好）。</p>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:0.9em;">'
+    + '<tr style="background:#f3f4f6;"><th style="padding:6px 10px;text-align:left;">犬</th>'
+    + '<th style="padding:6px 10px;text-align:left;">ヘテロ接合率</th>'
+    + '<th style="padding:6px 10px;text-align:left;">犬種標準域との比較</th></tr>';
+  dogsWithHet.forEach(d => {
+    let comparison = '<span style="color:var(--gray);">—</span>';
+    const r = d.heterozygosity_range;
+    if (Array.isArray(r) && r.length === 2) {
+      const [low, high] = r;
+      const v = d.heterozygosity;
+      let label, color;
+      if (v < low) { label = '標準域より低い（多様性やや低め）'; color = '#92400e'; }
+      else if (v > high) { label = '標準域より高い（多様性良好）'; color = '#166534'; }
+      else { label = '標準域内'; color = '#0e7490'; }
+      comparison = '<span style="color:' + color + ';">' + label + '</span>'
+        + '<br><span style="font-size:0.82em;color:var(--gray);">標準域 ' + low + '%–' + high + '%</span>';
+    }
+    html += '<tr><td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;">' + escapeHtml(d.name) + '</td>'
+      + '<td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;font-weight:700;color:#0e7490;">'
+      + d.heterozygosity + '%</td>'
+      + '<td style="padding:6px 10px;border-bottom:1px solid #f3f4f6;">' + comparison + '</td></tr>';
+  });
+  html += '</table>';
+  panel.innerHTML = html;
+  panel.style.display = 'block';
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
 }
 
 // PDF解析セッションからシミュレーターに自動反映（?session=XXX 経由）
@@ -1560,6 +1620,10 @@ const COI_KB = {
   ],
   health: '高COI犬は劣性遺伝病が顕在化しやすく、免疫機能・繁殖能力・寿命の低下が報告されています。育種学的には JKC・FCI 等が「COI 6.25% 以下を推奨」とするケースが多いです。',
   calculation: 'Wright の経路法: COI = Σ (0.5)^(n+m+1)\n  n = 個体 → 共通祖先 → 父 までの世代数\n  m = 個体 → 共通祖先 → 母 までの世代数\n複数の共通祖先がいる場合は各経路の寄与を合計します。',
+  pedigree_vs_genomic: '本ツールが算出するのは<strong>血統ベース COI</strong>（血統書から共通祖先を辿って予測する値）です。一方、Orivet などの DNA 検査は<strong>ヘテロ接合率（ゲノム多様性）</strong>を実測します。両者は<strong>別々の指標</strong>です:<br><br>'
+    + '<strong>血統ベース COI</strong>: 交配「前」に血統書だけで予測できる。世代数・血統書の精度に依存し、記載のない祖先の重複は反映されない。<br><br>'
+    + '<strong>ヘテロ接合率（Orivet 等）</strong>: 数万 SNP を実測するため血統書の誤りに左右されず、実際のゲノム状態を反映する。ただし DNA 検査が必要で、交配前の予測には使いにくい。<br><br>'
+    + '⚠️ <strong>本ツールの COI 値と Orivet の検査結果（ヘテロ接合率）は数値が一致しません。</strong>測定しているものが違うためです。両方を併用すると、血統由来のリスク（予測）と実測のゲノム多様性の両面から繁殖判断ができます。',
   advice: '繁殖計画では COI を計算前に **両親候補の登録番号レベルで照合**し、共通祖先を確認することが重要です。本ツールは 3 世代上限の簡易計算なので、より深い世代の重複は別途確認してください。',
   references: [
     { label: 'Wikipedia: 近交係数', url: 'https://ja.wikipedia.org/wiki/Special:Search/' + encodeURIComponent('近交係数') },
@@ -1582,6 +1646,7 @@ function showCoiInfo() {
   html += '</table></div>';
   html += '<div class="field"><span class="field-label">⚠️ 健康への影響</span>' + COI_KB.health + '</div>';
   html += '<div class="field" style="white-space:pre-line"><span class="field-label">🧪 計算方法</span>' + COI_KB.calculation + '</div>';
+  html += '<div class="field"><span class="field-label">🔬 血統ベース COI とヘテロ接合率の違い</span>' + COI_KB.pedigree_vs_genomic + '</div>';
   html += '<div class="field"><span class="field-label">💡 アドバイス</span>' + COI_KB.advice + '</div>';
   html += '<div class="field refs"><span class="field-label">🔗 参考リンク</span>'
        + COI_KB.references.map(r => '<a href="' + r.url + '" target="_blank" rel="noopener noreferrer">' + r.label + ' ↗</a>').join('')

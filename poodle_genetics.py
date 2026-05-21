@@ -102,6 +102,11 @@ class DogProfile:
     health_results: list = field(default_factory=list)
     trait_results: list = field(default_factory=list)
     source_file: str = ""
+    # ゲノム多様性指標（Orivet 等の DNA 検査が報告するヘテロ接合率）。
+    # 血統ベース COI とは別指標。PDF に記載があれば % 値（0-100）を格納。
+    heterozygosity: Optional[float] = None
+    # 犬種別の標準域（Typical range）。[low, high] の % 値。個体値の位置比較に使う。
+    heterozygosity_range: Optional[list] = None
 
 @dataclass
 class Ancestor:
@@ -2244,6 +2249,24 @@ GUIDES = [
                     "共通祖先がどこに何回出現しているかも可視化されるため、繁殖計画の意思決定に直接活用できます。"
                 ),
             },
+            {
+                "heading": "🔬 血統ベース COI とヘテロ接合率（ゲノム多様性）の違い",
+                "body": (
+                    "『COI』と名のつく数値には、実は<strong>大きく分けて 2 種類</strong>あり、測定しているものが異なります。<br><br>"
+                    "<strong>① 血統ベース COI（本ツールの算出方法）</strong><br>"
+                    "血統書から共通祖先を辿り、子犬が同じ遺伝子を 2 コピー受け継ぐ確率を<strong>予測</strong>します。"
+                    "交配『前』に血統書だけで計算できるのが最大の利点。"
+                    "ただし血統書の世代数・精度に依存し、記載のない祖先の重複は反映されません。"
+                    "JKC・FCI 等の伝統的な繁殖指針はこちらを前提にしています。<br><br>"
+                    "<strong>② ヘテロ接合率（Orivet などの DNA 検査）</strong><br>"
+                    "数万箇所の SNP（一塩基多型）を<strong>実測</strong>し、ゲノム全体でヘテロ接合（両親由来の遺伝子が異なる）の割合を求めます。"
+                    "血統書の誤りや記載漏れに左右されず、実際のゲノム状態を直接反映するのが強み。"
+                    "ただし DNA 検査が必要で、交配『前』の予測には使えません。<br><br>"
+                    "⚠️ <strong>本ツールの COI 値と、Orivet の検査結果（ヘテロ接合率）の数値は一致しません。</strong>"
+                    "これは誤りではなく、『予測 vs 実測』『血統 vs ゲノム』という<strong>別々の指標</strong>だからです。"
+                    "両者は競合ではなく補完関係にあり、繁殖判断では『血統由来のリスク予測（COI）』と『実測のゲノム多様性（ヘテロ接合率）』を併用するのが理想的です。"
+                ),
+            },
         ],
         "related_disease_slugs": [],
         "related_trait_slugs": [],
@@ -4052,6 +4075,97 @@ def parse_trait_results_from_text(text: str) -> list:
     return results
 
 
+def parse_heterozygosity(text: str) -> Optional[float]:
+    """Orivet PDF テキストからヘテロ接合率（ゲノム多様性）を抽出。
+
+    Orivet / Embark 等の DNA 検査が報告する『ヘテロ接合率』『遺伝的多様性』を
+    柔軟に拾う。表記揺れに対応:
+      - "Heterozygosity: 35.2%" / "Genetic Diversity 35.2 %"
+      - "ヘテロ接合率: 35.2%" / "遺伝的多様性 35.2%"
+      - "Heterozygosity Rate: 0.352"（小数 → % に換算）
+
+    見つからなければ None。0-100 の % 値（float）で返す。
+    """
+    if not text:
+        return None
+
+    def _to_percent(num_str, has_percent):
+        try:
+            v = float(num_str)
+        except (TypeError, ValueError):
+            return None
+        # 小数表記（0.373 など、% 記号なしで 1 以下）は % に換算
+        if not has_percent and v <= 1.0:
+            v *= 100.0
+        if v < 0 or v > 100:
+            return None
+        return round(v, 1)
+
+    # 1) Orivet の正準ラベル "Heterozygosity Score: 0.373" を最優先で拾う
+    #    （prose 中の「28%」やレンジの「23.4%」を誤検出しないため）
+    m = re.search(
+        r"heterozygosity\s*score\s*[:：]?\s*([0-9]+(?:\.[0-9]+)?)\s*(%|％)?",
+        text, re.IGNORECASE,
+    )
+    if m:
+        v = _to_percent(m.group(1), bool(m.group(2)))
+        if v is not None:
+            return v
+
+    # 2) 一般ラベル（英日両方）。値はパーセント（35.2%）か小数（0.352）。
+    label = (
+        r"(?:heterozygosity|genetic\s+diversity|genomic\s+diversity"
+        r"|ヘテロ接合率|ヘテロ接合性|遺伝的多様性|ゲノム多様性)"
+    )
+    # ラベル直後に許容する任意の修飾:
+    #   - 括弧注記        例: 遺伝的多様性（ヘテロ接合率）
+    #   - 限定語          例: Heterozygosity Rate / Diversity Score / 多様性スコア
+    qualifier = (
+        r"(?:\s*[（(][^）)\n]{0,20}[）)])?"
+        r"(?:\s*(?:rate|score|index|value|スコア|率|指数|値))?"
+    )
+    pattern = re.compile(
+        label + qualifier + r"\s*[:：]?\s*([0-9]+(?:\.[0-9]+)?)\s*(%|％)?",
+        re.IGNORECASE,
+    )
+    m = pattern.search(text)
+    if not m:
+        return None
+    return _to_percent(m.group(1), bool(m.group(2)))
+
+
+def parse_heterozygosity_range(text: str):
+    """Orivet PDF の犬種別『Typical range 23.4% - 32.6%』を抽出。
+
+    犬種ごとのヘテロ接合率の標準域。個体値がこの範囲の上か下かを示すために使う。
+    見つからなければ None、見つかれば (low, high) のタプル（% 値）。
+    """
+    if not text:
+        return None
+    m = re.search(
+        r"typical\s+range\s*[:：]?\s*"
+        r"([0-9]+(?:\.[0-9]+)?)\s*(?:%|％)?\s*[-–~〜]\s*([0-9]+(?:\.[0-9]+)?)\s*(?:%|％)?",
+        text, re.IGNORECASE,
+    )
+    if not m:
+        # 日本語表記「標準域 23.4% 〜 32.6%」も試す
+        m = re.search(
+            r"(?:標準域|標準範囲|典型的範囲|典型値)\s*[:：]?\s*"
+            r"([0-9]+(?:\.[0-9]+)?)\s*(?:%|％)?\s*[-–~〜]\s*([0-9]+(?:\.[0-9]+)?)\s*(?:%|％)?",
+            text,
+        )
+    if not m:
+        return None
+    try:
+        low = float(m.group(1))
+        high = float(m.group(2))
+    except (TypeError, ValueError):
+        return None
+    if not (0 <= low <= 100 and 0 <= high <= 100) or low > high:
+        return None
+    return (round(low, 1), round(high, 1))
+
+
 def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
     """PDFファイル1つを解析してDogProfileを返す"""
     basename = os.path.basename(pdf_path)
@@ -4099,6 +4213,8 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
         health_results=health_results,
         trait_results=trait_results,
         source_file=basename,
+        heterozygosity=parse_heterozygosity(text),
+        heterozygosity_range=(lambda r: list(r) if r else None)(parse_heterozygosity_range(text)),
     )
 
     print(f"  → {dog.pet_name or dog.registered_name}: 健康{len(health_results)}項目, 形質{len(trait_results)}項目")

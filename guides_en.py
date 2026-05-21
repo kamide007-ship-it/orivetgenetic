@@ -118,6 +118,23 @@ GUIDES_EN = {
                     "It also visualizes where and how often each common ancestor appears, so you can apply the result directly to breeding decisions."
                 ),
             },
+            {
+                "heading": "🔬 Pedigree COI vs. heterozygosity (genomic diversity)",
+                "body": (
+                    "There are actually <strong>two distinct kinds</strong> of number that go by 'COI', and they measure different things.<br><br>"
+                    "<strong>① Pedigree-based COI (what this tool calculates)</strong><br>"
+                    "Traces common ancestors through the pedigree to <strong>predict</strong> the probability that a puppy inherits two identical copies of a gene. "
+                    "Its key strength is that it can be computed <strong>before</strong> a mating, using the pedigree alone. "
+                    "However, it depends on pedigree depth and accuracy, and cannot reflect ancestor overlap that is missing from the records. "
+                    "Traditional kennel-club breeding guidelines (JKC, FCI) are based on this measure.<br><br>"
+                    "<strong>② Heterozygosity (DNA tests such as Orivet's)</strong><br>"
+                    "Directly <strong>measures</strong> tens of thousands of SNPs and computes the proportion of the genome that is heterozygous (different alleles from each parent). "
+                    "It is not affected by pedigree errors or gaps and reflects the actual genomic state — but it requires a DNA test and cannot be used to predict before a mating.<br><br>"
+                    "⚠️ <strong>The COI value from this tool will not match Orivet's test result (heterozygosity).</strong> "
+                    "This is not an error — they are <strong>different metrics</strong> ('prediction vs. measurement', 'pedigree vs. genome'). "
+                    "The two are complementary rather than competing: ideal breeding decisions use both the pedigree-derived risk prediction (COI) and the measured genomic diversity (heterozygosity)."
+                ),
+            },
         ],
     },
 
