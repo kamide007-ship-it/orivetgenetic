@@ -583,6 +583,7 @@ DISEASE_KB = [
         "symptoms": "8〜14歳頃から後肢のふらつき → 麻痺へ進行。痛みはない場合が多い。最終的には前肢にも進行。",
         "inheritance": "常染色体劣性（不完全浸透）。P/P でも全頭発症するわけではなく、発症率は犬種により異なる。",
         "advice": "P/P 同士の交配は避けることを推奨。発症犬はリハビリ・補助器具で QOL を維持できます。",
+        "severity": "high",
         "references": [
             {"label": "Wikipedia: 変性性脊髄症", "url": _wiki_jp("変性性脊髄症")},
             {"label": "詳細を検索", "url": _google_search("Degenerative Myelopathy 犬 SOD1")},
@@ -1824,6 +1825,7 @@ TRAIT_KB = [
         "phenotype": "m/m : マールなし\\nM/m : マール表現型\\nM/M : ダブルマール（白割合増・視聴覚障害リスク大）",
         "inheritance": "常染色体優性（不完全優性）。M/m ヘテロでマール発現。M/M ホモは視聴覚障害リスク大。M/m × M/m 交配は 25% が M/M になるため厳禁。",
         "advice": "**M/m × M/m の交配は厳禁**。25% の確率でダブルマール子犬が生まれます。",
+        "severity": "high",
         "references": [
             {"label": "詳細を検索 (Merle)", "url": _google_search("Merle locus PMEL17 犬 マール")},
         ],
@@ -1897,6 +1899,7 @@ TRAIT_KB = [
         "phenotype": "BT/BT: 胚致死（生まれない）\\nBT/N: 自然短尾\\nN/N: 通常の尾長",
         "inheritance": "常染色体優性（致死ホモ）。BT/N ヘテロで短尾発現。**BT/BT ホモは胚致死** のため、BT/N × BT/N 交配は 25% の胎児が発育しません。",
         "advice": "**BT/BT 同士の交配は厳禁** — 受胎しても胚致死で出生しません。コーギー・ボブテイル・ボクサー等で頻発。",
+        "severity": "high",
         "references": [
             {"label": "詳細を検索 (Bob Tail)", "url": _google_search("Brachyury 犬 自然短尾 BT")},
         ],
@@ -1946,6 +1949,7 @@ TRAIT_KB = [
         "phenotype": "H/H: 胚致死（生まれない）\\nH/h: 無毛 / 部分無毛・歯の欠損あり\\nh/h: 完全な被毛 (powderpuff / coated)",
         "inheritance": "常染色体優性（致死ホモ）。H/h ヘテロで無毛発現。**H/H ホモは胚致死**。H/h × H/h 交配は 25% の胎児が発育しません。",
         "advice": "**H/H 同士の交配は厳禁** — 全頭出生しない。チャイニーズ・クレステッドでは無毛 (H/h) × パウダーパフ (h/h) 交配が標準。皮膚保護・日焼け止め・防寒が必要な犬種。",
+        "severity": "high",
         "references": [
             {"label": "詳細を検索 (Hairless)", "url": _google_search("FOXI3 hairless dog Chinese Crested Xolo")},
         ],
@@ -1982,6 +1986,7 @@ TRAIT_KB = [
         "phenotype": "H/H: 胚致死\\nH/h + M/m: ハーレクイン（白地に黒斑）\\nH/h + m/m: 表現型に変化なし（ハーレクイン非発現の保因）\\nh/h: ハーレクイン非発現",
         "inheritance": "常染色体優性（致死ホモ）。H/h + M/m の組み合わせでのみハーレクイン表現。**H/H ホモは胚致死**。M座位 (Merle) との同時検査が必須。",
         "advice": "**H/H × H/H 交配は禁忌** — 全頭胚致死。さらに M/M（ダブルマール）× ハーレクインの組み合わせは深刻な発達異常リスク。グレートデーンのハーレクインブリーダーは PSMB7 と PMEL17 (M) の両方を検査する必要があります。",
+        "severity": "high",
         "references": [
             {"label": "詳細を検索 (Harlequin)", "url": _google_search("PSMB7 harlequin Great Dane merle")},
         ],
@@ -5295,8 +5300,20 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             # ↓ 形質の詳細解説 + 参考リンク
             t_detail = get_trait_detail(r.test_name)
             t_detail_html = render_detail_html(t_detail) if t_detail else ""
+            # 重症度バッジ（致死ホモ・ダブルマール等の危険形質のみ — 明示 severity がある場合のみ表示）
+            trait_severity_html = ""
+            if t_detail and t_detail.get("severity") in ("high", "medium", "low"):
+                sev = t_detail["severity"]
+                meta = SEVERITY_LABELS.get(sev, {})
+                if meta:
+                    trait_severity_html = (
+                        f'<span class="severity-badge" style="background:{meta["bg"]};color:{meta["color"]};'
+                        f'display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;'
+                        f'font-size:0.72em;font-weight:700;vertical-align:middle;">'
+                        f'{meta["emoji"]} {meta["label"]}</span>'
+                    )
             trait_rows += f"""        <tr>
-          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{t_detail_html}</td>
+          <td>{display_name}{trait_severity_html}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{t_detail_html}</td>
           <td>{badge}</td>
           <td style="font-size:0.85em">{_h(r.result_text[:150])}{annotation_html}</td>
         </tr>\n"""
@@ -5309,7 +5326,6 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             het = dog.heterozygosity
             rng = dog.heterozygosity_range
             range_html = ""
-            range_html_en = ""
             if rng and len(rng) == 2:
                 low, high = rng[0], rng[1]
                 if het < low:
