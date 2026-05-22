@@ -5245,6 +5245,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     tab_buttons = ""
     tab_contents = ""
     sex_i18n_en = {}  # per-dog sex translations for JS
+    het_i18n_ja = {}  # ヘテロ接合率パネルの日本語ラベル（EN→JA トグル復元用）
 
     for idx, dog in enumerate(dogs):
         name = dog.pet_name or dog.registered_name or f"犬{idx+1}"
@@ -5300,6 +5301,64 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
           <td style="font-size:0.85em">{_h(r.result_text[:150])}{annotation_html}</td>
         </tr>\n"""
 
+        # ── ヘテロ接合率（ゲノム多様性）パネル ──
+        # Orivet PDF に Heterozygosity Score が含まれる場合のみ表示。
+        # 血統ベース COI とは別指標であることを明示する。
+        hetero_block = ""
+        if dog.heterozygosity is not None:
+            het = dog.heterozygosity
+            rng = dog.heterozygosity_range
+            range_html = ""
+            range_html_en = ""
+            if rng and len(rng) == 2:
+                low, high = rng[0], rng[1]
+                if het < low:
+                    judge_ja = "標準域より低い（多様性やや低め）"
+                    judge_en = "Below the breed range (diversity slightly low)"
+                    jcolor = "#92400e"
+                elif het > high:
+                    judge_ja = "標準域より高い（多様性良好）"
+                    judge_en = "Above the breed range (good diversity)"
+                    jcolor = "#166534"
+                else:
+                    judge_ja = "標準域内"
+                    judge_en = "Within the breed range"
+                    jcolor = "#0e7490"
+                range_html = (
+                    f'<div style="margin-top:8px;font-size:0.9em;">'
+                    f'<span style="color:{jcolor};font-weight:700;" data-i18n="het_judge_{safe_id}">{judge_ja}</span>'
+                    f'<span style="color:#6b7280;"> — <span data-i18n="het_range_label">犬種標準域</span> {low}%–{high}%</span>'
+                    f'</div>'
+                )
+                sex_i18n_en[f"het_judge_{safe_id}"] = judge_en
+                het_i18n_ja[f"het_judge_{safe_id}"] = judge_ja
+            hetero_block = f"""
+      <div style="margin:14px 0;padding:14px 18px;background:#ecfeff;border:1px solid #a5f3fc;border-radius:10px;">
+        <div style="font-weight:700;color:#0e7490;margin-bottom:4px;">
+          🔬 <span data-i18n="het_title">ヘテロ接合率（ゲノム多様性）</span>:
+          <span style="font-size:1.15em;">{het}%</span>
+        </div>
+        {range_html}
+        <div style="margin-top:8px;font-size:0.82em;color:#6b7280;line-height:1.6;">
+          <span data-i18n="het_note">⚠️ これは Orivet の DNA 検査が実測した値です。本アプリの繁殖シミュレーターが算出する『血統ベース COI』とは別指標のため、数値を直接比較しないでください（ヘテロ接合率は高いほど遺伝的多様性が高く、一般に良好）。</span>
+        </div>
+      </div>"""
+            sex_i18n_en["het_title"] = "Heterozygosity (genomic diversity)"
+            sex_i18n_en["het_range_label"] = "breed typical range"
+            sex_i18n_en["het_note"] = (
+                "⚠️ This is the value measured by Orivet's DNA test. It is a different metric "
+                "from the pedigree-based COI calculated by this app's breeding simulator, so do "
+                "not compare the numbers directly (higher heterozygosity means greater genetic "
+                "diversity, generally favorable)."
+            )
+            het_i18n_ja["het_title"] = "ヘテロ接合率（ゲノム多様性）"
+            het_i18n_ja["het_range_label"] = "犬種標準域"
+            het_i18n_ja["het_note"] = (
+                "⚠️ これは Orivet の DNA 検査が実測した値です。本アプリの繁殖シミュレーターが算出する"
+                "『血統ベース COI』とは別指標のため、数値を直接比較しないでください"
+                "（ヘテロ接合率は高いほど遺伝的多様性が高く、一般に良好）。"
+            )
+
         tab_contents += f"""
   <div id="{safe_id}" class="tab-content">
     <div class="dog-card">
@@ -5316,7 +5375,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
           {'<span class="meta-tag"><span data-i18n="lbl_colour">毛色</span>: ' + _h(dog.colour) + '</span>' if dog.colour else ''}
         </div>
       </div>
-
+{hetero_block}
       <h3 class="section-title"><span data-i18n="health_results">健康検査結果</span> ({len(dog.health_results)}<span data-i18n="items_suffix">項目</span>)</h3>
       <table class="results-table">
         <tr><th data-i18n="th_category">カテゴリー</th><th data-i18n="th_test">検査項目</th><th data-i18n="th_result">結果</th><th data-i18n="th_detail">詳細</th></tr>
@@ -5855,6 +5914,7 @@ var REPORT_I18N = {{
 (function() {{
   var jaExtra = {json.dumps({f"sex_{re.sub(r'[^a-zA-Z0-9]', '_', (d.pet_name or d.registered_name or f'犬{i+1}').lower())}": "オス" if "male" in d.sex.lower() else "メス" for i, d in enumerate(dogs)}, ensure_ascii=False)};
   Object.assign(REPORT_I18N.ja, jaExtra);
+  Object.assign(REPORT_I18N.ja, {json.dumps(het_i18n_ja, ensure_ascii=False)});
 }})();
 
 function __applyLang(lang) {{

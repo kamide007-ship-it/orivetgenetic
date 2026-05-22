@@ -564,6 +564,56 @@ class TestHeterozygosityParser:
         assert sim["heterozygosity"] == 37.3
         assert sim["heterozygosity_range"] == [23.4, 32.6]
 
+    def test_report_shows_heterozygosity_panel(self):
+        """レポート HTML にヘテロ接合率パネルが描画される"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, generate_unified_html
+        d = DogProfile(pet_name="Angel", registered_name="R1", sex="Female",
+                       breed="Toy Poodle", heterozygosity=37.3,
+                       heterozygosity_range=[23.4, 32.6])
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html([d], [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        assert "ヘテロ接合率（ゲノム多様性）" in html
+        assert "37.3%" in html
+        assert "標準域より高い" in html  # 37.3 > 32.6
+        assert "別指標" in html  # 血統COIとの違い注記
+
+    def test_report_hides_panel_when_no_heterozygosity(self):
+        """ヘテロ接合率が無い犬ではパネルを描画しない"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, generate_unified_html
+        d = DogProfile(pet_name="NoHet", registered_name="R2", sex="Male",
+                       breed="Labrador", heterozygosity=None)
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html([d], [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        assert "ヘテロ接合率（ゲノム多様性）" not in html
+
+    def test_report_heterozygosity_below_range(self):
+        """標準域より低い場合の判定"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, generate_unified_html
+        d = DogProfile(pet_name="Low", registered_name="R3", sex="Male",
+                       breed="Toy Poodle", heterozygosity=20.0,
+                       heterozygosity_range=[23.4, 32.6])
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html([d], [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        assert "標準域より低い" in html
+
     def test_dogprofile_has_field(self):
         from poodle_genetics import DogProfile
         d = DogProfile()
