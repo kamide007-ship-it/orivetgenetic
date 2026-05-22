@@ -88,6 +88,57 @@
             font-size: 1.1em;
             padding: 0 4px;
         }
+        /* シミュレーターへの導線を強調するツールバーボタン */
+        .toolbar a#linkSim {
+            background: #fff;
+            color: #6d28d9;
+            font-weight: 700;
+            border: 1px solid #fff;
+        }
+        .toolbar a#linkSim:hover {
+            background: #f5f3ff;
+        }
+        /* 解析直後に見える繁殖シミュレーションへの CTA バナー */
+        .sim-cta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #faf5ff, #f0f9ff);
+            border-bottom: 1px solid #ddd6fe;
+        }
+        .sim-cta-text { display: flex; flex-direction: column; gap: 2px; min-width: 220px; flex: 1; }
+        .sim-cta-text strong { color: #4a1a7a; font-size: 1.02em; }
+        .sim-cta-text span { color: #6b7280; font-size: 0.85em; line-height: 1.5; }
+        .sim-cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95em;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+            transition: transform 0.12s, box-shadow 0.12s;
+        }
+        .sim-cta-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(124,58,237,0.4);
+        }
+        .sim-cta .close-btn {
+            background: none; border: none; color: #9ca3af;
+            cursor: pointer; font-size: 1.2em; padding: 0 4px; align-self: flex-start;
+        }
+        @media (max-width: 480px) {
+            .sim-cta { padding: 12px 16px; }
+            .sim-cta-btn { width: 100%; justify-content: center; }
+        }
     </style>
 </head>
 <body>
@@ -112,6 +163,14 @@
       <button type="button" class="close-btn" onclick="document.getElementById('breedRecs').style.display='none'" aria-label="閉じる">×</button>
     </div>
     {% endif %}
+    <div class="sim-cta" id="simCta">
+      <div class="sim-cta-text">
+        <strong id="simCtaTitle">🐕 次のステップ：繁殖シミュレーション</strong>
+        <span id="simCtaDesc">解析した遺伝子データから、子犬の毛色・健康リスク・近親交配係数(COI)を予測できます。データは自動で読み込まれます。</span>
+      </div>
+      <a href="/simulator?session={{ session_id }}" class="sim-cta-btn" id="simCtaBtn">繁殖シミュレーターを開く →</a>
+      <button type="button" class="close-btn" onclick="document.getElementById('simCta').style.display='none'" aria-label="閉じる">×</button>
+    </div>
     <iframe class="report-frame" id="reportFrame" srcdoc="{{ report_html | e }}"></iframe>
     <script>
         const TOOLBAR_I18N = {
@@ -122,7 +181,10 @@
                 linkXlsx: "Download Excel",
                 linkNew: "New Analysis",
                 breedRecsLabel: "🐶 Detected breed:",
-                breedRecsSuffix: "Open guide"
+                breedRecsSuffix: "Open guide",
+                simCtaTitle: "🐕 Next step: Breeding Simulation",
+                simCtaDesc: "Use the analyzed genetic data to predict puppy coat color, health risks, and the inbreeding coefficient (COI). Your dogs load automatically.",
+                simCtaBtn: "Open Breeding Simulator →"
             },
             ja: {
                 toolbarTitle: "Orivet Genetics Suite - レポート",
@@ -131,7 +193,10 @@
                 linkXlsx: "Excel ダウンロード",
                 linkNew: "新しい解析",
                 breedRecsLabel: "🐶 検出された犬種:",
-                breedRecsSuffix: "ガイドを開く"
+                breedRecsSuffix: "ガイドを開く",
+                simCtaTitle: "🐕 次のステップ：繁殖シミュレーション",
+                simCtaDesc: "解析した遺伝子データから、子犬の毛色・健康リスク・近親交配係数(COI)を予測できます。データは自動で読み込まれます。",
+                simCtaBtn: "繁殖シミュレーターを開く →"
             }
         };
 
