@@ -265,7 +265,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
             <option value="exA">トイプードル ♂ ブラック (E/e, KB/ky, at/at, Bb)</option>
             <option value="exC">ラブラドール ♂ チョコレート (E/E, KB/KB, ay/ay, bb)</option>
             <option value="exE">柴犬 ♂ 赤 (E/E, ky/ky, ay/ay, BB)</option>
-            <option value="exG">スタンダードプードル ♂ シルバー (G/g 退色)</option>
+            <option value="exG">スタンダードプードル ♂ シルバー (G/G ホモ)</option>
             <option value="exH">ジャーマンシェパード ♂ ワイルドセーブル (aw)</option>
           </select>
         </div>
@@ -276,6 +276,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
             <option value="exB">トイプードル ♀ クリーム (e/e, KB/KB, at/at, Bb)</option>
             <option value="exD">ラブラドール ♀ イエロー (e/e, KB/KB, ay/ay, Bb)</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール (E/E, ky/ky, at/at, M/m)</option>
+            <option value="exGc">スタンダードプードル ♀ チャコール (G/g ヘテロ)</option>
             <option value="exI">ラブラドール ♀ リセッシブブラック (a/a)</option>
           </select>
         </div>
@@ -300,10 +301,11 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
           <div class="form-group"><label>S (Pied)<button type="button" class="kb-help" onclick="showLocusInfo('s')" aria-label="S座位の解説">?</button></label><select id="cs-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
           <div class="form-group">
             <label>G (Greying / 退色)<button type="button" class="kb-help" onclick="showLocusInfo('g')" aria-label="G座位の解説">?</button></label>
-            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
-              <input type="checkbox" id="cs-g" onchange="runColorSim()">
-              Greying遺伝子を持つ（G/g 想定）
-            </label>
+            <select id="cs-g" onchange="runColorSim()">
+              <option value="gg" selected>g/g — 退色なし</option>
+              <option value="Gg">G/g — チャコール/ダークシルバー（ヘテロ）</option>
+              <option value="GG">G/G — シルバー（ホモ・フル退色）</option>
+            </select>
           </div>
         </div>
         <div class="form-row">
@@ -329,10 +331,11 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
           <div class="form-group"><label>S (Pied)<button type="button" class="kb-help" onclick="showLocusInfo('s')" aria-label="S座位の解説">?</button></label><select id="cd-s"><option value="SS" selected>S/S</option><option value="Ssp">S/sp</option><option value="spsp">sp/sp</option></select></div>
           <div class="form-group">
             <label>G (Greying / 退色)<button type="button" class="kb-help" onclick="showLocusInfo('g')" aria-label="G座位の解説">?</button></label>
-            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
-              <input type="checkbox" id="cd-g" onchange="runColorSim()">
-              Greying遺伝子を持つ（G/g 想定）
-            </label>
+            <select id="cd-g" onchange="runColorSim()">
+              <option value="gg" selected>g/g — 退色なし</option>
+              <option value="Gg">G/g — チャコール/ダークシルバー（ヘテロ）</option>
+              <option value="GG">G/G — シルバー（ホモ・フル退色）</option>
+            </select>
           </div>
         </div>
         <div class="form-row">
@@ -363,7 +366,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
             <option value="exA">トイプードル ♂ ブラック</option>
             <option value="exC">ラブラドール ♂ チョコレート</option>
             <option value="exE">柴犬 ♂ 赤</option>
-            <option value="exG">スタンダードプードル ♂ シルバー</option>
+            <option value="exG">スタンダードプードル ♂ シルバー (G/G)</option>
             <option value="exH">ジャーマンシェパード ♂ ワイルドセーブル</option>
           </select>
         </div>
@@ -374,6 +377,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
             <option value="exB">トイプードル ♀ クリーム</option>
             <option value="exD">ラブラドール ♀ イエロー</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール</option>
+            <option value="exGc">スタンダードプードル ♀ チャコール (G/g)</option>
             <option value="exI">ラブラドール ♀ リセッシブブラック</option>
           </select>
         </div>
@@ -573,9 +577,18 @@ const DOGS = {
       "prcd-PRA": "NN"
     }
   },
-  // 新色機能のデモ用例犬 (PR #40, #41 で追加した aw / a/a / G 系を試せる)
+  // G座位デモ: シルバー(G/G)・チャコール(G/g)
   exG: {
-    name: "（例）スタンダードプードル ♂ シルバー (G/g 退色)", sex: "male",
+    name: "（例）スタンダードプードル ♂ シルバー (G/G ホモ)", sex: "male",
+    color: { e:"EE", k:"KBKB", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS", g:"GG" },
+    health: {
+      "CDDY+IVDD": "NN", "Osteochondrodysplasia": "NN", "CDPA": "NN",
+      "Macrothrombocytopenia": "NN", "Methemoglobinemia": "NN",
+      "vWD1": "NN", "DM": "NN", "GM2": "NN", "prcd-PRA": "NN"
+    }
+  },
+  exGc: {
+    name: "（例）スタンダードプードル ♀ チャコール (G/g ヘテロ)", sex: "female",
     color: { e:"EE", k:"KBKB", a:"atat", b:"BB", d:"DD", m:"mm", s:"SS", g:"Gg" },
     health: {
       "CDDY+IVDD": "NN", "Osteochondrodysplasia": "NN", "CDPA": "NN",
@@ -753,9 +766,10 @@ const COLOR_MAP = {
   "cream": { hex:"#FFF8DC", name:"クリーム/ホワイト" },
   "apricot": { hex:"#FBCEB1", name:"アプリコット" },
   "red": { hex:"#CD5C5C", name:"レッド/ディープレッド" },
-  "silver": { hex:"#C0C0C0", name:"シルバー（成犬で退色）" },
-  "silver_beige": { hex:"#A89F92", name:"シルバービーグ（成犬で退色）" },
-  "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ（bb + Greying）" },
+  "charcoal": { hex:"#555F61", name:"チャコール/ダークシルバー（G/g・部分退色）" },
+  "silver": { hex:"#C0C0C0", name:"シルバー（G/G・フル退色）" },
+  "silver_beige": { hex:"#A89F92", name:"シルバービーグ（G/G・フル退色）" },
+  "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ（bb + G/g・部分退色）" },
   "lilac": { hex:"#C8A2C8", name:"ライラック/イザベラ" },
   "fawn": { hex:"#E5AA70", name:"フォーン/セーブル (ay_)" },
   "wild_sable": { hex:"#9B7E48", name:"ワイルドセーブル (aw_)" },
@@ -774,10 +788,9 @@ function runColorSim() {
   document.getElementById('custom-sire').style.display = sireKey === 'custom' ? 'block' : 'none';
   document.getElementById('custom-dam').style.display = damKey === 'custom' ? 'block' : 'none';
 
-  // G座位 (Greying) チェックボックス: チェック = G/g（ヘテロ）と仮定
-  // ホモG/G にしたい場合は将来 select 化を検討
-  const sireG = (document.getElementById('cs-g') || {}).checked ? 'Gg' : 'gg';
-  const damG  = (document.getElementById('cd-g') || {}).checked ? 'Gg' : 'gg';
+  // G座位 (Greying) select: g/g / G/g（チャコール）/ G/G（シルバー）
+  const sireG = (document.getElementById('cs-g') || { value: 'gg' }).value;
+  const damG  = (document.getElementById('cd-g') || { value: 'gg' }).value;
 
   let sire, dam;
   if (sireKey === 'custom') {
@@ -799,9 +812,11 @@ function runColorSim() {
   const mResult = cross(sire.m, dam.m);
   const sResult = cross(sire.s, dam.s);
   const gResult = cross(sire.g, dam.g);
-  // Greying (G_) は子犬期は色付き → 成犬で退色。G_ ホモでも G/g でも表現型は同じ
-  const pG_ = (gResult["GG"] || 0) + (gResult["Gg"] || 0);
+  // Greying (G座位) — G/G ホモはシルバー（フル退色）、G/g ヘテロはチャコール（部分退色）
+  const pGG = gResult["GG"] || 0;
+  const pGg = gResult["Gg"] || 0;
   const pgg = gResult["gg"] || 0;
+  const pG_ = pGG + pGg;
 
   // Determine phenotype probabilities
   const phenotypes = {};
@@ -881,32 +896,35 @@ function runColorSim() {
     for (const p of eePhenotypes) results.push(p);
   }
 
-  // 2. E_ + KB_ → Solid black or brown（G_ なら成犬で退色 → silver / silver beige）
-  // 子犬出生色は G の有無に関わらず同じ。G_ は成犬期に eumelanin を退色させる。
-  // pgg / pG_ で確率を分割し、ベース色とシルバー系を別エントリで提示する。
+  // 2. E_ + KB_ → Solid black or brown（G座位で退色シェードを分岐）
+  // G/G（ホモ）→ フル退色 → シルバー/シルバービーグ
+  // G/g（ヘテロ）→ 部分退色 → チャコール/カフェオレ
+  // 子犬出生色は G の有無に関わらず同じ（生後1〜2年で退色）。
   if (pE_ > 0 && pKB_ > 0) {
     const solidProb = pE_ * pKB_;
     if (pB_ > 0 && pD_ > 0) {
       const p = solidProb * pB_ * pD_;
-      if (pgg > 0) results.push({ color:"black", prob: p * pgg, note:"ブラック (E_, KB_, B_, D_, gg)" });
-      if (pG_ > 0) results.push({ color:"silver", prob: p * pG_, note:"シルバー (E_, KB_, B_, D_, G_: 成犬で退色)" });
+      if (pgg > 0) results.push({ color:"black",    prob: p * pgg, note:"ブラック (E_, KB_, B_, D_, g/g)" });
+      if (pGG > 0) results.push({ color:"silver",   prob: p * pGG, note:"シルバー (E_, KB_, B_, D_, G/G: フル退色)" });
+      if (pGg > 0) results.push({ color:"charcoal", prob: p * pGg, note:"チャコール/ダークシルバー (E_, KB_, B_, D_, G/g: 部分退色)" });
     }
     if (pB_ > 0 && pdd > 0) {
       const p = solidProb * pB_ * pdd;
-      if (pgg > 0) results.push({ color:"blue", prob: p * pgg, note:"ブルー (E_, KB_, B_, dd, gg)" });
-      if (pG_ > 0) results.push({ color:"silver", prob: p * pG_, note:"シルバー（淡） (E_, KB_, B_, dd, G_: 成犬で退色)" });
+      if (pgg > 0) results.push({ color:"blue",     prob: p * pgg, note:"ブルー (E_, KB_, B_, dd, g/g)" });
+      if (pGG > 0) results.push({ color:"silver",   prob: p * pGG, note:"シルバー（淡/ブルーベース） (E_, KB_, B_, dd, G/G: フル退色)" });
+      if (pGg > 0) results.push({ color:"silver",   prob: p * pGg, note:"シルバー（淡/ブルーベース） (E_, KB_, B_, dd, G/g: dd で希釈済みのため統合)" });
     }
     if (pbb > 0 && pD_ > 0) {
       const p = solidProb * pbb * pD_;
-      if (pgg > 0) results.push({ color:"brown", prob: p * pgg, note:"ブラウン/チョコ (E_, KB_, bb, D_, gg)" });
-      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"シルバービーグ (E_, KB_, bb, D_, G_: 成犬で退色)" });
+      if (pgg > 0) results.push({ color:"brown",       prob: p * pgg, note:"ブラウン/チョコ (E_, KB_, bb, D_, g/g)" });
+      if (pGG > 0) results.push({ color:"silver_beige",prob: p * pGG, note:"シルバービーグ (E_, KB_, bb, D_, G/G: フル退色)" });
+      if (pGg > 0) results.push({ color:"cafe_au_lait", prob: p * pGg, note:"カフェオレ (E_, KB_, bb, D_, G/g: 部分退色)" });
     }
     if (pbb > 0 && pdd > 0) {
       const p = solidProb * pbb * pdd;
-      // 参考: bb + dd は遺伝学上「ライラック/イザベラ」(diluted brown)。
-      // カフェオレ表記は本来 bb + Greying（成犬で退色）の方
-      if (pgg > 0) results.push({ color:"lilac", prob: p * pgg, note:"ライラック/イザベラ (E_, KB_, bb, dd, gg)" });
-      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"シルバービーグ（淡） (E_, KB_, bb, dd, G_: 成犬で退色)" });
+      if (pgg > 0) results.push({ color:"lilac",       prob: p * pgg, note:"ライラック/イザベラ (E_, KB_, bb, dd, g/g)" });
+      if (pGG > 0) results.push({ color:"silver_beige",prob: p * pGG, note:"シルバービーグ（淡） (E_, KB_, bb, dd, G/G: フル退色)" });
+      if (pGg > 0) results.push({ color:"silver_beige",prob: p * pGg, note:"シルバービーグ（淡） (E_, KB_, bb, dd, G/g: dd で希釈済みのため統合)" });
     }
   }
 
@@ -1557,9 +1575,9 @@ const LOCUS_KB = {
   },
   g: {
     title: 'G座位 (Greying / PMEL17) — 進行性退色',
-    summary: '子犬期は色付きで生まれ、成犬になると退色する遺伝子。プードルのシルバー色の原因。',
-    phenotype: 'g/g  : 退色なし\\nG/g, G/G : 成犬で退色\\n  Black + G_  → Silver\\n  Brown + G_  → Silver Beige\\n  Blue + G_   → Silver（淡）',
-    advice: 'シルバープードルは生まれた時は黒。1〜2歳までに段階的に退色していきます。'
+    summary: '子犬期は色付きで生まれ、成犬になると退色する遺伝子。G/G ホモはシルバー（フル退色）、G/g ヘテロはチャコール/ダークシルバー（部分退色）になる傾向。',
+    phenotype: 'g/g  : 退色なし（ブラック/ブラウン/ブルーのまま）\\nG/g  : チャコール/ダークシルバー（部分退色・ダークグレー）\\nG/G  : シルバー（フル退色・明るいシルバー）\\n\\n対応表:\\n  Black + G/G → Silver\\n  Black + G/g → Charcoal/Dark Silver\\n  Brown + G/G → Silver Beige\\n  Brown + G/g → Café au Lait',
+    advice: 'シルバープードルは生まれた時は黒。1〜2歳で退色。G/G ホモは退色が完全で明るいシルバー、G/g ヘテロはチャコール/ダークシルバーで留まる傾向（プードルのチャコールカラーの主因）。M座位 (Merle) とは別遺伝子（同じ PMEL17 でも変異位置が異なる）。'
   },
   i: {
     title: 'I座位 (MFSD12 / KITLG) — フェオメラニン濃度（アプリコット/レッド）',
