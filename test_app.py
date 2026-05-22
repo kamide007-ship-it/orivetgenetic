@@ -635,6 +635,48 @@ class TestHeterozygosityParser:
         assert "renderHeterozygosityPanel" in body
 
 
+class TestSimulatorFunnel:
+    """解析レポート → 繁殖シミュレーターへの導線"""
+
+    def _make_session(self, sid="test_funnel"):
+        import os, json
+        from app import REPORT_FOLDER
+        sdir = os.path.join(REPORT_FOLDER, sid)
+        os.makedirs(sdir, exist_ok=True)
+        with open(os.path.join(sdir, "report.html"), "w", encoding="utf-8") as f:
+            f.write("<html><body>dummy</body></html>")
+        with open(os.path.join(sdir, "dogs.json"), "w", encoding="utf-8") as f:
+            json.dump([{"name": "A", "sex": "male", "color": {}, "health": {},
+                        "breed": "Poodle", "heterozygosity": None}], f)
+        return sid, sdir
+
+    def test_report_has_prominent_sim_cta(self):
+        import shutil
+        sid, sdir = self._make_session()
+        try:
+            body = client.get(f"/report/{sid}").get_data(as_text=True)
+            assert 'id="simCta"' in body
+            assert "次のステップ：繁殖シミュレーション" in body
+            assert f"/simulator?session={sid}" in body
+        finally:
+            shutil.rmtree(sdir, ignore_errors=True)
+
+    def test_report_cta_has_english(self):
+        import shutil
+        sid, sdir = self._make_session("test_funnel_en")
+        try:
+            body = client.get(f"/report/{sid}").get_data(as_text=True)
+            assert "Next step: Breeding Simulation" in body
+            assert "Open Breeding Simulator" in body
+        finally:
+            shutil.rmtree(sdir, ignore_errors=True)
+
+    def test_simulator_has_session_loaded_banner(self):
+        body = client.get("/simulator").get_data(as_text=True)
+        assert "function showSessionLoadedBanner" in body
+        assert "解析データを自動読み込みしました" in body
+
+
 class TestSimulatorPdfUpload:
     """繁殖シミュレーター直接 PDF アップロード API"""
 
