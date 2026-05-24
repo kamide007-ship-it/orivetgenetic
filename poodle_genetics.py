@@ -497,6 +497,7 @@ DISEASE_KB = [
     {
         "match": ["chondrodystrophy", "cddy", "ivdd"],
         "title": "軟骨異栄養症 + 椎間板疾患 (CDDY+IVDD)",
+        "severity": "high",
         "summary": "椎間板を構成する軟骨の異常により、椎間板ヘルニアを起こしやすくなる遺伝性疾患です。",
         "mechanism": "FGF4遺伝子のレトロウィルス挿入が原因。椎間板の中心部（髄核）が早期に変性・石灰化し、些細な衝撃で破裂し脊髄を圧迫します。",
         "symptoms": "後肢のふらつき、痛み、歩行困難。重症例では完全麻痺や排尿障害が起こり得ます。",
@@ -510,6 +511,7 @@ DISEASE_KB = [
     {
         "match": ["osteochondrodysplasia"],
         "title": "骨軟骨異形成症 (Osteochondrodysplasia / SLC13A1)",
+        "severity": "high",
         "summary": "骨と軟骨の発達異常により、四肢の短縮や関節異常が現れる遺伝性疾患です。",
         "mechanism": "SLC13A1 遺伝子の変異によりミネラル代謝が異常になり、骨格の正常な発達が阻害されます。",
         "symptoms": "四肢の短縮、関節の変形、運動制限。スコティッシュフォールド・ミニチュアプードルなどで報告。",
@@ -523,6 +525,7 @@ DISEASE_KB = [
     {
         "match": ["chondrodysplasia (cdpa)", "cdpa", "chondrodysplasia"],
         "title": "軟骨異形成症 (CDPA / 短足遺伝子)",
+        "severity": "low",
         "summary": "短い四肢を生む遺伝子で、ダックスフンド・コーギーなどの「短足犬種」の特徴となる因子です。",
         "mechanism": "FGF4 遺伝子の重複により軟骨形成が変化し、四肢が短くなります。CDDY と異なり病気そのものではなく、犬種特性として定着しています。",
         "symptoms": "通常、症状はなし。短足は犬種スタンダードとして許容されています。",
@@ -535,6 +538,7 @@ DISEASE_KB = [
     {
         "match": ["macrothrombocytopenia"],
         "title": "先天性巨大血小板減少症 (Macrothrombocytopenia / β1-tubulin)",
+        "severity": "low",
         "summary": "血小板が通常より大きく、数が少ない遺伝性疾患です。多くは無症状ですが手術時に注意が必要。",
         "mechanism": "TUBB1 遺伝子（β1-tubulin）の変異により血小板の形成が異常になります。キャバリア・キング・チャールズ・スパニエルで頻発。",
         "symptoms": "ほとんどの場合無症状。健康診断で血小板数が低く出るが、機能は保たれていることが多い。",
@@ -547,6 +551,7 @@ DISEASE_KB = [
     {
         "match": ["methemoglobinemia"],
         "title": "先天性メトヘモグロビン血症 (Methemoglobinemia / CYB5R3)",
+        "severity": "medium",
         "summary": "血液中のヘモグロビンが酸素を運べない型に変わってしまう遺伝性疾患です。",
         "mechanism": "CYB5R3 遺伝子の変異により、酸化型ヘモグロビン（メトヘモグロビン）を還元する酵素が欠損。慢性的なチアノーゼ症状を起こします。",
         "symptoms": "皮膚・粘膜の青紫変色（チアノーゼ）、運動不耐性、疲れやすい。",
@@ -565,6 +570,7 @@ DISEASE_KB = [
             "willebrand i", "willebrand 1",
         ],
         "title": "フォン・ヴィレブランド病 I型 (vWD1)",
+        "severity": "medium",
         "summary": "止血に関わるフォン・ヴィレブランド因子が不足し、出血が止まりにくくなる遺伝性疾患です。",
         "mechanism": "vWF 遺伝子の変異により、血小板を血管壁に結合させる蛋白質が不足。軽度（I型）から重度（II型・III型）まで様々。ドーベルマンで頻発。",
         "symptoms": "外傷時の止血困難、鼻血、歯科処置後の長時間出血、血便など。",
@@ -592,6 +598,7 @@ DISEASE_KB = [
     {
         "match": ["gm2 gangliosidosis", "gm2", "gangliosidosis gm2"],
         "title": "ガングリオシドーシス GM2 (GM2 / HEXB)",
+        "severity": "high",
         "summary": "神経細胞内に脂質が異常蓄積し、進行性の神経障害を起こす重篤な遺伝性疾患です。",
         "mechanism": "HEXB 遺伝子の変異によりリソソーム酵素ヘキソサミニダーゼBが欠損。GM2ガングリオシドが分解されず神経細胞に蓄積。ヒトのテイ・サックス病類似。",
         "symptoms": "若齢で発症し、運動失調・痙攣・視覚障害が進行。多くは1〜2年で死に至る。",
@@ -605,6 +612,7 @@ DISEASE_KB = [
     {
         "match": ["progressive rod cone", "prcd", "progressive retinal atrophy"],
         "title": "進行性網膜萎縮症 (prcd-PRA / PRCD)",
+        "severity": "high",
         "summary": "網膜の光受容細胞（杆体・錐体）が徐々に変性し、最終的に失明する遺伝性疾患です。",
         "mechanism": "PRCD 遺伝子の変異により網膜細胞が徐々に死滅。最初に夜盲、次第に昼間視力も失われます。",
         "symptoms": "薄暗い場所での視覚障害（夜盲）→ 周辺視野の喪失 → 完全失明。痛みはなし。",
@@ -618,6 +626,7 @@ DISEASE_KB = [
     {
         "match": ["exercise-induced collapse", "\\beic\\b"],
         "title": "運動誘発性虚脱 (EIC / DNM1)",
+        "severity": "medium",
         "summary": "激しい運動の後に突然脱力・崩れる遺伝性疾患です。ラブラドール等で報告。",
         "mechanism": "DNM1 遺伝子の変異により、運動中の神経シナプス伝達が一時的に障害されます。",
         "symptoms": "5〜15分の激しい運動後、後肢の脱力・歩行不能。意識はあり、5〜25分で回復することが多い。",
@@ -631,6 +640,7 @@ DISEASE_KB = [
     {
         "match": ["neonatal encephalopathy", "news", "atf2"],
         "title": "新生児脳症 (NEwS / ATF2)",
+        "severity": "high",
         "summary": "プードルに特有の重篤な新生児神経疾患。生後数週間以内に発症し致死的です。",
         "mechanism": "ATF2 遺伝子の変異により神経発達が障害されます。スタンダードプードルで報告。",
         "symptoms": "生後4〜6週から運動失調・痙攣・成長不全。多くは離乳期までに死亡。",
@@ -643,6 +653,7 @@ DISEASE_KB = [
     {
         "match": ["neuronal ceroid lipofuscinosis", "\\bncl\\b"],
         "title": "神経セロイドリポフスチン症 (NCL)",
+        "severity": "high",
         "summary": "脳細胞に異常物質（セロイドリポフスチン）が蓄積し、進行性の神経変性を起こす疾患群です。",
         "mechanism": "複数の遺伝子（CLN5, CLN6, CLN8, CTSD など）の変異によりリソソーム機能が障害。多数の亜型が存在し、犬種ごとに原因遺伝子が異なります。",
         "symptoms": "若齢発症の場合: 1〜3歳で行動異常・運動失調・視覚障害→死亡。成犬発症型もあり。",
@@ -656,6 +667,7 @@ DISEASE_KB = [
     {
         "match": ["late onset ataxia", "\\bloa\\b", "late-onset ataxia"],
         "title": "若年性遅発型運動失調 (LOA / CAPN1)",
+        "severity": "high",
         "summary": "若い時期（1〜2歳）から始まる小脳性運動失調。歩行・バランス障害が徐々に進行します。",
         "mechanism": "CAPN1 遺伝子の変異により小脳プルキンエ細胞が変性。ジャック・ラッセル・テリア等で報告。",
         "symptoms": "ふらつき歩行、頭の震え、姿勢制御の困難。痛みはない。",
@@ -668,6 +680,7 @@ DISEASE_KB = [
     {
         "match": ["spinocerebellar ataxia", "\\bsca\\b"],
         "title": "脊髄小脳変性症 (SCA)",
+        "severity": "high",
         "summary": "脊髄と小脳の進行性変性により、運動・バランス障害を起こす遺伝性疾患です。",
         "mechanism": "複数の原因遺伝子（KCNJ10 など）の変異により神経細胞の機能が低下。",
         "symptoms": "歩行のふらつき、捻挫様の転倒、進行性の運動失調。",
@@ -680,6 +693,7 @@ DISEASE_KB = [
     {
         "match": ["multidrug resistance", "\\bmdr1\\b", "abcb1"],
         "title": "多剤耐性遺伝子 (MDR1 / ABCB1)",
+        "severity": "high",
         "summary": "特定の薬剤（イベルメクチン等の駆虫薬・抗がん剤・止瀉薬）に重篤な副作用を起こす遺伝子変異です。",
         "mechanism": "ABCB1（旧名 MDR1）遺伝子の変異により、脳血液関門で薬剤を排出する蛋白質が機能不全。薬剤が脳に蓄積し神経毒性を起こします。コリー系犬種で頻発。",
         "symptoms": "対象薬剤投与後に運動失調・痙攣・昏睡・呼吸停止など重篤な神経症状。",
@@ -693,6 +707,7 @@ DISEASE_KB = [
     {
         "match": ["cone-rod dystrophy", "crd4", "cone rod dystrophy"],
         "title": "錐体杆体ジストロフィー (crd4 / RPGRIP1)",
+        "severity": "high",
         "summary": "網膜の錐体（昼間視）が先に変性し、その後杆体（夜間視）も影響を受けるPRAの亜型です。",
         "mechanism": "RPGRIP1 遺伝子の変異により網膜光受容細胞が機能不全。プードルやミニチュアロングヘアードダックスフンドなどで報告。",
         "symptoms": "若齢期から昼間の視覚異常 → 夜盲 → 完全失明。痛みはなし。",
@@ -747,6 +762,7 @@ DISEASE_KB = [
     {
         "match": ["hyperuricosuria", "\\bhuu\\b", "slc2a9"],
         "title": "高尿酸尿症 (HUU / SLC2A9)",
+        "severity": "medium",
         "summary": "尿酸が異常に高くなり、尿路結石（尿酸石）を生じやすくなる遺伝性疾患です。",
         "mechanism": "SLC2A9 遺伝子の変異により肝臓での尿酸代謝が異常になります。ダルメシアン・ブルドッグなどで高頻度。",
         "symptoms": "頻尿・血尿・排尿困難・腎結石。重度では尿閉・腎機能不全。",
@@ -759,6 +775,7 @@ DISEASE_KB = [
     {
         "match": ["pyruvate kinase", "\\bpk\\b deficiency", "pklr"],
         "title": "ピルビン酸キナーゼ欠損症 (PK / PKLR)",
+        "severity": "high",
         "summary": "赤血球の代謝障害により慢性溶血性貧血を起こす遺伝性疾患です。",
         "mechanism": "PKLR 遺伝子の変異により赤血球内のエネルギー産生が低下。赤血球が早期に破壊されます。",
         "symptoms": "慢性貧血・倦怠・運動不耐・脾腫。多くは2〜5歳で重症化。",
@@ -771,6 +788,7 @@ DISEASE_KB = [
     {
         "match": ["factor vii", "factor 7"],
         "title": "第VII因子欠損症 (Factor VII / F7)",
+        "severity": "medium",
         "summary": "血液凝固因子の一つが欠損し、出血傾向を示す軽度〜中等度の凝固障害です。",
         "mechanism": "F7 遺伝子の変異により凝固第VII因子が低下。多くは軽症だが手術時に問題となる。",
         "symptoms": "通常は無症状。外傷・手術時に止血困難。",
@@ -783,6 +801,7 @@ DISEASE_KB = [
     {
         "match": ["mucopolysaccharidosis", "mps"],
         "title": "ムコ多糖症 (MPS)",
+        "severity": "high",
         "summary": "ムコ多糖類が分解されず体内に蓄積し、骨格異常・臓器障害を起こす重篤な代謝疾患です。",
         "mechanism": "リソソーム酵素の遺伝的欠損により多糖類が蓄積。MPS I/VI/VII など複数の亜型。",
         "symptoms": "顔面変形・関節異常・成長障害・心障害・視覚障害など。生命予後不良。",
@@ -797,6 +816,7 @@ DISEASE_KB = [
     {
         "match": ["centronuclear myopathy", "\\bcnm\\b", "ptpla"],
         "title": "中心核ミオパチー (CNM / PTPLA)",
+        "severity": "high",
         "summary": "若齢期からの筋力低下を起こす遺伝性筋疾患です。ラブラドール特発性筋疾患とも。",
         "mechanism": "PTPLA 遺伝子の変異により筋細胞の構造が異常になります。",
         "symptoms": "生後数ヶ月から運動不耐・筋力低下・歩行異常。寒冷悪化。",
@@ -810,6 +830,7 @@ DISEASE_KB = [
     {
         "match": ["cystinuria"],
         "title": "シスチン尿症 (Cystinuria / SLC3A1, SLC7A9)",
+        "severity": "medium",
         "summary": "アミノ酸（シスチン）が尿中に過剰排泄され、結石を生じやすくなる遺伝性疾患です。",
         "mechanism": "SLC3A1 / SLC7A9 遺伝子の変異により腎尿細管でのシスチン再吸収が障害。シスチン結石が形成されます。",
         "symptoms": "頻尿・血尿・排尿困難・尿閉。雄犬で重症化しやすい。",
@@ -823,6 +844,7 @@ DISEASE_KB = [
     {
         "match": ["familial nephropathy", "cocker nephropathy"],
         "title": "家族性腎症 (Familial Nephropathy / COL4A4)",
+        "severity": "high",
         "summary": "若齢期から進行性腎不全を起こす遺伝性疾患です。コッカースパニエル等で報告。",
         "mechanism": "COL4A4 遺伝子の変異により糸球体基底膜が脆弱になり、進行性腎機能低下を起こします。",
         "symptoms": "多飲多尿 → 食欲低下・嘔吐 → 末期腎不全。多くは6〜24ヶ月齢で発症。",
@@ -836,6 +858,7 @@ DISEASE_KB = [
     {
         "match": ["hnpk", "hereditary nasal parakeratosis"],
         "title": "遺伝性鼻過角化症 (HNPK / SUV39H2)",
+        "severity": "low",
         "summary": "鼻先の皮膚が異常に厚くなり、亀裂・痛み・痂皮を生じる遺伝性皮膚疾患です。",
         "mechanism": "SUV39H2 遺伝子の変異により鼻皮膚の角化が亢進。ラブラドールで多発。",
         "symptoms": "鼻先の硬化・痂皮・亀裂・出血。痛みあり。",
@@ -848,6 +871,7 @@ DISEASE_KB = [
     {
         "match": ["ichthyosis", "pnpla1"],
         "title": "魚鱗癬 (Ichthyosis / PNPLA1)",
+        "severity": "medium",
         "summary": "皮膚が魚の鱗のように剥がれ落ちる遺伝性皮膚疾患です。",
         "mechanism": "PNPLA1 等の遺伝子変異により皮膚の角化過程が異常。ゴールデンレトリーバー等で多発。",
         "symptoms": "全身の白い鱗状の剥がれ・乾燥・痒み。皮脂分泌異常。",
@@ -861,6 +885,7 @@ DISEASE_KB = [
     {
         "match": ["copper toxicosis", "commd1", "atp7"],
         "title": "銅蓄積性肝障害 (Copper Toxicosis / COMMD1, ATP7A/B)",
+        "severity": "high",
         "summary": "肝臓に銅が異常蓄積し、慢性肝炎・肝硬変を起こす遺伝性疾患です。",
         "mechanism": "COMMD1 / ATP7A / ATP7B 遺伝子の変異により銅の排出が障害。ベドリントンテリア・ラブラドール等で報告。",
         "symptoms": "食欲不振・体重減少・腹水・黄疸。進行すると肝不全。",
@@ -874,6 +899,7 @@ DISEASE_KB = [
     {
         "match": ["trapped neutrophil syndrome", "\\btns\\b"],
         "title": "好中球機能不全症候群 (TNS / VPS13B)",
+        "severity": "high",
         "summary": "白血球（好中球）が骨髄から血液へ移行できず、慢性免疫不全を起こす疾患です。",
         "mechanism": "VPS13B 遺伝子の変異により好中球の遊走機能が障害。ボーダーコリーで多発。",
         "symptoms": "繰り返す感染症・発熱・発育不良。多くは1歳までに死亡。",
@@ -888,6 +914,7 @@ DISEASE_KB = [
     {
         "match": ["glaucoma", "緑内障", "primary glaucoma"],
         "title": "原発性緑内障 (Primary Glaucoma / ADAMTS10, ADAMTS17 等)",
+        "severity": "high",
         "summary": "眼内圧が異常に上昇し、視神経が圧迫されて失明に至る遺伝性眼疾患です。",
         "mechanism": "前房隅角の閉塞や房水排出経路の異常により眼内圧が上昇。ADAMTS10/17 等の遺伝子変異が関与。ビーグル・コッカー・シーズーなどで多発。",
         "symptoms": "目の充血・角膜混濁・瞳孔散大・痛み・視覚消失。急性発作は緊急事態。",
@@ -901,6 +928,7 @@ DISEASE_KB = [
     {
         "match": ["cord1", "cord-1", "rpgrip1 pra"],
         "title": "PRA - CORD1 型 (RPGRIP1)",
+        "severity": "high",
         "summary": "進行性網膜萎縮症の一型。錐体（昼間視）が先に変性するタイプです。",
         "mechanism": "RPGRIP1 遺伝子の変異により網膜光受容細胞の機能が失われます。ミニチュアロングヘアダックスフンドで報告。",
         "symptoms": "1〜2歳から昼間の視覚異常 → 進行性失明。",
@@ -913,6 +941,7 @@ DISEASE_KB = [
     {
         "match": ["rcd3", "rcd-3", "pde6a pra", "rod cone dysplasia"],
         "title": "PRA - rcd3 型 (PDE6A)",
+        "severity": "high",
         "summary": "若齢期から急速に進行する PRA の一型。生後数ヶ月から発症します。",
         "mechanism": "PDE6A 遺伝子の変異により杆体（夜間視）細胞が早期に変性。",
         "symptoms": "生後6ヶ月頃から夜盲 → 1〜2歳で完全失明。",
@@ -925,6 +954,7 @@ DISEASE_KB = [
     {
         "match": ["cngb1 pra", "cngb1"],
         "title": "PRA - CNGB1 型",
+        "severity": "high",
         "summary": "PRA の遅発型。比較的緩やかな進行を示す型です。",
         "mechanism": "CNGB1 遺伝子の変異により網膜杆体の機能が低下。",
         "symptoms": "中年期から夜盲が始まり、徐々に昼間視覚も低下。",
@@ -951,6 +981,7 @@ DISEASE_KB = [
     {
         "match": ["gm1 gangliosidosis", "gm-1"],
         "title": "ガングリオシドーシス GM1 (GM1 / GLB1)",
+        "severity": "high",
         "summary": "GM1 ガングリオシドが神経細胞内に蓄積し進行性神経障害を起こす疾患です。",
         "mechanism": "GLB1 遺伝子の変異によりβ-ガラクトシダーゼ酵素が欠損。GM1 が分解されず蓄積します。シーバ・柴犬・スパニエル等で報告。",
         "symptoms": "若齢発症で運動失調・痙攣・視覚障害が進行。多くは2〜3歳までに死亡。",
@@ -964,6 +995,7 @@ DISEASE_KB = [
     {
         "match": ["myotonia congenita", "先天性筋強直症", "clcn1"],
         "title": "先天性筋強直症 (Myotonia Congenita / CLCN1)",
+        "severity": "medium",
         "summary": "筋肉が一度収縮すると弛緩しにくくなる遺伝性筋疾患です。",
         "mechanism": "CLCN1 遺伝子の変異により筋細胞膜のクロライドチャネル機能不全。筋電気活動が異常持続します。",
         "symptoms": "運動開始時のこわばり・転倒・歩行困難。運動を続けると改善（ウォームアップ現象）。",
@@ -982,6 +1014,7 @@ DISEASE_KB = [
             "willebrand ii", "willebrand 2",
         ],
         "title": "フォン・ヴィレブランド病 II型 (vWD2)",
+        "severity": "high",
         "summary": "vWD の中等度〜重度型。I型より出血傾向が強くなります。",
         "mechanism": "vWF 遺伝子の質的変異により、止血因子の機能が低下（量はあるが機能しない）。",
         "symptoms": "外傷・抜歯後の長時間出血、自然出血のリスクあり。",
@@ -999,6 +1032,7 @@ DISEASE_KB = [
             "willebrand iii", "willebrand 3",
         ],
         "title": "フォン・ヴィレブランド病 III型 (vWD3)",
+        "severity": "high",
         "summary": "最重度の vWD。出血が止まらず生命に関わる重篤型です。",
         "mechanism": "vWF 蛋白質が完全に欠損。スコティッシュテリア等で報告。",
         "symptoms": "幼齢期から重度出血。歯科処置・外傷で致命的になり得る。",
@@ -1011,6 +1045,7 @@ DISEASE_KB = [
     {
         "match": ["prekallikrein", "プレカリクレイン"],
         "title": "プレカリクレイン欠乏症 (Prekallikrein Deficiency / KLKB1)",
+        "severity": "low",
         "summary": "凝固系の前段階因子が欠損し、APTT 検査値が異常を示す凝固障害です。",
         "mechanism": "KLKB1 遺伝子の変異により内因系凝固第一段階が遅延。多くは無症状。",
         "symptoms": "通常は無症状だが、手術時に APTT 延長が見られる。",
@@ -1024,6 +1059,7 @@ DISEASE_KB = [
     {
         "match": ["glycogen storage disease", "gsd", "グリコーゲン蓄積症"],
         "title": "グリコーゲン蓄積症 (GSD / 複数型)",
+        "severity": "high",
         "summary": "グリコーゲンが分解できず体内に蓄積する重篤な代謝疾患です。型により症状が異なります。",
         "mechanism": "GAA (II型), GBE1 (IV型) などの遺伝子変異によりグリコーゲン代謝酵素が欠損。",
         "symptoms": "II型: 心筋・骨格筋の障害、IV型: 肝硬変・神経症状。多くは若齢で重症化。",
@@ -1037,6 +1073,7 @@ DISEASE_KB = [
     {
         "match": ["cobalamin malabsorption", "コバラミン吸収", "imerslund", "amn cubn"],
         "title": "コバラミン吸収不良症 (Cobalamin Malabsorption / AMN, CUBN)",
+        "severity": "medium",
         "summary": "ビタミンB12（コバラミン）の腸吸収障害により神経・血液障害を起こす遺伝性疾患です。",
         "mechanism": "AMN または CUBN 遺伝子の変異により回腸でのコバラミン受容体が機能不全。",
         "symptoms": "成長不良・貧血・神経症状（運動失調・痙攣）。ジャイアントシュナウザー等で報告。",
@@ -1051,6 +1088,7 @@ DISEASE_KB = [
     {
         "match": ["osteogenesis imperfecta", "骨形成不全", "serpinh1", "col1a"],
         "title": "骨形成不全症 (Osteogenesis Imperfecta / SERPINH1, COL1A1, COL1A2)",
+        "severity": "high",
         "summary": "骨が脆くなり、軽度の衝撃でも骨折しやすい遺伝性疾患です。",
         "mechanism": "コラーゲン関連遺伝子 (SERPINH1, COL1A1, COL1A2) の変異により骨の構造蛋白質が異常になります。",
         "symptoms": "若齢期からの繰り返す骨折・歯の異常・関節弛緩。ダックスフンド・ビーグル等で報告。",
@@ -1065,6 +1103,7 @@ DISEASE_KB = [
     {
         "match": ["gastric and intestinal polyposis", "消化管ポリポーシス", "gastrointestinal polyposis"],
         "title": "消化管ポリポーシス (GP)",
+        "severity": "high",
         "summary": "胃・腸にポリープが多発し、出血・腸閉塞のリスクを増す遺伝性疾患です。",
         "mechanism": "遺伝性ポリープ形成傾向。ジャックラッセルテリア等で報告。",
         "symptoms": "繰り返す消化器症状・血便・体重減少・嘔吐。",
@@ -1079,6 +1118,7 @@ DISEASE_KB = [
     {
         "match": ["cerebellar abiotrophy", "小脳皮質変性", "cerebellar degeneration"],
         "title": "小脳皮質変性症 (Cerebellar Abiotrophy)",
+        "severity": "high",
         "summary": "小脳のプルキンエ細胞が出生後変性し、運動失調を起こす遺伝性神経疾患です。",
         "mechanism": "犬種により原因遺伝子が異なる (GRM1, SPTBN2 等)。プルキンエ細胞の選択的死滅。",
         "symptoms": "若齢期 (3〜12ヶ月) からふらつき歩行・頭の震え・転倒。進行性。",
@@ -1092,6 +1132,7 @@ DISEASE_KB = [
     {
         "match": ["sensory neuropathy", "感覚性神経障害", "fam134b"],
         "title": "感覚性神経障害 (SN / FAM134B)",
+        "severity": "high",
         "summary": "末梢神経の感覚線維が変性し、痛覚消失や自咬行動を起こす遺伝性疾患です。",
         "mechanism": "FAM134B 遺伝子の変異により末梢感覚神経が変性。ボーダーコリーで報告。",
         "symptoms": "肢端の感覚消失 → 自咬 → 潰瘍・感染。歩行運動には支障なし。",
@@ -1104,6 +1145,7 @@ DISEASE_KB = [
     {
         "match": ["globoid cell leukodystrophy", "krabbe", "galc"],
         "title": "球状細胞白質ジストロフィー (Krabbe / GALC)",
+        "severity": "high",
         "summary": "中枢・末梢神経のミエリン形成が異常になる重篤な遺伝性代謝疾患です。",
         "mechanism": "GALC 遺伝子の変異によりガラクトセレブロシダーゼ酵素が欠損。ミエリン分解産物が蓄積し神経変性を起こします。",
         "symptoms": "生後 1〜6ヶ月で運動異常・痙攣・成長不全。多くは 1〜2 年で死亡。",
@@ -1117,6 +1159,7 @@ DISEASE_KB = [
     {
         "match": ["polyneuropathy", "多発性神経障害", "ndrg1", "arhgef10"],
         "title": "多発性神経障害 (Polyneuropathy / NDRG1, ARHGEF10)",
+        "severity": "high",
         "summary": "複数の末梢神経が同時に障害を受け、運動失調・筋萎縮を起こす疾患です。",
         "mechanism": "NDRG1 や ARHGEF10 等の変異により末梢神経の機能が低下。グレーハウンド・アラスカン・マラミュート等で報告。",
         "symptoms": "若齢期から後肢の脱力・歩行異常・筋萎縮。",
@@ -1129,6 +1172,7 @@ DISEASE_KB = [
     {
         "match": ["episodic falling", "episodic falling syndrome", "efs"],
         "title": "発作性失神症 (EFS / BCAN)",
+        "severity": "medium",
         "summary": "興奮や運動で発作的に筋肉が硬直し転倒する遺伝性疾患です。キャバリア K.C. スパニエルで頻発。",
         "mechanism": "BCAN 遺伝子の変異により神経シグナル伝達が異常になり、運動時に発作を起こします。",
         "symptoms": "興奮・運動・暑さで筋強直 → 転倒・硬直。意識は保持。数秒〜数分で回復。",
@@ -1155,6 +1199,7 @@ DISEASE_KB = [
     {
         "match": ["multifocal retinopathy", "cmr1", "cmr2", "best1"],
         "title": "多巣性網膜症 (CMR / BEST1)",
+        "severity": "low",
         "summary": "網膜に複数の隆起・剥離が起こる遺伝性眼疾患です。多くは進行が緩やか。",
         "mechanism": "BEST1 遺伝子の変異により網膜色素上皮の機能が異常。マスティフ・ピレネー等で報告。",
         "symptoms": "初期は無症状。中年期から斑状の網膜病変が見られる。視覚障害は軽度なことが多い。",
@@ -1180,6 +1225,7 @@ DISEASE_KB = [
     {
         "match": ["stargardt", "stgd1", "abca4"],
         "title": "スターガルト病 (STGD1 / ABCA4)",
+        "severity": "high",
         "summary": "若齢期から黄斑部の網膜が変性する遺伝性眼疾患です。",
         "mechanism": "ABCA4 遺伝子の変異により網膜色素上皮にリポフスチンが蓄積。ラブラドール等で報告。",
         "symptoms": "1〜2 歳から中心視野の視覚低下 → 進行性。",
@@ -1194,6 +1240,7 @@ DISEASE_KB = [
     {
         "match": ["coat color dilution alopecia", "color dilution alopecia", "cda"],
         "title": "毛色希釈性脱毛症 (CDA)",
+        "severity": "low",
         "summary": "希釈毛色 (Blue, Lilac 等) を持つ犬で起こる遺伝性脱毛症です。",
         "mechanism": "メラニン顆粒の異常蓄積により毛包が損傷。MLPH 遺伝子変異 (dd) を持つ希釈色犬の一部で発症。",
         "symptoms": "若齢期 (6ヶ月〜2歳) から希釈色部分の脱毛・痂皮・二次感染。非希釈色部位は正常。",
@@ -1206,6 +1253,7 @@ DISEASE_KB = [
     {
         "match": ["footpad hyperkeratosis", "hfh", "肉球角化"],
         "title": "肉球角化亢進症 (HFH / FAM83G)",
+        "severity": "medium",
         "summary": "肉球が異常に厚く硬化し、亀裂・痛みを生じる遺伝性皮膚疾患です。",
         "mechanism": "FAM83G 遺伝子の変異により肉球の角化が亢進。アイリッシュ・テリア、ドゴ・ド・ボルドー等で報告。",
         "symptoms": "若齢期から全肉球の硬化・亀裂・痛み。歩行困難を起こすこともある。",
@@ -1219,6 +1267,7 @@ DISEASE_KB = [
     {
         "match": ["renal cystadenocarcinoma", "rcnd", "nodular dermatofibrosis", "腎嚢腺癌"],
         "title": "腎嚢腺癌・結節性皮膚線維腫症 (RCND / FLCN)",
+        "severity": "high",
         "summary": "腎臓に多発する腫瘍と皮膚結節を起こす遺伝性腫瘍症候群です。ジャーマン・シェパード特有。",
         "mechanism": "FLCN 遺伝子の変異により腫瘍抑制機能が失われ、腎臓・皮膚に腫瘍が発生。",
         "symptoms": "中年期から皮膚に多数の結節 → 後に腎腫瘍・腎不全。",
@@ -1231,6 +1280,7 @@ DISEASE_KB = [
     {
         "match": ["hyperphosphatemia", "fgf23", "高リン血症"],
         "title": "家族性高リン血症 (Hyperphosphatemia / FGF23)",
+        "severity": "medium",
         "summary": "血中リン濃度が異常に高くなる遺伝性内分泌疾患です。",
         "mechanism": "FGF23 関連遺伝子の変異によりリン代謝が異常。骨・軟組織の異常石灰化を引き起こす。",
         "symptoms": "成長異常・骨格変形・腎機能障害。重症例では予後不良。",
