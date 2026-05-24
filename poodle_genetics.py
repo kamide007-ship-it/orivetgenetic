@@ -1784,13 +1784,32 @@ TRAIT_KB = [
     {
         "match": ["a locus", "agouti", "asip"],
         "title": "A座位 (ASIP) — アグーチ（模様）パターン",
-        "summary": "K座位が ky/ky のときに発現する『毛色の模様』を決める座位です。",
-        "mechanism": "ay > aw > at > a の優性順位。ay=セーブル、aw=ワイルドセーブル、at=タンポイント、a=リセッシブブラック。",
-        "phenotype": "ay/_ : フォーン/セーブル\\naw/_ : ワイルドセーブル\\nat/_ : ブラックタン/トライカラー（ドーベルマン的）\\na/a : リセッシブブラック（単色黒）",
+        "summary": "K座位が ky/ky のときに発現する『毛色の模様』を決める座位です。ay_ で「フォーン/セーブル」になりますが、プードルの公認レッド色とは異なる遺伝経路です。",
+        "mechanism": (
+            "ay > aw > at > a の優性順位。ay=セーブル/フォーン、aw=ワイルドセーブル、at=タンポイント、a=リセッシブブラック。"
+            "⚠️ <strong>プードルの「レッド/アプリコット」とは別</strong>: "
+            "プードルの公認レッド・アプリコット・クリームは <strong>E座位 e/e + I座位 (MFSD12)</strong> が決定する色で、"
+            "A座位とは無関係です。ay_ のフォーン/セーブルは K座位 ky/ky が必要で、"
+            "プードルでは多くが KB_ (ドミナントブラック) のため ay を持っていても外見に出ません。"
+        ),
+        "phenotype": (
+            "ay/_ (+ ky/ky): フォーン/セーブル — 赤みがかった毛色に黒いヘアチップ（毛先が黒）\n"
+            "aw/_ (+ ky/ky): ワイルドセーブル — より複雑なバンディングパターン\n"
+            "at/_ (+ ky/ky): ブラックタン/トライカラー（ドーベルマン的）\n"
+            "a/a (+ ky/ky): リセッシブブラック（単色黒）\n\n"
+            "【プードルの場合】\n"
+            "多くのプードルは KB_ のため A座位は表現されない。"
+            "ay の存在はシミュレーターで推測可能だが、KB_ × KB_ 交配では子犬コートに出ない。\n"
+            "プードルの「レッド」「アプリコット」「クリーム」は → <strong>E座位 e/e + I座位</strong> を参照"
+        ),
         "inheritance": "複対立遺伝子の優性序列: ay > aw > at > a。K座位が ky/ky の場合にのみ表現型に現れます。",
-        "advice": "見た目の模様パターンは A 座位＋K 座位＋E 座位の組み合わせで決まります。",
+        "advice": (
+            "プードルのレッド/フォーン交配を計画する際は A座位だけでなく E座位・K座位・I座位の組み合わせを必ず確認してください。"
+            "見た目がフォーンに見えても e/e ベースの場合と ay ベースの場合では繁殖結果が大きく異なります。"
+        ),
         "references": [
-            {"label": "詳細を検索 (A locus)", "url": _google_search("A locus ASIP 犬 アグーチ")},
+            {"label": "詳細を検索 (A locus ASIP)", "url": _google_search("A locus ASIP 犬 アグーチ セーブル")},
+            {"label": "プードルの毛色遺伝学", "url": _google_search("プードル レッド アプリコット 遺伝子 ee")},
         ],
     },
     {
@@ -1956,14 +1975,44 @@ TRAIT_KB = [
     },
     {
         "match": ["i locus", "intense red", "mfsd12", "intensity", "レッド濃度", "イエロー濃度"],
-        "title": "I 座位 (MFSD12) — 赤/黄色の濃度",
-        "summary": "E座位 e/e のフェオメラニン（赤・黄系）の濃さを決める遺伝子。ラブラドール・プードル・ゴールデンの色の濃淡を説明。",
-        "mechanism": "MFSD12 遺伝子の変異がメラノサイトでのフェオメラニン生成量を調節。i/i ホモで色素が薄くなりクリーム/ホワイト寄りになります。",
-        "phenotype": "I/I: 濃い赤・ディープレッド\\nI/i: 中間（アプリコット〜レッド）\\ni/i: 淡いクリーム・ホワイト寄り",
-        "inheritance": "常染色体（不完全優性/相加的）。I/I が最濃色、I/i が中間、i/i が最淡色。",
-        "advice": "イングリッシュ・クリーム・ゴールデンの淡色や、プードルのホワイト〜クリーム〜アプリコット〜レッドの幅広さの一因。E座位 ee と組み合わせて色の濃淡を予測する際に重要。E_ 犬（黒系優位）では coat 色への影響は限定的。",
+        "title": "I 座位 (MFSD12) — 赤/黄色の濃度（プードルのレッド/アプリコット/クリームの主因）",
+        "summary": (
+            "E座位 e/e と組み合わさってプードルの「レッド・アプリコット・クリーム」の濃淡を決める遺伝子。"
+            "プードルのフォーン/レッドと呼ばれる色の濃淡はほぼこの座位が決定します。"
+        ),
+        "mechanism": (
+            "MFSD12 遺伝子の変異がメラノサイトでのフェオメラニン（赤/黄系色素）生成量を調節。"
+            "i/i ホモで色素が薄くなりクリーム/ホワイト寄り、I/I ホモで最大強度のディープレッドになります。"
+            "<br><br>"
+            "<strong>プードルのレッド/フォーン色の遺伝子型（基本条件: e/e + KB_）</strong><br>"
+            "・<strong>e/e + I/I</strong> → ディープレッド / レッド（最濃色）<br>"
+            "・<strong>e/e + I/i</strong> → アプリコット / レッドアプリコット（中間色）<br>"
+            "・<strong>e/e + i/i</strong> → クリーム / ホワイト（最淡色）<br>"
+            "※ B座位（bb）の場合、鼻・パッドがブラウン（リバー）になるが coat 色自体は上記と同様"
+        ),
+        "phenotype": (
+            "I/I : ディープレッド（高強度フェオメラニン）— プードルの「レッド」公認色に対応\n"
+            "I/i : アプリコット〜レッドアプリコット（中間強度）— プードルの「アプリコット」公認色に対応\n"
+            "i/i : クリーム / ホワイト（低強度）— プードルの「クリーム」公認色に対応\n\n"
+            "【日本での呼称と AKC 公認色の対応】\n"
+            "「フォーン」= 日本でレッド〜アプリコット系を指すことがある通称\n"
+            "「レッド」 = AKC 公認色（e/e + I/I が必須、A座位 ay_ とは別）\n"
+            "「アプリコット」= AKC 公認色（e/e + I/i 主体）\n"
+            "「クリーム」 = AKC 公認色（e/e + i/i 主体）"
+        ),
+        "inheritance": "常染色体（不完全優性/相加的）。I/I が最濃色、I/i が中間、i/i が最淡色。E座位 e/e との組み合わせが必須。",
+        "advice": (
+            "【プードルのレッド繁殖アドバイス】<br>"
+            "レッドを目指すには両親の <strong>E座位 e/e</strong> が必須。"
+            "片方でも E_ があると子犬の 50〜100% が黒/茶系になる可能性があります。<br>"
+            "また I/I（ディープレッド）同士の交配でも、i アレルをキャリアしていれば "
+            "I/i（アプリコット）や i/i（クリーム）の子犬が生まれます。<br>"
+            "Orivet 12項目パネルには KITLG/I座位が含まれないため、"
+            "レッド系統の交配では MFSD12 の追加検査を推奨します。"
+        ),
         "references": [
-            {"label": "詳細を検索 (Intense Red)", "url": _google_search("MFSD12 dog intense red phaeomelanin")},
+            {"label": "詳細を検索 (MFSD12 Intensity)", "url": _google_search("MFSD12 dog intense red phaeomelanin poodle")},
+            {"label": "プードルのアプリコット/レッドの遺伝学", "url": _google_search("poodle apricot red color genetics MFSD12 ee")},
         ],
     },
     {
@@ -2408,6 +2457,103 @@ GUIDES = [
         ],
         "related_disease_slugs": [],
         "related_trait_slugs": ["e-locus", "k-locus", "a-locus", "b-locus", "d-locus"],
+    },
+    {
+        "slug": "poodle-red-apricot-fawn",
+        "title": "プードルのレッド・アプリコット・フォーン — 毛色の遺伝学",
+        "summary": "プードルの『レッド』『アプリコット』『クリーム』『フォーン』と呼ばれる色の遺伝的しくみを解説。E座位 (e/e) と I座位 (MFSD12) の組み合わせが鍵。",
+        "category": "🎨 毛色遺伝学",
+        "reading_time": "7 分",
+        "sections": [
+            {
+                "heading": "🟠 プードルの「レッド/フォーン」の正体",
+                "body": (
+                    "日本でプードルに使われる「フォーン」「レッド」「アプリコット」はすべて同じ遺伝経路から生まれます。"
+                    "必須条件は <strong>E座位 e/e（ホモ接合）</strong>。"
+                    "e/e の犬はコートに黒/茶系の色素（ユーメラニン）を作れないため、"
+                    "フェオメラニン（赤/黄系色素）のみでコートが染まります。"
+                    "その濃淡を決めるのが <strong>I座位（MFSD12 遺伝子）</strong> です。"
+                ),
+            },
+            {
+                "heading": "🎨 e/e × I座位 の組み合わせ早見表",
+                "body": (
+                    "<table style='width:100%;border-collapse:collapse;font-size:0.9em;'>"
+                    "<tr style='background:#fef3c7;'><th style='padding:6px;text-align:left;'>E座位</th><th style='padding:6px;text-align:left;'>I座位</th><th style='padding:6px;text-align:left;'>コート色</th><th style='padding:6px;text-align:left;'>呼称</th></tr>"
+                    "<tr><td style='padding:6px;'>e/e</td><td style='padding:6px;'>I/I</td><td style='padding:6px;'><span style='display:inline-block;width:14px;height:14px;background:#CD5C5C;border-radius:50%;vertical-align:middle;margin-right:4px;'></span>ディープレッド</td><td style='padding:6px;'>レッド（AKC 公認色）</td></tr>"
+                    "<tr style='background:#fafafa;'><td style='padding:6px;'>e/e</td><td style='padding:6px;'>I/i</td><td style='padding:6px;'><span style='display:inline-block;width:14px;height:14px;background:#FBCEB1;border-radius:50%;vertical-align:middle;margin-right:4px;'></span>アプリコット〜レッド</td><td style='padding:6px;'>アプリコット（AKC 公認色）</td></tr>"
+                    "<tr><td style='padding:6px;'>e/e</td><td style='padding:6px;'>i/i</td><td style='padding:6px;'><span style='display:inline-block;width:14px;height:14px;background:#FFF8DC;border:1px solid #ccc;border-radius:50%;vertical-align:middle;margin-right:4px;'></span>クリーム〜ホワイト</td><td style='padding:6px;'>クリーム / ホワイト（AKC 公認色）</td></tr>"
+                    "</table>"
+                    "<br>「フォーン」は日本で使われる通称で、上記のレッド〜アプリコット系を指すことが多いです。"
+                ),
+            },
+            {
+                "heading": "⚠️ A座位フォーン (ay) との違い",
+                "body": (
+                    "遺伝学用語の「フォーン/セーブル (ay_)」は A座位のアレルで、"
+                    "プードルの公認レッドとは<strong>まったく異なる遺伝経路</strong>です。<br><br>"
+                    "<strong>A座位 ay（セーブル/フォーン）:</strong><br>"
+                    "・E_ + K座位 ky/ky + ay_ の条件が必要<br>"
+                    "・毛色: 赤みがかった毛に<strong>黒いヘアチップ（毛先が黒い）</strong><br>"
+                    "・プードルでは KB_ が多いため発現しないことが多い<br>"
+                    "・AKC 非公認（apricot/red と外見が近く混同されやすい）<br><br>"
+                    "<strong>I座位 × e/e（プードルの公認レッド）:</strong><br>"
+                    "・e/e + KB_ + I/I（ヘアチップに黒はない、均一な赤）<br>"
+                    "・プードルで最も一般的なレッドの遺伝経路<br>"
+                    "・繁殖予測が I座位の遺伝子型で明確にできる"
+                ),
+            },
+            {
+                "heading": "🧬 繁殖でレッドを作るには",
+                "body": (
+                    "<strong>1. e/e の確立が最優先</strong><br>"
+                    "両親ともに e/e である必要があります。"
+                    "片方が E/e（キャリア）でも、子犬の 50% は E_ になり黒/茶系になります。"
+                    "E座位の確認なしに「レッド同士の交配」をしても、隠れた E アレルで黒い子犬が生まれることがあります。<br><br>"
+                    "<strong>2. I座位で濃淡を設計する</strong><br>"
+                    "・I/I × I/I → 100% ディープレッド<br>"
+                    "・I/I × I/i → 50% レッド, 50% アプリコット<br>"
+                    "・I/i × I/i → 25% レッド, 50% アプリコット, 25% クリーム<br>"
+                    "・i/i × i/i → 100% クリーム<br><br>"
+                    "<strong>3. Orivet パネルの注意点</strong><br>"
+                    "Orivet 12項目標準パネルには <strong>I座位 (MFSD12) が含まれません</strong>。"
+                    "レッド系統の繁殖計画には MFSD12（I座位 / Intensity）の追加検査を推奨します。"
+                ),
+            },
+            {
+                "heading": "🦴 B座位・D座位との組み合わせ（鼻の色）",
+                "body": (
+                    "e/e の犬はコートに黒/茶色素が出ませんが、<strong>鼻・パッド・アイリム</strong>の色には B座位と D座位が影響します。<br>"
+                    "・e/e + B_ + D_ → 鼻・パッド: 黒（ブラック鼻）<br>"
+                    "・e/e + bb + D_ → 鼻・パッド: ブラウン（リバー鼻）<br>"
+                    "・e/e + B_ + dd → 鼻・パッド: 希釈黒（グレー系）<br>"
+                    "・e/e + bb + dd → 鼻・パッド: イザベラ（薄茶）<br>"
+                    "コートのレッド/アプリコット/クリームの濃淡は B/D に<strong>影響されません</strong>。"
+                ),
+            },
+        ],
+        "tldr": [
+            "プードルのレッド/アプリコット/クリームは「e/e + I座位 (MFSD12)」で決まる",
+            "I/I = ディープレッド, I/i = アプリコット, i/i = クリーム",
+            "A座位 ay の『遺伝学用語フォーン』とは別ルート — 外見は似るが遺伝的に異なる",
+            "Orivet 標準パネルに I座位は含まれない → レッド繁殖には追加検査を推奨",
+        ],
+        "faq": [
+            {
+                "q": "レッド同士を交配したら黒い子犬が生まれました。なぜ？",
+                "a": "片方または両方の親に E アレルが隠れていた（E/e のキャリア）可能性があります。E/e の親同士の交配では 25% の子犬が E_ になり黒/茶系になります。E座位の検査で確認できます。",
+            },
+            {
+                "q": "アプリコット × アプリコットでレッドの子犬は生まれますか？",
+                "a": "両親が I/i（アプリコット）なら 25% の確率で I/I（ディープレッド）が生まれます。ただし両親が i/i（クリーム同士）なら I/I は生まれません。I座位の検査値が重要です。",
+            },
+            {
+                "q": "「フォーン」と「レッド」は同じ遺伝子から来ていますか？",
+                "a": "日本で『フォーン』と呼ぶ場合はほとんど e/e + I座位のレッド/アプリコット系を指します。遺伝学用語の『フォーン（ay）』は A座位のアレルで別のルートですが、プードルでは KB_ のためほぼ発現しません。",
+            },
+        ],
+        "related_disease_slugs": [],
+        "related_trait_slugs": ["e-locus", "i-locus", "k-locus", "a-locus", "b-locus"],
     },
     {
         "slug": "breeders-checklist",

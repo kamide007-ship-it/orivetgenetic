@@ -820,12 +820,24 @@ TRAIT_EN = {
         "advice": "<strong>H/H × H/H crosses are strictly prohibited</strong> — no live offspring. The standard Chinese Crested mating is hairless (H/h) × powderpuff (h/h). Skin protection, sunscreen, and cold-weather coverage are required for these breeds.",
     },
     "i-locus": {
-        "title": "I Locus (MFSD12) — Intensity of Red/Yellow",
-        "summary": "Modulates the intensity of phaeomelanin (red/yellow pigment) in E-locus ee dogs. Explains the wide range of yellow/cream/red shades in Labradors, Poodles, and Goldens.",
-        "mechanism": "Variants in MFSD12 regulate phaeomelanin output in melanocytes. i/i homozygotes show diluted pigment, leaning cream or near-white.",
-        "phenotype": "I/I: Deep, saturated red\nI/i: Intermediate (apricot to red)\ni/i: Pale cream, near white",
-        "inheritance": "Autosomal (incomplete dominance / additive). I/I is deepest, I/i intermediate, i/i palest.",
-        "advice": "Underlies the pale shades of English Cream Goldens and the wide white-to-apricot-to-red spectrum in Poodles. Important when combined with E locus ee for predicting coat shade. Limited effect on coat color in E_ dogs (eumelanin-dominant).",
+        "title": "I Locus (MFSD12) — Intensity of Red/Yellow (Poodle Red/Apricot/Cream)",
+        "summary": "The primary gene controlling the shade of red, apricot, and cream in Poodles when combined with E-locus e/e. Also explains yellow intensity in Labradors and Goldens.",
+        "mechanism": (
+            "Variants in MFSD12 regulate phaeomelanin output in melanocytes. i/i homozygotes produce minimal pigment (cream/white); I/I produces maximal intensity (deep red).\n\n"
+            "Poodle coat color chart (requires e/e):\n"
+            "• e/e + I/I → Deep Red (AKC 'Red' color)\n"
+            "• e/e + I/i → Apricot to Red (AKC 'Apricot' color)\n"
+            "• e/e + i/i → Cream / White (AKC 'Cream' color)"
+        ),
+        "phenotype": "I/I: Deep red (high-intensity phaeomelanin)\nI/i: Apricot to red (intermediate)\ni/i: Cream / white (low-intensity)",
+        "inheritance": "Autosomal (incomplete dominance / additive). I/I is deepest, I/i intermediate, i/i palest. E-locus e/e is required for coat color expression.",
+        "advice": (
+            "Poodle breeding note: To produce red puppies, both parents must be e/e. "
+            "If one parent carries E_, 50–100% of offspring may have a black or brown base coat. "
+            "I/i (apricot) × I/i (apricot) produces 25% deep red (I/I), 50% apricot (I/i), and 25% cream (i/i) offspring. "
+            "A carrier (P/N or I/i) parent passes the diluting i allele to 50% of offspring. "
+            "The Orivet standard 12-panel does not include MFSD12 — dedicated I-locus testing is recommended for red-line breeding."
+        ),
     },
     "cocoa": {
         "title": "Cocoa Locus (HPS3) — Non-standard Chocolate",

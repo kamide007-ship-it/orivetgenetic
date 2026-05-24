@@ -1155,4 +1155,97 @@ GUIDES_EN = {
             },
         ],
     },
+    "poodle-red-apricot-fawn": {
+        "title": "Poodle Red, Apricot & Fawn — Color Genetics Explained",
+        "summary": "A clear explanation of the genes behind Poodle 'Red', 'Apricot', 'Cream', and 'Fawn' colors. The E locus (e/e) and I locus (MFSD12) are the key.",
+        "category": "🎨 Coat Genetics",
+        "reading_time": "7 min",
+        "tldr": [
+            "Poodle Red / Apricot / Cream are determined by 'e/e + I locus (MFSD12)'",
+            "I/I = Deep Red, I/i = Apricot, i/i = Cream",
+            "A-locus 'fawn' (ay) is a different genetic pathway — similar appearance but distinct genetics",
+            "MFSD12 is not included in the Orivet standard panel — additional testing is recommended for red-line breeding",
+        ],
+        "faq": [
+            {
+                "q": "We bred two red Poodles and got a black puppy. Why?",
+                "a": "One or both parents likely carry a hidden E allele (E/e carrier). E/e × E/e crosses produce 25% E/E or E/e offspring, which are black or brown. E-locus testing will confirm this.",
+            },
+            {
+                "q": "Can an apricot × apricot cross produce a red puppy?",
+                "a": "Yes — if both parents are I/i (apricot), there is a 25% chance of I/I (deep red) offspring. However, if both parents are i/i (cream), I/I cannot be produced.",
+            },
+            {
+                "q": "Is 'fawn' the same gene as 'red' in Poodles?",
+                "a": "In Japan, 'fawn' usually refers to the e/e + I-locus red/apricot family. The genetic term 'fawn' (ay, A locus) is a different pathway, but rarely expressed in Poodles because most carry KB_ (dominant black).",
+            },
+        ],
+        "sections": [
+            {
+                "heading": "🟠 What is a 'Red/Fawn' Poodle?",
+                "body": (
+                    "The terms 'fawn', 'red', and 'apricot' used for Poodles in Japan all originate from the same genetic pathway. "
+                    "The essential requirement is <strong>E locus e/e (homozygous recessive)</strong>. "
+                    "e/e dogs cannot produce eumelanin (black/brown pigment) in the coat, "
+                    "so only phaeomelanin (red/yellow pigment) colors the coat. "
+                    "The intensity of that pigment is controlled by the <strong>I locus (MFSD12 gene)</strong>."
+                ),
+            },
+            {
+                "heading": "🎨 e/e × I Locus Quick Reference",
+                "body": (
+                    "<table style='width:100%;border-collapse:collapse;font-size:0.9em;'>"
+                    "<tr style='background:#fef3c7;'><th style='padding:6px;text-align:left;'>E Locus</th><th style='padding:6px;text-align:left;'>I Locus</th><th style='padding:6px;text-align:left;'>Coat Color</th><th style='padding:6px;text-align:left;'>Name</th></tr>"
+                    "<tr><td style='padding:6px;'>e/e</td><td style='padding:6px;'>I/I</td><td style='padding:6px;'><span style='display:inline-block;width:14px;height:14px;background:#CD5C5C;border-radius:50%;vertical-align:middle;margin-right:4px;'></span>Deep red</td><td style='padding:6px;'>Red (AKC recognized)</td></tr>"
+                    "<tr style='background:#fafafa;'><td style='padding:6px;'>e/e</td><td style='padding:6px;'>I/i</td><td style='padding:6px;'><span style='display:inline-block;width:14px;height:14px;background:#FBCEB1;border-radius:50%;vertical-align:middle;margin-right:4px;'></span>Apricot to red</td><td style='padding:6px;'>Apricot (AKC recognized)</td></tr>"
+                    "<tr><td style='padding:6px;'>e/e</td><td style='padding:6px;'>i/i</td><td style='padding:6px;'><span style='display:inline-block;width:14px;height:14px;background:#FFF8DC;border:1px solid #ccc;border-radius:50%;vertical-align:middle;margin-right:4px;'></span>Cream to white</td><td style='padding:6px;'>Cream / White (AKC recognized)</td></tr>"
+                    "</table>"
+                    "<br>'Fawn' is a colloquial Japanese term that typically refers to the red–apricot range above."
+                ),
+            },
+            {
+                "heading": "⚠️ Difference from A-locus Fawn (ay)",
+                "body": (
+                    "The genetic term 'fawn/sable (ay)' is an A-locus allele and is a "
+                    "<strong>completely different genetic pathway</strong> from AKC Red Poodles.<br><br>"
+                    "<strong>A-locus ay (sable/fawn):</strong><br>"
+                    "・Requires E_ + K locus ky/ky + ay_<br>"
+                    "・Coat: reddish with <strong>black hair tips (dark tipping)</strong><br>"
+                    "・Rarely expressed in Poodles because most carry KB_ (dominant black)<br>"
+                    "・Not an AKC-recognized Poodle color (often confused with apricot/red)<br><br>"
+                    "<strong>I locus × e/e (AKC Red Poodle):</strong><br>"
+                    "・e/e + KB_ + I/I (no black tipping — uniform red)<br>"
+                    "・The most common genetic basis for 'Red Poodle'<br>"
+                    "・Breeding outcomes can be clearly predicted from I-locus genotype"
+                ),
+            },
+            {
+                "heading": "🧬 Breeding for Red Poodles",
+                "body": (
+                    "<strong>1. Confirm e/e in both parents first</strong><br>"
+                    "Both parents must be e/e. Even one E/e carrier parent means 50% of puppies will be E_ (black or brown base). "
+                    "'Red × Red' crosses can still produce black puppies if a hidden E allele is present.<br><br>"
+                    "<strong>2. Design intensity with the I locus</strong><br>"
+                    "・I/I × I/I → 100% Deep Red<br>"
+                    "・I/I × I/i → 50% Red, 50% Apricot<br>"
+                    "・I/i × I/i → 25% Red, 50% Apricot, 25% Cream<br>"
+                    "・i/i × i/i → 100% Cream<br><br>"
+                    "<strong>3. Note on the Orivet panel</strong><br>"
+                    "The Orivet standard 12-panel does <strong>not include MFSD12 (I locus)</strong>. "
+                    "For red-line breeding, additional MFSD12 / Intensity testing is strongly recommended."
+                ),
+            },
+            {
+                "heading": "🦴 B locus and D locus (Nose / Pad Color)",
+                "body": (
+                    "e/e dogs have no eumelanin in the coat, but <strong>nose, pads, and eye-rim pigment</strong> are still affected by the B and D loci.<br>"
+                    "・e/e + B_ + D_ → Black nose/pads<br>"
+                    "・e/e + bb + D_ → Brown (liver) nose/pads<br>"
+                    "・e/e + B_ + dd → Dilute black (slate/grey) nose/pads<br>"
+                    "・e/e + bb + dd → Isabella (pale liver) nose/pads<br>"
+                    "The shade of Red/Apricot/Cream in the coat is <strong>not affected</strong> by B or D."
+                ),
+            },
+        ],
+    },
 }
