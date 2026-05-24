@@ -150,8 +150,8 @@ except Exception:
 @pytest.mark.skipif(not _HAS_EN, reason="kb_en not importable")
 class TestEnglishKB:
     def test_disease_en_count(self):
-        # 全72疾患の英訳が含まれていること
-        assert len(DISEASE_EN) >= 70
+        # 全77疾患の英訳が含まれていること
+        assert len(DISEASE_EN) >= 77
 
     def test_trait_en_count(self):
         # 全14形質座位の英訳
@@ -414,7 +414,7 @@ class TestSimpleExplainers:
         assert "よくある質問" in body
 
     def test_full_coverage_diseases(self):
-        """全疾患 (72) に _simple が投入されている"""
+        """全疾患 (77) に _simple が投入されている"""
         from poodle_genetics import DISEASE_KB
         no_simple = [d['_slug'] for d in DISEASE_KB if "_simple" not in d]
         assert not no_simple, f"_simple 未投入: {no_simple}"

@@ -274,6 +274,14 @@ DISEASE_EN = {
         "inheritance": "Autosomal recessive. 25% affected from carrier × carrier.",
         "advice": "Symptomatic care only. Avoid cold; warm up sufficiently.",
     },
+    "benign-familial-juvenile-epilepsy": {
+        "title": "Benign Familial Juvenile Epilepsy (BFJE / LGI2)",
+        "summary": "A benign, young-onset epilepsy prevalent in Lagotto Romagnolos. Most cases spontaneously remit as the dog matures.",
+        "mechanism": "Mutation in LGI2 disrupts the balance of neuronal excitation and inhibition, causing focal and generalized seizures.",
+        "symptoms": "Tonic-clonic, focal, or psychomotor seizures from 5–13 weeks of age. Most cases resolve by 4 months; neurological sequelae are uncommon.",
+        "inheritance": "Autosomal recessive. Primarily reported in Lagotto Romagnolos. 25% affected from carrier × carrier.",
+        "advice": "Symptomatic anticonvulsant therapy for severe or frequent seizures. Prognosis is generally favorable. Breeding P/P (homozygous affected) dogs is not recommended.",
+    },
 
     # ============================================================
     # 眼科系
@@ -389,6 +397,14 @@ DISEASE_EN = {
         "symptoms": "Initially asymptomatic. Patchy retinal lesions visible from middle age. Vision impairment often mild.",
         "inheritance": "Autosomal recessive. 25% affected from carrier × carrier.",
         "advice": "Slowly progressive; early management maintains good QOL. Regular ophthalmologic exams recommended.",
+    },
+    "primary-lens-luxation": {
+        "title": "Primary Lens Luxation (PLL / ADAMTS17)",
+        "summary": "An inherited eye disease in which the zonular ligaments supporting the lens rupture, causing lens dislocation and risk of acute glaucoma and blindness.",
+        "mechanism": "Mutations in ADAMTS17 (or ADAMTS10 in some breeds) cause dysfunction of the zonule fiber proteins, losing the ability to hold the lens in position.",
+        "symptoms": "Sudden eye redness, elevated intraocular pressure, and pain from 2–8 years of age. Anterior luxation causes corneal edema and secondary glaucoma with risk of permanent vision loss.",
+        "inheritance": "Autosomal recessive (P/P affected; P/N carrier with elevated risk). Frequently reported in Terriers, Border Collies, and Siberian Huskies.",
+        "advice": "P/P and P/N dogs should have regular tonometry (at least annually). Anterior luxation is an ophthalmologic emergency requiring immediate veterinary care. For breeding, P/N × N/N pairings are preferred.",
     },
 
     # ============================================================
@@ -509,6 +525,14 @@ DISEASE_EN = {
         "symptoms": "Growth abnormalities, skeletal deformity, renal dysfunction. Severe cases have poor prognosis.",
         "inheritance": "Autosomal recessive. 25% affected from carrier × carrier.",
         "advice": "Affected dogs require low-phosphate diet and phosphate binders to slow progression.",
+    },
+    "phosphofructokinase-deficiency": {
+        "title": "Phosphofructokinase Deficiency (PFK / PFKM)",
+        "summary": "A metabolic disease in which deficiency of the key glycolytic enzyme PFK-M causes hemolytic anemia and exercise intolerance. Primarily reported in English Springer Spaniels.",
+        "mechanism": "Mutations in PFKM severely reduce glycolytic enzyme activity in red blood cells and muscle, causing premature erythrocyte destruction and hemolytic anemia.",
+        "symptoms": "Post-exercise muscle weakness, jaundice, hemoglobinuria (red-brown urine), fatigue. Hemolytic episodes are triggered by strenuous exercise, fever, or alkalosis.",
+        "inheritance": "Autosomal recessive. 25% affected from carrier × carrier. Reported in English Springer Spaniels and American Cocker Spaniels.",
+        "advice": "Avoid strenuous exercise and prolonged barking (hyperventilation). Affected dogs are managed for hemolytic crises. Pre-breeding genetic testing of both parents is essential.",
     },
 
     # ============================================================
@@ -653,6 +677,26 @@ DISEASE_EN = {
         "symptoms": "Young-onset recurrent lung infections, respiratory distress, exercise intolerance.",
         "inheritance": "Autosomal recessive. 25% affected from carrier × carrier.",
         "advice": "Antibiotics and bronchodilators for symptomatic care. Severe cases require long-term management.",
+    },
+
+    # ============================================================
+    # 心臓系
+    # ============================================================
+    "arvc": {
+        "title": "Arrhythmogenic Right Ventricular Cardiomyopathy (ARVC / Striatin)",
+        "summary": "An inherited cardiomyopathy in which the right ventricular myocardium is replaced by fatty and fibrous tissue, causing severe arrhythmias and sudden death. Most commonly reported in Boxers.",
+        "mechanism": "A duplicative insertion in the Striatin (STRN) gene disrupts intercalated disc proteins in ventricular cardiomyocytes, triggering apoptosis and replacement with adipose and fibrous tissue.",
+        "symptoms": "Collapse, syncope, sudden death. Polymorphic ventricular tachycardia (VT) and ventricular fibrillation (VF). Onset typically in young to middle-aged dogs; some die suddenly without prior signs.",
+        "inheritance": "Autosomal dominant (incomplete penetrance). A single copy raises risk. Most frequently reported in Boxers; a similar condition is seen in Dobermans.",
+        "advice": "Homozygous (A/A) dogs are high-risk; breeding is not recommended. Heterozygous (A/N) dogs should have regular 24-hour Holter ECG monitoring. Antiarrhythmic medications can help, but prognosis varies significantly.",
+    },
+    "dilated-cardiomyopathy": {
+        "title": "Dilated Cardiomyopathy Type 1 (DCM1 / PDK4)",
+        "summary": "An inherited cardiomyopathy in which the ventricular walls thin and the heart enlarges, leading to acute heart failure or sudden death. Frequently reported in Dobermans.",
+        "mechanism": "An intronic insertion variant in PDK4 (documented in Dobermans) impairs myocardial energy metabolism and contractile function. The ventricles dilate compensatorily, ultimately resulting in systolic failure.",
+        "symptoms": "Lethargy, exercise intolerance, dyspnea, cough. Atrial fibrillation and sudden death may occur. Dobermans often have a prolonged asymptomatic phase, requiring regular Holter ECG screening.",
+        "inheritance": "Autosomal dominant (Doberman type) or polygenic. Common in large and giant breeds: Dobermans, Irish Wolfhounds, Giant Schnauzers, and others.",
+        "advice": "Dobermans should have annual Holter ECG + echocardiography from 3 years of age. ACE inhibitors may slow progression. Breeding decisions should combine genetic testing with cardiac screening.",
     },
 
     # ============================================================
