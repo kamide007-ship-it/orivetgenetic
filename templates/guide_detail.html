@@ -85,6 +85,24 @@
     .section { padding:18px 20px; }
     body { padding-bottom:env(safe-area-inset-bottom); }
   }
+
+  /* 印刷用スタイル */
+  @media print {
+    header, .cta-row, .no-print { display:none !important; }
+    body { background:#fff; color:#000; font-size:11pt; }
+    .container { max-width:100%; padding:0; }
+    .article-header, .section, .related { box-shadow:none; border:1px solid #ccc; break-inside:avoid; }
+    .section { margin-bottom:8px; }
+    a { color:#000; text-decoration:none; }
+  }
+  .print-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 14px; border-radius:8px; border:1px solid rgba(255,255,255,0.3);
+    background:rgba(255,255,255,0.15); color:#fff;
+    font-size:0.85em; cursor:pointer; text-decoration:none;
+    margin-left:6px;
+  }
+  .print-btn:hover { background:rgba(255,255,255,0.3); }
 </style>
 </head>
 <body>
@@ -102,6 +120,9 @@
       <a href="/guides/{{ slug }}?lang={{ toggle_lang }}" title="Toggle language" style="background:rgba(255,255,255,0.3);font-weight:700;">
         🌐 {% if lang == 'en' %}日本語{% else %}English{% endif %}
       </a>
+      <button type="button" class="print-btn no-print" onclick="window.print()" aria-label="{% if lang == 'en' %}Print this page{% else %}印刷{% endif %}">
+        🖨️ {% if lang == 'en' %}Print{% else %}印刷{% endif %}
+      </button>
     </div>
   </div>
 </header>

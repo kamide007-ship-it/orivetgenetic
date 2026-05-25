@@ -113,7 +113,7 @@ from poodle_genetics import (
     generate_unified_html, generate_excel,
     HAS_PDFPLUMBER, HAS_OCR,
     DISEASE_KB, TRAIT_KB, group_diseases_by_category,
-    get_disease_severity, SEVERITY_LABELS,
+    get_disease_severity, get_disease_category, SEVERITY_LABELS,
     SYMPTOM_INDEX, filter_by_symptom,
     DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX,
     GUIDES, GUIDES_INDEX, GUIDES_BY_DISEASE, GUIDES_BY_TRAIT,
@@ -649,6 +649,7 @@ def disease_detail_page(slug):
         merged["references"] = entry.get("references", [])
         entry = merged
     severity = get_disease_severity(entry)
+    category = get_disease_category(entry)
     related_guides = GUIDES_BY_DISEASE.get(slug, [])
     related_breeds = BREEDS_BY_DISEASE.get(slug, [])
     # 英語表示時のみ監修状態を表示する
@@ -662,10 +663,12 @@ def disease_detail_page(slug):
         entry=entry,
         slug=slug,
         severity=severity,
+        category=category,
         severity_labels=SEVERITY_LABELS,
         related_guides=related_guides,
         related_breeds=related_breeds,
         en_reviewed=en_reviewed,
+        category_labels_en=CATEGORY_LABELS_EN,
         canonical=request.url_root.rstrip("/") + f"/glossary/disease/{slug}",
         lang=lang,
     )
