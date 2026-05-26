@@ -103,6 +103,24 @@
   .section-content { display:none; }
   .section-content.active { display:block; }
 
+  /* ページトップへボタン */
+  .scroll-top-btn {
+    position:fixed; bottom:24px; right:20px; z-index:999;
+    width:46px; height:46px; border-radius:50%;
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
+    color:#fff; border:none; cursor:pointer;
+    font-size:1.3em; line-height:1; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(124,58,237,0.4);
+    opacity:0; transform:translateY(12px);
+    transition:opacity 0.25s,transform 0.25s;
+    pointer-events:none;
+  }
+  .scroll-top-btn.visible { opacity:1; transform:translateY(0); pointer-events:auto; }
+  .scroll-top-btn:hover { background:linear-gradient(135deg,#6d28d9,#9333ea); box-shadow:0 6px 20px rgba(124,58,237,0.5); }
+  @media (max-width:480px) {
+    .scroll-top-btn { bottom:calc(16px + env(safe-area-inset-bottom)); right:14px; width:42px; height:42px; font-size:1.1em; }
+  }
+
   /* カテゴリグループ */
   .toc { background:#fff; padding:14px 18px; border-radius:10px; margin-bottom:18px; border:1px solid #e5e7eb; }
   .toc-title { font-size:0.85em; color:#6b7280; margin-bottom:8px; font-weight:600; }
@@ -477,6 +495,21 @@ function showSection(name, btn) {
 })();
 </script>
 
+<button class="scroll-top-btn" id="scrollTopBtn" aria-label="{% if lang == 'en' %}Back to top{% else %}ページトップへ{% endif %}" title="{% if lang == 'en' %}Back to top{% else %}ページトップへ{% endif %}">↑</button>
+
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});}</script>
+<script>
+(function() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  const THRESHOLD = 300;
+  const onScroll = () => {
+    if (window.scrollY > THRESHOLD) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+})();
+</script>
 </body>
 </html>
