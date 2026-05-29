@@ -274,6 +274,14 @@ DISEASE_EN = {
         "inheritance": "Autosomal recessive. 25% affected from carrier × carrier.",
         "advice": "Symptomatic care only. Avoid cold; warm up sufficiently.",
     },
+    "benign-familial-juvenile-epilepsy": {
+        "title": "Benign Familial Juvenile Epilepsy (BFJE / LGI2)",
+        "summary": "A benign, young-onset epilepsy prevalent in Lagotto Romagnolos. Most cases spontaneously remit as the dog matures.",
+        "mechanism": "Mutation in LGI2 disrupts the balance of neuronal excitation and inhibition, causing focal and generalized seizures.",
+        "symptoms": "Tonic-clonic, focal, or psychomotor seizures from 5–13 weeks of age. Most cases resolve by 4 months; neurological sequelae are uncommon.",
+        "inheritance": "Autosomal recessive. Primarily reported in Lagotto Romagnolos. 25% affected from carrier × carrier.",
+        "advice": "Symptomatic anticonvulsant therapy for severe or frequent seizures. Prognosis is generally favorable. Breeding P/P (homozygous affected) dogs is not recommended.",
+    },
 
     # ============================================================
     # 眼科系
@@ -389,6 +397,14 @@ DISEASE_EN = {
         "symptoms": "Initially asymptomatic. Patchy retinal lesions visible from middle age. Vision impairment often mild.",
         "inheritance": "Autosomal recessive. 25% affected from carrier × carrier.",
         "advice": "Slowly progressive; early management maintains good QOL. Regular ophthalmologic exams recommended.",
+    },
+    "primary-lens-luxation": {
+        "title": "Primary Lens Luxation (PLL / ADAMTS17)",
+        "summary": "An inherited eye disease in which the zonular ligaments supporting the lens rupture, causing lens dislocation and risk of acute glaucoma and blindness.",
+        "mechanism": "Mutations in ADAMTS17 (or ADAMTS10 in some breeds) cause dysfunction of the zonule fiber proteins, losing the ability to hold the lens in position.",
+        "symptoms": "Sudden eye redness, elevated intraocular pressure, and pain from 2–8 years of age. Anterior luxation causes corneal edema and secondary glaucoma with risk of permanent vision loss.",
+        "inheritance": "Autosomal recessive (P/P affected; P/N carrier with elevated risk). Frequently reported in Terriers, Border Collies, and Siberian Huskies.",
+        "advice": "P/P and P/N dogs should have regular tonometry (at least annually). Anterior luxation is an ophthalmologic emergency requiring immediate veterinary care. For breeding, P/N × N/N pairings are preferred.",
     },
 
     # ============================================================
@@ -509,6 +525,14 @@ DISEASE_EN = {
         "symptoms": "Growth abnormalities, skeletal deformity, renal dysfunction. Severe cases have poor prognosis.",
         "inheritance": "Autosomal recessive. 25% affected from carrier × carrier.",
         "advice": "Affected dogs require low-phosphate diet and phosphate binders to slow progression.",
+    },
+    "phosphofructokinase-deficiency": {
+        "title": "Phosphofructokinase Deficiency (PFK / PFKM)",
+        "summary": "A metabolic disease in which deficiency of the key glycolytic enzyme PFK-M causes hemolytic anemia and exercise intolerance. Primarily reported in English Springer Spaniels.",
+        "mechanism": "Mutations in PFKM severely reduce glycolytic enzyme activity in red blood cells and muscle, causing premature erythrocyte destruction and hemolytic anemia.",
+        "symptoms": "Post-exercise muscle weakness, jaundice, hemoglobinuria (red-brown urine), fatigue. Hemolytic episodes are triggered by strenuous exercise, fever, or alkalosis.",
+        "inheritance": "Autosomal recessive. 25% affected from carrier × carrier. Reported in English Springer Spaniels and American Cocker Spaniels.",
+        "advice": "Avoid strenuous exercise and prolonged barking (hyperventilation). Affected dogs are managed for hemolytic crises. Pre-breeding genetic testing of both parents is essential.",
     },
 
     # ============================================================
@@ -656,6 +680,26 @@ DISEASE_EN = {
     },
 
     # ============================================================
+    # 心臓系
+    # ============================================================
+    "arvc": {
+        "title": "Arrhythmogenic Right Ventricular Cardiomyopathy (ARVC / Striatin)",
+        "summary": "An inherited cardiomyopathy in which the right ventricular myocardium is replaced by fatty and fibrous tissue, causing severe arrhythmias and sudden death. Most commonly reported in Boxers.",
+        "mechanism": "A duplicative insertion in the Striatin (STRN) gene disrupts intercalated disc proteins in ventricular cardiomyocytes, triggering apoptosis and replacement with adipose and fibrous tissue.",
+        "symptoms": "Collapse, syncope, sudden death. Polymorphic ventricular tachycardia (VT) and ventricular fibrillation (VF). Onset typically in young to middle-aged dogs; some die suddenly without prior signs.",
+        "inheritance": "Autosomal dominant (incomplete penetrance). A single copy raises risk. Most frequently reported in Boxers; a similar condition is seen in Dobermans.",
+        "advice": "Homozygous (A/A) dogs are high-risk; breeding is not recommended. Heterozygous (A/N) dogs should have regular 24-hour Holter ECG monitoring. Antiarrhythmic medications can help, but prognosis varies significantly.",
+    },
+    "dilated-cardiomyopathy": {
+        "title": "Dilated Cardiomyopathy Type 1 (DCM1 / PDK4)",
+        "summary": "An inherited cardiomyopathy in which the ventricular walls thin and the heart enlarges, leading to acute heart failure or sudden death. Frequently reported in Dobermans.",
+        "mechanism": "An intronic insertion variant in PDK4 (documented in Dobermans) impairs myocardial energy metabolism and contractile function. The ventricles dilate compensatorily, ultimately resulting in systolic failure.",
+        "symptoms": "Lethargy, exercise intolerance, dyspnea, cough. Atrial fibrillation and sudden death may occur. Dobermans often have a prolonged asymptomatic phase, requiring regular Holter ECG screening.",
+        "inheritance": "Autosomal dominant (Doberman type) or polygenic. Common in large and giant breeds: Dobermans, Irish Wolfhounds, Giant Schnauzers, and others.",
+        "advice": "Dobermans should have annual Holter ECG + echocardiography from 3 years of age. ACE inhibitors may slow progression. Breeding decisions should combine genetic testing with cardiac screening.",
+    },
+
+    # ============================================================
     # 発達・内分泌系
     # ============================================================
     "pituitary-dwarfism": {
@@ -695,6 +739,7 @@ TRAIT_EN = {
         "summary": "The 'master switch' determining whether the coat produces black/brown pigment (eumelanin).",
         "mechanism": "When MC1R is active, the dog produces eumelanin. In e/e homozygotes (recessive), MC1R is inactive, so the coat is only red/yellow/cream/white (skin and footpad pigment is unaffected).",
         "phenotype": "E/E, E/e: Coat can express black/brown pigment (subject to K and A loci).\nee: Coat is cream–apricot–red (KITLG determines shade).",
+        "inheritance": "Autosomal recessive (expressed in e/e homozygotes). 25% of offspring from E/e × E/e crosses will be e/e.",
         "advice": "Even ee dogs may have black or brown nose, paws, and eye rims, depending on the B locus.",
     },
     "k-locus": {
@@ -702,6 +747,7 @@ TRAIT_EN = {
         "summary": "Determines whether the coat is solid (one color) or shows agouti patterns.",
         "mechanism": "KB (dominant) in one copy suppresses A locus expression, producing solid coat. ky/ky allows A locus patterns (sable, tan point, etc.). kbr causes brindle.",
         "phenotype": "KB/_ : Solid (black, brown, or diluted depending on E and B).\nky/ky : A locus patterns (sable, tan point, etc.)\nkbr/_  : Brindle",
+        "inheritance": "Autosomal dominant. Dominance hierarchy: KB > kbr > ky. One copy of KB is sufficient for solid coat.",
         "advice": "Maintain KB to preserve solid coat. Cross ky/ky × ky/ky to express patterns.",
     },
     "a-locus": {
@@ -709,6 +755,7 @@ TRAIT_EN = {
         "summary": "Determines coat pattern when K locus is ky/ky.",
         "mechanism": "Dominance order: ay > aw > at > a. ay=sable, aw=wild sable, at=tan point, a=recessive black.",
         "phenotype": "ay/_ : Fawn/Sable\naw/_ : Wild Sable\nat/_ : Black-and-Tan/Tricolor (Doberman-like)\na/a : Recessive Black (solid black)",
+        "inheritance": "Multiple alleles with dominance hierarchy: ay > aw > at > a. Expressed only when K locus is ky/ky.",
         "advice": "Visible coat pattern depends on A locus + K locus + E locus combination.",
     },
     "b-locus": {
@@ -716,6 +763,7 @@ TRAIT_EN = {
         "summary": "Determines whether eumelanin appears as black or is converted to brown.",
         "mechanism": "When TYRP1 function is lost (bb homozygous), all black pigment is converted to brown. In ee dogs, B does not affect coat color since there is no eumelanin in coat; only affects nose and footpad pigment.",
         "phenotype": "B/_ : Normal black pigment\nbb : All black converted to brown (chocolate/liver). With ee, coat is cream-apricot but nose is brown.",
+        "inheritance": "Autosomal recessive (expressed in bb homozygotes). 25% of offspring from B/b × B/b crosses will be chocolate.",
         "advice": "bb is required to maintain chocolate color.",
     },
     "d-locus": {
@@ -723,6 +771,7 @@ TRAIT_EN = {
         "summary": "A gene that dilutes pigment concentration. Black → Blue, Brown → Lilac/Isabella, Yellow → Champagne.",
         "mechanism": "Loss of MLPH function (dd homozygous) prevents uniform distribution of melanin granules, resulting in lighter color.",
         "phenotype": "D/_ : Normal\ndd : Diluted. Black→Blue, Brown→Lilac/Isabella, Yellow→Champagne",
+        "inheritance": "Autosomal recessive (expressed in dd homozygotes). 25% of offspring from D/d × D/d crosses will be dilute.",
         "advice": "Weimaraner's gray and French Bulldog's blue are due to dd.",
     },
     "m-locus": {
@@ -730,6 +779,7 @@ TRAIT_EN = {
         "summary": "A gene producing irregular spotted patches (merle) on the coat. M/M (double merle) carries serious health risks.",
         "mechanism": "Mutation in PMEL17 partially disrupts melanocyte function, producing mottled patterns. M/M carries high risk of blindness and deafness.",
         "phenotype": "m/m : No merle\nM/m : Merle phenotype\nM/M : Double merle (more white area, high risk of visual/auditory impairment)",
+        "inheritance": "Autosomal dominant (incomplete). M/m heterozygotes show merle. M/M homozygotes have serious visual/auditory risks. **M/m × M/m crosses produce 25% M/M offspring — strictly prohibited.**",
         "advice": "**M/m × M/m crosses are strictly prohibited**. 25% of offspring will be double merle.",
     },
     "s-locus": {
@@ -737,6 +787,7 @@ TRAIT_EN = {
         "summary": "Determines presence of white patches on the coat.",
         "mechanism": "Promoter mutation in MITF restricts melanocyte distribution, producing white coat regions.",
         "phenotype": "S/S : No or minimal white\nS/sp : Mild white markings\nsp/sp : Piebald/Parti (high white percentage)",
+        "inheritance": "Autosomal (incomplete dominance). sp is semi-recessive: S/sp shows mild white markings, sp/sp produces full piebald/parti pattern.",
         "advice": "Parti-poodles are sp/sp. Other genes (Irish spotting, etc.) also influence white expression.",
     },
     "g-locus": {
@@ -744,6 +795,7 @@ TRAIT_EN = {
         "summary": "A gene causing puppies born with color to gradually fade as they mature. Cause of silver Poodles and similar.",
         "mechanism": "G_ causes progressive melanin loss in coat hair after birth. Greying typically progresses by 1–2 years.",
         "phenotype": "g/g: No greying\nG/g or G/G: Adult fading\n  Black + G_  → Silver\n  Brown + G_  → Silver Beige\n  Blue + G_   → Silver (lighter)",
+        "inheritance": "Autosomal dominant. G/g heterozygotes show greying. The phenotypic difference between G/g and G/G is subtle.",
         "advice": "Silver Poodles are born black. Greying gradually develops over the first 1–2 years. M locus (Merle) is a different gene despite both involving PMEL17.",
     },
     "furnishings": {
@@ -751,6 +803,7 @@ TRAIT_EN = {
         "summary": "A gene producing furnished facial hair (eyebrows, beard, mustache).",
         "mechanism": "Insertion mutation in RSPO2 increases facial hair density.",
         "phenotype": "F/F or F/N: Furnished (terrier, doodle types)\nN/N: Smooth-coated",
+        "inheritance": "Autosomal dominant (incomplete). F/N heterozygotes express furnishings. F/F homozygotes may show denser facial hair.",
         "advice": "Strongly affects appearance of doodle breeds (Labradoodle, etc.).",
     },
     "curly-coat": {
@@ -758,6 +811,7 @@ TRAIT_EN = {
         "summary": "Determines whether the coat is straight or curly.",
         "mechanism": "Mutation in KRT71 produces curly hair.",
         "phenotype": "C/C or C/N: Curly coat\nN/N: Straight coat",
+        "inheritance": "Autosomal dominant (incomplete). C/N heterozygotes show curly coat. C/C homozygotes typically have tighter curls.",
         "advice": "Poodles and Bichons Frise are C/C homozygous. Combined with Furnishings (F locus), produces various coat types.",
     },
     "l-locus": {
@@ -765,6 +819,7 @@ TRAIT_EN = {
         "summary": "Determines short hair vs long hair. Long hair is recessive.",
         "mechanism": "Mutation in FGF5 alters hair cycle. L/L is short, l/l is long.",
         "phenotype": "L/L: Short coat\nL/l: Short coat (carrier)\nl/l: Long coat",
+        "inheritance": "Autosomal recessive (l/l homozygous for long coat). 25% of offspring from L/l × L/l crosses will be long-coated.",
         "advice": "Poodles, Yorkshire Terriers, Papillons are l/l homozygous. Combines with KRT71 (Curly) and RSPO2 (Furnishings) for diverse coat types.",
     },
     "shedding": {
@@ -772,6 +827,7 @@ TRAIT_EN = {
         "summary": "Determines amount of coat shedding. Most breeds carry 1 or 2 alleles.",
         "mechanism": "Mutations in MC5R affect coat-shedding cycle. SD/SD homozygous = heavy shedding; N/N = minimal shedding.",
         "phenotype": "SD/SD: Heavy shedding\nSD/N: Moderate\nN/N: Minimal shedding",
+        "inheritance": "Autosomal (co-dominant / additive). Shedding amount increases proportionally with the number of SD alleles.",
         "advice": "Poodles and doodles are N/N with minimal shedding (sometimes called 'hypoallergenic'; not 100% hair-free).",
     },
     "bob-tail": {
@@ -779,6 +835,7 @@ TRAIT_EN = {
         "summary": "A gene producing a naturally short tail. BT/BT homozygotes are embryonic lethal.",
         "mechanism": "Mutation in Brachyury (T) gene shortens tail development. Homozygotes are embryonic lethal.",
         "phenotype": "BT/BT: Embryonic lethal (not born)\nBT/N: Natural bob tail\nN/N: Normal tail length",
+        "inheritance": "Autosomal dominant (lethal homozygote). BT/N heterozygotes show bob tail. **BT/BT is embryonic lethal** — BT/N × BT/N crosses lose 25% of embryos.",
         "advice": "**BT/BT × BT/BT crosses are strictly prohibited** — embryos are not born. Common in Welsh Corgis, Bobtails, Boxers.",
     },
     "em-locus": {
@@ -786,6 +843,7 @@ TRAIT_EN = {
         "summary": "A gene producing a black mask on the face. A specific MC1R variant.",
         "mechanism": "The Em variant of the E locus (MC1R) is dominant, concentrating black pigment on the face. Different mutation from E locus itself.",
         "phenotype": "Em/Em or Em/E: Mask present\nE/E (no Em): No mask",
+        "inheritance": "Autosomal dominant (Em allele of E locus). One copy of Em is sufficient for mask expression. Not expressed in e/e dogs (no eumelanin in coat).",
         "advice": "Typical in German Shepherds, Pugs, Boxers. Not expressed in ee dogs (no eumelanin in coat).",
     },
     # === Breed-specific traits (beyond Poodle) ===
@@ -794,6 +852,7 @@ TRAIT_EN = {
         "summary": "Breed-defining dorsal ridge of the Rhodesian Ridgeback, where back hair grows in the opposite direction. Caused by a duplication in the FGF3/FGF4/FGF19 region.",
         "mechanism": "A ~133 kb duplication on chromosome 16 spanning FGF3-FGF4-FGF19 causes hair on the back to grow in reverse direction.",
         "phenotype": "R/R: Ridge present (with elevated dermoid sinus risk)\nR/r: Ridge present\nr/r: No ridge (disqualifying per FCI breed standard)",
+        "inheritance": "Autosomal dominant. R/r heterozygotes show the ridge. **R/R homozygotes have elevated dermoid sinus risk.** R/r × r/r crosses are recommended to maintain the ridge while avoiding homozygotes.",
         "advice": "R/R homozygotes have an increased rate of dermoid sinus (a subcutaneous cyst from incomplete neural tube closure). Recommended breeding is R/r × r/r to preserve the ridge while avoiding homozygotes. The same mutation is found in Thai and Phu Quoc Ridgebacks.",
     },
     "hairless": {
@@ -801,6 +860,7 @@ TRAIT_EN = {
         "summary": "Determines hairlessness in Chinese Crested, Mexican Hairless (Xoloitzcuintle), and Peruvian Hairless dogs. Homozygotes are embryonic lethal.",
         "mechanism": "A dominant insertion mutation in FOXI3 disrupts tooth and hair follicle development, suppressing coat and dentition. H/H homozygotes are embryonic lethal.",
         "phenotype": "H/H: Embryonic lethal (not born)\nH/h: Hairless / partial coat, often with missing teeth\nh/h: Full coat (powderpuff / coated)",
+        "inheritance": "Autosomal dominant (lethal homozygote). H/h heterozygotes show hairlessness. **H/H is embryonic lethal** — H/h × H/h crosses lose 25% of embryos. Standard mating: hairless (H/h) × powderpuff (h/h).",
         "advice": "<strong>H/H × H/H crosses are strictly prohibited</strong> — no live offspring. The standard Chinese Crested mating is hairless (H/h) × powderpuff (h/h). Skin protection, sunscreen, and cold-weather coverage are required for these breeds.",
     },
     "i-locus": {
@@ -808,6 +868,7 @@ TRAIT_EN = {
         "summary": "Modulates the intensity of phaeomelanin (red/yellow pigment) in E-locus ee dogs. Explains the wide range of yellow/cream/red shades in Labradors, Poodles, and Goldens.",
         "mechanism": "Variants in MFSD12 regulate phaeomelanin output in melanocytes. i/i homozygotes show diluted pigment, leaning cream or near-white.",
         "phenotype": "I/I: Deep, saturated red\nI/i: Intermediate (apricot to red)\ni/i: Pale cream, near white",
+        "inheritance": "Autosomal (incomplete dominance / additive). I/I is deepest, I/i intermediate, i/i palest.",
         "advice": "Underlies the pale shades of English Cream Goldens and the wide white-to-apricot-to-red spectrum in Poodles. Important when combined with E locus ee for predicting coat shade. Limited effect on coat color in E_ dogs (eumelanin-dominant).",
     },
     "cocoa": {
@@ -815,6 +876,7 @@ TRAIT_EN = {
         "summary": "A recessive chocolate color independent of the B locus (TYRP1), first reported in French Bulldogs.",
         "mechanism": "A recessive HPS3 variant. Even on a BB (or Bb) background, a co/co homozygote produces chocolate coat. Acts independently of B-locus bb classic chocolate.",
         "phenotype": "Co/Co or Co/co: Normal coloring\nco/co: Chocolate (expressed independently of the B locus)",
+        "inheritance": "Autosomal recessive (co/co homozygotes show chocolate). 25% of offspring from Co/co × Co/co crosses will be Cocoa chocolate.",
         "advice": "Reported in French Bulldogs and Australian Shepherds. Even crosses planned to avoid B-locus chocolate can produce unexpected chocolate from co/co × co/co — breeders of rare colors should test both loci. CDA (color dilution alopecia) risk is not yet established.",
     },
     "harlequin": {
@@ -822,6 +884,7 @@ TRAIT_EN = {
         "summary": "Breed-specific gene producing the Great Dane harlequin pattern (white with black patches). Interacts with the Merle locus. Homozygous lethal.",
         "mechanism": "A dominant variant in PSMB7 completely bleaches the merle regions to white, producing white with discrete black patches. Expressed only with M_ + H_. H/H is embryonic lethal.",
         "phenotype": "H/H: Embryonic lethal\nH/h + M/m: Harlequin (white with black patches)\nH/h + m/m: No phenotype change (carrier without harlequin expression)\nh/h: No harlequin expression",
+        "inheritance": "Autosomal dominant (lethal homozygote). Expressed only in combination with M locus (M/m). **H/H is embryonic lethal.** Simultaneous testing of PSMB7 and PMEL17 (M) is mandatory for Great Dane harlequin breeders.",
         "advice": "<strong>H/H × H/H breeding is contraindicated</strong> — all offspring die in utero. Combining M/M (double merle) with harlequin carries severe developmental risks. Great Dane harlequin breeders must test both PSMB7 (H) and PMEL17 (M).",
     },
     "roan": {
@@ -829,6 +892,7 @@ TRAIT_EN = {
         "summary": "Develops colored speckles within the white areas of an adult coat. Typical of spaniels and the Australian Cattle Dog.",
         "mechanism": "Causative gene not fully confirmed (USH2A region is a candidate). Dominant inheritance. Melanocytes migrate into white-spotted regions with delay, producing the ticked appearance in adulthood.",
         "phenotype": "Rn/Rn or Rn/rn: Roan present (manifests in adulthood)\nrn/rn: No roan (white spots remain solid white)",
+        "inheritance": "Autosomal dominant (causative gene not fully confirmed). Rn/rn heterozygotes express roan. Requires S-locus white spotting (sp/sp) as a prerequisite.",
         "advice": "Seen in English Cocker Spaniels, German Shorthaired Pointers, and the 'Blue Heeler' / 'Red Heeler' Australian Cattle Dog. Puppies are born predominantly white, with speckles emerging from 4–6 weeks of age.",
     },
     "ticking": {
@@ -836,6 +900,7 @@ TRAIT_EN = {
         "summary": "Small colored speckles scattered through a white coat. Also produces the spots of the Dalmatian.",
         "mechanism": "Dominant inheritance. The causative gene is unconfirmed. Melanocytes migrate into S-locus sp/sp white regions with delay, producing fine speckles. Spots are smaller and sparser than roan.",
         "phenotype": "T/T or T/t: Ticking present (white with small speckles)\nt/t: Solid white in spotted regions",
+        "inheritance": "Autosomal dominant (causative gene unconfirmed). T/t heterozygotes express ticking. Acts only within S-locus white-spotted regions.",
         "advice": "Typical of Dalmatians, English Setters, and Jack Russell Terriers. Dalmatians additionally carry a fixed SLC2A9 risk allele for hyperuricosuria (HUU), so HUU testing is routinely paired with ticking analysis.",
     },
     "alx4": {
@@ -843,6 +908,7 @@ TRAIT_EN = {
         "summary": "Gene duplication causing blue eyes in Siberian Huskies — independent of the merle and piebald routes to blue eyes.",
         "mechanism": "An ~98 kb duplication near ALX4 on chromosome 18 acts dominantly to suppress iris pigmentation. Distinct from blue-eye phenotypes caused by M-locus (Merle) or S-locus (Pied).",
         "phenotype": "BE/BE or BE/be: Blue eye(s) (unilateral or bilateral)\nbe/be: Normal eye color (brown to amber)",
+        "inheritance": "Autosomal dominant (gene duplication). BE/be heterozygotes may show one or both blue eyes.",
         "advice": "The primary cause of blue or odd eyes in Siberian Huskies. Unlike merle- or white-spotting-mediated blue eyes, no association with vision or hearing impairment has been reported. Distinct from merle-mediated blue eyes in Australian Shepherds.",
     },
     # === Coat-color modifier and pattern genes ===
@@ -851,6 +917,7 @@ TRAIT_EN = {
         "summary": "A modifier gene that drives phaeomelanin (yellow/red) intensity, producing the 'fox red' shade in yellow Labradors.",
         "mechanism": "Regulatory variants near KITLG modulate melanocyte differentiation and pigment output. The effect is most visible in E-locus e/e dogs, where coat color is purely phaeomelanin.",
         "phenotype": "2 intense alleles: Fox red to deep red\n1 intense allele: Intermediate yellow\n2 standard alleles: Pale yellow to cream",
+        "inheritance": "Autosomal (additive). Pigment intensity increases proportionally with the number of intense alleles.",
         "advice": "Important in Labradors, Nova Scotia Duck Tolling Retrievers, and red-shaded Goldens. Combined with the I locus (MFSD12), KITLG gives more accurate predictions across the cream-to-deep-red spectrum. No known health impact.",
     },
     "saddle-tan": {
@@ -858,6 +925,7 @@ TRAIT_EN = {
         "summary": "Dogs are born black-and-tan (tan-point) but progressively shift to a 'saddle' pattern as the black recedes from the body during growth. The classic German Shepherd pattern.",
         "mechanism": "A dominant regulatory variant in RALY. In A-locus at/at dogs, eumelanin areas on the back shrink with age, exposing more tan (phaeomelanin) coloration.",
         "phenotype": "I/I or I/i: Adult saddle-tan (black confined to the saddle; legs and face tan)\ni/i: Remains predominantly black-and-tan into adulthood",
+        "inheritance": "Autosomal dominant (incomplete dominance). I/i heterozygotes show saddle-tan. Requires A-locus at/at as a prerequisite.",
         "advice": "Typical of German Shepherds, Airedale Terriers, Beagles, and Belgian Tervurens. Puppies may look black-and-tan but transition to the saddle pattern between 6 months and 2 years. A-locus at/at is a prerequisite.",
     },
     "domino": {
@@ -865,6 +933,7 @@ TRAIT_EN = {
         "summary": "A pattern of lightened pigment in the facial mask region, characteristic of sighthounds. Reported in Afghans, Salukis, Borzois, and Siberian Huskies.",
         "mechanism": "The Ea (Edomino) variant of MC1R partially suppresses eumelanin in the mask region. A derived E-locus allele, with dominance hierarchy E > Eg > Ea > e.",
         "phenotype": "Ea/Ea or Ea/e: Domino / grizzle (lightened facial mask)\nEa/E_ (E dominant): Standard coloring",
+        "inheritance": "Multiple E-locus alleles. Hierarchy: E > Eg > Ea > e. Expressed only in Ea/e or Ea/Ea genotypes — suppressed if E/_ or Em/_ is present.",
         "advice": "Underlies the 'domino' pattern in Afghan Hounds, 'grizzle' in Salukis, and agouti-like patterns in Siberian Huskies. Effect is opposite to the Em mask (black mask). Some E-locus panels omit the Ea variant — sighthound breeders should verify panel coverage.",
     },
     "improper-coat": {
@@ -872,6 +941,7 @@ TRAIT_EN = {
         "summary": "A recessive phenotype seen in Portuguese Water Dogs and doodle breeds: a smooth face (no furnishings) and short coat.",
         "mechanism": "Caused by homozygous absence of the RSPO2 furnishings variant (ic/ic). Equivalent to f/f at the F locus, suppressing development of facial furnishings, eyebrows, and beard.",
         "phenotype": "IC/IC or IC/ic: Standard furnished coat (eyebrows and beard present)\nic/ic: Smooth coat (no facial furnishings, Lab/Golden-like appearance)",
+        "inheritance": "Autosomal recessive (ic/ic homozygotes show improper coat). 25% of offspring from IC/ic × IC/ic crosses will have smooth coat.",
         "advice": "Disqualifying in Portuguese Water Dogs and Lagotto Romagnolos. In doodle breeds (Labradoodle / Goldendoodle), this is treated as a 'hypoallergenic failure'. Recommended alongside the F-locus (RSPO2) furnishings test. No known health impact.",
     },
     "albinism": {
@@ -879,6 +949,7 @@ TRAIT_EN = {
         "summary": "Hereditary albinism with severely reduced melanin synthesis: white coat and skin, pale to red eyes, and frequent vision impairment.",
         "mechanism": "Recessive variants in melanin-synthesis genes such as TYR (tyrosinase) and SLC45A2 sharply reduce melanin output. This is true albinism, distinct from dominant-white phenotypes such as merle or piebald.",
         "phenotype": "A/A or A/oca: Normal coloring\noca/oca: Albino (white coat and skin, red to pale iris, photophobia, reduced vision)",
+        "inheritance": "Autosomal recessive (oca/oca homozygotes show albinism). 25% of offspring from A/oca × A/oca crosses will be albino.",
         "advice": "Reported in Dobermans (Z-factor), Pekingese, Lhasa Apsos, and others. ⚠️ <strong>Health impact</strong>: UV sensitivity (elevated skin cancer risk), vision impairment, and photophobia. Breeding albino dogs is ethically discouraged. Affected dogs require sun protection outdoors and routine dermatologic monitoring.",
     },
 }

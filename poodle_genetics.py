@@ -497,6 +497,7 @@ DISEASE_KB = [
     {
         "match": ["chondrodystrophy", "cddy", "ivdd"],
         "title": "軟骨異栄養症 + 椎間板疾患 (CDDY+IVDD)",
+        "severity": "high",
         "summary": "椎間板を構成する軟骨の異常により、椎間板ヘルニアを起こしやすくなる遺伝性疾患です。",
         "mechanism": "FGF4遺伝子のレトロウィルス挿入が原因。椎間板の中心部（髄核）が早期に変性・石灰化し、些細な衝撃で破裂し脊髄を圧迫します。",
         "symptoms": "後肢のふらつき、痛み、歩行困難。重症例では完全麻痺や排尿障害が起こり得ます。",
@@ -510,6 +511,7 @@ DISEASE_KB = [
     {
         "match": ["osteochondrodysplasia"],
         "title": "骨軟骨異形成症 (Osteochondrodysplasia / SLC13A1)",
+        "severity": "high",
         "summary": "骨と軟骨の発達異常により、四肢の短縮や関節異常が現れる遺伝性疾患です。",
         "mechanism": "SLC13A1 遺伝子の変異によりミネラル代謝が異常になり、骨格の正常な発達が阻害されます。",
         "symptoms": "四肢の短縮、関節の変形、運動制限。スコティッシュフォールド・ミニチュアプードルなどで報告。",
@@ -523,6 +525,7 @@ DISEASE_KB = [
     {
         "match": ["chondrodysplasia (cdpa)", "cdpa", "chondrodysplasia"],
         "title": "軟骨異形成症 (CDPA / 短足遺伝子)",
+        "severity": "low",
         "summary": "短い四肢を生む遺伝子で、ダックスフンド・コーギーなどの「短足犬種」の特徴となる因子です。",
         "mechanism": "FGF4 遺伝子の重複により軟骨形成が変化し、四肢が短くなります。CDDY と異なり病気そのものではなく、犬種特性として定着しています。",
         "symptoms": "通常、症状はなし。短足は犬種スタンダードとして許容されています。",
@@ -535,6 +538,7 @@ DISEASE_KB = [
     {
         "match": ["macrothrombocytopenia"],
         "title": "先天性巨大血小板減少症 (Macrothrombocytopenia / β1-tubulin)",
+        "severity": "low",
         "summary": "血小板が通常より大きく、数が少ない遺伝性疾患です。多くは無症状ですが手術時に注意が必要。",
         "mechanism": "TUBB1 遺伝子（β1-tubulin）の変異により血小板の形成が異常になります。キャバリア・キング・チャールズ・スパニエルで頻発。",
         "symptoms": "ほとんどの場合無症状。健康診断で血小板数が低く出るが、機能は保たれていることが多い。",
@@ -547,6 +551,7 @@ DISEASE_KB = [
     {
         "match": ["methemoglobinemia"],
         "title": "先天性メトヘモグロビン血症 (Methemoglobinemia / CYB5R3)",
+        "severity": "medium",
         "summary": "血液中のヘモグロビンが酸素を運べない型に変わってしまう遺伝性疾患です。",
         "mechanism": "CYB5R3 遺伝子の変異により、酸化型ヘモグロビン（メトヘモグロビン）を還元する酵素が欠損。慢性的なチアノーゼ症状を起こします。",
         "symptoms": "皮膚・粘膜の青紫変色（チアノーゼ）、運動不耐性、疲れやすい。",
@@ -565,6 +570,7 @@ DISEASE_KB = [
             "willebrand i", "willebrand 1",
         ],
         "title": "フォン・ヴィレブランド病 I型 (vWD1)",
+        "severity": "medium",
         "summary": "止血に関わるフォン・ヴィレブランド因子が不足し、出血が止まりにくくなる遺伝性疾患です。",
         "mechanism": "vWF 遺伝子の変異により、血小板を血管壁に結合させる蛋白質が不足。軽度（I型）から重度（II型・III型）まで様々。ドーベルマンで頻発。",
         "symptoms": "外傷時の止血困難、鼻血、歯科処置後の長時間出血、血便など。",
@@ -583,6 +589,7 @@ DISEASE_KB = [
         "symptoms": "8〜14歳頃から後肢のふらつき → 麻痺へ進行。痛みはない場合が多い。最終的には前肢にも進行。",
         "inheritance": "常染色体劣性（不完全浸透）。P/P でも全頭発症するわけではなく、発症率は犬種により異なる。",
         "advice": "P/P 同士の交配は避けることを推奨。発症犬はリハビリ・補助器具で QOL を維持できます。",
+        "severity": "high",
         "references": [
             {"label": "Wikipedia: 変性性脊髄症", "url": _wiki_jp("変性性脊髄症")},
             {"label": "詳細を検索", "url": _google_search("Degenerative Myelopathy 犬 SOD1")},
@@ -591,6 +598,7 @@ DISEASE_KB = [
     {
         "match": ["gm2 gangliosidosis", "gm2", "gangliosidosis gm2"],
         "title": "ガングリオシドーシス GM2 (GM2 / HEXB)",
+        "severity": "high",
         "summary": "神経細胞内に脂質が異常蓄積し、進行性の神経障害を起こす重篤な遺伝性疾患です。",
         "mechanism": "HEXB 遺伝子の変異によりリソソーム酵素ヘキソサミニダーゼBが欠損。GM2ガングリオシドが分解されず神経細胞に蓄積。ヒトのテイ・サックス病類似。",
         "symptoms": "若齢で発症し、運動失調・痙攣・視覚障害が進行。多くは1〜2年で死に至る。",
@@ -604,6 +612,7 @@ DISEASE_KB = [
     {
         "match": ["progressive rod cone", "prcd", "progressive retinal atrophy"],
         "title": "進行性網膜萎縮症 (prcd-PRA / PRCD)",
+        "severity": "high",
         "summary": "網膜の光受容細胞（杆体・錐体）が徐々に変性し、最終的に失明する遺伝性疾患です。",
         "mechanism": "PRCD 遺伝子の変異により網膜細胞が徐々に死滅。最初に夜盲、次第に昼間視力も失われます。",
         "symptoms": "薄暗い場所での視覚障害（夜盲）→ 周辺視野の喪失 → 完全失明。痛みはなし。",
@@ -617,6 +626,7 @@ DISEASE_KB = [
     {
         "match": ["exercise-induced collapse", "\\beic\\b"],
         "title": "運動誘発性虚脱 (EIC / DNM1)",
+        "severity": "medium",
         "summary": "激しい運動の後に突然脱力・崩れる遺伝性疾患です。ラブラドール等で報告。",
         "mechanism": "DNM1 遺伝子の変異により、運動中の神経シナプス伝達が一時的に障害されます。",
         "symptoms": "5〜15分の激しい運動後、後肢の脱力・歩行不能。意識はあり、5〜25分で回復することが多い。",
@@ -630,6 +640,7 @@ DISEASE_KB = [
     {
         "match": ["neonatal encephalopathy", "news", "atf2"],
         "title": "新生児脳症 (NEwS / ATF2)",
+        "severity": "high",
         "summary": "プードルに特有の重篤な新生児神経疾患。生後数週間以内に発症し致死的です。",
         "mechanism": "ATF2 遺伝子の変異により神経発達が障害されます。スタンダードプードルで報告。",
         "symptoms": "生後4〜6週から運動失調・痙攣・成長不全。多くは離乳期までに死亡。",
@@ -642,6 +653,7 @@ DISEASE_KB = [
     {
         "match": ["neuronal ceroid lipofuscinosis", "\\bncl\\b"],
         "title": "神経セロイドリポフスチン症 (NCL)",
+        "severity": "high",
         "summary": "脳細胞に異常物質（セロイドリポフスチン）が蓄積し、進行性の神経変性を起こす疾患群です。",
         "mechanism": "複数の遺伝子（CLN5, CLN6, CLN8, CTSD など）の変異によりリソソーム機能が障害。多数の亜型が存在し、犬種ごとに原因遺伝子が異なります。",
         "symptoms": "若齢発症の場合: 1〜3歳で行動異常・運動失調・視覚障害→死亡。成犬発症型もあり。",
@@ -655,6 +667,7 @@ DISEASE_KB = [
     {
         "match": ["late onset ataxia", "\\bloa\\b", "late-onset ataxia"],
         "title": "若年性遅発型運動失調 (LOA / CAPN1)",
+        "severity": "high",
         "summary": "若い時期（1〜2歳）から始まる小脳性運動失調。歩行・バランス障害が徐々に進行します。",
         "mechanism": "CAPN1 遺伝子の変異により小脳プルキンエ細胞が変性。ジャック・ラッセル・テリア等で報告。",
         "symptoms": "ふらつき歩行、頭の震え、姿勢制御の困難。痛みはない。",
@@ -667,6 +680,7 @@ DISEASE_KB = [
     {
         "match": ["spinocerebellar ataxia", "\\bsca\\b"],
         "title": "脊髄小脳変性症 (SCA)",
+        "severity": "high",
         "summary": "脊髄と小脳の進行性変性により、運動・バランス障害を起こす遺伝性疾患です。",
         "mechanism": "複数の原因遺伝子（KCNJ10 など）の変異により神経細胞の機能が低下。",
         "symptoms": "歩行のふらつき、捻挫様の転倒、進行性の運動失調。",
@@ -679,6 +693,7 @@ DISEASE_KB = [
     {
         "match": ["multidrug resistance", "\\bmdr1\\b", "abcb1"],
         "title": "多剤耐性遺伝子 (MDR1 / ABCB1)",
+        "severity": "high",
         "summary": "特定の薬剤（イベルメクチン等の駆虫薬・抗がん剤・止瀉薬）に重篤な副作用を起こす遺伝子変異です。",
         "mechanism": "ABCB1（旧名 MDR1）遺伝子の変異により、脳血液関門で薬剤を排出する蛋白質が機能不全。薬剤が脳に蓄積し神経毒性を起こします。コリー系犬種で頻発。",
         "symptoms": "対象薬剤投与後に運動失調・痙攣・昏睡・呼吸停止など重篤な神経症状。",
@@ -692,6 +707,7 @@ DISEASE_KB = [
     {
         "match": ["cone-rod dystrophy", "crd4", "cone rod dystrophy"],
         "title": "錐体杆体ジストロフィー (crd4 / RPGRIP1)",
+        "severity": "high",
         "summary": "網膜の錐体（昼間視）が先に変性し、その後杆体（夜間視）も影響を受けるPRAの亜型です。",
         "mechanism": "RPGRIP1 遺伝子の変異により網膜光受容細胞が機能不全。プードルやミニチュアロングヘアードダックスフンドなどで報告。",
         "symptoms": "若齢期から昼間の視覚異常 → 夜盲 → 完全失明。痛みはなし。",
@@ -746,6 +762,7 @@ DISEASE_KB = [
     {
         "match": ["hyperuricosuria", "\\bhuu\\b", "slc2a9"],
         "title": "高尿酸尿症 (HUU / SLC2A9)",
+        "severity": "medium",
         "summary": "尿酸が異常に高くなり、尿路結石（尿酸石）を生じやすくなる遺伝性疾患です。",
         "mechanism": "SLC2A9 遺伝子の変異により肝臓での尿酸代謝が異常になります。ダルメシアン・ブルドッグなどで高頻度。",
         "symptoms": "頻尿・血尿・排尿困難・腎結石。重度では尿閉・腎機能不全。",
@@ -758,6 +775,7 @@ DISEASE_KB = [
     {
         "match": ["pyruvate kinase", "\\bpk\\b deficiency", "pklr"],
         "title": "ピルビン酸キナーゼ欠損症 (PK / PKLR)",
+        "severity": "high",
         "summary": "赤血球の代謝障害により慢性溶血性貧血を起こす遺伝性疾患です。",
         "mechanism": "PKLR 遺伝子の変異により赤血球内のエネルギー産生が低下。赤血球が早期に破壊されます。",
         "symptoms": "慢性貧血・倦怠・運動不耐・脾腫。多くは2〜5歳で重症化。",
@@ -770,6 +788,7 @@ DISEASE_KB = [
     {
         "match": ["factor vii", "factor 7"],
         "title": "第VII因子欠損症 (Factor VII / F7)",
+        "severity": "medium",
         "summary": "血液凝固因子の一つが欠損し、出血傾向を示す軽度〜中等度の凝固障害です。",
         "mechanism": "F7 遺伝子の変異により凝固第VII因子が低下。多くは軽症だが手術時に問題となる。",
         "symptoms": "通常は無症状。外傷・手術時に止血困難。",
@@ -782,6 +801,7 @@ DISEASE_KB = [
     {
         "match": ["mucopolysaccharidosis", "mps"],
         "title": "ムコ多糖症 (MPS)",
+        "severity": "high",
         "summary": "ムコ多糖類が分解されず体内に蓄積し、骨格異常・臓器障害を起こす重篤な代謝疾患です。",
         "mechanism": "リソソーム酵素の遺伝的欠損により多糖類が蓄積。MPS I/VI/VII など複数の亜型。",
         "symptoms": "顔面変形・関節異常・成長障害・心障害・視覚障害など。生命予後不良。",
@@ -796,6 +816,7 @@ DISEASE_KB = [
     {
         "match": ["centronuclear myopathy", "\\bcnm\\b", "ptpla"],
         "title": "中心核ミオパチー (CNM / PTPLA)",
+        "severity": "high",
         "summary": "若齢期からの筋力低下を起こす遺伝性筋疾患です。ラブラドール特発性筋疾患とも。",
         "mechanism": "PTPLA 遺伝子の変異により筋細胞の構造が異常になります。",
         "symptoms": "生後数ヶ月から運動不耐・筋力低下・歩行異常。寒冷悪化。",
@@ -809,6 +830,7 @@ DISEASE_KB = [
     {
         "match": ["cystinuria"],
         "title": "シスチン尿症 (Cystinuria / SLC3A1, SLC7A9)",
+        "severity": "medium",
         "summary": "アミノ酸（シスチン）が尿中に過剰排泄され、結石を生じやすくなる遺伝性疾患です。",
         "mechanism": "SLC3A1 / SLC7A9 遺伝子の変異により腎尿細管でのシスチン再吸収が障害。シスチン結石が形成されます。",
         "symptoms": "頻尿・血尿・排尿困難・尿閉。雄犬で重症化しやすい。",
@@ -822,6 +844,7 @@ DISEASE_KB = [
     {
         "match": ["familial nephropathy", "cocker nephropathy"],
         "title": "家族性腎症 (Familial Nephropathy / COL4A4)",
+        "severity": "high",
         "summary": "若齢期から進行性腎不全を起こす遺伝性疾患です。コッカースパニエル等で報告。",
         "mechanism": "COL4A4 遺伝子の変異により糸球体基底膜が脆弱になり、進行性腎機能低下を起こします。",
         "symptoms": "多飲多尿 → 食欲低下・嘔吐 → 末期腎不全。多くは6〜24ヶ月齢で発症。",
@@ -835,6 +858,7 @@ DISEASE_KB = [
     {
         "match": ["hnpk", "hereditary nasal parakeratosis"],
         "title": "遺伝性鼻過角化症 (HNPK / SUV39H2)",
+        "severity": "low",
         "summary": "鼻先の皮膚が異常に厚くなり、亀裂・痛み・痂皮を生じる遺伝性皮膚疾患です。",
         "mechanism": "SUV39H2 遺伝子の変異により鼻皮膚の角化が亢進。ラブラドールで多発。",
         "symptoms": "鼻先の硬化・痂皮・亀裂・出血。痛みあり。",
@@ -847,6 +871,7 @@ DISEASE_KB = [
     {
         "match": ["ichthyosis", "pnpla1"],
         "title": "魚鱗癬 (Ichthyosis / PNPLA1)",
+        "severity": "medium",
         "summary": "皮膚が魚の鱗のように剥がれ落ちる遺伝性皮膚疾患です。",
         "mechanism": "PNPLA1 等の遺伝子変異により皮膚の角化過程が異常。ゴールデンレトリーバー等で多発。",
         "symptoms": "全身の白い鱗状の剥がれ・乾燥・痒み。皮脂分泌異常。",
@@ -860,6 +885,7 @@ DISEASE_KB = [
     {
         "match": ["copper toxicosis", "commd1", "atp7"],
         "title": "銅蓄積性肝障害 (Copper Toxicosis / COMMD1, ATP7A/B)",
+        "severity": "high",
         "summary": "肝臓に銅が異常蓄積し、慢性肝炎・肝硬変を起こす遺伝性疾患です。",
         "mechanism": "COMMD1 / ATP7A / ATP7B 遺伝子の変異により銅の排出が障害。ベドリントンテリア・ラブラドール等で報告。",
         "symptoms": "食欲不振・体重減少・腹水・黄疸。進行すると肝不全。",
@@ -873,6 +899,7 @@ DISEASE_KB = [
     {
         "match": ["trapped neutrophil syndrome", "\\btns\\b"],
         "title": "好中球機能不全症候群 (TNS / VPS13B)",
+        "severity": "high",
         "summary": "白血球（好中球）が骨髄から血液へ移行できず、慢性免疫不全を起こす疾患です。",
         "mechanism": "VPS13B 遺伝子の変異により好中球の遊走機能が障害。ボーダーコリーで多発。",
         "symptoms": "繰り返す感染症・発熱・発育不良。多くは1歳までに死亡。",
@@ -887,6 +914,7 @@ DISEASE_KB = [
     {
         "match": ["glaucoma", "緑内障", "primary glaucoma"],
         "title": "原発性緑内障 (Primary Glaucoma / ADAMTS10, ADAMTS17 等)",
+        "severity": "high",
         "summary": "眼内圧が異常に上昇し、視神経が圧迫されて失明に至る遺伝性眼疾患です。",
         "mechanism": "前房隅角の閉塞や房水排出経路の異常により眼内圧が上昇。ADAMTS10/17 等の遺伝子変異が関与。ビーグル・コッカー・シーズーなどで多発。",
         "symptoms": "目の充血・角膜混濁・瞳孔散大・痛み・視覚消失。急性発作は緊急事態。",
@@ -900,6 +928,7 @@ DISEASE_KB = [
     {
         "match": ["cord1", "cord-1", "rpgrip1 pra"],
         "title": "PRA - CORD1 型 (RPGRIP1)",
+        "severity": "high",
         "summary": "進行性網膜萎縮症の一型。錐体（昼間視）が先に変性するタイプです。",
         "mechanism": "RPGRIP1 遺伝子の変異により網膜光受容細胞の機能が失われます。ミニチュアロングヘアダックスフンドで報告。",
         "symptoms": "1〜2歳から昼間の視覚異常 → 進行性失明。",
@@ -912,6 +941,7 @@ DISEASE_KB = [
     {
         "match": ["rcd3", "rcd-3", "pde6a pra", "rod cone dysplasia"],
         "title": "PRA - rcd3 型 (PDE6A)",
+        "severity": "high",
         "summary": "若齢期から急速に進行する PRA の一型。生後数ヶ月から発症します。",
         "mechanism": "PDE6A 遺伝子の変異により杆体（夜間視）細胞が早期に変性。",
         "symptoms": "生後6ヶ月頃から夜盲 → 1〜2歳で完全失明。",
@@ -924,6 +954,7 @@ DISEASE_KB = [
     {
         "match": ["cngb1 pra", "cngb1"],
         "title": "PRA - CNGB1 型",
+        "severity": "high",
         "summary": "PRA の遅発型。比較的緩やかな進行を示す型です。",
         "mechanism": "CNGB1 遺伝子の変異により網膜杆体の機能が低下。",
         "symptoms": "中年期から夜盲が始まり、徐々に昼間視覚も低下。",
@@ -950,6 +981,7 @@ DISEASE_KB = [
     {
         "match": ["gm1 gangliosidosis", "gm-1"],
         "title": "ガングリオシドーシス GM1 (GM1 / GLB1)",
+        "severity": "high",
         "summary": "GM1 ガングリオシドが神経細胞内に蓄積し進行性神経障害を起こす疾患です。",
         "mechanism": "GLB1 遺伝子の変異によりβ-ガラクトシダーゼ酵素が欠損。GM1 が分解されず蓄積します。シーバ・柴犬・スパニエル等で報告。",
         "symptoms": "若齢発症で運動失調・痙攣・視覚障害が進行。多くは2〜3歳までに死亡。",
@@ -963,6 +995,7 @@ DISEASE_KB = [
     {
         "match": ["myotonia congenita", "先天性筋強直症", "clcn1"],
         "title": "先天性筋強直症 (Myotonia Congenita / CLCN1)",
+        "severity": "medium",
         "summary": "筋肉が一度収縮すると弛緩しにくくなる遺伝性筋疾患です。",
         "mechanism": "CLCN1 遺伝子の変異により筋細胞膜のクロライドチャネル機能不全。筋電気活動が異常持続します。",
         "symptoms": "運動開始時のこわばり・転倒・歩行困難。運動を続けると改善（ウォームアップ現象）。",
@@ -981,6 +1014,7 @@ DISEASE_KB = [
             "willebrand ii", "willebrand 2",
         ],
         "title": "フォン・ヴィレブランド病 II型 (vWD2)",
+        "severity": "high",
         "summary": "vWD の中等度〜重度型。I型より出血傾向が強くなります。",
         "mechanism": "vWF 遺伝子の質的変異により、止血因子の機能が低下（量はあるが機能しない）。",
         "symptoms": "外傷・抜歯後の長時間出血、自然出血のリスクあり。",
@@ -998,6 +1032,7 @@ DISEASE_KB = [
             "willebrand iii", "willebrand 3",
         ],
         "title": "フォン・ヴィレブランド病 III型 (vWD3)",
+        "severity": "high",
         "summary": "最重度の vWD。出血が止まらず生命に関わる重篤型です。",
         "mechanism": "vWF 蛋白質が完全に欠損。スコティッシュテリア等で報告。",
         "symptoms": "幼齢期から重度出血。歯科処置・外傷で致命的になり得る。",
@@ -1010,6 +1045,7 @@ DISEASE_KB = [
     {
         "match": ["prekallikrein", "プレカリクレイン"],
         "title": "プレカリクレイン欠乏症 (Prekallikrein Deficiency / KLKB1)",
+        "severity": "low",
         "summary": "凝固系の前段階因子が欠損し、APTT 検査値が異常を示す凝固障害です。",
         "mechanism": "KLKB1 遺伝子の変異により内因系凝固第一段階が遅延。多くは無症状。",
         "symptoms": "通常は無症状だが、手術時に APTT 延長が見られる。",
@@ -1023,6 +1059,7 @@ DISEASE_KB = [
     {
         "match": ["glycogen storage disease", "gsd", "グリコーゲン蓄積症"],
         "title": "グリコーゲン蓄積症 (GSD / 複数型)",
+        "severity": "high",
         "summary": "グリコーゲンが分解できず体内に蓄積する重篤な代謝疾患です。型により症状が異なります。",
         "mechanism": "GAA (II型), GBE1 (IV型) などの遺伝子変異によりグリコーゲン代謝酵素が欠損。",
         "symptoms": "II型: 心筋・骨格筋の障害、IV型: 肝硬変・神経症状。多くは若齢で重症化。",
@@ -1036,6 +1073,7 @@ DISEASE_KB = [
     {
         "match": ["cobalamin malabsorption", "コバラミン吸収", "imerslund", "amn cubn"],
         "title": "コバラミン吸収不良症 (Cobalamin Malabsorption / AMN, CUBN)",
+        "severity": "medium",
         "summary": "ビタミンB12（コバラミン）の腸吸収障害により神経・血液障害を起こす遺伝性疾患です。",
         "mechanism": "AMN または CUBN 遺伝子の変異により回腸でのコバラミン受容体が機能不全。",
         "symptoms": "成長不良・貧血・神経症状（運動失調・痙攣）。ジャイアントシュナウザー等で報告。",
@@ -1050,6 +1088,7 @@ DISEASE_KB = [
     {
         "match": ["osteogenesis imperfecta", "骨形成不全", "serpinh1", "col1a"],
         "title": "骨形成不全症 (Osteogenesis Imperfecta / SERPINH1, COL1A1, COL1A2)",
+        "severity": "high",
         "summary": "骨が脆くなり、軽度の衝撃でも骨折しやすい遺伝性疾患です。",
         "mechanism": "コラーゲン関連遺伝子 (SERPINH1, COL1A1, COL1A2) の変異により骨の構造蛋白質が異常になります。",
         "symptoms": "若齢期からの繰り返す骨折・歯の異常・関節弛緩。ダックスフンド・ビーグル等で報告。",
@@ -1064,6 +1103,7 @@ DISEASE_KB = [
     {
         "match": ["gastric and intestinal polyposis", "消化管ポリポーシス", "gastrointestinal polyposis"],
         "title": "消化管ポリポーシス (GP)",
+        "severity": "high",
         "summary": "胃・腸にポリープが多発し、出血・腸閉塞のリスクを増す遺伝性疾患です。",
         "mechanism": "遺伝性ポリープ形成傾向。ジャックラッセルテリア等で報告。",
         "symptoms": "繰り返す消化器症状・血便・体重減少・嘔吐。",
@@ -1078,6 +1118,7 @@ DISEASE_KB = [
     {
         "match": ["cerebellar abiotrophy", "小脳皮質変性", "cerebellar degeneration"],
         "title": "小脳皮質変性症 (Cerebellar Abiotrophy)",
+        "severity": "high",
         "summary": "小脳のプルキンエ細胞が出生後変性し、運動失調を起こす遺伝性神経疾患です。",
         "mechanism": "犬種により原因遺伝子が異なる (GRM1, SPTBN2 等)。プルキンエ細胞の選択的死滅。",
         "symptoms": "若齢期 (3〜12ヶ月) からふらつき歩行・頭の震え・転倒。進行性。",
@@ -1091,6 +1132,7 @@ DISEASE_KB = [
     {
         "match": ["sensory neuropathy", "感覚性神経障害", "fam134b"],
         "title": "感覚性神経障害 (SN / FAM134B)",
+        "severity": "high",
         "summary": "末梢神経の感覚線維が変性し、痛覚消失や自咬行動を起こす遺伝性疾患です。",
         "mechanism": "FAM134B 遺伝子の変異により末梢感覚神経が変性。ボーダーコリーで報告。",
         "symptoms": "肢端の感覚消失 → 自咬 → 潰瘍・感染。歩行運動には支障なし。",
@@ -1103,6 +1145,7 @@ DISEASE_KB = [
     {
         "match": ["globoid cell leukodystrophy", "krabbe", "galc"],
         "title": "球状細胞白質ジストロフィー (Krabbe / GALC)",
+        "severity": "high",
         "summary": "中枢・末梢神経のミエリン形成が異常になる重篤な遺伝性代謝疾患です。",
         "mechanism": "GALC 遺伝子の変異によりガラクトセレブロシダーゼ酵素が欠損。ミエリン分解産物が蓄積し神経変性を起こします。",
         "symptoms": "生後 1〜6ヶ月で運動異常・痙攣・成長不全。多くは 1〜2 年で死亡。",
@@ -1116,6 +1159,7 @@ DISEASE_KB = [
     {
         "match": ["polyneuropathy", "多発性神経障害", "ndrg1", "arhgef10"],
         "title": "多発性神経障害 (Polyneuropathy / NDRG1, ARHGEF10)",
+        "severity": "high",
         "summary": "複数の末梢神経が同時に障害を受け、運動失調・筋萎縮を起こす疾患です。",
         "mechanism": "NDRG1 や ARHGEF10 等の変異により末梢神経の機能が低下。グレーハウンド・アラスカン・マラミュート等で報告。",
         "symptoms": "若齢期から後肢の脱力・歩行異常・筋萎縮。",
@@ -1128,6 +1172,7 @@ DISEASE_KB = [
     {
         "match": ["episodic falling", "episodic falling syndrome", "efs"],
         "title": "発作性失神症 (EFS / BCAN)",
+        "severity": "medium",
         "summary": "興奮や運動で発作的に筋肉が硬直し転倒する遺伝性疾患です。キャバリア K.C. スパニエルで頻発。",
         "mechanism": "BCAN 遺伝子の変異により神経シグナル伝達が異常になり、運動時に発作を起こします。",
         "symptoms": "興奮・運動・暑さで筋強直 → 転倒・硬直。意識は保持。数秒〜数分で回復。",
@@ -1154,6 +1199,7 @@ DISEASE_KB = [
     {
         "match": ["multifocal retinopathy", "cmr1", "cmr2", "best1"],
         "title": "多巣性網膜症 (CMR / BEST1)",
+        "severity": "low",
         "summary": "網膜に複数の隆起・剥離が起こる遺伝性眼疾患です。多くは進行が緩やか。",
         "mechanism": "BEST1 遺伝子の変異により網膜色素上皮の機能が異常。マスティフ・ピレネー等で報告。",
         "symptoms": "初期は無症状。中年期から斑状の網膜病変が見られる。視覚障害は軽度なことが多い。",
@@ -1179,6 +1225,7 @@ DISEASE_KB = [
     {
         "match": ["stargardt", "stgd1", "abca4"],
         "title": "スターガルト病 (STGD1 / ABCA4)",
+        "severity": "high",
         "summary": "若齢期から黄斑部の網膜が変性する遺伝性眼疾患です。",
         "mechanism": "ABCA4 遺伝子の変異により網膜色素上皮にリポフスチンが蓄積。ラブラドール等で報告。",
         "symptoms": "1〜2 歳から中心視野の視覚低下 → 進行性。",
@@ -1193,6 +1240,7 @@ DISEASE_KB = [
     {
         "match": ["coat color dilution alopecia", "color dilution alopecia", "cda"],
         "title": "毛色希釈性脱毛症 (CDA)",
+        "severity": "low",
         "summary": "希釈毛色 (Blue, Lilac 等) を持つ犬で起こる遺伝性脱毛症です。",
         "mechanism": "メラニン顆粒の異常蓄積により毛包が損傷。MLPH 遺伝子変異 (dd) を持つ希釈色犬の一部で発症。",
         "symptoms": "若齢期 (6ヶ月〜2歳) から希釈色部分の脱毛・痂皮・二次感染。非希釈色部位は正常。",
@@ -1205,6 +1253,7 @@ DISEASE_KB = [
     {
         "match": ["footpad hyperkeratosis", "hfh", "肉球角化"],
         "title": "肉球角化亢進症 (HFH / FAM83G)",
+        "severity": "medium",
         "summary": "肉球が異常に厚く硬化し、亀裂・痛みを生じる遺伝性皮膚疾患です。",
         "mechanism": "FAM83G 遺伝子の変異により肉球の角化が亢進。アイリッシュ・テリア、ドゴ・ド・ボルドー等で報告。",
         "symptoms": "若齢期から全肉球の硬化・亀裂・痛み。歩行困難を起こすこともある。",
@@ -1218,6 +1267,7 @@ DISEASE_KB = [
     {
         "match": ["renal cystadenocarcinoma", "rcnd", "nodular dermatofibrosis", "腎嚢腺癌"],
         "title": "腎嚢腺癌・結節性皮膚線維腫症 (RCND / FLCN)",
+        "severity": "high",
         "summary": "腎臓に多発する腫瘍と皮膚結節を起こす遺伝性腫瘍症候群です。ジャーマン・シェパード特有。",
         "mechanism": "FLCN 遺伝子の変異により腫瘍抑制機能が失われ、腎臓・皮膚に腫瘍が発生。",
         "symptoms": "中年期から皮膚に多数の結節 → 後に腎腫瘍・腎不全。",
@@ -1230,6 +1280,7 @@ DISEASE_KB = [
     {
         "match": ["hyperphosphatemia", "fgf23", "高リン血症"],
         "title": "家族性高リン血症 (Hyperphosphatemia / FGF23)",
+        "severity": "medium",
         "summary": "血中リン濃度が異常に高くなる遺伝性内分泌疾患です。",
         "mechanism": "FGF23 関連遺伝子の変異によりリン代謝が異常。骨・軟組織の異常石灰化を引き起こす。",
         "symptoms": "成長異常・骨格変形・腎機能障害。重症例では予後不良。",
@@ -1446,6 +1497,75 @@ DISEASE_KB = [
             {"label": "詳細を検索", "url": _google_search("PRA rcd2 犬 RD3 コリー")},
         ],
     },
+    # 眼科系（追加）
+    {
+        "match": ["primary lens luxation", "pll", "水晶体脱臼", "lens luxation", "adamts17 lens", "adamts10 lens"],
+        "title": "原発性水晶体脱臼 (PLL / ADAMTS17)",
+        "summary": "水晶体を支えるチン小帯が断裂し、水晶体が脱臼する遺伝性眼科疾患。急性緑内障や失明リスクがあります。",
+        "mechanism": "ADAMTS17（一部犬種は ADAMTS10）遺伝子変異によりチン小帯タンパク質が機能不全となり、水晶体位置が保持できなくなります。",
+        "symptoms": "2〜8 歳での急激な目の充血・眼圧上昇・疼痛。前方脱臼では角膜浮腫、緑内障を続発し失明の危険があります。",
+        "inheritance": "常染色体劣性（P/P は発症、P/N はキャリアで発症リスク上昇）。テリア系・ボーダーコリー・シベリアンハスキー等で多報告。",
+        "advice": "P/P（ホモ陽性）や P/N 犬は年 1 回以上の眼圧測定を推奨。前方脱臼は眼科的緊急事態のため即時受診を。繁殖には P/N × N/N の組み合わせを推奨。",
+        "severity": "high",
+        "references": [
+            {"label": "詳細を検索 (PLL ADAMTS17)", "url": _google_search("Primary Lens Luxation PLL 犬 ADAMTS17")},
+        ],
+    },
+    # 代謝系（追加）
+    {
+        "match": ["phosphofructokinase deficiency", "pfk deficiency", "pfkm", "ホスホフルクトキナーゼ欠損", "pfk欠損"],
+        "title": "ホスホフルクトキナーゼ欠損症 (PFK / PFKM)",
+        "summary": "解糖系の重要酵素 PFK-M が欠損し、溶血性貧血と運動不耐を引き起こす代謝疾患。主にイングリッシュ・スプリンガー・スパニエルで報告。",
+        "mechanism": "PFKM 遺伝子の変異により赤血球・筋肉の解糖系酵素活性が著しく低下。赤血球が早期に崩壊し溶血性貧血を生じます。",
+        "symptoms": "運動後の筋力低下・黄疸・血色素尿（ヘモグロビン尿）・疲労感。激しい運動や発熱・アルカローシスで溶血発作が誘発されます。",
+        "inheritance": "常染色体劣性。両親キャリアで 25% 発症。スプリンガー・スパニエル、アメリカン・コッカー・スパニエル等で多報告。",
+        "advice": "激しい運動・過換気（吠え続け等）を避ける。発症犬は溶血発作管理が中心。繁殖では両親の遺伝子検査が必須。",
+        "severity": "medium",
+        "references": [
+            {"label": "詳細を検索 (PFK 犬)", "url": _google_search("Phosphofructokinase Deficiency PFK 犬 溶血性貧血")},
+        ],
+    },
+    # 心臓系（新カテゴリ）
+    {
+        "match": ["arvc", "arrhythmogenic right ventricular cardiomyopathy", "striatin", "strn", "不整脈源性右室心筋症", "右室心筋症"],
+        "title": "不整脈源性右室心筋症 (ARVC / Striatin)",
+        "summary": "右心室心筋が脂肪・線維組織に置き換わる遺伝性心筋症。突然死や重篤な不整脈を引き起こすボクサー特有の疾患です。",
+        "mechanism": "Striatin（STRN）遺伝子の重複挿入変異により心室筋の細胞間接合タンパク質が機能不全となり、心筋がアポトーシスを起こして脂肪・線維組織に置換されます。",
+        "symptoms": "虚脱・失神・突然死。多形性心室頻拍（VT）や心室細動（VF）を示す。若齢〜中年で発症することが多く、無症状のまま突然死する例も。",
+        "inheritance": "常染色体優性（不完全浸透）。片方の遺伝子コピーだけでも発症リスクが上昇。ボクサーで最多報告、ドーベルマンにも類似疾患あり。",
+        "advice": "ホモ（A/A）は高リスク・繁殖不可推奨。ヘテロ（A/N）は定期的なホルター心電図モニタリングを推奨。抗不整脈薬で管理可能な場合もあるが予後は個体差が大きい。",
+        "severity": "high",
+        "references": [
+            {"label": "詳細を検索 (ARVC ボクサー)", "url": _google_search("ARVC Arrhythmogenic Right Ventricular Cardiomyopathy 犬 ボクサー Striatin")},
+        ],
+    },
+    {
+        "match": ["dilated cardiomyopathy", "dcm1", "dcm type 1", "pdk4", "拡張型心筋症", "dcm 犬"],
+        "title": "拡張型心筋症 1 型 (DCM1 / PDK4)",
+        "summary": "心室壁が薄くなり心臓が拡張する遺伝性心筋症。ドーベルマンで高頻度に報告され、急性心不全や突然死のリスクがあります。",
+        "mechanism": "PDK4 遺伝子のイントロン挿入変異が報告されており（特にドーベルマン）、心筋のエネルギー代謝および収縮機能が低下。心室が代償性に拡張し、最終的に収縮不全に至ります。",
+        "symptoms": "倦怠感・運動不耐・呼吸困難・咳。心房細動や突然死を起こすこともある。ドーベルマンでは無症状期が長く、ホルター心電図による定期検査が必要。",
+        "inheritance": "常染色体優性（ドーベルマン型）または多因子遺伝。大型・巨大犬種（ドーベルマン・アイリッシュ・ウルフハウンド・大型シュナウザー等）で多報告。",
+        "advice": "ドーベルマンは 3 歳以降から年 1 回以上のホルター心電図 + 心臓超音波検査を推奨。ACE 阻害剤などで進行を遅らせる可能性がある。繁殖には遺伝子検査＋心臓スクリーニングを組み合わせた評価を。",
+        "severity": "high",
+        "references": [
+            {"label": "詳細を検索 (DCM 犬 PDK4)", "url": _google_search("Dilated Cardiomyopathy DCM 犬 PDK4 ドーベルマン")},
+        ],
+    },
+    # 神経系（追加）
+    {
+        "match": ["benign familial juvenile epilepsy", "bfje", "lgi2", "良性家族性若年性てんかん", "juvenile epilepsy lagotto"],
+        "title": "良性家族性若年性てんかん (BFJE / LGI2)",
+        "summary": "ラゴット・ロマニョーロで多発する若齢発症の良性てんかんで、多くは成長とともに自然寛解します。",
+        "mechanism": "LGI2 遺伝子の変異により脳内神経回路の興奮抑制バランスが乱れ、焦点性・全般性てんかん発作を引き起こします。",
+        "symptoms": "生後 5〜13 週での強直間代発作・焦点発作・精神運動発作。多くは 4 ヶ月齢までに発作が消失し（良性）、神経学的後遺症を残さない例が多い。",
+        "inheritance": "常染色体劣性。主にラゴット・ロマニョーロで報告。両親キャリアで 25% 発症。",
+        "advice": "発作が重篤または頻繁な場合は抗てんかん薬で対症療法。多くは予後良好だが繁殖前検査で P/P（ホモ陽性）犬の繁殖への使用は避けることを推奨。",
+        "severity": "low",
+        "references": [
+            {"label": "詳細を検索 (BFJE LGI2)", "url": _google_search("Benign Familial Juvenile Epilepsy BFJE 犬 LGI2 Lagotto")},
+        ],
+    },
 ]
 
 
@@ -1458,9 +1578,10 @@ def _normalize_for_match(text: str) -> str:
 # 辞書ページでグルーピング表示に使用
 DISEASE_CATEGORIES = [
     ("🦴 骨格・関節系",   ["椎間板", "骨軟骨", "短足", "骨形成不全"]),
-    ("🧠 神経・脳系",     ["脳症", "リポフスチン", "運動失調", "脊髄小脳", "多剤耐性", "ガングリオシドーシス", "変性性脊髄症", "筋強直症", "小脳皮質", "感覚性神経", "ジストロフィー", "白質ジストロフィー", "Krabbe", "多発性神経", "発作性失神", "ヒドロキシグルタル", "髄膜脳炎", "ラフォラ", "ナルコレプシー", "神経軸索", "海綿状白質"]),
-    ("👁 眼科系",         ["緑内障", "夜盲", "コリーアイ", "白内障", "全色盲", "錐体杆体", "進行性網膜萎縮", "PRA", "多巣性網膜症", "CMR", "錐体ジストロフィー", "スターガルト", "rcd"]),
-    ("🩸 血液・凝固系",   ["フォン・ヴィレブランド", "ピルビン酸", "第VII", "プレカリクレイン", "血小板", "メトヘモグロビン"]),
+    ("🧠 神経・脳系",     ["脳症", "リポフスチン", "運動失調", "脊髄小脳", "多剤耐性", "ガングリオシドーシス", "変性性脊髄症", "筋強直症", "小脳皮質", "感覚性神経", "ジストロフィー", "白質ジストロフィー", "Krabbe", "多発性神経", "発作性失神", "ヒドロキシグルタル", "髄膜脳炎", "ラフォラ", "ナルコレプシー", "神経軸索", "海綿状白質", "てんかん"]),
+    ("👁 眼科系",         ["緑内障", "夜盲", "コリーアイ", "白内障", "全色盲", "錐体杆体", "進行性網膜萎縮", "PRA", "多巣性網膜症", "CMR", "錐体ジストロフィー", "スターガルト", "rcd", "水晶体脱臼"]),
+    ("💜 心臓系",         ["心筋症", "不整脈"]),
+    ("🩸 血液・凝固系",   ["フォン・ヴィレブランド", "ピルビン酸", "第VII", "プレカリクレイン", "血小板", "メトヘモグロビン", "フルクトキナーゼ"]),
     ("🧪 代謝・内分泌系", ["尿酸尿", "コバラミン", "グリコーゲン蓄積", "ムコ多糖", "銅蓄積", "高リン血症", "リン血症"]),
     ("💪 筋・運動系",     ["運動誘発性", "中心核ミオパチー", "肢帯型筋", "重症筋無力症", "骨格異形成"]),
     ("🫘 腎・泌尿器系",   ["シスチン尿", "腎症", "腎嚢腺癌"]),
@@ -1692,6 +1813,7 @@ TRAIT_KB = [
         "summary": "コートに黒/茶色色素（eumelanin）を作るかどうかを決める『マスタースイッチ』です。",
         "mechanism": "MC1R 遺伝子が活性なら黒/茶色素を産生。e/e ホモ（劣性）では完全に活性が失われ、コートは赤/黄/クリーム/ホワイトのみになります（鼻パッドの色素は残る）。",
         "phenotype": "E/E, E/e: コートに黒/茶色素を発現可。K座位・A座位の支配を受ける。\\ne/e: コートはクリーム〜アプリコット〜レッド（KITLG が濃淡を決定）。",
+        "inheritance": "常染色体劣性（e/e ホモ接合で発現）。E/e キャリア間の交配から 25% の確率で e/e 子犬が生まれます。",
         "advice": "e/e でも鼻・パッド・アイリムの色は B 座位で決まります（黒 or ブラウン）。",
         "references": [
             {"label": "詳細を検索 (E locus)", "url": _google_search("E locus MC1R 犬 毛色")},
@@ -1703,6 +1825,7 @@ TRAIT_KB = [
         "summary": "黒一色（ソリッド）かどうかを決める優性遺伝子です。",
         "mechanism": "KB（優性）が 1コピーでもあると A 座位の表現が抑制され、コートは単色になります。ky/ky ではアグーチ模様（A座位）が現れます。kbr はブリンドル。",
         "phenotype": "KB/_ : ソリッド（黒・茶・希釈色 など、E と B で決まる）\\nky/ky : A 座位の模様（セーブル・タンポイント等）\\nkbr/_  : ブリンドル",
+        "inheritance": "常染色体優性（KB は 1コピーで優性。ky/ky が劣性ホモ）。優性序列: KB > kbr > ky。",
         "advice": "ソリッドカラーを残したいなら KB を維持。模様を出したいなら ky/ky × ky/ky に交配。",
         "references": [
             {"label": "詳細を検索 (K locus)", "url": _google_search("K locus CBD103 犬 ドミナントブラック")},
@@ -1714,6 +1837,7 @@ TRAIT_KB = [
         "summary": "K座位が ky/ky のときに発現する『毛色の模様』を決める座位です。",
         "mechanism": "ay > aw > at > a の優性順位。ay=セーブル、aw=ワイルドセーブル、at=タンポイント、a=リセッシブブラック。",
         "phenotype": "ay/_ : フォーン/セーブル\\naw/_ : ワイルドセーブル\\nat/_ : ブラックタン/トライカラー（ドーベルマン的）\\na/a : リセッシブブラック（単色黒）",
+        "inheritance": "複対立遺伝子の優性序列: ay > aw > at > a。K座位が ky/ky の場合にのみ表現型に現れます。",
         "advice": "見た目の模様パターンは A 座位＋K 座位＋E 座位の組み合わせで決まります。",
         "references": [
             {"label": "詳細を検索 (A locus)", "url": _google_search("A locus ASIP 犬 アグーチ")},
@@ -1725,6 +1849,7 @@ TRAIT_KB = [
         "summary": "黒色素を「黒」のまま発現するか「茶色」に変換するかを決めます。",
         "mechanism": "TYRP1 遺伝子の機能が失われると（bb ホモ）、すべての黒色素がブラウンに変換されます。e/e の場合はコートに eumelanin が無いため B はコートに影響せず、鼻・パッド色素のみに影響します。",
         "phenotype": "B/_ : 通常通り黒色素\\nbb : 全ての黒がブラウン（チョコレート/レバー）。ee と組み合わせるとコートはクリーム〜アプリコットだが鼻はブラウン。",
+        "inheritance": "常染色体劣性（bb ホモ接合で発現）。B/b キャリア間の交配から 25% の確率でチョコ子犬が生まれます。",
         "advice": "チョコレート色を残したい場合は bb 必須。",
         "references": [
             {"label": "詳細を検索 (B locus)", "url": _google_search("B locus TYRP1 犬 ブラウン チョコレート")},
@@ -1736,6 +1861,7 @@ TRAIT_KB = [
         "summary": "色素の濃度を薄める（希釈する）遺伝子。黒→青/ブルー、茶→ライラック/イザベラ、黄→シャンパンになります。",
         "mechanism": "MLPH 遺伝子の機能不全（dd ホモ）でメラニン顆粒が均一に分布せず、淡い色になります。",
         "phenotype": "D/_ : 通常通り\\ndd : 希釈。Black→Blue, Brown→Lilac/Isabella, Yellow→Champagne",
+        "inheritance": "常染色体劣性（dd ホモ接合で希釈発現）。D/d キャリア間の交配から 25% の確率で希釈色子犬が生まれます。",
         "advice": "ワイマラナーの『ねずみ色』、フレンチブルドッグの『ブルー』などは dd によるもの。",
         "references": [
             {"label": "詳細を検索 (D locus)", "url": _google_search("D locus MLPH 犬 dilute ブルー")},
@@ -1747,7 +1873,9 @@ TRAIT_KB = [
         "summary": "コートに不規則な色のまだら（マール）を作る遺伝子。M/M（ダブルマール）は重大な健康リスクあり。",
         "mechanism": "PMEL17 遺伝子の変異により、色素細胞の機能が部分的に失われ、まだら模様になります。M/M は失明・聴覚障害のリスクが高い。",
         "phenotype": "m/m : マールなし\\nM/m : マール表現型\\nM/M : ダブルマール（白割合増・視聴覚障害リスク大）",
+        "inheritance": "常染色体優性（不完全優性）。M/m ヘテロでマール発現。M/M ホモは視聴覚障害リスク大。M/m × M/m 交配は 25% が M/M になるため厳禁。",
         "advice": "**M/m × M/m の交配は厳禁**。25% の確率でダブルマール子犬が生まれます。",
+        "severity": "high",
         "references": [
             {"label": "詳細を検索 (Merle)", "url": _google_search("Merle locus PMEL17 犬 マール")},
         ],
@@ -1758,6 +1886,7 @@ TRAIT_KB = [
         "summary": "コートに白い部分（白斑）を作るかどうかを決めます。",
         "mechanism": "MITF 遺伝子のプロモーター変異により、色素細胞の分布が制限されコートに白い領域ができます。",
         "phenotype": "S/S : 白斑なし or 最小\\nS/sp : 軽度の白斑\\nsp/sp : パイド/パーティカラー（白の割合が高い）",
+        "inheritance": "常染色体（不完全優性）。sp アレルは半劣性: S/sp で軽度白斑、sp/sp でパーティカラー発現。",
         "advice": "パーティプードルなどは sp/sp。S 座位だけでなく Irish spotting 等の他遺伝子も白の表現に関与。",
         "references": [
             {"label": "詳細を検索 (S locus)", "url": _google_search("S locus MITF 犬 パイド ピーバルド")},
@@ -1769,6 +1898,7 @@ TRAIT_KB = [
         "summary": "眉毛・髭・飾り毛などの『ふさふさ』を作る遺伝子です。",
         "mechanism": "RSPO2 遺伝子の挿入変異が顔の毛量を増やします。",
         "phenotype": "F/F or F/N: ファーニシングあり（テリア・ドゥードゥル系）\\nN/N: スムースコート",
+        "inheritance": "常染色体優性（不完全優性）。F/N ヘテロでも発現。F/F ホモの方がより濃いファーニシングになる場合があります。",
         "advice": "ドゥードゥル系（ラブラドゥードル等）の見た目に大きく影響。",
         "references": [
             {"label": "詳細を検索 (Furnishings)", "url": _google_search("Furnishings RSPO2 犬 ファーニシング")},
@@ -1780,6 +1910,7 @@ TRAIT_KB = [
         "summary": "コートが直毛か巻き毛かを決める遺伝子です。",
         "mechanism": "KRT71 遺伝子の変異がカール毛を形成します。",
         "phenotype": "C/C or C/N: 巻き毛\\nN/N: 直毛",
+        "inheritance": "常染色体優性（不完全優性）。C/N ヘテロでも巻き毛が発現。C/C ホモではより強いカールになります。",
         "advice": "プードル・ビションフリーゼ等は C/C ホモ。F 座位（ファーニシング）と組み合わせると様々な毛質に。",
         "references": [
             {"label": "詳細を検索 (Curly)", "url": _google_search("Curly coat KRT71 犬 巻き毛")},
@@ -1792,6 +1923,7 @@ TRAIT_KB = [
         "summary": "短毛か長毛かを決める遺伝子です。長毛は劣性。",
         "mechanism": "FGF5 遺伝子の変異により被毛のサイクルが変化。L/L は短毛、l/l は長毛になります。",
         "phenotype": "L/L: 短毛\\nL/l: 短毛（キャリア）\\nl/l: 長毛",
+        "inheritance": "常染色体劣性（l/l ホモ接合で長毛）。L/l キャリア間の交配から 25% の確率で長毛子犬が生まれます。",
         "advice": "プードル・ヨークシャーテリア・パピヨン等は l/l ホモ。FGF5 だけでなく KRT71 (Curly)・RSPO2 (Furnishings) との組み合わせで多様な毛質に。",
         "references": [
             {"label": "詳細を検索 (Hair Length)", "url": _google_search("FGF5 犬 被毛長 短毛 長毛")},
@@ -1803,6 +1935,7 @@ TRAIT_KB = [
         "summary": "コートの抜け毛量を決める遺伝子です。多くの犬種で 1〜2 アレルを保有。",
         "mechanism": "MC5R 遺伝子の変異が被毛の脱落サイクルに影響。SD/SD ホモは抜け毛多、N/N は少なめ。",
         "phenotype": "SD/SD: 抜け毛多（重ねシェッディング）\\nSD/N: 中程度\\nN/N: 抜け毛少なめ",
+        "inheritance": "常染色体（共優性/相加的）。SD アレル数に比例して抜け毛量が増えます。",
         "advice": "プードル・ドゥードゥル系は N/N で抜け毛が少なく『ハイポアレジェニック』とされる場合あり。100% 無毛ではない点に注意。",
         "references": [
             {"label": "詳細を検索 (Shedding)", "url": _google_search("MC5R 犬 抜け毛 シェッディング")},
@@ -1814,7 +1947,9 @@ TRAIT_KB = [
         "summary": "生まれつき尻尾が短い形質を決める遺伝子です。ホモ (BT/BT) は致死。",
         "mechanism": "Brachyury (T) 遺伝子の変異により尻尾の発達が短くなります。ホモ接合は胚致死。",
         "phenotype": "BT/BT: 胚致死（生まれない）\\nBT/N: 自然短尾\\nN/N: 通常の尾長",
+        "inheritance": "常染色体優性（致死ホモ）。BT/N ヘテロで短尾発現。**BT/BT ホモは胚致死** のため、BT/N × BT/N 交配は 25% の胎児が発育しません。",
         "advice": "**BT/BT 同士の交配は厳禁** — 受胎しても胚致死で出生しません。コーギー・ボブテイル・ボクサー等で頻発。",
+        "severity": "high",
         "references": [
             {"label": "詳細を検索 (Bob Tail)", "url": _google_search("Brachyury 犬 自然短尾 BT")},
         ],
@@ -1825,6 +1960,7 @@ TRAIT_KB = [
         "summary": "顔に黒いマスク模様を形成する遺伝子。MC1R の特定バリアント。",
         "mechanism": "E座位 (MC1R) の Em バリアントが優性で、顔面に黒い色素を集中させます。E座位本体とは別の変異。",
         "phenotype": "Em/Em or Em/E: 黒マスクあり\\nE/E (Em なし): マスクなし",
+        "inheritance": "常染色体優性（E座位の Em アレルが優性）。Em/E または Em/Em のいずれでも発現。e/e 犬（eumelanin なし）では発現しません。",
         "advice": "ジャーマンシェパード・パグ・ボクサー等で典型。ee 犬では発現しません（eumelanin がコートに無いため）。",
         "references": [
             {"label": "詳細を検索 (Mask)", "url": _google_search("Em MC1R 犬 メラニスティックマスク 黒マスク")},
@@ -1836,6 +1972,7 @@ TRAIT_KB = [
         "summary": "子犬期は色付きで生まれ、成犬になると退色する遺伝子。プードルのシルバー・ベージュ色の原因。",
         "mechanism": "G_ は成犬期に毛色のメラニンを段階的に失わせます。1〜2歳までに退色が進行。",
         "phenotype": "g/g: 退色なし\\nG/g or G/G: 成犬で退色\\n  Black + G_  → Silver\\n  Brown + G_  → Silver Beige\\n  Blue + G_   → Silver（淡）",
+        "inheritance": "常染色体優性。G/g ヘテロでも退色が発現します。G/G ホモとの表現型差は軽微です。",
         "advice": "シルバープードルは生まれた時は黒。1〜2歳までに段階的に退色していきます。M座位 (Merle) とは別遺伝子（同じ PMEL17 でも変異位置が異なる）。",
         "references": [
             {"label": "詳細を検索 (Greying)", "url": _google_search("Greying 犬 シルバー 退色 PMEL17")},
@@ -1848,6 +1985,7 @@ TRAIT_KB = [
         "summary": "ローデシアン・リッジバック特有の、背中に逆向きの毛流が生じる形質。FGF3/FGF4/FGF19 領域の重複が原因。",
         "mechanism": "16番染色体の FGF3-FGF4-FGF19 領域に約 133kb の重複が発生し、背中の毛流が逆方向に成長します。",
         "phenotype": "R/R: リッジあり（ただしダーモイドサイナス [dermoid sinus] のリスク上昇）\\nR/r: リッジあり\\nr/r: リッジなし（FCI スタンダード違反）",
+        "inheritance": "常染色体優性。R/r ヘテロでリッジ発現。**R/R ホモはダーモイドサイナスリスク上昇** のため、R/r × r/r 交配が推奨されます。",
         "advice": "R/R ホモ接合では**ダーモイドサイナス**（神経管閉鎖不全による皮下嚢胞）の発症率が上がります。R/r ヘテロ × r/r で繁殖し、リッジを保持しつつホモ接合を避けるのが推奨。タイランドリッジバック、フーピアン (Phu Quoc) リッジバックでも同じ変異。",
         "references": [
             {"label": "詳細を検索 (Ridge)", "url": _google_search("FGF4 ridgeback dermoid sinus")},
@@ -1859,7 +1997,9 @@ TRAIT_KB = [
         "summary": "チャイニーズ・クレステッド、メキシカン・ヘアレス（ショロイツクィントレ）、ペルービアン・ヘアレスの無毛を決める遺伝子。ホモは胚致死。",
         "mechanism": "FOXI3 遺伝子の挿入変異が優性。歯や毛包の発達に関与し、変異により被毛・歯の生成が抑制されます。H/H ホモ接合は胚段階で致死。",
         "phenotype": "H/H: 胚致死（生まれない）\\nH/h: 無毛 / 部分無毛・歯の欠損あり\\nh/h: 完全な被毛 (powderpuff / coated)",
+        "inheritance": "常染色体優性（致死ホモ）。H/h ヘテロで無毛発現。**H/H ホモは胚致死**。H/h × H/h 交配は 25% の胎児が発育しません。",
         "advice": "**H/H 同士の交配は厳禁** — 全頭出生しない。チャイニーズ・クレステッドでは無毛 (H/h) × パウダーパフ (h/h) 交配が標準。皮膚保護・日焼け止め・防寒が必要な犬種。",
+        "severity": "high",
         "references": [
             {"label": "詳細を検索 (Hairless)", "url": _google_search("FOXI3 hairless dog Chinese Crested Xolo")},
         ],
@@ -1870,6 +2010,7 @@ TRAIT_KB = [
         "summary": "E座位 e/e のフェオメラニン（赤・黄系）の濃さを決める遺伝子。ラブラドール・プードル・ゴールデンの色の濃淡を説明。",
         "mechanism": "MFSD12 遺伝子の変異がメラノサイトでのフェオメラニン生成量を調節。i/i ホモで色素が薄くなりクリーム/ホワイト寄りになります。",
         "phenotype": "I/I: 濃い赤・ディープレッド\\nI/i: 中間（アプリコット〜レッド）\\ni/i: 淡いクリーム・ホワイト寄り",
+        "inheritance": "常染色体（不完全優性/相加的）。I/I が最濃色、I/i が中間、i/i が最淡色。",
         "advice": "イングリッシュ・クリーム・ゴールデンの淡色や、プードルのホワイト〜クリーム〜アプリコット〜レッドの幅広さの一因。E座位 ee と組み合わせて色の濃淡を予測する際に重要。E_ 犬（黒系優位）では coat 色への影響は限定的。",
         "references": [
             {"label": "詳細を検索 (Intense Red)", "url": _google_search("MFSD12 dog intense red phaeomelanin")},
@@ -1881,6 +2022,7 @@ TRAIT_KB = [
         "summary": "フレンチブルドッグで報告された B座位 (TYRP1) とは別の劣性チョコレート色。",
         "mechanism": "HPS3 遺伝子の変異が劣性で発現。BB（または Bb）でも co/co ホモであればチョコレート色になります。B座位 bb の従来チョコとは独立した遺伝子。",
         "phenotype": "Co/Co or Co/co: 通常色\\nco/co: チョコレート（B 座位とは独立に発現）",
+        "inheritance": "常染色体劣性（co/co ホモ接合で発現）。Co/co キャリア間の交配から 25% の確率で Cocoa チョコレートが生まれます。",
         "advice": "フレンチブルドッグ・オーストラリアンシェパード等で報告。B座位だけ検査して 'チョコにならないはず' の交配でも、co/co × co/co で予想外のチョコが出るため、希少色のブリーダーは両方検査推奨。CDA リスクは未確立。",
         "references": [
             {"label": "詳細を検索 (Cocoa)", "url": _google_search("HPS3 cocoa French Bulldog chocolate")},
@@ -1892,7 +2034,9 @@ TRAIT_KB = [
         "summary": "グレートデーン特有の白地に黒斑のハーレクイン模様を決める遺伝子。マールと相互作用。ホモ致死。",
         "mechanism": "PSMB7 遺伝子の変異が優性。M座位 (Merle) のメルル領域の色素を完全に脱色させ、白地に黒斑のパターンを作ります。M_ + H_ の組み合わせでのみ発現。H/H は胚致死。",
         "phenotype": "H/H: 胚致死\\nH/h + M/m: ハーレクイン（白地に黒斑）\\nH/h + m/m: 表現型に変化なし（ハーレクイン非発現の保因）\\nh/h: ハーレクイン非発現",
+        "inheritance": "常染色体優性（致死ホモ）。H/h + M/m の組み合わせでのみハーレクイン表現。**H/H ホモは胚致死**。M座位 (Merle) との同時検査が必須。",
         "advice": "**H/H × H/H 交配は禁忌** — 全頭胚致死。さらに M/M（ダブルマール）× ハーレクインの組み合わせは深刻な発達異常リスク。グレートデーンのハーレクインブリーダーは PSMB7 と PMEL17 (M) の両方を検査する必要があります。",
+        "severity": "high",
         "references": [
             {"label": "詳細を検索 (Harlequin)", "url": _google_search("PSMB7 harlequin Great Dane merle")},
         ],
@@ -1903,6 +2047,7 @@ TRAIT_KB = [
         "summary": "成犬になると白い部分に色付き斑点が散らばる『ローン』形質。スパニエル系・オーストラリアン・キャトルドッグ等で典型。",
         "mechanism": "原因遺伝子は未確定（USH2A 周辺が候補）。優性遺伝で、白斑領域に色素細胞が遅れて移行することで成犬期にティッキング模様が出現します。",
         "phenotype": "Rn/Rn or Rn/rn: ローンあり（成犬で発現）\\nrn/rn: ローンなし（白斑のまま）",
+        "inheritance": "常染色体優性（原因遺伝子未確定）。Rn/rn ヘテロでも発現。S座位 (パイド/白斑) の存在が前提です。",
         "advice": "イングリッシュ・コッカー・スパニエル、ジャーマン・ショートヘアード・ポインター、オーストラリアン・キャトルドッグの『ブルーヒーラー』『レッドヒーラー』はこのアレル発現。子犬期は白いが、4〜6 週齢から斑点が出始めます。",
         "references": [
             {"label": "詳細を検索 (Roan)", "url": _google_search("dog roan USH2A coat pattern")},
@@ -1914,6 +2059,7 @@ TRAIT_KB = [
         "summary": "白地に小さな色付き斑点が散らばる形質。ダルメシアンの斑点もこの遺伝子による。",
         "mechanism": "優性遺伝。原因遺伝子は未確定だが、S座位 sp/sp の白斑領域に色素細胞が遅れて移行することで斑点が出現します。Roan より斑点が小さく密度が低い。",
         "phenotype": "T/T or T/t: ティッキングあり（白地に小斑点）\\nt/t: 純白の白斑のまま",
+        "inheritance": "常染色体優性（原因遺伝子未確定）。T/t ヘテロでも発現。S座位の白斑領域に対してのみ作用します。",
         "advice": "ダルメシアン・イングリッシュ・セッター・ジャック・ラッセル・テリア等で典型。ダルメシアンでは追加で SLC2A9（高尿酸尿症 HUU）のリスクアレルが固定しており、HUU 検査と併用が標準。",
         "references": [
             {"label": "詳細を検索 (Ticking)", "url": _google_search("dog ticking T locus Dalmatian")},
@@ -1925,6 +2071,7 @@ TRAIT_KB = [
         "summary": "シベリアン・ハスキー特有の青目を決める遺伝子重複。マールやメルル以外の青目原因。",
         "mechanism": "18番染色体の ALX4 近傍に約 98kb の重複が発生し、優性遺伝で虹彩の色素生成を抑制。M座位 (Merle) や S座位 (Pied) 経由の青目とは独立の機構です。",
         "phenotype": "BE/BE or BE/be: 青目（片目または両目）\\nbe/be: 通常色（茶〜琥珀）",
+        "inheritance": "常染色体優性（遺伝子重複）。BE/be ヘテロでも青目または片目が発現します。",
         "advice": "シベリアン・ハスキーの青目・オッドアイの主因。マールや白斑経由の青目と異なり、視聴覚障害リスクとの関連は報告されていません。オーストラリアンシェパードのマール経由青目とは区別が必要。",
         "references": [
             {"label": "詳細を検索 (ALX4 Blue Eyes)", "url": _google_search("ALX4 blue eyes Siberian Husky")},
@@ -1937,6 +2084,7 @@ TRAIT_KB = [
         "summary": "黄ラブラドールの『フォックスレッド』など、フェオメラニン（黄/赤系）の発色濃度を決める補助遺伝子。",
         "mechanism": "KITLG 遺伝子近傍の調節領域変異がメラノサイトの分化と色素生成を調節。e/e (E座位) 犬で coat の黄色濃度に強く影響します。",
         "phenotype": "Intense allele 2 コピー: フォックスレッド〜ディープレッド\\nIntense allele 1 コピー: 中間色（中程度のイエロー）\\n通常型 2 コピー: 淡いイエロー〜クリーム",
+        "inheritance": "常染色体（相加的）。Intense アレル数に比例して赤色濃度が上がります。",
         "advice": "ラブラドール、ノバスコシア・ダックトーリング・レトリーバー、レッド系ゴールデンで重要。I座位 (MFSD12) と組み合わせて使うと黄〜赤色の濃淡をより正確に予測できます。健康影響なし。",
         "references": [
             {"label": "詳細を検索 (KITLG)", "url": _google_search("KITLG fox red Labrador phaeomelanin")},
@@ -1948,6 +2096,7 @@ TRAIT_KB = [
         "summary": "生まれた時はブラックタン（タンポイント）だが、成長と共に背中の黒色が後退し『サドル』模様になる遺伝子。ジャーマンシェパードの典型パターン。",
         "mechanism": "RALY 遺伝子の調節領域変異が優性。A座位 at/at の犬で、成長に伴い背中の eumelanin 領域が縮小して褐色（タン）が広がります。",
         "phenotype": "I/I or I/i: 成犬でサドルタン（背中のみ黒、四肢・顔は褐色）\\ni/i: ブラックタン（黒主体のまま）",
+        "inheritance": "常染色体優性（不完全優性）。I/i ヘテロでもサドルタンが発現。A座位 at/at であることが前提条件。",
         "advice": "ジャーマンシェパード、エアデール・テリア、ビーグル、ベルジアン・タービュレン等で典型。子犬期はブラックタンに見えても、6ヶ月〜2歳でサドル模様に変化します。A座位 at/at が必須前提。",
         "references": [
             {"label": "詳細を検索 (Saddle Tan)", "url": _google_search("RALY saddle tan dog German Shepherd")},
@@ -1959,6 +2108,7 @@ TRAIT_KB = [
         "summary": "サイトハウンド系特有の『顔のマスク領域の色が抜けて薄く見える』パターン。アフガン、サルーキ、ボルゾイ、シベリアンハスキーで報告。",
         "mechanism": "MC1R の Ea (Edomino) バリアントが eumelanin 産生をマスク領域で部分抑制。E座位の派生アレルで、E > Eg > Ea > e の優位序列。",
         "phenotype": "Ea/Ea or Ea/e: ドミノ/グリズル（顔の黒抜け、淡色マスク）\\nEa/E_ (E 優性): 通常",
+        "inheritance": "E座位の複対立遺伝子。優性序列: E > Eg > Ea > e。Ea/e または Ea/Ea のみで発現（E/_ または Em/_ が存在すると抑制）。",
         "advice": "アフガンハウンドの『ドミノ』、サルーキの『グリズル』、シベリアンハスキーの『アグーチ』様パターンの一因。Em マスク（黒マスク）とは反対方向の作用。E座位の検査で Ea バリアントを含めない検査もあるため、サイトハウンドブリーダーは検査内容を確認推奨。",
         "references": [
             {"label": "詳細を検索 (Domino)", "url": _google_search("MC1R domino grizzle Afghan Saluki Ea")},
@@ -1970,6 +2120,7 @@ TRAIT_KB = [
         "summary": "ポーチュギーズ・ウォーター・ドッグや Doodle 系で出現する『スムースな顔（ファーニシングなし）+ 短毛』の劣性表現型。",
         "mechanism": "RSPO2 のファーニシング変異の保有なし（ic/ic ホモ）が原因。F 座位の f/f に相当し、顔毛・眉毛・髭の発達が抑制されます。",
         "phenotype": "IC/IC or IC/ic: 標準的なファーニッシュコート（眉・髭あり）\\nic/ic: スムースコート（顔毛なし、ラブ/ゴールデン的な外観）",
+        "inheritance": "常染色体劣性（ic/ic ホモ接合でスムースコート発現）。IC/ic キャリア間の交配から 25% の確率でインプロパーコートが生まれます。",
         "advice": "ポーチュギーズ・ウォーター・ドッグ、ラゴット・ロマニョーロでは血統書失格、Doodle 系（ラブラドゥードル/ゴールデンドゥードル）では『hypoallergenic 失敗』と扱われます。F座位 (RSPO2) ファーニシング検査と同時に確認推奨。健康影響なし。",
         "references": [
             {"label": "詳細を検索 (Improper Coat)", "url": _google_search("improper coat IC RSPO2 Portuguese Water Dog Doodle")},
@@ -1981,6 +2132,7 @@ TRAIT_KB = [
         "summary": "メラニン生成が極度に低下する遺伝性白皮症。被毛・皮膚が白く、虹彩が淡色〜赤目、視覚障害を伴うことが多い。",
         "mechanism": "TYR (チロシナーゼ) や SLC45A2 などのメラニン合成経路遺伝子の劣性変異により、メラニン生成が極端に低下。優性ホワイト（マールやパイドの白）とは区別される真のアルビニズム。",
         "phenotype": "A/A or A/oca: 通常色\\noca/oca: アルビノ（被毛・皮膚白、赤目〜淡色虹彩、羞明・視覚低下）",
+        "inheritance": "常染色体劣性（oca/oca ホモ接合で発現）。A/oca キャリア間の交配から 25% の確率でアルビノ子犬が生まれます。",
         "advice": "ドーベルマン (Z-factor)・ペキニーズ・ラサ・アプソ等で報告。⚠️ **健康影響あり**: 紫外線過敏（皮膚がん発症率上昇）・視覚障害・羞明。アルビノ犬の繁殖は倫理的に推奨されません。屋外活動時の遮光保護と定期皮膚検診が必須。",
         "references": [
             {"label": "詳細を検索 (Albinism)", "url": _google_search("dog albinism TYR SLC45A2 Doberman Z-factor")},
@@ -4292,7 +4444,7 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
 
     info = parse_animal_details(text)
     if not info.get("pet_name") and not info.get("registered_name"):
-        print(f"  → 動物情報を検出できませんでした。スキップします。")
+        print("  → 動物情報を検出できませんでした。スキップします。")
         return None
 
     health_results = parse_health_tests(text)
@@ -4366,7 +4518,7 @@ def parse_pedigree_pdf(pdf_path: str) -> Optional[Pedigree]:
         print(f"  → 血統書PDF検出: {ped.dog_name}")
         return ped
     else:
-        print(f"  → 血統書データの解析に失敗しました")
+        print("  → 血統書データの解析に失敗しました")
         return None
 
 
@@ -4708,15 +4860,6 @@ def _parse_jkc_ancestors(text: str, ped: Pedigree):
 
     # --- 方法2: ラベルベース（番号ベースで取れなかったものを補完）---
     # JKC血統書のラベルパターン: "G.G.SIRE 曾祖父" / "G.SIRE 祖父" / "SIRE 父"
-    label_patterns = [
-        # (regex, position, priority) — longer patterns first to avoid partial matches
-        (r'G\.?\s*G\.?\s*SIRE\s*(?:曾祖父)?', 'sss', 7),  # 曾祖父 positions: 7,9,11,13
-        (r'G\.?\s*G\.?\s*DAM\s*(?:曾祖母)?', 'ssd', 8),    # 曾祖母 positions: 8,10,12,14
-        (r'G\.?\s*SIRE\s*(?:祖父)?', 'ss', 3),               # 祖父 positions: 3,5
-        (r'G\.?\s*DAM\s*(?:祖母)?', 'sd', 4),                 # 祖母 positions: 4,6
-        (r'\bSIRE\s*(?:父)?', 'sire', 1),
-        (r'\bDAM\s*(?:母)?', 'dam', 2),
-    ]
 
     # G.G.SIRE/G.G.DAM の位置を順番に割り当てるためのカウンター
     gg_sire_slots = ['sss', 'sds', 'dss', 'dds']
@@ -5336,8 +5479,20 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             # ↓ 形質の詳細解説 + 参考リンク
             t_detail = get_trait_detail(r.test_name)
             t_detail_html = render_detail_html(t_detail) if t_detail else ""
+            # 重症度バッジ（致死ホモ・ダブルマール等の危険形質のみ — 明示 severity がある場合のみ表示）
+            trait_severity_html = ""
+            if t_detail and t_detail.get("severity") in ("high", "medium", "low"):
+                sev = t_detail["severity"]
+                meta = SEVERITY_LABELS.get(sev, {})
+                if meta:
+                    trait_severity_html = (
+                        f'<span class="severity-badge" style="background:{meta["bg"]};color:{meta["color"]};'
+                        f'display:inline-block;margin-left:6px;padding:1px 8px;border-radius:10px;'
+                        f'font-size:0.72em;font-weight:700;vertical-align:middle;">'
+                        f'{meta["emoji"]} {meta["label"]}</span>'
+                    )
             trait_rows += f"""        <tr>
-          <td>{display_name}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{t_detail_html}</td>
+          <td>{display_name}{trait_severity_html}<br><small style="color:#6b7280">{_h(r.test_name)}</small>{t_detail_html}</td>
           <td>{badge}</td>
           <td style="font-size:0.85em">{_h(r.result_text[:150])}{annotation_html}</td>
         </tr>\n"""
@@ -5350,7 +5505,6 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
             het = dog.heterozygosity
             rng = dog.heterozygosity_range
             range_html = ""
-            range_html_en = ""
             if rng and len(rng) == 2:
                 low, high = rng[0], rng[1]
                 if het < low:
@@ -6332,8 +6486,6 @@ def main():
             print("\nエラー: pdfplumber が必要です。\n  pip install pdfplumber")
             sys.exit(1)
 
-        # Filter out option flags from file arguments
-        file_args = [a for a in remaining_args if a not in ('--output', '-o') and not (len(remaining_args) > 1 and remaining_args[remaining_args.index(a)-1] in ('--output', '-o') if a in remaining_args else False)]
         pdf_files = collect_pdf_files(remaining_args)
 
         if not pdf_files:
@@ -6383,7 +6535,7 @@ def main():
                         pedigrees.append(ped)
                         print(f"  → {ped.dog_name} の血統書を解析しました。")
                     else:
-                        print(f"  → 血統書データの解析に失敗しました。")
+                        print("  → 血統書データの解析に失敗しました。")
             else:
                 print(f"  → 不明な引数: {src}")
 
@@ -6438,7 +6590,7 @@ def main():
     generate_unified_html(dogs, pedigrees, html_path)
     generate_excel(dogs, pedigrees, xlsx_path)
 
-    print(f"\n完了! 以下のファイルが生成されました:")
+    print("\n完了! 以下のファイルが生成されました:")
     print(f"  HTML: {html_path}")
     print(f"  Excel: {xlsx_path}")
     print()

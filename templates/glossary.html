@@ -30,6 +30,7 @@
 <link rel="apple-touch-icon" href="/static/icon-192.svg">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif; background:#f8f9fa; color:#1f2937; line-height:1.6; }
   header { background: linear-gradient(135deg, #4a1a7a, #e6007e); color:#fff; padding:24px 0; }
   header .container { max-width:1100px; margin:0 auto; padding:0 20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; }
@@ -101,6 +102,24 @@
   /* セクション切替 */
   .section-content { display:none; }
   .section-content.active { display:block; }
+
+  /* ページトップへボタン */
+  .scroll-top-btn {
+    position:fixed; bottom:24px; right:20px; z-index:999;
+    width:46px; height:46px; border-radius:50%;
+    background:linear-gradient(135deg,#7c3aed,#a855f7);
+    color:#fff; border:none; cursor:pointer;
+    font-size:1.3em; line-height:1; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 14px rgba(124,58,237,0.4);
+    opacity:0; transform:translateY(12px);
+    transition:opacity 0.25s,transform 0.25s;
+    pointer-events:none;
+  }
+  .scroll-top-btn.visible { opacity:1; transform:translateY(0); pointer-events:auto; }
+  .scroll-top-btn:hover { background:linear-gradient(135deg,#6d28d9,#9333ea); box-shadow:0 6px 20px rgba(124,58,237,0.5); }
+  @media (max-width:480px) {
+    .scroll-top-btn { bottom:calc(16px + env(safe-area-inset-bottom)); right:14px; width:42px; height:42px; font-size:1.1em; }
+  }
 
   /* カテゴリグループ */
   .toc { background:#fff; padding:14px 18px; border-radius:10px; margin-bottom:18px; border:1px solid #e5e7eb; }
@@ -188,7 +207,7 @@
     <input type="search" name="q" placeholder="{% if lang == 'en' %}Search by disease, gene, or symptom (e.g. PRA, brown, IVDD){% else %}疾患名・遺伝子・症状などで検索 (例: PRA, ブラウン, 椎間板){% endif %}" value="{{ query }}" aria-label="{% if lang == 'en' %}Search query{% else %}検索クエリ{% endif %}">
     <button type="submit">{% if lang == 'en' %}Search{% else %}検索{% endif %}</button>
     {% if query %}
-    <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" style="color:#6b7280;font-size:0.85em;">{% if lang == 'en' %}Clear{% else %}クリア{% endif %}</a>
+    <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" style="color:#6b7280;font-size:0.85em;padding:8px 12px;min-height:44px;display:inline-flex;align-items:center;border-radius:8px;" aria-label="{% if lang == 'en' %}Clear search{% else %}検索をクリア{% endif %}">{% if lang == 'en' %}✕ Clear{% else %}✕ クリア{% endif %}</a>
     {% endif %}
     <span class="stat">{% if lang == 'en' %}{{ diseases|length }} diseases / {{ traits|length }} traits matched{% else %}疾患 {{ diseases|length }} / 形質 {{ traits|length }} 件ヒット{% endif %}</span>
   </form>
@@ -315,7 +334,11 @@
       {% endfor %}
 
     {% else %}
-    <div class="empty-state">{% if lang == 'en' %}No diseases found matching "{{ query }}".{% else %}「{{ query }}」に該当する疾患は見つかりませんでした。{% endif %}</div>
+    <div class="empty-state">
+      <p style="font-size:1.1em;margin-bottom:10px;">{% if lang == 'en' %}No diseases found matching <strong>"{{ query }}"</strong>.{% else %}「<strong>{{ query }}</strong>」に該当する疾患は見つかりませんでした。{% endif %}</p>
+      <p style="font-size:0.9em;color:#9ca3af;margin-bottom:14px;">{% if lang == 'en' %}Try searching by English name, Japanese name, gene symbol, or symptom keyword.{% else %}英語名・日本語名・遺伝子記号・症状キーワードで試してみてください。{% endif %}</p>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" style="display:inline-block;background:#7c3aed;color:#fff;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:0.9em;">{% if lang == 'en' %}✕ Clear search{% else %}✕ 検索をクリア{% endif %}</a>
+    </div>
     {% endif %}
   </div>
 
@@ -344,7 +367,11 @@
       {% endfor %}
     </div>
     {% else %}
-    <div class="empty-state">{% if lang == 'en' %}No traits found matching "{{ query }}".{% else %}「{{ query }}」に該当する形質は見つかりませんでした。{% endif %}</div>
+    <div class="empty-state">
+      <p style="font-size:1.1em;margin-bottom:10px;">{% if lang == 'en' %}No traits found matching <strong>"{{ query }}"</strong>.{% else %}「<strong>{{ query }}</strong>」に該当する形質は見つかりませんでした。{% endif %}</p>
+      <p style="font-size:0.9em;color:#9ca3af;margin-bottom:14px;">{% if lang == 'en' %}Try searching by locus name (e.g. B locus, M locus), gene symbol, or coat color keyword.{% else %}座位名（例: B 座位、マール）・遺伝子記号・毛色キーワードで試してみてください。{% endif %}</p>
+      <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" style="display:inline-block;background:#7c3aed;color:#fff;padding:8px 20px;border-radius:8px;text-decoration:none;font-size:0.9em;">{% if lang == 'en' %}✕ Clear search{% else %}✕ 検索をクリア{% endif %}</a>
+    </div>
     {% endif %}
   </div>
 
@@ -418,6 +445,21 @@ function showSection(name, btn) {
       tabs[1].textContent = q ? tCount : tabs[1].dataset.original;
     }
 
+    // Announce result count changes to screen readers
+    let liveRegion = document.getElementById('filter-live-region');
+    if (!liveRegion) {
+      liveRegion = document.createElement('div');
+      liveRegion.id = 'filter-live-region';
+      liveRegion.setAttribute('aria-live', 'polite');
+      liveRegion.setAttribute('aria-atomic', 'true');
+      liveRegion.className = 'sr-only';
+      document.body.appendChild(liveRegion);
+    }
+    const isEn = document.documentElement.lang === 'en';
+    liveRegion.textContent = q
+      ? (isEn ? `${dCount} diseases, ${tCount} traits matched` : `疾患 ${dCount} 件、形質 ${tCount} 件ヒット`)
+      : '';
+
     // Live empty state
     let emptyHint = document.getElementById('live-empty-hint');
     const totalVisible = dCount + tCount;
@@ -453,6 +495,21 @@ function showSection(name, btn) {
 })();
 </script>
 
+<button class="scroll-top-btn" id="scrollTopBtn" aria-label="{% if lang == 'en' %}Back to top{% else %}ページトップへ{% endif %}" title="{% if lang == 'en' %}Back to top{% else %}ページトップへ{% endif %}">↑</button>
+
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});});}</script>
+<script>
+(function() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  const THRESHOLD = 300;
+  const onScroll = () => {
+    if (window.scrollY > THRESHOLD) btn.classList.add('visible');
+    else btn.classList.remove('visible');
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+})();
+</script>
 </body>
 </html>

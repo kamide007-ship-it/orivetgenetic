@@ -236,12 +236,12 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
       <form id="sim-pdf-form" onsubmit="return handleSimulatorPdfUpload(event)" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
         <input type="file" name="pdf_files" accept="application/pdf,.pdf" multiple required
                style="font-size:0.95em;padding:8px;background:#fff;border:1px solid #fde68a;border-radius:8px;flex:1;min-width:200px;">
-        <button type="submit" class="btn" style="background:#7c3aed;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-weight:600;cursor:pointer;">
-          📤 解析して投入
+        <button type="submit" id="sim-pdf-submit" class="btn" aria-busy="false" style="background:#7c3aed;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-weight:600;cursor:pointer;transition:opacity 0.2s;">
+          <span id="sim-pdf-btn-text">📤 解析して投入</span>
         </button>
         <span id="sim-pdf-status" role="status" aria-live="polite" style="font-size:0.85em;color:#374151;"></span>
       </form>
-      <div id="sim-pdf-errors" style="margin-top:8px;font-size:0.85em;"></div>
+      <div id="sim-pdf-errors" style="margin-top:8px;font-size:0.85em;max-height:120px;overflow-y:auto;"></div>
     </div>
   </details>
 
@@ -306,6 +306,9 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
             </label>
           </div>
         </div>
+        <div class="form-row">
+          <div class="form-group"><label>I Locus (KITLG / 毛色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label><select id="cs-i" onchange="runColorSim()"><option value="II">I/I — レッド/ディープレッド</option><option value="Ii" selected>I/i — アプリコット（中間）</option><option value="ii">i/i — クリーム/ホワイト</option></select></div>
+        </div>
       </div>
 
       <div id="custom-dam" style="display:none;" class="card">
@@ -331,6 +334,9 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
               Greying遺伝子を持つ（G/g 想定）
             </label>
           </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>I Locus (KITLG / 毛色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label><select id="cd-i" onchange="runColorSim()"><option value="II">I/I — レッド/ディープレッド</option><option value="Ii" selected>I/i — アプリコット（中間）</option><option value="ii">i/i — クリーム/ホワイト</option></select></div>
         </div>
       </div>
 
@@ -494,7 +500,7 @@ const DOGS = {
   },
   exB: {
     name: "（例）トイプードル ♀ クリーム", sex: "female",
-    color: { e:"ee", k:"KBKB", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS" },
+    color: { e:"ee", k:"KBKB", a:"atat", b:"Bb", d:"DD", m:"mm", s:"SS", i:"ii" },
     health: {
       "CDDY+IVDD": "PN",
       "Osteochondrodysplasia": "NN",
@@ -524,7 +530,7 @@ const DOGS = {
   },
   exD: {
     name: "（例）ラブラドール ♀ イエロー", sex: "female",
-    color: { e:"ee", k:"KBKB", a:"ayay", b:"Bb", d:"DD", m:"mm", s:"SS" },
+    color: { e:"ee", k:"KBKB", a:"ayay", b:"Bb", d:"DD", m:"mm", s:"SS", i:"Ii" },
     health: {
       "CDDY+IVDD": "NN",
       "Osteochondrodysplasia": "NN",
@@ -687,9 +693,7 @@ function splitAlleles(gt) {
     "aay":["a","ay"],            // a/ay (sorted: a < ay)
     "aat":["a","at"],            // a/at (sorted: a < at)
     "GG":["G","G"], "Gg":["G","g"], "gg":["g","g"],
-    // KITLG (Intensity) 座位 — 将来対応 T026。今はフォーム未公開だが
-    // splitAlleles マッピングだけ事前定義しておき、KITLG_SUPPORTED を true に
-    // するだけで cross() が機能するようにしておく。
+    // I座位 (KITLG / Intensity) — T026 実装済み
     "II":["I","I"], "Ii":["I","i"], "ii":["i","i"],
     "NN":["N","N"], "PN":["P","N"], "PP":["P","P"],
   };
@@ -697,45 +701,45 @@ function splitAlleles(gt) {
 }
 
 // ================================================================
-// KITLG (Intensity) 座位 対応スイッチ — 将来 T026 で true にして反映
+// KITLG (Intensity) 座位 — T026 実装済み
 // ================================================================
-//   false: ee の coat 色は一律「クリーム〜ホワイト」と表記。
-//          アプリコット/レッドは「KITLG 検査が必要」と注記のみ。
-//   true:  cross(sire.i, dam.i) で II/Ii/ii の確率を取り、
-//          II→クリーム/ホワイト、Ii→アプリコット、ii→レッド と
-//          確率分割して results に追加。
-// 将来手順 (T026):
-//   1. KITLG_SUPPORTED を true に変更
-//   2. 両親フォームに <select id="cs-i"/cd-i"> を追加（既に splitAlleles 対応済み）
-//   3. DOGS 例犬に i:'II'/'Ii'/'ii' を追加
-//   4. 下記 computeEePhenotypes() の TODO ブロック内のコメントを外す
-const KITLG_SUPPORTED = false;
+//   I/I : 高強度フェオメラニン → レッド/ディープレッド
+//   I/i : 中強度             → アプリコット
+//   i/i : 低強度             → クリーム/ホワイト
+//   ※ ee 犬（E座位 e/e）のコート色にのみ影響。E_ 犬では鼻・パッド色素への
+//     影響は限定的。Orivet 12項目には KITLG は含まれないため、
+//     不明の場合は「I/i（アプリコット中間）」を初期値として使用。
+const KITLG_SUPPORTED = true;
 
 // ee 表現型の coat 色ラベルと note を生成する関数。
-// KITLG_SUPPORTED 切替時にここだけ修正すれば他に波及しない。
 function computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam) {
   const out = [];
-  // 共通の coat 色キー（KITLG 未対応時）。
-  // KITLG 対応後はここを intensity allele 確率で分岐する。
-  const coatColor = "cream";
-  const coatBase = "クリーム〜ホワイト";
 
-  // TODO(T026): KITLG_SUPPORTED が true のときの実装例
-  // if (KITLG_SUPPORTED && sire.i && dam.i) {
-  //   const iResult = cross(sire.i, dam.i);
-  //   const pII = iResult["II"]||0, pIi = iResult["Ii"]||0, pii = iResult["ii"]||0;
-  //   const intensityMix = (n) => {
-  //     // n: { color:..., prob:..., note:... } の coat 部分
-  //     // 各 intensity allele 確率で color を分割した array を返す
-  //   };
-  //   // ee + B_ D_ など各分岐ごとに intensityMix を適用
-  // }
+  if (KITLG_SUPPORTED && sire.i && dam.i) {
+    const iResult = cross(sire.i, dam.i);
+    const pII = iResult["II"] || 0;
+    const pIi = iResult["Ii"] || 0;
+    const pii = iResult["ii"] || 0;
 
-  const intensityHint = " ※アプリコット/レッド判定には KITLG 検査が必要";
-  if (pB_ > 0 && pD_ > 0) out.push({ color:coatColor, prob: creamProb * pB_ * pD_, note:`${coatBase} (ee, B_ D_) — 鼻・パッドは黒色素${intensityHint}` });
-  if (pB_ > 0 && pdd > 0) out.push({ color:coatColor, prob: creamProb * pB_ * pdd, note:`${coatBase} ※希釈時はシャンパンと呼ばれる (ee, B_ dd) — 鼻・パッドは希釈黒色素(ブルー系)` });
-  if (pbb > 0 && pD_ > 0) out.push({ color:coatColor, prob: creamProb * pbb * pD_, note:`${coatBase} (ee, bb D_) — 鼻・パッドはブラウン色素(リバー)` });
-  if (pbb > 0 && pdd > 0) out.push({ color:coatColor, prob: creamProb * pbb * pdd, note:`${coatBase} ※希釈時はシャンパンと呼ばれる (ee, bb dd) — 鼻・パッドはイザベラ(ライラック)` });
+    const addIntensity = (baseProb, bdNote) => {
+      if (pII > 0) out.push({ color:"red",    prob: baseProb * pII, note:`レッド/ディープレッド (ee, I/I, ${bdNote})` });
+      if (pIi > 0) out.push({ color:"apricot",prob: baseProb * pIi, note:`アプリコット (ee, I/i, ${bdNote})` });
+      if (pii > 0) out.push({ color:"cream",  prob: baseProb * pii, note:`クリーム/ホワイト (ee, i/i, ${bdNote})` });
+    };
+
+    if (pB_ > 0 && pD_ > 0) addIntensity(creamProb * pB_ * pD_, "B_ D_ 鼻・パッド: 黒");
+    if (pB_ > 0 && pdd > 0) addIntensity(creamProb * pB_ * pdd, "B_ dd 鼻・パッド: ブルー系 ※シャンパン");
+    if (pbb > 0 && pD_ > 0) addIntensity(creamProb * pbb * pD_, "bb D_ 鼻・パッド: リバー(ブラウン)");
+    if (pbb > 0 && pdd > 0) addIntensity(creamProb * pbb * pdd, "bb dd 鼻・パッド: イザベラ(ライラック) ※シャンパン");
+    return out;
+  }
+
+  // KITLG 情報なし時のフォールバック
+  const intensityHint = " ※アプリコット/レッド判定には I座位(KITLG)情報が必要";
+  if (pB_ > 0 && pD_ > 0) out.push({ color:"cream", prob: creamProb * pB_ * pD_, note:`クリーム〜ホワイト (ee, B_ D_) — 鼻・パッドは黒色素${intensityHint}` });
+  if (pB_ > 0 && pdd > 0) out.push({ color:"cream", prob: creamProb * pB_ * pdd, note:`クリーム〜ホワイト (ee, B_ dd) — 鼻・パッドは希釈黒(ブルー系) ※シャンパン${intensityHint}` });
+  if (pbb > 0 && pD_ > 0) out.push({ color:"cream", prob: creamProb * pbb * pD_, note:`クリーム〜ホワイト (ee, bb D_) — 鼻・パッドはリバー(ブラウン)${intensityHint}` });
+  if (pbb > 0 && pdd > 0) out.push({ color:"cream", prob: creamProb * pbb * pdd, note:`クリーム〜ホワイト (ee, bb dd) — 鼻・パッドはイザベラ(ライラック) ※シャンパン${intensityHint}` });
   return out;
 }
 
@@ -746,9 +750,9 @@ const COLOR_MAP = {
   "black": { hex:"#1a1a1a", name:"ブラック" },
   "brown": { hex:"#8B4513", name:"ブラウン/チョコレート" },
   "blue": { hex:"#4a6fa5", name:"ブルー" },
-  "cream": { hex:"#FFF8DC", name:"クリーム〜ホワイト (ee 基本表現型)" },
-  "apricot": { hex:"#FBCEB1", name:"アプリコット (KITLG 中 intensity)" },
-  "red": { hex:"#CD5C5C", name:"レッド (KITLG 高 intensity)" },
+  "cream": { hex:"#FFF8DC", name:"クリーム/ホワイト" },
+  "apricot": { hex:"#FBCEB1", name:"アプリコット" },
+  "red": { hex:"#CD5C5C", name:"レッド/ディープレッド" },
   "silver": { hex:"#C0C0C0", name:"シルバー（成犬で退色）" },
   "silver_beige": { hex:"#A89F92", name:"シルバービーグ（成犬で退色）" },
   "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ（bb + Greying）" },
@@ -777,14 +781,14 @@ function runColorSim() {
 
   let sire, dam;
   if (sireKey === 'custom') {
-    sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s'), g: sireG };
+    sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s'), g: sireG, i:v('cs-i') };
   } else {
-    sire = Object.assign({ g: 'gg' }, DOGS[sireKey].color);  // 既存例犬は G なし扱い
+    sire = Object.assign({ g: 'gg', i: 'Ii' }, DOGS[sireKey].color);
   }
   if (damKey === 'custom') {
-    dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s'), g: damG };
+    dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s'), g: damG, i:v('cd-i') };
   } else {
-    dam = Object.assign({ g: 'gg' }, DOGS[damKey].color);
+    dam = Object.assign({ g: 'gg', i: 'Ii' }, DOGS[damKey].color);
   }
 
   const eResult = cross(sire.e, dam.e);
@@ -868,11 +872,10 @@ function runColorSim() {
   // Calculate color outcomes
   const results = [];
 
-  // 1. ee dogs → Cream / White（コート色は B/D 座に影響されない）
+  // 1. ee dogs — I座位(KITLG)で クリーム/アプリコット/レッド に分岐
   // 遺伝学的事実: e/e は coat に eumelanin を作れない。B 座（黒vs茶）も D 座（希釈）も
   // coat 色には影響せず、鼻・パッド・アイリムの色素にのみ影響する。
-  // KITLG (Intensity) 未対応のため coat 表記は「クリーム〜ホワイト」固定。
-  // 詳細は computeEePhenotypes() の TODO(T026) ブロック参照。
+  // I/I=レッド, I/i=アプリコット, i/i=クリーム（computeEePhenotypes 参照）
   if (pee > 0) {
     const eePhenotypes = computeEePhenotypes(pee, pB_, pdd, pD_, pbb, sire, dam);
     for (const p of eePhenotypes) results.push(p);
@@ -1358,10 +1361,14 @@ function handleSimulatorPdfUpload(ev) {
   const form = ev.target;
   const status = document.getElementById('sim-pdf-status');
   const errBox = document.getElementById('sim-pdf-errors');
-  const submitBtn = form.querySelector('button[type="submit"]');
-  status.textContent = '⏳ 解析中…';
+  const submitBtn = document.getElementById('sim-pdf-submit');
+  const btnText = document.getElementById('sim-pdf-btn-text');
+  status.textContent = '';
   errBox.innerHTML = '';
   submitBtn.disabled = true;
+  submitBtn.setAttribute('aria-busy', 'true');
+  submitBtn.style.opacity = '0.65';
+  btnText.textContent = '⏳ 解析中…';
 
   const fd = new FormData(form);
   fetch('/api/simulator/parse', { method: 'POST', body: fd })
@@ -1394,7 +1401,12 @@ function handleSimulatorPdfUpload(ev) {
       status.textContent = '';
       errBox.innerHTML = '<div class="warn-box">通信エラー: ' + (err && err.message ? err.message : err) + '</div>';
     })
-    .finally(() => { submitBtn.disabled = false; });
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.setAttribute('aria-busy', 'false');
+      submitBtn.style.opacity = '';
+      btnText.textContent = '📤 解析して投入';
+    });
   return false;
 }
 
@@ -1548,6 +1560,12 @@ const LOCUS_KB = {
     summary: '子犬期は色付きで生まれ、成犬になると退色する遺伝子。プードルのシルバー色の原因。',
     phenotype: 'g/g  : 退色なし\\nG/g, G/G : 成犬で退色\\n  Black + G_  → Silver\\n  Brown + G_  → Silver Beige\\n  Blue + G_   → Silver（淡）',
     advice: 'シルバープードルは生まれた時は黒。1〜2歳までに段階的に退色していきます。'
+  },
+  i: {
+    title: 'I座位 (MFSD12 / KITLG) — フェオメラニン濃度（アプリコット/レッド）',
+    summary: 'E座位 e/e の犬のコート色（クリーム〜アプリコット〜レッド）の濃さを決める遺伝子座位です。黒・茶系（E_）犬への影響は限定的。',
+    phenotype: 'I/I : レッド / ディープレッド（高強度フェオメラニン）\\nI/i : アプリコット（中間）\\ni/i : クリーム / ホワイト（低強度フェオメラニン）',
+    advice: 'Orivet 12項目パネルには KITLG が含まれていないため、検査値がない場合は「I/i（アプリコット）」をデフォルトとして使用してください。ラブラドールのフォックスレッド・イエロー・クリームの違い、プードルの各コート色の濃淡もこの座位で説明できます。'
   }
 };
 
@@ -1593,13 +1611,15 @@ const _LOCUS_FROM_CODE = {
   'M_':'m','mm':'m','Mm':'m','MM':'m',
   'S_':'s','SS':'s','Ssp':'s','spsp':'s','sp':'s',
   'G_':'g','gg':'g','Gg':'g','GG':'g',
+  // I 座位 (KITLG / Intensity)
+  'I/I':'i','I/i':'i','i/i':'i','II':'i','Ii':'i',
   // A 座位は ay/aw/at/a 由来全パターン
   'ay':'a','aw':'a','at':'a','a/a':'a',
   'ayay':'a','ayat':'a','away':'a','aay':'a','awaw':'a',
   'ataw':'a','aaw':'a','atat':'a','aat':'a','aa':'a',
 };
 // 正規表現: 長いパターンを先に評価する必要があるため alternation 順序が重要
-const _LOCUS_REGEX = /\b(KB_|kbr_|ky_|E_|B_|D_|M_|S_|G_|ayay|ayat|away|aay|awaw|ataw|aaw|atat|aat|Ssp|spsp|kbr|KB|ky|EE|Ee|ee|BB|Bb|bb|DD|Dd|dd|MM|Mm|mm|GG|Gg|gg|SS|sp|aa)\b/g;
+const _LOCUS_REGEX = /\b(KB_|kbr_|ky_|E_|B_|D_|M_|S_|G_|ayay|ayat|away|aay|awaw|ataw|aaw|atat|aat|Ssp|spsp|kbr|KB|ky|EE|Ee|ee|BB|Bb|bb|DD|Dd|dd|MM|Mm|mm|GG|Gg|gg|SS|sp|aa)\b|I\/I|I\/i|i\/i/g;
 
 function wrapLocusReferences(text) {
   if (!text) return text;
