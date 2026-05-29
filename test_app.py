@@ -733,6 +733,52 @@ class TestHeterozygosityDetailsMerge:
         body = rv.get_data(as_text=True)
         assert "Heterozygosity Details" in body
 
+    def test_looks_like_orivet_detects_english(self):
+        from poodle_genetics import _looks_like_orivet_pdf
+        assert _looks_like_orivet_pdf("Orivet Genetic Summary Report\n...")
+        assert _looks_like_orivet_pdf("Heterozygosity Score: 0.373\n...")
+
+    def test_looks_like_orivet_detects_japanese(self):
+        from poodle_genetics import _looks_like_orivet_pdf
+        assert _looks_like_orivet_pdf("オリベット 遺伝子解析サマリー\n...")
+        assert _looks_like_orivet_pdf("健康検査結果\n...")
+        assert _looks_like_orivet_pdf("ヘテロ接合率 37.30%\n...")
+        assert _looks_like_orivet_pdf("遺伝的多様性\n...")
+
+    def test_looks_like_orivet_rejects_unrelated(self):
+        from poodle_genetics import _looks_like_orivet_pdf
+        assert not _looks_like_orivet_pdf("This is a cat document.")
+        assert not _looks_like_orivet_pdf("")
+        assert not _looks_like_orivet_pdf(None)
+
+
+class TestIndexCacheHeaders:
+    """トップページが flash メッセージで汚染されないことの検証"""
+
+    def test_index_has_no_store_headers(self):
+        """/ に no-cache, no-store ヘッダーが付く（ブラウザキャッシュ汚染防止）"""
+        rv = client.get("/")
+        cc = rv.headers.get("Cache-Control", "")
+        assert "no-store" in cc
+        assert "no-cache" in cc
+
+    def test_flash_consumed_on_first_render(self):
+        """flash メッセージは 1 回表示で消費される（次回は出ない）"""
+        with client.session_transaction() as sess:
+            sess["_flashes"] = [("error", "テストエラー")]
+        first = client.get("/").get_data(as_text=True)
+        assert "テストエラー" in first
+        second = client.get("/").get_data(as_text=True)
+        assert "テストエラー" not in second
+
+    def test_service_worker_excludes_root_from_cache_first(self):
+        """SW は / を network-first 扱いし、APP_SHELL の cache-first リストから外す"""
+        sw = client.get("/sw.js").get_data(as_text=True)
+        # キャッシュバージョン更新で旧キャッシュを無効化
+        assert "orivet-v2" in sw
+        # / 専用の network-first 分岐が存在
+        assert "url.pathname === '/'" in sw
+
 
 class TestSimulatorPdfUpload:
     """繁殖シミュレーター直接 PDF アップロード API"""

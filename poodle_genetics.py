@@ -4337,6 +4337,31 @@ def parse_heterozygosity_range(text: str):
     return (round(low, 1), round(high, 1))
 
 
+def _looks_like_orivet_pdf(text: str) -> bool:
+    """テキストが Orivet レポートかどうかを判定（日英・部分一致対応）。
+
+    マーカーが英語版か日本語版か分からない場合のフォールバック。
+    Orivet ブランディング または 遺伝子検査関連の語句で広く拾う。
+    """
+    if not text:
+        return False
+    markers = (
+        "Orivet", "Paw Print Genetics",
+        "オリベット", "オリヴェット",
+        # 英語版セクションヘッダー
+        "Genetic Summary Report", "Health Tests Reported",
+        "Genetic Test", "DNA Test Results",
+        # 日本語版セクションヘッダー
+        "遺伝子解析サマリー", "遺伝子解析サマリーレポート",
+        "遺伝子検査サマリー", "遺伝子検査結果", "遺伝子検査レポート",
+        "遺伝子解析レポート", "健康検査結果", "形質検査結果",
+        # ヘテロ接合率関連
+        "Heterozygosity Details", "Heterozygosity Score",
+        "ヘテロ接合率", "遺伝的多様性",
+    )
+    return any(m in text for m in markers)
+
+
 def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
     """PDFファイル1つを解析してDogProfileを返す"""
     basename = os.path.basename(pdf_path)
@@ -4355,23 +4380,35 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
 
     text = extract_all_text(pdf_path)
 
+    # === マーカー検出（英語・日本語両対応） ===
+    # 本体（Genetic Summary Report 相当）と Heterozygosity Details ページを別々に判定。
+    main_markers = (
+        "Genetic Summary Report", "Health Tests Reported",
+        "Genetic Test Results", "DNA Test Results",
+        # 日本語ローカライズ版
+        "遺伝子解析サマリー", "遺伝子検査サマリー",
+        "遺伝子検査結果", "遺伝子解析レポート",
+        "遺伝子検査レポート", "健康検査結果", "形質検査結果",
+    )
+    het_markers = (
+        "Heterozygosity Details", "Heterozygosity Score",
+        "ヘテロ接合率", "遺伝的多様性",
+    )
+    has_main = any(m in text for m in main_markers)
+    has_het = any(m in text for m in het_markers)
+
     # === Heterozygosity Details PDF（別ファイルで送られてくる）の単独受付 ===
     # Genetic Summary Report 本体は持たないが、Heterozygosity Details ページだけ
     # 切り出された PDF を、最小プロファイル（pet_name + het + range のみ）として
     # 受け付ける。/analyze 側で同名の犬と自動マージされる。
-    is_het_only = (
-        ("Heterozygosity Details" in text or "Heterozygosity Score" in text)
-        and "Genetic Summary Report" not in text
-        and "Health Tests Reported" not in text
-    )
-    if is_het_only:
+    if has_het and not has_main:
         het = parse_heterozygosity(text)
         if het is None:
             print(f"  → Heterozygosity Score を抽出できませんでした。スキップします。")
             return None
         rng = parse_heterozygosity_range(text)
-        # Pet Name : 行から犬名を取得（マージ用キー）
-        m = re.search(r"Pet\s*Name\s*[:：]?\s*(.+)", text)
+        # Pet Name / ペット名 行から犬名を取得（マージ用キー）
+        m = re.search(r"(?:Pet\s*Name|ペット名|犬名)\s*[:：]?\s*(.+)", text)
         pet_name = m.group(1).strip() if m else ""
         dog = DogProfile(
             pet_name=pet_name,
@@ -4382,8 +4419,27 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
         print(f"  → {pet_name or '(名前不明)'}: Heterozygosity Details のみ ({het}%)")
         return dog
 
-    if "Genetic Summary Report" not in text and "Health Tests Reported" not in text:
-        print("  → Orivet Genetic Summary Report ではありません。スキップします。")
+    if not has_main:
+        # Orivet ブランディングがあるのにメインマーカーが見つからない場合、
+        # PDF テキスト抽出やローカライズ変種で取りこぼした可能性が高い。
+        # 最後のフォールバックとしてヘテロ接合率だけでも抽出を試みる。
+        if _looks_like_orivet_pdf(text):
+            het = parse_heterozygosity(text)
+            if het is not None:
+                rng = parse_heterozygosity_range(text)
+                m = re.search(r"(?:Pet\s*Name|ペット名|犬名)\s*[:：]?\s*(.+)", text)
+                pet_name = m.group(1).strip() if m else ""
+                dog = DogProfile(
+                    pet_name=pet_name,
+                    source_file=basename,
+                    heterozygosity=het,
+                    heterozygosity_range=(list(rng) if rng else None),
+                )
+                print(f"  → {pet_name or '(名前不明)'}: Orivet PDF（ヘテロ接合率のみ抽出 {het}%）")
+                return dog
+            print(f"  → Orivet PDF らしいが本体マーカーが見つかりません。スキップします。")
+        else:
+            print(f"  → Orivet Genetic Summary Report ではありません。スキップします。")
         return None
 
     info = parse_animal_details(text)

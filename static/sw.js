@@ -4,17 +4,18 @@
 // キャッシュ戦略:
 //   - app shell (HTML / 静的辞書 / アイコン): cache-first
 //   - /api/* / /analyze / /report: network-only (常に最新)
+//   - / (トップ): network-first (flash メッセージのキャッシュ汚染を防ぐ)
 //   - その他: network-first, fallback to cache
 //
 // ⚠️ Service Worker のスコープはこのファイルの配置パスで決まる。
 //    /sw.js から配信することでサイト全体を制御可能。
 
-const CACHE_VERSION = 'orivet-v1';
+const CACHE_VERSION = 'orivet-v2';
 const CACHE_NAME = `app-shell-${CACHE_VERSION}`;
 
 // オフラインでも閲覧したい最小コアアセット
+// 注: '/' は flash メッセージを含み得るので、ここから外して runtime で都度取得
 const APP_SHELL = [
-  '/',
   '/glossary',
   '/guides',
   '/sample',
@@ -67,6 +68,22 @@ self.addEventListener('fetch', (event) => {
     url.pathname.startsWith('/download/')
   ) {
     return;  // ブラウザに任せる
+  }
+
+  // トップページ '/' は flash メッセージを含み得るので network-first。
+  // ネットワーク失敗時のみキャッシュへフォールバック（オフライン対応）。
+  if (url.pathname === '/' || url.pathname === '/index' || url.pathname === '/index.html') {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        if (response.ok && response.status === 200) {
+          // 念のためキャッシュも更新（オフライン用フォールバック）
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(event.request, clone)).catch(() => {});
+        }
+        return response;
+      }).catch(() => caches.match(event.request).then((c) => c || caches.match('/')))
+    );
+    return;
   }
 
   // 静的辞書ページ・KB ページ等は cache-first
