@@ -471,7 +471,7 @@
                     <span class="status-badge badge-ng" data-i18n="badge_ng">未対応</span>
                     {% endif %}
                 </div>
-                <p class="section-desc" data-i18n="sec_pdf_desc">Orivet 遺伝子検査PDF または 血統書PDF をアップロードしてください（全犬種対応・複数可・自動判別）</p>
+                <p class="section-desc" data-i18n="sec_pdf_desc">Orivet 遺伝子検査PDF または 血統書PDF をアップロードしてください（全犬種対応・複数可・自動判別）<br><small style="opacity:0.85;">※「Heterozygosity Details」PDF を本体レポートと一緒に入れると、ヘテロ接合率（遺伝的多様性）も自動評価します。</small></p>
                 <div class="upload-area" id="pdfArea">
                     <input type="file" name="pdf_files" multiple accept=".pdf" id="pdfInput" aria-label="PDF ファイルを選択（複数可）">
                     <div class="upload-icon">📄</div>
@@ -658,7 +658,7 @@
                 sec_pdf: "Genetic Test PDF / Pedigree PDF",
                 badge_ok: "Supported",
                 badge_ng: "Not Supported",
-                sec_pdf_desc: "Upload Orivet genetic test PDF or pedigree certificate PDF (all breeds supported, multiple files OK, auto-detected)",
+                sec_pdf_desc: "Upload Orivet genetic test PDF or pedigree certificate PDF (all breeds supported, multiple files OK, auto-detected). Including the 'Heterozygosity Details' PDF alongside the main report will also evaluate genetic diversity automatically.",
                 pdf_drop: "Drop or click to select PDF files",
                 pdf_hint: ".pdf (multiple files OK)",
                 sec_pedigree: "Pedigree (JKC, ALAJ, AKC, etc.)",
@@ -705,7 +705,7 @@
                 sec_pdf: "遺伝子検査PDF / 血統書PDF",
                 badge_ok: "対応",
                 badge_ng: "未対応",
-                sec_pdf_desc: "Orivet 遺伝子検査PDF または 血統書PDF をアップロードしてください（全犬種対応・複数可・自動判別）",
+                sec_pdf_desc: "Orivet 遺伝子検査PDF または 血統書PDF をアップロードしてください（全犬種対応・複数可・自動判別）。「Heterozygosity Details」PDF を本体レポートと一緒に入れると、ヘテロ接合率も自動評価します。",
                 pdf_drop: "PDF ファイルをドロップまたはクリック",
                 pdf_hint: ".pdf（複数選択可）",
                 sec_pedigree: "血統書（JKC・ALAJ・AKC等）",

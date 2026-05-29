@@ -231,7 +231,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
     <div style="margin-top:12px;font-size:0.9em;color:#374151;">
       <p style="margin-bottom:10px;">
         Orivet 遺伝子検査の PDF を最大 4 ファイルまで選択すると、自動で解析して父犬・母犬の遺伝子型欄に投入します。<br>
-        <span style="color:#6b7280;font-size:0.9em;">※ レポートは生成されません。シミュレーター専用の軽量解析です。</span>
+        <span style="color:#6b7280;font-size:0.9em;">※ 本体レポートと「Heterozygosity Details」PDF を一緒に選ぶと、ヘテロ接合率も同時に評価します。レポート HTML は生成されません（シミュレーター専用の軽量解析）。</span>
       </p>
       <form id="sim-pdf-form" onsubmit="return handleSimulatorPdfUpload(event)" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
         <input type="file" name="pdf_files" accept="application/pdf,.pdf" multiple required
