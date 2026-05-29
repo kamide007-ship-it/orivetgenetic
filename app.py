@@ -118,6 +118,7 @@ from poodle_genetics import (
     DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX, make_entry_slug,
     GUIDES, GUIDES_INDEX, GUIDES_BY_DISEASE, GUIDES_BY_TRAIT,
     BREEDS_BY_DISEASE, BREEDS_BY_TRAIT, detect_breed_guides,
+    merge_heterozygosity_only,
     get_disease_kb_localized, get_trait_kb_localized,
     get_guides_localized, get_guide_localized, HAS_EN_GUIDES,
     HAS_EN_KB, SEVERITY_LABELS_EN, CATEGORY_LABELS_EN, SYMPTOM_LABELS_EN,
@@ -382,6 +383,9 @@ def analyze():
     use_demo = request.form.get("use_demo")
     if use_demo:
         pedigrees.append(KNOWN_PEDIGREES["seven"])
+
+    # Heterozygosity Details PDF が別ファイルで来た場合、同名の本体にマージ
+    dogs = merge_heterozygosity_only(dogs)
 
     if not dogs and not pedigrees:
         flash("解析可能なデータがありませんでした。PDFまたは血統書画像をアップロードしてください。", "error")
@@ -939,7 +943,7 @@ def api_simulator_parse():
     # アップロード用の使い捨て一時ディレクトリ。終了時に必ず削除する。
     tmp_dir = os.path.join(UPLOAD_FOLDER, f"sim_{request_id}_{uuid.uuid4().hex[:8]}")
     os.makedirs(tmp_dir, exist_ok=True)
-    parsed = []
+    dog_profiles = []
     errors = []
     try:
         for f in files:
@@ -961,7 +965,11 @@ def api_simulator_parse():
             if not dog:
                 errors.append({"file": f.filename, "message": "Orivet 遺伝子検査 PDF として認識できませんでした"})
                 continue
-            parsed.append(extract_sim_data(dog))
+            dog_profiles.append(dog)
+
+        # Heterozygosity Details PDF を同名の本体にマージ
+        dog_profiles = merge_heterozygosity_only(dog_profiles)
+        parsed = [extract_sim_data(d) for d in dog_profiles]
 
         if not parsed:
             return jsonify({"dogs": [], "errors": errors, "message": "解析できた犬がいませんでした"}), 200

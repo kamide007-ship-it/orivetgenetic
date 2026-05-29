@@ -677,6 +677,63 @@ class TestSimulatorFunnel:
         assert "解析データを自動読み込みしました" in body
 
 
+class TestHeterozygosityDetailsMerge:
+    """別 PDF として送られてくる Heterozygosity Details の本体マージ"""
+
+    def test_is_heterozygosity_only_profile(self):
+        from poodle_genetics import DogProfile, is_heterozygosity_only_profile
+        main = DogProfile(pet_name="A", health_results=["x"])
+        het = DogProfile(pet_name="A", heterozygosity=37.3)
+        empty = DogProfile(pet_name="A")
+        assert not is_heterozygosity_only_profile(main)
+        assert is_heterozygosity_only_profile(het)
+        assert not is_heterozygosity_only_profile(empty)  # het 値が無いので false
+        assert not is_heterozygosity_only_profile(None)
+
+    def test_merge_by_pet_name(self):
+        """同名の本体に het 値が注入される"""
+        from poodle_genetics import DogProfile, merge_heterozygosity_only
+        main = DogProfile(pet_name="Angel of Music", health_results=["x"], trait_results=["y"])
+        het = DogProfile(pet_name="Angel of Music", heterozygosity=37.3,
+                         heterozygosity_range=[23.4, 32.6])
+        result = merge_heterozygosity_only([main, het])
+        assert len(result) == 1
+        assert result[0].heterozygosity == 37.3
+        assert result[0].heterozygosity_range == [23.4, 32.6]
+        assert result[0].health_results == ["x"]
+
+    def test_merge_case_and_whitespace_insensitive(self):
+        from poodle_genetics import DogProfile, merge_heterozygosity_only
+        main = DogProfile(pet_name="  Angel of Music  ", health_results=["x"])
+        het = DogProfile(pet_name="angel of music", heterozygosity=37.3)
+        result = merge_heterozygosity_only([main, het])
+        assert len(result) == 1
+        assert result[0].heterozygosity == 37.3
+
+    def test_unmatched_kept_separately(self):
+        from poodle_genetics import DogProfile, merge_heterozygosity_only
+        main = DogProfile(pet_name="Different", health_results=["x"])
+        het = DogProfile(pet_name="Angel", heterozygosity=37.3)
+        result = merge_heterozygosity_only([main, het])
+        assert len(result) == 2
+
+    def test_existing_value_not_overwritten(self):
+        from poodle_genetics import DogProfile, merge_heterozygosity_only
+        main = DogProfile(pet_name="X", health_results=["x"], heterozygosity=99.9)
+        het = DogProfile(pet_name="X", heterozygosity=37.3)
+        result = merge_heterozygosity_only([main, het])
+        assert result[0].heterozygosity == 99.9  # 既存値を保持
+
+    def test_empty_list(self):
+        from poodle_genetics import merge_heterozygosity_only
+        assert merge_heterozygosity_only([]) == []
+
+    def test_index_explains_het_details_pdf(self):
+        rv = client.get("/")
+        body = rv.get_data(as_text=True)
+        assert "Heterozygosity Details" in body
+
+
 class TestSimulatorPdfUpload:
     """繁殖シミュレーター直接 PDF アップロード API"""
 

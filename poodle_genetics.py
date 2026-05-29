@@ -4107,6 +4107,52 @@ def parse_heterozygosity(text: str) -> Optional[float]:
     return _to_percent(m.group(1), bool(m.group(2)))
 
 
+def is_heterozygosity_only_profile(dog) -> bool:
+    """Heterozygosity Details PDF だけから作られた最小プロファイルか判定。
+
+    /analyze 側で同名の Genetic Summary Report 由来 DogProfile にマージする
+    ための識別子。
+    """
+    return (
+        dog is not None
+        and dog.heterozygosity is not None
+        and not dog.health_results
+        and not dog.trait_results
+    )
+
+
+def merge_heterozygosity_only(dogs: list) -> list:
+    """Heterozygosity-only プロファイルを同名の本体プロファイルにマージ。
+
+    アップロード時に Genetic Summary Report PDF と Heterozygosity Details PDF
+    が別ファイルとして来た場合に呼ぶ。pet_name で照合（大文字小文字無視、
+    前後空白除去）。本体に既に het 値が入っていれば上書きしない。
+
+    どの本体ともマッチしなかった het-only プロファイルは結果リストにそのまま残る。
+    """
+    if not dogs:
+        return dogs
+    main_dogs = [d for d in dogs if not is_heterozygosity_only_profile(d)]
+    het_only = [d for d in dogs if is_heterozygosity_only_profile(d)]
+    if not het_only:
+        return dogs
+
+    def _key(name: str) -> str:
+        return (name or "").strip().casefold()
+
+    unmatched = []
+    for h in het_only:
+        target = next((m for m in main_dogs if _key(m.pet_name) == _key(h.pet_name) and h.pet_name), None)
+        if target is None:
+            unmatched.append(h)
+            continue
+        if target.heterozygosity is None:
+            target.heterozygosity = h.heterozygosity
+        if target.heterozygosity_range is None and h.heterozygosity_range:
+            target.heterozygosity_range = h.heterozygosity_range
+    return main_dogs + unmatched
+
+
 def parse_heterozygosity_range(text: str):
     """Orivet PDF の犬種別『Typical range 23.4% - 32.6%』を抽出。
 
@@ -4156,6 +4202,33 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
     print(f"  解析中: {basename}")
 
     text = extract_all_text(pdf_path)
+
+    # === Heterozygosity Details PDF（別ファイルで送られてくる）の単独受付 ===
+    # Genetic Summary Report 本体は持たないが、Heterozygosity Details ページだけ
+    # 切り出された PDF を、最小プロファイル（pet_name + het + range のみ）として
+    # 受け付ける。/analyze 側で同名の犬と自動マージされる。
+    is_het_only = (
+        ("Heterozygosity Details" in text or "Heterozygosity Score" in text)
+        and "Genetic Summary Report" not in text
+        and "Health Tests Reported" not in text
+    )
+    if is_het_only:
+        het = parse_heterozygosity(text)
+        if het is None:
+            print(f"  → Heterozygosity Score を抽出できませんでした。スキップします。")
+            return None
+        rng = parse_heterozygosity_range(text)
+        # Pet Name : 行から犬名を取得（マージ用キー）
+        m = re.search(r"Pet\s*Name\s*[:：]?\s*(.+)", text)
+        pet_name = m.group(1).strip() if m else ""
+        dog = DogProfile(
+            pet_name=pet_name,
+            source_file=basename,
+            heterozygosity=het,
+            heterozygosity_range=(list(rng) if rng else None),
+        )
+        print(f"  → {pet_name or '(名前不明)'}: Heterozygosity Details のみ ({het}%)")
+        return dog
 
     if "Genetic Summary Report" not in text and "Health Tests Reported" not in text:
         print(f"  → Orivet Genetic Summary Report ではありません。スキップします。")
