@@ -340,7 +340,22 @@ def analyze():
                         if ped:
                             pedigrees.append(ped)
                         else:
-                            ocr_errors.append(f"{f.filename}: 血統書PDFとして解析できませんでした")
+                            # 血統書として解析できなかった場合、Orivet 遺伝子検査 PDF
+                            # として再試行（ユーザーがスロットを間違えても救済）。
+                            dog2 = None
+                            try:
+                                dog2 = parse_pdf(path)
+                            except Exception:
+                                dog2 = None
+                            if dog2:
+                                dogs.append(dog2)
+                            else:
+                                ocr_errors.append(
+                                    f"{f.filename}: 血統書PDFとしても Orivet 遺伝子検査 PDF "
+                                    "としても解析できませんでした。日本語ローカライズ版や"
+                                    "画像ベースの PDF の場合は表示用 PDF（テキスト抽出可能なもの）"
+                                    "をご利用ください。"
+                                )
                     except Exception as e:
                         eid = _log_exc("parse_pedigree_pdf", f.filename, e, request_id)
                         ocr_errors.append(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__} / error_id={eid}）")

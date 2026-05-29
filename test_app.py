@@ -733,6 +733,24 @@ class TestHeterozygosityDetailsMerge:
         body = rv.get_data(as_text=True)
         assert "Heterozygosity Details" in body
 
+    def test_looks_like_orivet_detects_english(self):
+        from poodle_genetics import _looks_like_orivet_pdf
+        assert _looks_like_orivet_pdf("Orivet Genetic Summary Report\n...")
+        assert _looks_like_orivet_pdf("Heterozygosity Score: 0.373\n...")
+
+    def test_looks_like_orivet_detects_japanese(self):
+        from poodle_genetics import _looks_like_orivet_pdf
+        assert _looks_like_orivet_pdf("オリベット 遺伝子解析サマリー\n...")
+        assert _looks_like_orivet_pdf("健康検査結果\n...")
+        assert _looks_like_orivet_pdf("ヘテロ接合率 37.30%\n...")
+        assert _looks_like_orivet_pdf("遺伝的多様性\n...")
+
+    def test_looks_like_orivet_rejects_unrelated(self):
+        from poodle_genetics import _looks_like_orivet_pdf
+        assert not _looks_like_orivet_pdf("This is a cat document.")
+        assert not _looks_like_orivet_pdf("")
+        assert not _looks_like_orivet_pdf(None)
+
 
 class TestSimulatorPdfUpload:
     """繁殖シミュレーター直接 PDF アップロード API"""
