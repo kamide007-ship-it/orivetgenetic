@@ -11,7 +11,7 @@ import json
 import shutil
 import logging
 import secrets
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, flash, jsonify, make_response
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -250,12 +250,19 @@ def request_entity_too_large(_e):
 
 @app.route("/")
 def index():
-    return render_template(
+    # トップは flash メッセージ（前回アップロード失敗時のエラー等）を含み得る。
+    # キャッシュされると「空の状態でも前回のエラーが出続ける」UX を生むため、
+    # キャッシュ無効化ヘッダーを付与する（Service Worker は別途 network-first）。
+    response = make_response(render_template(
         "index.html",
         has_pdfplumber=HAS_PDFPLUMBER,
         has_ocr=HAS_OCR,
         canonical=request.url_root.rstrip("/") + "/",
-    )
+    ))
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 
 @app.route("/analyze", methods=["POST"])

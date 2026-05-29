@@ -752,6 +752,34 @@ class TestHeterozygosityDetailsMerge:
         assert not _looks_like_orivet_pdf(None)
 
 
+class TestIndexCacheHeaders:
+    """トップページが flash メッセージで汚染されないことの検証"""
+
+    def test_index_has_no_store_headers(self):
+        """/ に no-cache, no-store ヘッダーが付く（ブラウザキャッシュ汚染防止）"""
+        rv = client.get("/")
+        cc = rv.headers.get("Cache-Control", "")
+        assert "no-store" in cc
+        assert "no-cache" in cc
+
+    def test_flash_consumed_on_first_render(self):
+        """flash メッセージは 1 回表示で消費される（次回は出ない）"""
+        with client.session_transaction() as sess:
+            sess["_flashes"] = [("error", "テストエラー")]
+        first = client.get("/").get_data(as_text=True)
+        assert "テストエラー" in first
+        second = client.get("/").get_data(as_text=True)
+        assert "テストエラー" not in second
+
+    def test_service_worker_excludes_root_from_cache_first(self):
+        """SW は / を network-first 扱いし、APP_SHELL の cache-first リストから外す"""
+        sw = client.get("/sw.js").get_data(as_text=True)
+        # キャッシュバージョン更新で旧キャッシュを無効化
+        assert "orivet-v2" in sw
+        # / 専用の network-first 分岐が存在
+        assert "url.pathname === '/'" in sw
+
+
 class TestSimulatorPdfUpload:
     """繁殖シミュレーター直接 PDF アップロード API"""
 
