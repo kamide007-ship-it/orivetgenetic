@@ -25,6 +25,39 @@
     <link rel="alternate" hreflang="x-default" href="{{ canonical }}">
     {% endif %}
 
+    {# --- JSON-LD: Organization + WebSite (サイト全体の知識グラフ) --- #}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "{{ request.url_root.rstrip('/') }}/#organization",
+          "name": "Orivet 遺伝子解析",
+          "url": "{{ request.url_root.rstrip('/') }}/",
+          "logo": "{{ request.url_root.rstrip('/') }}/static/icon-512.svg",
+          "description": "犬の遺伝子検査PDFから毛色予測・遺伝性疾患リスク・血統分析を生成する解析ツール。"
+        },
+        {
+          "@type": "WebSite",
+          "@id": "{{ request.url_root.rstrip('/') }}/#website",
+          "url": "{{ request.url_root.rstrip('/') }}/",
+          "name": "Orivet 遺伝子解析",
+          "publisher": { "@id": "{{ request.url_root.rstrip('/') }}/#organization" },
+          "inLanguage": ["ja", "en"],
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "{{ request.url_root.rstrip('/') }}/glossary?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    }
+    </script>
+
     {# PWA 対応 (PR #58) #}
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#7c3aed">
@@ -233,6 +266,35 @@
             margin-top: 10px;
             font-size: 0.8em;
             color: #9ca3af;
+        }
+        /* 辞書・ガイド ディレクトリ（内部リンク集） */
+        .directory {
+            max-width: 760px;
+            margin: 28px auto 40px;
+            padding: 24px 28px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+        }
+        .directory-title { font-size: 1.25em; color: #4a1a7a; margin-bottom: 6px; }
+        .directory-lead { font-size: 0.92em; color: #6b7280; line-height: 1.6; margin-bottom: 18px; }
+        .directory-group { margin-bottom: 18px; }
+        .directory-group:last-child { margin-bottom: 0; }
+        .directory-subtitle { font-size: 0.98em; color: #5b21b6; margin-bottom: 10px; }
+        .directory-links { display: flex; flex-wrap: wrap; gap: 8px; }
+        .directory-links a {
+            display: inline-block; padding: 7px 14px;
+            background: #faf5ff; color: #4a1a7a; text-decoration: none;
+            border: 1px solid #ede9fe; border-radius: 18px; font-size: 0.88em;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .directory-links a:hover { background: #ede9fe; border-color: #c4b5fd; }
+        .directory-links a.directory-all { background: #7c3aed; color: #fff; border-color: #7c3aed; font-weight: 600; }
+        .directory-links a.directory-all:hover { background: #6d28d9; }
+        @media (max-width: 480px) {
+            .directory { margin: 20px 14px 28px; padding: 18px 16px; border-radius: 12px; }
+            .directory-links a { padding: 9px 14px; min-height: 40px; display: inline-flex; align-items: center; }
         }
         .loading {
             display: none;
@@ -535,6 +597,46 @@
             Tesseract OCR: {{ "OK" if has_ocr else "未インストール" }}
         </div>
     </div>
+
+    {# --- 辞書・ガイドへの内部リンク集（SEO / クロール深度短縮） --- #}
+    <nav class="directory" aria-label="{% if lang == 'en' %}Glossary and guide directory{% else %}辞書・ガイド ディレクトリ{% endif %}">
+        <h2 class="directory-title">{% if lang == 'en' %}📚 Explore the Genetic Glossary{% else %}📚 遺伝子辞書を見る{% endif %}</h2>
+        <p class="directory-lead">{% if lang == 'en' %}A free reference covering {{ total_diseases }} genetic diseases, {{ total_traits }} coat / trait genes, and {{ total_guides }} guides — no upload required.{% else %}アップロード不要で読める無料の辞書。{{ total_diseases }} の遺伝子疾患、{{ total_traits }} の毛色・形質遺伝子、{{ total_guides }} のガイド記事を収録しています。{% endif %}</p>
+
+        {% if popular_diseases %}
+        <div class="directory-group">
+            <h3 class="directory-subtitle">🧬 {% if lang == 'en' %}Popular genetic diseases{% else %}よく見られる遺伝子疾患{% endif %}</h3>
+            <div class="directory-links">
+                {% for d in popular_diseases %}
+                <a href="/glossary/disease/{{ d.slug }}{% if lang == 'en' %}?lang=en{% endif %}">{{ d.title }}</a>
+                {% endfor %}
+                <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="directory-all">{% if lang == 'en' %}View all diseases →{% else %}すべての疾患を見る →{% endif %}</a>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if popular_traits %}
+        <div class="directory-group">
+            <h3 class="directory-subtitle">🎨 {% if lang == 'en' %}Coat color & trait genes{% else %}毛色・形質の遺伝子座位{% endif %}</h3>
+            <div class="directory-links">
+                {% for t in popular_traits %}
+                <a href="/glossary/trait/{{ t.slug }}{% if lang == 'en' %}?lang=en{% endif %}">{{ t.title }}</a>
+                {% endfor %}
+                <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="directory-all">{% if lang == 'en' %}View all traits →{% else %}すべての形質を見る →{% endif %}</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="directory-group">
+            <h3 class="directory-subtitle">📖 {% if lang == 'en' %}Guides & tools{% else %}ガイド・ツール{% endif %}</h3>
+            <div class="directory-links">
+                <a href="/guides{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}All guide articles{% else %}ガイド記事一覧{% endif %}</a>
+                <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Disease & trait glossary{% else %}遺伝子疾患・形質 辞書{% endif %}</a>
+                <a href="/simulator">{% if lang == 'en' %}Breeding simulator{% else %}繁殖シミュレーター{% endif %}</a>
+                <a href="/sample{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Sample report{% else %}サンプルレポート{% endif %}</a>
+            </div>
+        </div>
+    </nav>
 
     <script>
         function showFiles(input, listEl) {

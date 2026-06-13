@@ -5,13 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% if lang == 'en' %}Guides — Genetic Testing, Breeding & Coat Genetics | Orivet Genetic Analysis{% else %}ガイド記事 — 遺伝子検査・繁殖計画・毛色遺伝学 | Orivet 遺伝子解析{% endif %}</title>
 <meta name="description" content="{% if lang == 'en' %}Guides on Orivet genetic test interpretation, COI (inbreeding coefficient), coat color genetics, breeding plans, and breed-specific recommendations.{% else %}Orivet 遺伝子検査の見方、COI（近親交配係数）の意味、毛色遺伝子の基本、ブリーダー向け繁殖計画など、犬の遺伝学を理解するためのガイド記事。{% endif %}">
-<link rel="canonical" href="{{ canonical }}">
+<link rel="canonical" href="{{ canonical }}{% if lang == 'en' %}?lang=en{% endif %}">
+
+{# --- hreflang (言語別 alternate) --- #}
+<link rel="alternate" hreflang="ja" href="{{ request.url_root.rstrip('/') }}/guides">
+<link rel="alternate" hreflang="en" href="{{ request.url_root.rstrip('/') }}/guides?lang=en">
+<link rel="alternate" hreflang="x-default" href="{{ request.url_root.rstrip('/') }}/guides">
 
 <meta property="og:type" content="website">
 <meta property="og:title" content="{% if lang == 'en' %}Guides | Orivet Genetic Analysis{% else %}ガイド記事 | Orivet 遺伝子解析{% endif %}">
 <meta property="og:description" content="{% if lang == 'en' %}Guide articles on canine genetic testing, breeding plans, and coat color genetics.{% else %}犬の遺伝子検査・繁殖計画・毛色遺伝学のガイド記事一覧。{% endif %}">
-<meta property="og:url" content="{{ canonical }}">
+<meta property="og:url" content="{{ canonical }}{% if lang == 'en' %}?lang=en{% endif %}">
 <meta property="og:site_name" content="{% if lang == 'en' %}Orivet Genetic Analysis{% else %}Orivet 遺伝子解析{% endif %}">
+<meta property="og:locale" content="{% if lang == 'en' %}en_US{% else %}ja_JP{% endif %}">
+<meta property="og:locale:alternate" content="{% if lang == 'en' %}ja_JP{% else %}en_US{% endif %}">
+
+{# --- JSON-LD: ガイド記事一覧 (ItemList) --- #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "{% if lang == 'en' %}Guides | Orivet Genetic Analysis{% else %}ガイド記事 | Orivet 遺伝子解析{% endif %}",
+  "url": "{{ canonical }}",
+  "inLanguage": "{% if lang == 'en' %}en{% else %}ja{% endif %}",
+  "hasPart": {
+    "@type": "ItemList",
+    "numberOfItems": {{ guides | length }},
+    "itemListElement": [
+      {% for g in guides %}{
+        "@type": "ListItem",
+        "position": {{ loop.index }},
+        "url": "{{ request.url_root.rstrip('/') }}/guides/{{ g.slug }}{% if lang == 'en' %}?lang=en{% endif %}",
+        "name": "{{ g.title }}"
+      }{% if not loop.last %},{% endif %}{% endfor %}
+    ]
+  }
+}
+</script>
 
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }

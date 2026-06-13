@@ -271,6 +271,135 @@ class TestRelatedGuidesReverse:
         assert "関連ガイド" in body or "Related Guides" in body
 
 
+class TestSeoInternalLinking:
+    """SEO 内部リンク強化（関連疾患/形質・BreadcrumbList・hreflang・Organization）"""
+
+    # --- 関連エントリ・インデックス ---
+    def test_related_disease_index_built(self):
+        from poodle_genetics import RELATED_DISEASES_BY_SLUG, DISEASE_KB
+        assert isinstance(RELATED_DISEASES_BY_SLUG, dict)
+        # 大半の疾患に同一カテゴリの関連疾患がある
+        with_related = sum(1 for v in RELATED_DISEASES_BY_SLUG.values() if v)
+        assert with_related >= len(DISEASE_KB) - 5
+
+    def test_related_disease_excludes_self(self):
+        from poodle_genetics import RELATED_DISEASES_BY_SLUG
+        for slug, related in RELATED_DISEASES_BY_SLUG.items():
+            assert all(r["slug"] != slug for r in related), f"{slug} は自己参照しない"
+
+    def test_related_trait_index_built(self):
+        from poodle_genetics import RELATED_TRAITS_BY_SLUG, TRAIT_KB
+        assert isinstance(RELATED_TRAITS_BY_SLUG, dict)
+        # 全形質がいずれかのグループに属する
+        with_related = sum(1 for v in RELATED_TRAITS_BY_SLUG.values() if v)
+        assert with_related == len(TRAIT_KB)
+
+    def test_related_trait_excludes_self(self):
+        from poodle_genetics import RELATED_TRAITS_BY_SLUG
+        for slug, related in RELATED_TRAITS_BY_SLUG.items():
+            assert all(r["slug"] != slug for r in related)
+
+    # --- 詳細ページの関連リンク描画 ---
+    def test_disease_page_shows_related_diseases(self):
+        rv = client.get("/glossary/disease/degenerative-myelopathy")
+        body = rv.get_data(as_text=True)
+        assert "関連する遺伝子疾患" in body
+        # 同カテゴリの別疾患への個別リンクがある
+        assert "/glossary/disease/gm1-gangliosidosis" in body
+
+    def test_trait_page_shows_related_traits(self):
+        rv = client.get("/glossary/trait/e-locus")
+        body = rv.get_data(as_text=True)
+        assert "関連する形質" in body
+        # 同グループの別形質への個別リンクがある
+        assert "/glossary/trait/k-locus" in body
+
+    def test_related_links_localized_en(self):
+        rv = client.get("/glossary/trait/e-locus?lang=en")
+        body = rv.get_data(as_text=True)
+        assert "Related Traits" in body
+        assert "/glossary/trait/k-locus?lang=en" in body
+
+    # --- BreadcrumbList 構造化データ ---
+    def test_disease_has_breadcrumb_jsonld(self):
+        body = client.get("/glossary/disease/degenerative-myelopathy").get_data(as_text=True)
+        assert '"@type": "BreadcrumbList"' in body
+
+    def test_trait_has_breadcrumb_jsonld(self):
+        body = client.get("/glossary/trait/e-locus").get_data(as_text=True)
+        assert '"@type": "BreadcrumbList"' in body
+
+    def test_guide_has_breadcrumb_jsonld(self):
+        body = client.get("/guides/coi-basics").get_data(as_text=True)
+        assert '"@type": "BreadcrumbList"' in body
+
+    def test_all_jsonld_valid_json(self):
+        """全主要ページの JSON-LD ブロックが有効な JSON である"""
+        import json, re
+        urls = [
+            "/", "/?lang=en", "/glossary", "/glossary?lang=en",
+            "/glossary/disease/degenerative-myelopathy",
+            "/glossary/disease/degenerative-myelopathy?lang=en",
+            "/glossary/trait/e-locus", "/glossary/trait/e-locus?lang=en",
+            "/guides", "/guides/coi-basics", "/guides/coi-basics?lang=en",
+        ]
+        for url in urls:
+            body = client.get(url).get_data(as_text=True)
+            blocks = re.findall(
+                r'<script type="application/ld\+json">(.*?)</script>', body, re.DOTALL)
+            assert blocks, f"{url} に JSON-LD が無い"
+            for b in blocks:
+                json.loads(b)  # 例外が出れば fail
+
+    # --- hreflang ---
+    def test_disease_page_has_hreflang(self):
+        body = client.get("/glossary/disease/degenerative-myelopathy").get_data(as_text=True)
+        assert 'hreflang="ja"' in body
+        assert 'hreflang="en"' in body
+        assert 'hreflang="x-default"' in body
+
+    def test_guide_page_has_hreflang(self):
+        body = client.get("/guides/coi-basics").get_data(as_text=True)
+        assert 'hreflang="en"' in body
+
+    def test_guides_index_has_hreflang(self):
+        body = client.get("/guides").get_data(as_text=True)
+        assert 'hreflang="en"' in body
+
+    # --- ホームページ Organization / WebSite / ディレクトリ ---
+    def test_homepage_has_organization_jsonld(self):
+        body = client.get("/").get_data(as_text=True)
+        assert '"@type": "Organization"' in body
+        assert '"@type": "WebSite"' in body
+        assert '"@type": "SearchAction"' in body
+
+    def test_homepage_directory_links(self):
+        body = client.get("/").get_data(as_text=True)
+        # 人気疾患・形質への個別リンクがトップに出る
+        assert "/glossary/disease/degenerative-myelopathy" in body
+        assert "/glossary/trait/e-locus" in body
+        assert "遺伝子辞書を見る" in body
+
+    def test_get_popular_entries(self):
+        from poodle_genetics import get_popular_entries
+        dis, tr = get_popular_entries("ja")
+        assert dis and tr
+        assert all("slug" in d and "title" in d for d in dis)
+        # EN 版はタイトルが英訳される（_en があるもの）
+        dis_en, _ = get_popular_entries("en")
+        assert dis_en
+
+    # --- glossary / guides 一覧の ItemList ---
+    def test_glossary_has_itemlist(self):
+        body = client.get("/glossary").get_data(as_text=True)
+        assert '"@type": "ItemList"' in body
+        assert '"@type": "CollectionPage"' in body
+
+    def test_guides_index_has_itemlist(self):
+        body = client.get("/guides").get_data(as_text=True)
+        assert '"@type": "ItemList"' in body
+
+
 class TestReviewedFlag:
     def test_kb_en_supports_reviewed_field(self):
         """kb_en エントリの reviewed フィールドは optional"""

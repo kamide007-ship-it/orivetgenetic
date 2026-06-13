@@ -5,14 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ guide.title }} | {% if lang == 'en' %}Orivet Genetic Analysis{% else %}Orivet 遺伝子解析{% endif %}</title>
 <meta name="description" content="{{ guide.summary | truncate(160) }}">
-<link rel="canonical" href="{{ canonical }}">
+<link rel="canonical" href="{{ canonical }}{% if lang == 'en' %}?lang=en{% endif %}">
+
+{# --- hreflang (言語別 alternate) --- #}
+<link rel="alternate" hreflang="ja" href="{{ canonical }}">
+<link rel="alternate" hreflang="en" href="{{ canonical }}?lang=en">
+<link rel="alternate" hreflang="x-default" href="{{ canonical }}">
 
 <meta property="og:type" content="article">
 <meta property="og:title" content="{{ guide.title }}">
 <meta property="og:description" content="{{ guide.summary | truncate(200) }}">
-<meta property="og:url" content="{{ canonical }}">
-<meta property="og:site_name" content="Orivet 遺伝子解析">
-<meta property="og:locale" content="ja_JP">
+<meta property="og:url" content="{{ canonical }}{% if lang == 'en' %}?lang=en{% endif %}">
+<meta property="og:site_name" content="{% if lang == 'en' %}Orivet Genetic Analysis{% else %}Orivet 遺伝子解析{% endif %}">
+<meta property="og:locale" content="{% if lang == 'en' %}en_US{% else %}ja_JP{% endif %}">
+<meta property="og:locale:alternate" content="{% if lang == 'en' %}ja_JP{% else %}en_US{% endif %}">
 
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="{{ guide.title }}">
@@ -25,14 +31,42 @@
   "headline": "{{ guide.title }}",
   "description": "{{ guide.summary }}",
   "url": "{{ canonical }}",
-  "inLanguage": "ja",
+  "inLanguage": "{% if lang == 'en' %}en{% else %}ja{% endif %}",
   {% if lang == 'en' %}"availableLanguage": "ja",{% endif %}
   "articleSection": "{{ guide.category }}",
-  "timeRequired": "PT{{ guide.reading_time | replace(' 分','') }}M",
+  "timeRequired": "PT{{ guide.reading_time | replace(' 分','') | replace(' min','') }}M",
   "about": {
     "@type": "Thing",
-    "name": "犬の遺伝学・遺伝子検査"
+    "name": "{% if lang == 'en' %}Canine genetics and genetic testing{% else %}犬の遺伝学・遺伝子検査{% endif %}"
   }
+}
+</script>
+
+{# --- JSON-LD パンくず (schema.org BreadcrumbList) --- #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "{% if lang == 'en' %}Home{% else %}ホーム{% endif %}",
+      "item": "{{ request.url_root.rstrip('/') }}/{% if lang == 'en' %}?lang=en{% endif %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "{% if lang == 'en' %}Guides{% else %}ガイド記事{% endif %}",
+      "item": "{{ request.url_root.rstrip('/') }}/guides{% if lang == 'en' %}?lang=en{% endif %}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ guide.title }}",
+      "item": "{{ canonical }}{% if lang == 'en' %}?lang=en{% endif %}"
+    }
+  ]
 }
 </script>
 

@@ -118,6 +118,7 @@ from poodle_genetics import (
     DISEASE_SLUG_INDEX, TRAIT_SLUG_INDEX,
     GUIDES, GUIDES_INDEX, GUIDES_BY_DISEASE, GUIDES_BY_TRAIT,
     BREEDS_BY_DISEASE, BREEDS_BY_TRAIT, detect_breed_guides,
+    RELATED_DISEASES_BY_SLUG, RELATED_TRAITS_BY_SLUG, get_popular_entries,
     merge_heterozygosity_only,
     get_disease_kb_localized, get_trait_kb_localized,
     get_guides_localized, get_guide_localized,
@@ -253,11 +254,22 @@ def index():
     # トップは flash メッセージ（前回アップロード失敗時のエラー等）を含み得る。
     # キャッシュされると「空の状態でも前回のエラーが出続ける」UX を生むため、
     # キャッシュ無効化ヘッダーを付与する（Service Worker は別途 network-first）。
+    lang = (request.args.get("lang") or "").strip().lower()
+    if lang not in ("ja", "en"):
+        accept = (request.headers.get("Accept-Language") or "").lower()
+        lang = "en" if accept.startswith("en") else "ja"
+    popular_diseases, popular_traits = get_popular_entries(lang)
     response = make_response(render_template(
         "index.html",
         has_pdfplumber=HAS_PDFPLUMBER,
         has_ocr=HAS_OCR,
         canonical=request.url_root.rstrip("/") + "/",
+        lang=lang,
+        popular_diseases=popular_diseases,
+        popular_traits=popular_traits,
+        total_diseases=len(DISEASE_KB),
+        total_traits=len(TRAIT_KB),
+        total_guides=len(GUIDES),
     ))
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
@@ -651,6 +663,27 @@ def api_glossary():
     })
 
 
+def _localize_related(related_list, slug_index, lang):
+    """関連エントリのタイトルを言語に応じて差し替える。
+
+    related_list の各要素は {slug, title, ...}（title は JA）。
+    lang='en' のとき、slug_index 経由で _en['title'] があれば置換する。
+    元の dict は破壊せず、新しい list[dict] を返す。
+    """
+    if lang != "en":
+        return related_list
+    out = []
+    for item in related_list:
+        new_item = dict(item)
+        orig = slug_index.get(item.get("slug"))
+        if orig:
+            en_title = (orig.get("_en") or {}).get("title")
+            if en_title:
+                new_item["title"] = en_title
+        out.append(new_item)
+    return out
+
+
 @app.route("/glossary/disease/<slug>")
 def disease_detail_page(slug):
     """疾患個別ページ（SEO 対応・schema.org 構造化データ付き）"""
@@ -678,6 +711,8 @@ def disease_detail_page(slug):
     category = get_disease_category(entry)
     related_guides = GUIDES_BY_DISEASE.get(slug, [])
     related_breeds = BREEDS_BY_DISEASE.get(slug, [])
+    related_diseases = _localize_related(RELATED_DISEASES_BY_SLUG.get(slug, []),
+                                         DISEASE_SLUG_INDEX, lang)
     # 英語表示時のみ監修状態を表示する
     en_reviewed = False
     if lang == "en":
@@ -693,6 +728,7 @@ def disease_detail_page(slug):
         severity_labels=SEVERITY_LABELS,
         related_guides=related_guides,
         related_breeds=related_breeds,
+        related_diseases=related_diseases,
         en_reviewed=en_reviewed,
         category_labels_en=CATEGORY_LABELS_EN,
         canonical=request.url_root.rstrip("/") + f"/glossary/disease/{slug}",
@@ -722,6 +758,8 @@ def trait_detail_page(slug):
         entry = merged
     related_guides = GUIDES_BY_TRAIT.get(slug, [])
     related_breeds = BREEDS_BY_TRAIT.get(slug, [])
+    related_traits = _localize_related(RELATED_TRAITS_BY_SLUG.get(slug, []),
+                                       TRAIT_SLUG_INDEX, lang)
     en_reviewed = False
     if lang == "en":
         original = TRAIT_SLUG_INDEX.get(slug, {})
@@ -733,6 +771,7 @@ def trait_detail_page(slug):
         slug=slug,
         related_guides=related_guides,
         related_breeds=related_breeds,
+        related_traits=related_traits,
         en_reviewed=en_reviewed,
         canonical=request.url_root.rstrip("/") + f"/glossary/trait/{slug}",
         lang=lang,
