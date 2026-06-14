@@ -23,6 +23,38 @@
 <link rel="alternate" hreflang="en" href="{{ request.url_root.rstrip('/') }}/glossary?lang=en">
 <link rel="alternate" hreflang="x-default" href="{{ request.url_root.rstrip('/') }}/glossary">
 
+{# --- JSON-LD: 辞書全エントリへの内部リンク列挙 (ItemList) ---
+   検索エンジンに個別ページの存在を確実に伝える。フィルタ無しの canonical
+   ページでは全件が列挙される。 #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "{% if lang == 'en' %}Genetic Disease & Trait Glossary{% else %}遺伝子疾患・形質 辞書{% endif %}",
+  "url": "{{ request.url_root.rstrip('/') }}/glossary{% if lang == 'en' %}?lang=en{% endif %}",
+  "inLanguage": "{% if lang == 'en' %}en{% else %}ja{% endif %}",
+  "hasPart": {
+    "@type": "ItemList",
+    "numberOfItems": {{ diseases | length + traits | length }},
+    "itemListElement": [
+      {% set ns = namespace(pos=0) %}
+      {% for d in diseases %}{% if d._slug %}{% set ns.pos = ns.pos + 1 %}{% if ns.pos > 1 %},{% endif %}{
+        "@type": "ListItem",
+        "position": {{ ns.pos }},
+        "url": "{{ request.url_root.rstrip('/') }}/glossary/disease/{{ d._slug }}{% if lang == 'en' %}?lang=en{% endif %}",
+        "name": "{{ d.title }}"
+      }{% endif %}{% endfor %}
+      {% for t in traits %}{% if t._slug %}{% set ns.pos = ns.pos + 1 %}{% if ns.pos > 1 %},{% endif %}{
+        "@type": "ListItem",
+        "position": {{ ns.pos }},
+        "url": "{{ request.url_root.rstrip('/') }}/glossary/trait/{{ t._slug }}{% if lang == 'en' %}?lang=en{% endif %}",
+        "name": "{{ t.title }}"
+      }{% endif %}{% endfor %}
+    ]
+  }
+}
+</script>
+
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#7c3aed">
 <meta name="apple-mobile-web-app-capable" content="yes">

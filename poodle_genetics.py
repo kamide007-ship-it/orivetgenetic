@@ -3533,6 +3533,146 @@ GUIDES_BY_DISEASE, GUIDES_BY_TRAIT, BREEDS_BY_DISEASE, BREEDS_BY_TRAIT = _build_
 
 
 # ============================================================
+# 関連エントリの相互リンク・インデックス（SEO 内部リンク強化）
+# ============================================================
+# 疾患 → 同一カテゴリの他疾患、形質 → 同一グループの他形質を相互リンクする。
+# これにより辞書全体の内部リンク密度が上がり、クロール性・回遊性が向上する。
+
+# 形質のテーマ別グループ（毛色・模様・被毛タイプ・体型/目）。
+# 各 slug は最大 1 グループに属する。グループ内の他形質を「関連する形質」として提示。
+TRAIT_GROUPS = [
+    ("色素・毛色を決める遺伝子", [
+        "e-locus", "k-locus", "a-locus", "b-locus", "d-locus",
+        "i-locus", "kitlg", "cocoa", "em-locus", "g-locus",
+        "saddle-tan", "domino", "albinism",
+    ]),
+    ("模様・斑点のパターン", [
+        "m-locus", "s-locus", "harlequin", "roan", "ticking", "ridge",
+    ]),
+    ("被毛タイプ・毛質", [
+        "furnishings", "curly-coat", "l-locus", "shedding",
+        "hairless", "improper-coat",
+    ]),
+    ("体型・目の色などの形質", [
+        "bob-tail", "alx4",
+    ]),
+]
+
+
+def _build_related_disease_index():
+    """疾患 slug → 同一カテゴリの関連疾患リストを構築。
+
+    get_disease_category() でカテゴリを判定し、同一カテゴリの他疾患を
+    タイトル順に最大 8 件まで関連付ける。各要素は {slug, title, severity}。
+    """
+    by_category = {}
+    for entry in DISEASE_KB:
+        cat = get_disease_category(entry)
+        by_category.setdefault(cat, []).append(entry)
+
+    index = {}
+    for entry in DISEASE_KB:
+        slug = entry.get("_slug")
+        if not slug:
+            continue
+        cat = get_disease_category(entry)
+        siblings = [
+            e for e in by_category.get(cat, [])
+            if e.get("_slug") and e.get("_slug") != slug
+        ]
+        siblings.sort(key=lambda e: e.get("title", ""))
+        index[slug] = [
+            {
+                "slug": e["_slug"],
+                "title": e.get("title", ""),
+                "severity": get_disease_severity(e),
+                "category": cat,
+            }
+            for e in siblings[:8]
+        ]
+    return index
+
+
+def _build_related_trait_index():
+    """形質 slug → 同一テーマグループの関連形質リストを構築。
+
+    各要素は {slug, title, group}。
+    """
+    slug_to_group = {}
+    for group_name, slugs in TRAIT_GROUPS:
+        for s in slugs:
+            slug_to_group[s] = group_name
+
+    index = {}
+    for entry in TRAIT_KB:
+        slug = entry.get("_slug")
+        if not slug:
+            continue
+        group_name = slug_to_group.get(slug)
+        if not group_name:
+            index[slug] = []
+            continue
+        peers = [
+            e for e in TRAIT_KB
+            if e.get("_slug") and e.get("_slug") != slug
+            and slug_to_group.get(e.get("_slug")) == group_name
+        ]
+        index[slug] = [
+            {"slug": e["_slug"], "title": e.get("title", ""), "group": group_name}
+            for e in peers
+        ]
+    return index
+
+
+RELATED_DISEASES_BY_SLUG = _build_related_disease_index()
+RELATED_TRAITS_BY_SLUG = _build_related_trait_index()
+
+
+# トップページに出す代表的な疾患・形質（内部リンク・クロール深度短縮）。
+# 検索ボリュームの高い / 代表的なエントリを手動キュレーション。
+POPULAR_DISEASE_SLUGS = [
+    "degenerative-myelopathy",
+    "progressive-rod-cone",
+    "chondrodystrophy",
+    "multidrug-resistance",
+    "hereditary-cataract",
+    "collie-eye-anomaly",
+    "exercise-induced-collapse",
+    "gm1-gangliosidosis",
+]
+POPULAR_TRAIT_SLUGS = [
+    "e-locus", "k-locus", "a-locus", "b-locus",
+    "d-locus", "m-locus", "s-locus", "curly-coat",
+]
+
+
+def get_popular_entries(lang: str = "ja"):
+    """トップページ用の人気疾患・形質リストを返す。
+
+    各要素は {slug, title}。lang='en' のとき _en['title'] があれば置換。
+    存在しない slug は静かにスキップ。
+    """
+    def _resolve(slugs, index):
+        out = []
+        for s in slugs:
+            entry = index.get(s)
+            if not entry:
+                continue
+            title = entry.get("title", "")
+            if lang == "en":
+                en_title = (entry.get("_en") or {}).get("title")
+                if en_title:
+                    title = en_title
+            out.append({"slug": s, "title": title})
+        return out
+
+    return (
+        _resolve(POPULAR_DISEASE_SLUGS, DISEASE_SLUG_INDEX),
+        _resolve(POPULAR_TRAIT_SLUGS, TRAIT_SLUG_INDEX),
+    )
+
+
+# ============================================================
 # 初心者向け解説オーバーレイ（simple_explainers.py）
 # ============================================================
 # 専門用語に不慣れな飼い主さん向けのコンテンツ層。既存の DISEASE_KB /
