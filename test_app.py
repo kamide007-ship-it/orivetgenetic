@@ -301,10 +301,20 @@ class TestSeoInternalLinking:
 
     # --- Embark 由来追加疾患（embark_diseases.py） ---
     def test_embark_diseases_loaded(self):
-        from poodle_genetics import DISEASE_KB, HAS_EMBARK_DISEASES
+        from poodle_genetics import DISEASE_KB, HAS_EMBARK_DISEASES, HAS_EMBARK_VARIANTS
         assert HAS_EMBARK_DISEASES, "embark_diseases.py がロードできなかった"
+        assert HAS_EMBARK_VARIANTS, "embark_diseases_variants.py がロードできなかった"
         embark = [d for d in DISEASE_KB if d.get("_source") == "embark"]
-        assert len(embark) >= 80, f"Embark 由来エントリ数が不足: {len(embark)}"
+        # 115 (embark_diseases) + ~100 (variants) ≈ 215+ entries
+        assert len(embark) >= 200, f"Embark 由来エントリ数が不足: {len(embark)}"
+
+    def test_embark_total_disease_count(self):
+        """全 DISEASE_KB エントリ数が Embark カバレッジ目標（~271+）に達している"""
+        from poodle_genetics import DISEASE_KB
+        assert len(DISEASE_KB) >= 271, (
+            f"DISEASE_KB has {len(DISEASE_KB)} entries; "
+            "目標 271 件以上（Embark DNA テストのカバレッジ）"
+        )
 
     def test_embark_disease_pages_render(self):
         """主要な Embark 由来エントリの個別ページが 200 を返す"""
@@ -335,8 +345,12 @@ class TestSeoInternalLinking:
         rv = client.get("/glossary/disease/degenerative-myelopathy")
         body = rv.get_data(as_text=True)
         assert "関連する遺伝子疾患" in body
-        # 同カテゴリの別疾患への個別リンクがある
-        assert "/glossary/disease/gm1-gangliosidosis" in body
+        # 関連疾患リンク（自己ページへのリンクを除く）が少なくとも 1 件存在する
+        # （カテゴリ内エントリ数の増加により、特定スラッグへの依存をやめる）
+        import re
+        all_links = set(re.findall(r"/glossary/disease/[a-z0-9-]+", body))
+        other_links = {u for u in all_links if "degenerative-myelopathy" not in u}
+        assert len(other_links) >= 1, f"expected ≥1 related disease link, got {other_links}"
 
     def test_trait_page_shows_related_traits(self):
         rv = client.get("/glossary/trait/e-locus")
