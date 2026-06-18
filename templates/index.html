@@ -72,9 +72,14 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100dvh; /* iOS Safari: 100vh はアドレスバー分の計算バグあり */
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;       /* 子要素を縦に積む（モバイル横並び崩れ防止） */
+            align-items: center;          /* 水平方向は中央寄せ */
             padding: 20px;
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
+            gap: 20px;                    /* container と directory の間隔 */
+        }
+        @media (max-width: 480px) {
+            body { padding: 12px; gap: 12px; }
         }
         .container {
             background: #fff;
@@ -83,6 +88,29 @@
             max-width: 700px;
             width: 100%;
             padding: 40px;
+            position: relative; /* 言語トグルの絶対配置基準 */
+        }
+        /* 言語切替トグル: コンパクトな丸ピル形状で右上に固定 */
+        #langToggle {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.78em;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(124,58,237,0.3);
+            transition: transform 0.12s, box-shadow 0.12s;
+            z-index: 10;
+        }
+        #langToggle:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(124,58,237,0.4); }
+        #langToggle:active { transform: translateY(0); }
+        @media (max-width: 480px) {
+            #langToggle { top: 10px; right: 10px; font-size: 0.74em; padding: 5px 12px; min-height: 30px; }
         }
         h1 {
             text-align: center;
@@ -270,14 +298,34 @@
         /* 辞書・ガイド ディレクトリ（内部リンク集） */
         .directory {
             max-width: 760px;
-            margin: 28px auto 40px;
+            width: 100%;
             padding: 24px 28px;
             background: #fff;
             border: 1px solid #e5e7eb;
             border-radius: 16px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.04);
         }
-        .directory-title { font-size: 1.25em; color: #4a1a7a; margin-bottom: 6px; }
+        /* <details> ベースのアコーディオン化（モバイルでデフォルト閉） */
+        .directory > summary {
+            cursor: pointer;
+            list-style: none;
+            font-size: 1.25em; color: #4a1a7a; font-weight: 600;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px;
+            padding: 4px 0;
+            user-select: none;
+        }
+        .directory > summary::-webkit-details-marker { display: none; }
+        .directory > summary::after {
+            content: "▾";
+            color: #7c3aed;
+            font-size: 0.7em;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        .directory[open] > summary::after { transform: rotate(180deg); }
+        .directory > summary:focus-visible { outline: 3px solid #7c3aed; outline-offset: 2px; border-radius: 6px; }
+        .directory-body { padding-top: 14px; border-top: 1px dashed #ede9fe; margin-top: 12px; }
         .directory-lead { font-size: 0.92em; color: #6b7280; line-height: 1.6; margin-bottom: 18px; }
         .directory-group { margin-bottom: 18px; }
         .directory-group:last-child { margin-bottom: 0; }
@@ -293,7 +341,8 @@
         .directory-links a.directory-all { background: #7c3aed; color: #fff; border-color: #7c3aed; font-weight: 600; }
         .directory-links a.directory-all:hover { background: #6d28d9; }
         @media (max-width: 480px) {
-            .directory { margin: 20px 14px 28px; padding: 18px 16px; border-radius: 12px; }
+            .directory { padding: 16px 16px; border-radius: 12px; }
+            .directory > summary { font-size: 1.05em; padding: 8px 0; min-height: 44px; }
             .directory-links a { padding: 9px 14px; min-height: 40px; display: inline-flex; align-items: center; }
         }
         .loading {
@@ -385,7 +434,7 @@
             }
             /* スマートフォン UX 集中改善 (PR #51) */
             .container { padding: 24px 16px; border-radius: 12px; }
-            h1 { font-size: 1.3em; }
+            h1 { font-size: 1.3em; padding-right: 72px; /* 言語トグルボタンと衝突回避 */ }
             .feature-cards { grid-template-columns: 1fr; gap: 8px; }
             .feature-card { padding: 10px 14px; text-align: left; display: flex; gap: 10px; align-items: center; }
             .feature-card .fc-title { margin-bottom: 0; flex-shrink: 0; }
@@ -396,7 +445,6 @@
             /* タッチターゲット */
             .upload-area { padding: 32px 20px; min-height: 80px; }
             .btn { padding: 16px; min-height: 48px; font-size: 1.05em; }
-            #langToggle { min-height: 44px; padding: 10px 16px !important; }
             .trust-badges { gap: 5px; }
             .trust-badge { font-size: 0.72em; padding: 4px 9px; }
             /* iOS safe-area */
@@ -467,9 +515,7 @@
 </head>
 <body>
     <div class="container">
-        <div style="text-align:right;margin-bottom:8px;">
-            <button type="button" id="langToggle" onclick="toggleLang()" aria-label="言語切替" style="background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;padding:6px 14px;border-radius:8px;cursor:pointer;font-size:0.85em;font-weight:600;">English</button>
-        </div>
+        <button type="button" id="langToggle" onclick="toggleLang()" aria-label="言語切替">English</button>
         <h1 data-i18n="title">Orivet 遺伝子解析アプリケーション</h1>
         <p class="subtitle" data-i18n="subtitle">検査結果と血統書をアップロードするだけで、<br>愛犬の遺伝情報をわかりやすいレポートにまとめます</p>
         <p class="subtitle-sub" data-i18n="subtitle_sub">全犬種対応 / Orivet 遺伝子検査PDF + 各種血統書（JKC・ALAJ・AKC等）</p>
@@ -598,45 +644,66 @@
         </div>
     </div>
 
-    {# --- 辞書・ガイドへの内部リンク集（SEO / クロール深度短縮） --- #}
-    <nav class="directory" aria-label="{% if lang == 'en' %}Glossary and guide directory{% else %}辞書・ガイド ディレクトリ{% endif %}">
-        <h2 class="directory-title">{% if lang == 'en' %}📚 Explore the Genetic Glossary{% else %}📚 遺伝子辞書を見る{% endif %}</h2>
-        <p class="directory-lead">{% if lang == 'en' %}A free reference covering {{ total_diseases }} genetic diseases, {{ total_traits }} coat / trait genes, and {{ total_guides }} guides — no upload required.{% else %}アップロード不要で読める無料の辞書。{{ total_diseases }} の遺伝子疾患、{{ total_traits }} の毛色・形質遺伝子、{{ total_guides }} のガイド記事を収録しています。{% endif %}</p>
+    {# --- 辞書・ガイドへの内部リンク集（SEO / クロール深度短縮） ---
+         <details> でアコーディオン化。デスクトップでは open、モバイルではデフォルト閉。 #}
+    <details class="directory" id="directoryAccordion" aria-label="{% if lang == 'en' %}Glossary and guide directory{% else %}辞書・ガイド ディレクトリ{% endif %}">
+        <summary>{% if lang == 'en' %}📚 Explore the Genetic Glossary{% else %}📚 遺伝子辞書・ガイドを見る{% endif %}</summary>
+        <div class="directory-body">
+            <p class="directory-lead">{% if lang == 'en' %}A free reference covering {{ total_diseases }} genetic diseases, {{ total_traits }} coat / trait genes, and {{ total_guides }} guides — no upload required.{% else %}アップロード不要で読める無料の辞書。{{ total_diseases }} の遺伝子疾患、{{ total_traits }} の毛色・形質遺伝子、{{ total_guides }} のガイド記事を収録しています。{% endif %}</p>
 
-        {% if popular_diseases %}
-        <div class="directory-group">
-            <h3 class="directory-subtitle">🧬 {% if lang == 'en' %}Popular genetic diseases{% else %}よく見られる遺伝子疾患{% endif %}</h3>
-            <div class="directory-links">
-                {% for d in popular_diseases %}
-                <a href="/glossary/disease/{{ d.slug }}{% if lang == 'en' %}?lang=en{% endif %}">{{ d.title }}</a>
-                {% endfor %}
-                <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="directory-all">{% if lang == 'en' %}View all diseases →{% else %}すべての疾患を見る →{% endif %}</a>
+            {% if popular_diseases %}
+            <div class="directory-group">
+                <h3 class="directory-subtitle">🧬 {% if lang == 'en' %}Popular genetic diseases{% else %}よく見られる遺伝子疾患{% endif %}</h3>
+                <div class="directory-links">
+                    {% for d in popular_diseases %}
+                    <a href="/glossary/disease/{{ d.slug }}{% if lang == 'en' %}?lang=en{% endif %}">{{ d.title }}</a>
+                    {% endfor %}
+                    <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="directory-all">{% if lang == 'en' %}View all diseases →{% else %}すべての疾患を見る →{% endif %}</a>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if popular_traits %}
+            <div class="directory-group">
+                <h3 class="directory-subtitle">🎨 {% if lang == 'en' %}Coat color & trait genes{% else %}毛色・形質の遺伝子座位{% endif %}</h3>
+                <div class="directory-links">
+                    {% for t in popular_traits %}
+                    <a href="/glossary/trait/{{ t.slug }}{% if lang == 'en' %}?lang=en{% endif %}">{{ t.title }}</a>
+                    {% endfor %}
+                    <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="directory-all">{% if lang == 'en' %}View all traits →{% else %}すべての形質を見る →{% endif %}</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="directory-group">
+                <h3 class="directory-subtitle">📖 {% if lang == 'en' %}Guides & tools{% else %}ガイド・ツール{% endif %}</h3>
+                <div class="directory-links">
+                    <a href="/guides{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}All guide articles{% else %}ガイド記事一覧{% endif %}</a>
+                    <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Disease & trait glossary{% else %}遺伝子疾患・形質 辞書{% endif %}</a>
+                    <a href="/simulator">{% if lang == 'en' %}Breeding simulator{% else %}繁殖シミュレーター{% endif %}</a>
+                    <a href="/sample{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Sample report{% else %}サンプルレポート{% endif %}</a>
+                </div>
             </div>
         </div>
-        {% endif %}
+    </details>
 
-        {% if popular_traits %}
-        <div class="directory-group">
-            <h3 class="directory-subtitle">🎨 {% if lang == 'en' %}Coat color & trait genes{% else %}毛色・形質の遺伝子座位{% endif %}</h3>
-            <div class="directory-links">
-                {% for t in popular_traits %}
-                <a href="/glossary/trait/{{ t.slug }}{% if lang == 'en' %}?lang=en{% endif %}">{{ t.title }}</a>
-                {% endfor %}
-                <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}" class="directory-all">{% if lang == 'en' %}View all traits →{% else %}すべての形質を見る →{% endif %}</a>
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="directory-group">
-            <h3 class="directory-subtitle">📖 {% if lang == 'en' %}Guides & tools{% else %}ガイド・ツール{% endif %}</h3>
-            <div class="directory-links">
-                <a href="/guides{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}All guide articles{% else %}ガイド記事一覧{% endif %}</a>
-                <a href="/glossary{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Disease & trait glossary{% else %}遺伝子疾患・形質 辞書{% endif %}</a>
-                <a href="/simulator">{% if lang == 'en' %}Breeding simulator{% else %}繁殖シミュレーター{% endif %}</a>
-                <a href="/sample{% if lang == 'en' %}?lang=en{% endif %}">{% if lang == 'en' %}Sample report{% else %}サンプルレポート{% endif %}</a>
-            </div>
-        </div>
-    </nav>
+    {# デスクトップ（>=768px）ではディレクトリを既定で展開、モバイルでは折りたたみ。
+       JS で初期状態を制御。 #}
+    <script>
+        (function() {
+            const dir = document.getElementById('directoryAccordion');
+            if (!dir) return;
+            const mq = window.matchMedia('(min-width: 768px)');
+            // 初期値を一度だけ設定（ユーザーが手で開閉した後は上書きしない）
+            let userTouched = false;
+            dir.addEventListener('toggle', () => { userTouched = true; }, { once: true });
+            const apply = (isDesktop) => {
+                if (userTouched) return;
+                dir.open = isDesktop;
+            };
+            apply(mq.matches);
+        })();
+    </script>
 
     <script>
         function showFiles(input, listEl) {

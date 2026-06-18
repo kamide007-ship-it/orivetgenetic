@@ -423,7 +423,23 @@ class TestSeoInternalLinking:
         # 人気疾患・形質への個別リンクがトップに出る
         assert "/glossary/disease/degenerative-myelopathy" in body
         assert "/glossary/trait/e-locus" in body
-        assert "遺伝子辞書を見る" in body
+        # ディレクトリのアコーディオン見出し（モバイル UX 改善後の文言）
+        assert "遺伝子辞書" in body and "ガイドを見る" in body
+
+    def test_homepage_mobile_ux_fixes(self):
+        """モバイル UX 改善: body 縦積み + ディレクトリのアコーディオン化 + 言語トグル絶対配置"""
+        body = client.get("/").get_data(as_text=True)
+        # body 子要素を縦に積む（最重要: container と directory の横並び崩れ防止）
+        assert "flex-direction: column" in body
+        # ディレクトリは <details>/<summary> でアコーディオン化
+        assert '<details class="directory"' in body
+        assert 'id="directoryAccordion"' in body
+        # デスクトップでは展開、モバイルでは折りたたみを JS で制御
+        assert "window.matchMedia('(min-width: 768px)')" in body
+        # 言語トグルはコンテナ右上に絶対配置（独立したフル幅行を排除）
+        assert "#langToggle" in body
+        # iOS セーフエリア対応
+        assert "safe-area-inset-bottom" in body
 
     def test_get_popular_entries(self):
         from poodle_genetics import get_popular_entries
