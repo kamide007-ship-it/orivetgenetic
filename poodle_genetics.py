@@ -284,7 +284,7 @@ def get_trait_annotation(test_name: str, genotype: str) -> str:
         return {
             "D/D": "希釈因子なし。色素は通常通り発現する",
             "D/d": "希釈因子を1つ保有（キャリア）。見た目は通常色だが、希釈色の子が出る可能性あり",
-            "d/d": "希釈因子を2つ保有。ブラック→ブルー、ブラウン→カフェオレに希釈される",
+            "d/d": "希釈因子を2つ保有。ブラック→ブルー、ブラウン→ライラック（イザベラ）に希釈される（※カフェオレ（シルバービーグ）は bb + Greying による退色で、d/d とは別経路）",
         }.get(genotype, "")
 
     # M Locus (マール)
@@ -368,7 +368,7 @@ _PHENO_SWATCH = {
     "blue":            ("ブルー",                     "#4a6fa5"),
     "lilac":           ("ライラック/イザベラ",       "#C8A2C8"),
     "silver":          ("シルバー（成犬で退色）",    "#C0C0C0"),
-    "silver_beige":    ("シルバービーグ（成犬で退色）", "#A89F92"),
+    "silver_beige":    ("カフェオレ（シルバービーグ／成犬で退色）", "#BFA37A"),
     "fawn":            ("フォーン/セーブル",         "#E5AA70"),
     "wild_sable":      ("ワイルドセーブル",          "#9B7E48"),
     "phantom_black":   ("ブラックタン/トライカラー", "#2d2d2d"),
@@ -2835,7 +2835,8 @@ GUIDES = [
                     "・<strong>E座位 (MC1R)</strong> — クリーム/アプリコット/レッドの基本色制御<br>"
                     "・<strong>K座位 (CBD103)</strong> — ブラック/ブラウン(チョコ) のソリッド色<br>"
                     "・<strong>B座位 (TYRP1)</strong> — bb でブラウン (チョコ/レバー) になる<br>"
-                    "・<strong>D座位 (MLPH)</strong> — dd でブルー/シルバービーグへ希釈<br>"
+                    "・<strong>D座位 (MLPH)</strong> — dd でブルー/ライラック(イザベラ)へ希釈<br>"
+                    "・<strong>退色系</strong> — bb + Greying でカフェオレ（シルバービーグ）<br>"
                     "・<strong>G座位 (Greying)</strong> — シルバープードルの原因。生まれは黒、成犬で退色<br>"
                     "・<strong>S座位 (MITF)</strong> — sp/sp でパーティカラー"
                 ),
