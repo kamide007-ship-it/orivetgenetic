@@ -307,7 +307,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>I Locus (KITLG / 毛色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label><select id="cs-i" onchange="runColorSim()"><option value="II">I/I — レッド/ディープレッド</option><option value="Ii" selected>I/i — アプリコット（中間）</option><option value="ii">i/i — クリーム/ホワイト</option></select></div>
+          <div class="form-group"><label>I Locus (MFSD12 / 赤・黄色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label><select id="cs-i" onchange="runColorSim()"><option value="" selected>未検査 / 不明（Orivet 未対応）</option><option value="II">I/I — レッド/ディープレッド</option><option value="Ii">I/i — アプリコット（中間）</option><option value="ii">i/i — クリーム/ホワイト</option></select></div>
         </div>
       </div>
 
@@ -336,7 +336,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>I Locus (KITLG / 毛色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label><select id="cd-i" onchange="runColorSim()"><option value="II">I/I — レッド/ディープレッド</option><option value="Ii" selected>I/i — アプリコット（中間）</option><option value="ii">i/i — クリーム/ホワイト</option></select></div>
+          <div class="form-group"><label>I Locus (MFSD12 / 赤・黄色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label><select id="cd-i" onchange="runColorSim()"><option value="" selected>未検査 / 不明（Orivet 未対応）</option><option value="II">I/I — レッド/ディープレッド</option><option value="Ii">I/i — アプリコット（中間）</option><option value="ii">i/i — クリーム/ホワイト</option></select></div>
         </div>
       </div>
 
@@ -779,16 +779,23 @@ function runColorSim() {
   const sireG = (document.getElementById('cs-g') || {}).checked ? 'Gg' : 'gg';
   const damG  = (document.getElementById('cd-g') || {}).checked ? 'Gg' : 'gg';
 
+  // I 座位 (MFSD12) は Orivet 12項目パネルに含まれないため、PDF データから
+  // 来た犬には i を埋めない（computeEePhenotypes のフォールバックに任せる）。
+  // カスタム入力で「未検査/不明」を選んだ場合も同様に i を省略。
+  const sireI = v('cs-i');
+  const damI  = v('cd-i');
   let sire, dam;
   if (sireKey === 'custom') {
-    sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s'), g: sireG, i:v('cs-i') };
+    sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s'), g: sireG };
+    if (sireI) sire.i = sireI;
   } else {
-    sire = Object.assign({ g: 'gg', i: 'Ii' }, DOGS[sireKey].color);
+    sire = Object.assign({ g: 'gg' }, DOGS[sireKey].color);
   }
   if (damKey === 'custom') {
-    dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s'), g: damG, i:v('cd-i') };
+    dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s'), g: damG };
+    if (damI) dam.i = damI;
   } else {
-    dam = Object.assign({ g: 'gg', i: 'Ii' }, DOGS[damKey].color);
+    dam = Object.assign({ g: 'gg' }, DOGS[damKey].color);
   }
 
   const eResult = cross(sire.e, dam.e);
@@ -1562,10 +1569,10 @@ const LOCUS_KB = {
     advice: 'シルバープードルは生まれた時は黒。1〜2歳までに段階的に退色していきます。'
   },
   i: {
-    title: 'I座位 (MFSD12 / KITLG) — フェオメラニン濃度（アプリコット/レッド）',
-    summary: 'E座位 e/e の犬のコート色（クリーム〜アプリコット〜レッド）の濃さを決める遺伝子座位です。黒・茶系（E_）犬への影響は限定的。',
+    title: 'I座位 (MFSD12) — フェオメラニン濃度（アプリコット/レッド）',
+    summary: 'E座位 e/e の犬のコート色（クリーム〜アプリコット〜レッド）の濃さを決める遺伝子座位です。MFSD12 が主要な原因遺伝子で、KITLG など隣接する別の遺伝子も補助的に関与すると報告されています。黒・茶系（E_）犬への影響は限定的。',
     phenotype: 'I/I : レッド / ディープレッド（高強度フェオメラニン）\\nI/i : アプリコット（中間）\\ni/i : クリーム / ホワイト（低強度フェオメラニン）',
-    advice: 'Orivet 12項目パネルには KITLG が含まれていないため、検査値がない場合は「I/i（アプリコット）」をデフォルトとして使用してください。ラブラドールのフォックスレッド・イエロー・クリームの違い、プードルの各コート色の濃淡もこの座位で説明できます。'
+    advice: '⚠️ Orivet の標準パネルには I座位 (MFSD12) が含まれていません。PDF から自動投入された犬は I座位の値が無いため、本シミュレーターは ee の子犬を「クリーム〜ホワイト」としてまとめて表示し、アプリコット/レッドの内訳は出しません。Embark など I座位を検査するパネルの結果がある場合は、カスタム入力で実測値を選択してください。'
   }
 };
 
