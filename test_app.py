@@ -925,6 +925,34 @@ class TestHeterozygosityParser:
         # 上書きの注釈
         assert "補足入力" in body or "追加情報" in body
 
+    def test_silver_beige_renamed_to_cafe_au_lait(self):
+        """bb + Greying の表示名が「カフェオレ（シルバービーグ）」に統一されている"""
+        from poodle_genetics import _PHENO_SWATCH
+        name, hex_color = _PHENO_SWATCH["silver_beige"]
+        assert "カフェオレ" in name
+        assert "シルバービーグ" in name
+        assert hex_color.upper() == "#BFA37A"
+        # シミュレーター側 COLOR_MAP も同じ HEX で統一
+        body = client.get("/simulator").get_data(as_text=True)
+        assert '"silver_beige": { hex:"#BFA37A"' in body
+        assert "カフェオレ（シルバービーグ／成犬で退色）" in body
+
+    def test_simulator_shows_carrier_breakdown(self):
+        """シミュレーターに「キャリア確率まとめ」パネルと
+        ホモ/ヘテロ/劣性ホモの明示ラベルが含まれる"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # キャリアまとめパネル
+        assert "🧬 子犬のキャリア確率まとめ" in body
+        # 座位ラベル定義
+        assert "E/E ホモ・ノンキャリア" in body
+        assert "E/e ヘテロ・eキャリア" in body
+        assert "Bb ヘテロ・bキャリア" in body
+        assert "D/d ヘテロ・dキャリア" in body
+        assert "M/m ヘテロ・マール発現" in body
+        # ユーザー説明（見た目は同じだが子に劣性が出る可能性）
+        assert "見た目はホモと同じ" in body
+        assert "劣性形質" in body or "劣性ホモ" in body
+
 
 class TestSimulatorFunnel:
     """解析レポート → 繁殖シミュレーターへの導線"""

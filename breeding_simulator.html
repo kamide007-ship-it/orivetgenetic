@@ -802,8 +802,8 @@ const COLOR_MAP = {
   "apricot": { hex:"#FBCEB1", name:"アプリコット" },
   "red": { hex:"#CD5C5C", name:"レッド/ディープレッド" },
   "silver": { hex:"#C0C0C0", name:"シルバー（成犬で退色）" },
-  "silver_beige": { hex:"#A89F92", name:"シルバービーグ（成犬で退色）" },
-  "cafe_au_lait": { hex:"#A67B5B", name:"カフェオレ（bb + Greying）" },
+  "silver_beige": { hex:"#BFA37A", name:"カフェオレ（シルバービーグ／成犬で退色）" },
+  "cafe_au_lait": { hex:"#BFA37A", name:"カフェオレ（シルバービーグ／bb + Greying）" },
   "lilac": { hex:"#C8A2C8", name:"ライラック/イザベラ" },
   "fawn": { hex:"#E5AA70", name:"フォーン/セーブル (ay_)" },
   "wild_sable": { hex:"#9B7E48", name:"ワイルドセーブル (aw_)" },
@@ -967,14 +967,14 @@ function runColorSim() {
     if (pbb > 0 && pD_ > 0) {
       const p = solidProb * pbb * pD_;
       if (pgg > 0) results.push({ color:"brown", prob: p * pgg, note:"ブラウン/チョコ (E_, KB_, bb, D_, gg)" });
-      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"シルバービーグ (E_, KB_, bb, D_, G_: 成犬で退色)" });
+      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"カフェオレ（シルバービーグ） (E_, KB_, bb, D_, G_: 成犬で退色)" });
     }
     if (pbb > 0 && pdd > 0) {
       const p = solidProb * pbb * pdd;
       // 参考: bb + dd は遺伝学上「ライラック/イザベラ」(diluted brown)。
-      // カフェオレ表記は本来 bb + Greying（成犬で退色）の方
+      // カフェオレ（シルバービーグ）表記は本来 bb + Greying（成犬で退色）の方
       if (pgg > 0) results.push({ color:"lilac", prob: p * pgg, note:"ライラック/イザベラ (E_, KB_, bb, dd, gg)" });
-      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"シルバービーグ（淡） (E_, KB_, bb, dd, G_: 成犬で退色)" });
+      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"カフェオレ（シルバービーグ／淡） (E_, KB_, bb, dd, G_: 成犬で退色)" });
     }
   }
 
@@ -1032,7 +1032,7 @@ function runColorSim() {
   for (const [key, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
     const cm = COLOR_MAP[key];
     const pct = (data.prob / totalProb * 100).toFixed(1);
-    const textColor = ['cream','apricot','parti','silver'].includes(key) ? '#333' : 'white';
+    const textColor = ['cream','apricot','parti','silver','silver_beige','cafe_au_lait'].includes(key) ? '#333' : 'white';
     html += `<div style="width:${pct}%;background:${cm.hex};color:${textColor}">${pct}%</div>`;
   }
   html += '</div>';
@@ -1049,8 +1049,132 @@ function runColorSim() {
   }
   html += '</table>';
 
+  // ヘテロ接合（キャリア）確率まとめ
+  // 「見た目は同じでも子の代に劣性が出るかもしれない子犬」を一目で把握するためのパネル。
+  // 表現型テーブルは E/E と E/e を同じ色（黒など）にまとめて表示してしまうため、
+  // ここで明示的にホモ vs ヘテロ・キャリアの割合を出す。
+  const carrierLoci = [
+    { key:'e', name:'E座位 (クリーム/レッド)',  hetKey:'Ee', recKey:'ee', result: eResult,
+      recPheno:'クリーム/アプリコット/レッド (ee)' },
+    { key:'b', name:'B座位 (ブラウン)',          hetKey:'Bb', recKey:'bb', result: bResult,
+      recPheno:'ブラウン/チョコ (bb)' },
+    { key:'d', name:'D座位 (希釈)',              hetKey:'Dd', recKey:'dd', result: dResult,
+      recPheno:'ブルー/ライラック (dd)' },
+  ];
+  let carrierRows = '';
+  for (const c of carrierLoci) {
+    const homoNonCarrier = Object.entries(c.result)
+      .filter(([g, _]) => g !== c.hetKey && g !== c.recKey)
+      .reduce((s, [, p]) => s + p, 0);
+    const het = c.result[c.hetKey] || 0;
+    const rec = c.result[c.recKey] || 0;
+    if (het + rec < 0.001) continue;  // どちらも 0% なら省略
+    const homoPct = (homoNonCarrier * 100).toFixed(1);
+    const hetPct  = (het * 100).toFixed(1);
+    const recPct  = (rec * 100).toFixed(1);
+    carrierRows += `<tr>
+      <td style="padding:8px 10px;font-weight:600;color:#5b21b6;">${c.name}</td>
+      <td style="padding:8px 10px;color:#166534;">
+        <strong>${homoPct}%</strong>
+        <span style="font-size:0.82em;color:#6b7280;">ホモ・ノンキャリア</span>
+      </td>
+      <td style="padding:8px 10px;color:#92400e;background:#fef3c7;">
+        <strong>${hetPct}%</strong>
+        <span style="font-size:0.82em;color:#78350f;">ヘテロ・${c.recKey[0]}キャリア</span>
+      </td>
+      <td style="padding:8px 10px;color:#991b1b;">
+        <strong>${recPct}%</strong>
+        <span style="font-size:0.82em;color:#7f1d1d;">劣性ホモ（${c.recPheno} 発現）</span>
+      </td>
+    </tr>`;
+  }
+  // M座位（マール）も同様に表示。ヘテロは「マール発現」、ホモは「ダブルマール ⚠️」
+  {
+    const homoMm = mResult['mm'] || 0;
+    const hetMm  = mResult['Mm'] || 0;
+    const homoMM = mResult['MM'] || 0;
+    if (hetMm + homoMM > 0.001) {
+      carrierRows += `<tr>
+        <td style="padding:8px 10px;font-weight:600;color:#5b21b6;">M座位 (マール)</td>
+        <td style="padding:8px 10px;color:#166534;">
+          <strong>${(homoMm*100).toFixed(1)}%</strong>
+          <span style="font-size:0.82em;color:#6b7280;">m/m ノンキャリア</span>
+        </td>
+        <td style="padding:8px 10px;color:#92400e;background:#fef3c7;">
+          <strong>${(hetMm*100).toFixed(1)}%</strong>
+          <span style="font-size:0.82em;color:#78350f;">M/m マール発現（聴覚・視覚は概ね正常）</span>
+        </td>
+        <td style="padding:8px 10px;color:#991b1b;background:#fee2e2;">
+          <strong>${(homoMM*100).toFixed(1)}%</strong>
+          <span style="font-size:0.82em;color:#7f1d1d;">M/M ダブルマール ⚠️ 健康リスク</span>
+        </td>
+      </tr>`;
+    }
+  }
+  if (carrierRows) {
+    html += `<div style="margin-top:24px;padding:18px;background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;">
+      <h3 style="margin:0 0 8px;color:#5b21b6;">🧬 子犬のキャリア確率まとめ</h3>
+      <p style="font-size:0.9em;color:#6b7280;margin-bottom:12px;line-height:1.6;">
+        <strong>ヘテロキャリア</strong>（例: E/e, Bb, Dd）の子犬は<strong>見た目はホモと同じ</strong>ですが、
+        次の代に劣性形質（クリーム・ブラウン・希釈など）の子を産む可能性があります。
+        繁殖計画では、ここの「キャリア」列で<strong>どれだけヘテロが生まれるか</strong>を確認してください。
+      </p>
+      <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
+        <tr style="background:#ede9fe;">
+          <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">座位</th>
+          <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#166534;">優性ホモ</th>
+          <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#92400e;">ヘテロ・キャリア</th>
+          <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#991b1b;">劣性ホモ</th>
+        </tr>
+        ${carrierRows}
+      </table>
+    </div>`;
+  }
+
   // Genotype detail table
-  html += '<h3 style="margin-top:20px;">各遺伝子座の交配結果</h3><table>';
+  // 各遺伝子座のホモ vs ヘテロを言葉で明示する（ユーザー要望: 「キャリアが分かる」）。
+  const _LOCUS_LABELS = {
+    e: {
+      'EE': 'E/E ホモ・ノンキャリア',
+      'Ee': 'E/e ヘテロ・eキャリア',
+      'ee': 'e/e 劣性ホモ（クリーム系発現）',
+    },
+    b: {
+      'BB': 'BB ホモ・ノンキャリア',
+      'Bb': 'Bb ヘテロ・bキャリア',
+      'bb': 'bb 劣性ホモ（ブラウン発現）',
+    },
+    d: {
+      'DD': 'D/D ホモ・ノンキャリア',
+      'Dd': 'D/d ヘテロ・dキャリア',
+      'dd': 'd/d 劣性ホモ（希釈発現）',
+    },
+    k: {
+      'KBKB': 'KB/KB ホモ・ドミナントブラック',
+      'KBky': 'KB/ky ヘテロ・kyキャリア',
+      'KBkbr': 'KB/kbr ヘテロ・ブリンドルキャリア',
+      'kyky': 'ky/ky ホモ（アグーチ発現）',
+      'kbrky': 'kbr/ky ブリンドル発現',
+      'kbrkbr': 'kbr/kbr ホモ・ブリンドル発現',
+    },
+    m: {
+      'mm': 'm/m ホモ・ノンキャリア',
+      'Mm': 'M/m ヘテロ・マール発現',
+      'MM': 'M/M ダブルマール ⚠️ 健康リスク',
+    },
+    s: {
+      'SS': 'S/S 白斑なし',
+      'Ssp': 'S/sp わずかな白斑',
+      'spsp': 'sp/sp パーティカラー',
+    },
+    g: {
+      'gg': 'g/g 退色なし',
+      'Gg': 'G/g 成犬で退色',
+      'GG': 'G/G 成犬で退色',
+    },
+  };
+  html += '<h3 style="margin-top:20px;">各遺伝子座の交配結果</h3>';
+  html += '<p style="font-size:0.85em;color:#6b7280;margin-bottom:10px;">ホモ・ヘテロ・劣性ホモを明記しています。ヘテロは「キャリア」（保因犬）です。</p><table>';
   html += '<tr><th>遺伝子座</th><th>父犬</th><th>母犬</th><th>子犬の遺伝子型確率</th></tr>';
   const loci = [
     {name:"E Locus", key:"e", s:sire.e, d:dam.e},
@@ -1064,10 +1188,14 @@ function runColorSim() {
   ];
   for (const l of loci) {
     const cx = cross(l.s, l.d);
-    const detail = Object.entries(cx).map(([g,p]) => `${g}: ${(p*100).toFixed(0)}%`).join(', ');
+    const labels = _LOCUS_LABELS[l.key] || {};
+    const detail = Object.entries(cx).map(([g,p]) => {
+      const labeled = labels[g] || g;
+      return `${labeled}: <strong>${(p*100).toFixed(0)}%</strong>`;
+    }).join('<br>');
     // 遺伝子座名・親遺伝子型・子確率の全てをクリッカブル化
     const locusBtn = `<button type="button" class="locus-cell-link" onclick="showLocusInfo('${l.key}')" title="${l.name} の解説">${l.name} 📖</button>`;
-    html += `<tr><td>${locusBtn}</td><td>${wrapLocusReferences(l.s)}</td><td>${wrapLocusReferences(l.d)}</td><td>${wrapLocusReferences(detail)}</td></tr>`;
+    html += `<tr><td>${locusBtn}</td><td>${wrapLocusReferences(l.s)}</td><td>${wrapLocusReferences(l.d)}</td><td style="font-size:0.85em;line-height:1.7;">${detail}</td></tr>`;
   }
   html += '</table>';
 
