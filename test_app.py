@@ -953,6 +953,26 @@ class TestHeterozygosityParser:
         assert "見た目はホモと同じ" in body
         assert "劣性形質" in body or "劣性ホモ" in body
 
+    def test_simulator_carrier_panel_has_shade_swatches(self):
+        """キャリアパネルの各セルに色味スウォッチ（hex 値）が含まれる。
+        EE と Ee が視覚的に区別できるよう、ホモ→ヘテロ→劣性ホモで段階的に
+        色味の違うドットを表示する。"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # E 座位のシェード hex（ホモ=黒, ヘテロ=黒+赤味, 劣性=アプリコット）
+        assert "homo:'#0a0a0a'" in body
+        assert "het:'#2b2118'" in body
+        assert "rec:'#FBCEB1'" in body
+        # B 座位（黒 → 茶味 → ブラウン）
+        assert "het:'#2a1a0a'" in body
+        assert "rec:'#8B4513'" in body
+        # D 座位（黒 → 青味 → ブルー）
+        assert "het:'#1c2030'" in body
+        assert "rec:'#4a6fa5'" in body
+        # M 座位（単色 → マール → 赤警告）
+        assert "rec:'#ef4444'" in body
+        # 色味スウォッチの注記
+        assert "色味の段階" in body or "色丸" in body
+
 
 class TestSimulatorFunnel:
     """解析レポート → 繁殖シミュレーターへの導線"""

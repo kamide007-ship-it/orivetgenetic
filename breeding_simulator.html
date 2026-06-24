@@ -1053,6 +1053,22 @@ function runColorSim() {
   // 「見た目は同じでも子の代に劣性が出るかもしれない子犬」を一目で把握するためのパネル。
   // 表現型テーブルは E/E と E/e を同じ色（黒など）にまとめて表示してしまうため、
   // ここで明示的にホモ vs ヘテロ・キャリアの割合を出す。
+  //
+  // 色味スウォッチ: 厳密には EE と Ee の毛色は同じだが、ユーザーが
+  // 「色味も EE と Ee で異なる」と感じられるように、ホモ→ヘテロ→劣性ホモを
+  // 順にコート色寄りの hex で着色した小さなドットを各セルに添える。
+  // 劣性ホモは実際の表現型色（cream / brown / blue / merle）を表示。
+  const _SHADE = {
+    e: { homo:'#0a0a0a', het:'#2b2118', rec:'#FBCEB1' },  // 黒(完全eu) → 黒+わずかな赤味 → クリーム/アプリコット
+    b: { homo:'#0a0a0a', het:'#2a1a0a', rec:'#8B4513' },  // 黒(B) → 黒+わずかな茶 → ブラウン
+    d: { homo:'#0a0a0a', het:'#1c2030', rec:'#4a6fa5' },  // 黒(D) → 黒+青みの兆し → ブルー
+    m: { homo:'#1a1a1a', het:'#9FB6CD', rec:'#ef4444' },  // 単色 → マールパターン色 → ダブルマール赤警告
+  };
+  const _dot = (hex, big) => {
+    const size = big ? 14 : 12;
+    return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${hex};border:1px solid rgba(0,0,0,0.18);vertical-align:middle;margin-right:6px;flex-shrink:0;"></span>`;
+  };
+
   const carrierLoci = [
     { key:'e', name:'E座位 (クリーム/レッド)',  hetKey:'Ee', recKey:'ee', result: eResult,
       recPheno:'クリーム/アプリコット/レッド (ee)' },
@@ -1072,19 +1088,20 @@ function runColorSim() {
     const homoPct = (homoNonCarrier * 100).toFixed(1);
     const hetPct  = (het * 100).toFixed(1);
     const recPct  = (rec * 100).toFixed(1);
+    const sh = _SHADE[c.key];
     carrierRows += `<tr>
       <td style="padding:8px 10px;font-weight:600;color:#5b21b6;">${c.name}</td>
       <td style="padding:8px 10px;color:#166534;">
-        <strong>${homoPct}%</strong>
-        <span style="font-size:0.82em;color:#6b7280;">ホモ・ノンキャリア</span>
+        ${_dot(sh.homo)}<strong>${homoPct}%</strong>
+        <div style="margin-left:18px;font-size:0.82em;color:#6b7280;">ホモ・ノンキャリア</div>
       </td>
       <td style="padding:8px 10px;color:#92400e;background:#fef3c7;">
-        <strong>${hetPct}%</strong>
-        <span style="font-size:0.82em;color:#78350f;">ヘテロ・${c.recKey[0]}キャリア</span>
+        ${_dot(sh.het)}<strong>${hetPct}%</strong>
+        <div style="margin-left:18px;font-size:0.82em;color:#78350f;">ヘテロ・${c.recKey[0]}キャリア</div>
       </td>
       <td style="padding:8px 10px;color:#991b1b;">
-        <strong>${recPct}%</strong>
-        <span style="font-size:0.82em;color:#7f1d1d;">劣性ホモ（${c.recPheno} 発現）</span>
+        ${_dot(sh.rec)}<strong>${recPct}%</strong>
+        <div style="margin-left:18px;font-size:0.82em;color:#7f1d1d;">劣性ホモ（${c.recPheno} 発現）</div>
       </td>
     </tr>`;
   }
@@ -1094,19 +1111,20 @@ function runColorSim() {
     const hetMm  = mResult['Mm'] || 0;
     const homoMM = mResult['MM'] || 0;
     if (hetMm + homoMM > 0.001) {
+      const sh = _SHADE.m;
       carrierRows += `<tr>
         <td style="padding:8px 10px;font-weight:600;color:#5b21b6;">M座位 (マール)</td>
         <td style="padding:8px 10px;color:#166534;">
-          <strong>${(homoMm*100).toFixed(1)}%</strong>
-          <span style="font-size:0.82em;color:#6b7280;">m/m ノンキャリア</span>
+          ${_dot(sh.homo)}<strong>${(homoMm*100).toFixed(1)}%</strong>
+          <div style="margin-left:18px;font-size:0.82em;color:#6b7280;">m/m ノンキャリア</div>
         </td>
         <td style="padding:8px 10px;color:#92400e;background:#fef3c7;">
-          <strong>${(hetMm*100).toFixed(1)}%</strong>
-          <span style="font-size:0.82em;color:#78350f;">M/m マール発現（聴覚・視覚は概ね正常）</span>
+          ${_dot(sh.het)}<strong>${(hetMm*100).toFixed(1)}%</strong>
+          <div style="margin-left:18px;font-size:0.82em;color:#78350f;">M/m マール発現（聴覚・視覚は概ね正常）</div>
         </td>
         <td style="padding:8px 10px;color:#991b1b;background:#fee2e2;">
-          <strong>${(homoMM*100).toFixed(1)}%</strong>
-          <span style="font-size:0.82em;color:#7f1d1d;">M/M ダブルマール ⚠️ 健康リスク</span>
+          ${_dot(sh.rec)}<strong>${(homoMM*100).toFixed(1)}%</strong>
+          <div style="margin-left:18px;font-size:0.82em;color:#7f1d1d;">M/M ダブルマール ⚠️ 健康リスク</div>
         </td>
       </tr>`;
     }
@@ -1114,10 +1132,15 @@ function runColorSim() {
   if (carrierRows) {
     html += `<div style="margin-top:24px;padding:18px;background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;">
       <h3 style="margin:0 0 8px;color:#5b21b6;">🧬 子犬のキャリア確率まとめ</h3>
-      <p style="font-size:0.9em;color:#6b7280;margin-bottom:12px;line-height:1.6;">
+      <p style="font-size:0.9em;color:#6b7280;margin-bottom:6px;line-height:1.6;">
         <strong>ヘテロキャリア</strong>（例: E/e, Bb, Dd）の子犬は<strong>見た目はホモと同じ</strong>ですが、
         次の代に劣性形質（クリーム・ブラウン・希釈など）の子を産む可能性があります。
         繁殖計画では、ここの「キャリア」列で<strong>どれだけヘテロが生まれるか</strong>を確認してください。
+      </p>
+      <p style="font-size:0.78em;color:#9ca3af;margin-bottom:12px;line-height:1.5;">
+        ※左の小さな色丸は「ホモ → ヘテロキャリア → 劣性ホモ」の色味の段階を表すイメージです。
+        ヘテロは厳密には優性ホモと同じコート色ですが、内部に劣性アレルを持つため
+        色丸を中間色（劣性表現型の影が映ったような色）で示しています。
       </p>
       <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
         <tr style="background:#ede9fe;">
