@@ -347,6 +347,231 @@ def get_trait_annotation(test_name: str, genotype: str) -> str:
 
 
 # ============================================================
+# 毛色プロファイル（解析時のページ向け表現型サマリー）
+# ============================================================
+
+# 検査名 → 主要 8 座位 + I 座位のキー
+_LOCUS_FROM_TEST = {
+    "E Locus (Cream/Red/Yellow)": "e",
+    "K Locus (Dominant Black)":   "k",
+    "A Locus (Agouti)":            "a",
+    "B Locus (Brown)":             "b",
+    "D (Dilute) Locus":            "d",
+    "M Locus (Merle/Dapple)":      "m",
+    "Pied":                         "s",
+}
+
+# 各表現型の日本語名と表示用カラースウォッチ（HEX）
+_PHENO_SWATCH = {
+    "black":           ("ブラック",                   "#1a1a1a"),
+    "brown":           ("ブラウン/チョコレート",      "#8B4513"),
+    "blue":            ("ブルー",                     "#4a6fa5"),
+    "lilac":           ("ライラック/イザベラ",       "#C8A2C8"),
+    "silver":          ("シルバー（成犬で退色）",    "#C0C0C0"),
+    "silver_beige":    ("シルバービーグ（成犬で退色）", "#A89F92"),
+    "fawn":            ("フォーン/セーブル",         "#E5AA70"),
+    "wild_sable":      ("ワイルドセーブル",          "#9B7E48"),
+    "phantom_black":   ("ブラックタン/トライカラー", "#2d2d2d"),
+    "phantom_brown":   ("ブラウンタン/トライ（茶）", "#A0522D"),
+    "recessive_black": ("リセッシブブラック",        "#0a0a0a"),
+    "brindle":         ("ブリンドル",                "#8B7355"),
+    "cream":           ("クリーム/ホワイト",         "#FFF8DC"),
+    "apricot":         ("アプリコット",              "#FBCEB1"),
+    "red":             ("レッド/ディープレッド",     "#CD5C5C"),
+    "unknown":         ("判定不能（主要座位データ不足）", "#9ca3af"),
+}
+
+
+def _collect_color_loci(dog) -> dict:
+    """trait_results から E/K/A/B/D/M/S 座位の遺伝子型を辞書に集約。
+    値が無い座位は None のまま（未検査）。"""
+    loci = {k: None for k in ("e", "k", "a", "b", "d", "m", "s")}
+    for r in dog.trait_results:
+        key = _LOCUS_FROM_TEST.get(r.test_name)
+        if key and r.genotype:
+            loci[key] = r.genotype
+    return loci
+
+
+def _predict_phenotype(loci: dict, i_locus=None, has_greying=False):
+    """主要座位の遺伝子型から最も可能性の高い表現型を 1 件返す。
+    返り値: (key, 日本語名, ベースとなった遺伝子型の説明)。
+    確率分布は繁殖シミュレーター側に任せ、ここはレポートで「見た目はこの色」を示す用途。"""
+    e = loci.get("e") or ""
+    k = loci.get("k") or ""
+    a = loci.get("a") or ""
+    b = loci.get("b") or ""
+    d = loci.get("d") or ""
+    m = loci.get("m") or ""
+    s = loci.get("s") or ""
+
+    # E 座位 e/e は eumelanin が作れず、コートはフェオメラニン系（クリーム〜レッド）
+    # B 座位/D 座位は鼻・パッドの色素にのみ影響する。
+    if e == "e/e":
+        if i_locus == "I/I":
+            return ("red", "ee + I/I（I 座位検査済）")
+        if i_locus == "I/i":
+            return ("apricot", "ee + I/i（I 座位検査済）")
+        if i_locus == "i/i":
+            return ("cream", "ee + i/i（I 座位検査済）")
+        return ("cream", "ee（I 座位は Orivet 未対応のため詳細未確定）")
+
+    # E_（E/E または E/e）: eumelanin を作れる。K 座位で分岐
+    if not e:
+        return ("unknown", "E 座位が未検査")
+
+    # K 座位 KB_（KB/KB, KB/ky, KB/kbr）はドミナントブラック → 単色
+    if k.startswith("KB/") or k == "K/K":
+        if b == "bb":
+            base, base_desc = "brown", "bb"
+        elif b in ("BB", "Bb", "B/B", "B/b"):
+            base, base_desc = "black", b
+        else:
+            # B 座位未検査だがほぼ黒だろう
+            base, base_desc = "black", "B 座位未検査"
+
+        # D 座位希釈
+        if d == "d/d":
+            base = "blue" if base == "black" else "lilac"
+            base_desc += " + d/d"
+
+        # Greying（成犬で退色）
+        if has_greying:
+            base = "silver" if base in ("black", "blue") else "silver_beige"
+            base_desc += " + G_"
+
+        # 修飾因子（マール／パーティ）は注記に回す
+        mods = []
+        if m in ("M/m", "M/M"):
+            mods.append("マール" + ("（ダブル）" if m == "M/M" else ""))
+        if s == "sp/sp":
+            mods.append("パーティカラー")
+        elif s == "S/sp":
+            mods.append("わずかな白斑")
+
+        desc = "E_ + KB_ ({})".format(base_desc)
+        if mods:
+            desc += " + " + " / ".join(mods)
+        return (base, desc)
+
+    if k == "ky/ky":
+        # A 座位の表現型が出る
+        if a in ("ay/ay", "ay/at", "ay/aw"):
+            return ("fawn", "E_ + ky/ky + ay_")
+        if a in ("aw/aw", "aw/at"):
+            return ("wild_sable", "E_ + ky/ky + aw_")
+        if a == "at/at":
+            base = "phantom_brown" if b == "bb" else "phantom_black"
+            return (base, "E_ + ky/ky + at/at")
+        if a == "a/a":
+            return ("recessive_black", "E_ + ky/ky + a/a")
+        return ("unknown", "E_ + ky/ky だが A 座位未検査")
+
+    if k in ("kbr/ky", "kbr/kbr"):
+        return ("brindle", "E_ + kbr_")
+
+    return ("unknown", "K 座位データ不足")
+
+
+def build_color_profile_html(dog) -> str:
+    """1 頭分の毛色プロファイル（遺伝子型グリッド + 推測表現型 + 未検査注記）を HTML で返す。"""
+    loci = _collect_color_loci(dog)
+    pheno_key, pheno_desc = _predict_phenotype(loci)
+    pheno_ja, pheno_hex = _PHENO_SWATCH.get(pheno_key, _PHENO_SWATCH["unknown"])
+
+    # 主要 8 座位 + I 座位の表示順
+    display_loci = [
+        ("e", "E 座位",  "クリーム/レッド (MC1R)"),
+        ("k", "K 座位",  "ドミナントブラック"),
+        ("a", "A 座位",  "アグーチ（模様）"),
+        ("b", "B 座位",  "ブラウン (TYRP1)"),
+        ("d", "D 座位",  "希釈 (MLPH)"),
+        ("m", "M 座位",  "マール (PMEL)"),
+        ("s", "S 座位",  "パイド (MITF)"),
+        ("g", "G 座位",  "Greying / 退色"),
+        ("i", "I 座位",  "赤・黄色濃度 (MFSD12)"),
+    ]
+
+    rows = ""
+    for key, name, role in display_loci:
+        if key in ("g", "i"):
+            geno = None
+            not_tested_label = "（Orivet 未対応）"
+        else:
+            geno = loci.get(key)
+            not_tested_label = "（未検査）"
+        if geno:
+            geno_cell = (
+                f'<span style="font-family:Menlo,Consolas,monospace;font-weight:700;'
+                f'color:#4c1d95;">{_h(geno)}</span>'
+            )
+        else:
+            geno_cell = (
+                f'<span style="color:#9ca3af;font-style:italic;">— {not_tested_label}</span>'
+            )
+        rows += (
+            f'<tr>'
+            f'<td style="padding:6px 10px;color:#374151;font-weight:600;">{name}</td>'
+            f'<td style="padding:6px 10px;color:#6b7280;font-size:0.85em;">{role}</td>'
+            f'<td style="padding:6px 10px;">{geno_cell}</td>'
+            f'</tr>'
+        )
+
+    # PDF 上の自己申告毛色
+    pdf_color_html = ""
+    if dog.colour:
+        pdf_color_html = (
+            f'<div style="margin-bottom:10px;font-size:0.92em;color:#374151;">'
+            f'📄 <strong>PDF 上の毛色記載</strong>: {_h(dog.colour)}'
+            f'</div>'
+        )
+
+    # 推測表現型カード
+    pheno_html = (
+        f'<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;'
+        f'background:#fff;border-radius:10px;border:1px solid #e5e7eb;'
+        f'box-shadow:0 1px 2px rgba(0,0,0,0.04);margin-bottom:14px;">'
+        f'<div style="width:44px;height:44px;border-radius:50%;background:{pheno_hex};'
+        f'border:2px solid rgba(0,0,0,0.12);flex-shrink:0;"></div>'
+        f'<div>'
+        f'<div style="font-size:1.15em;font-weight:700;color:#1f2937;">🎨 推測される表現型: {pheno_ja}</div>'
+        f'<div style="font-size:0.85em;color:#6b7280;margin-top:2px;">'
+        f'根拠: <span style="font-family:Menlo,Consolas,monospace;">{_h(pheno_desc)}</span>'
+        f'</div>'
+        f'</div>'
+        f'</div>'
+    )
+
+    note_html = (
+        '<div style="margin-top:10px;padding:10px 14px;background:#fef9c3;'
+        'border-left:3px solid #f59e0b;border-radius:6px;font-size:0.82em;'
+        'color:#78350f;line-height:1.6;">'
+        '<strong>⚠️ Orivet 未対応の座位について</strong><br>'
+        '• <strong>I 座位 (MFSD12)</strong>: ee 犬のレッド/アプリコット/クリームの内訳を決める。Orivet 標準パネルでは未検査のため、ee の犬は「クリーム〜レッド系」とまとめて扱います。<br>'
+        '• <strong>G 座位 (Greying)</strong>: 成犬期の退色（プードルのシルバー等）を決める。Orivet では未対応のため、上記表現型は G/g 想定をしていません。<br>'
+        '繁殖シミュレーターでは、これらの座位を「補足入力」で手動指定できます。'
+        '</div>'
+    )
+
+    return (
+        '<h3 class="section-title"><span data-i18n="color_profile">🎨 毛色プロファイル（遺伝子型サマリー）</span></h3>'
+        '<div style="background:#f9fafb;border-radius:12px;padding:16px 18px;margin-bottom:16px;border:1px solid #e5e7eb;">'
+        + pdf_color_html
+        + pheno_html
+        + '<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">'
+        + '<tr style="background:#ede9fe;">'
+        + '<th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">座位</th>'
+        + '<th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">役割</th>'
+        + '<th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">遺伝子型</th>'
+        + '</tr>'
+        + rows
+        + '</table>'
+        + note_html
+        + '</div>'
+    )
+
+
+# ============================================================
 # 健康検査 遺伝子型の日本語注釈
 # ============================================================
 
@@ -5743,6 +5968,7 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
 {health_rows}
       </table>
 
+{build_color_profile_html(dog) if dog.trait_results else ''}
       <h3 class="section-title"><span data-i18n="trait_results">毛色・形質検査結果</span> ({len(dog.trait_results)}<span data-i18n="items_suffix">項目</span>)</h3>
       <table class="results-table">
         <tr><th data-i18n="th_test">検査項目</th><th data-i18n="th_genotype">遺伝子型</th><th data-i18n="th_detail">詳細</th></tr>

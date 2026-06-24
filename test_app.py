@@ -836,6 +836,95 @@ class TestHeterozygosityParser:
         assert "ヘテロ接合率" in body
         assert "renderHeterozygosityPanel" in body
 
+    # ---- 毛色プロファイル（解析時ページ） ----
+
+    def test_color_profile_renders_in_report(self):
+        """毛色プロファイル（推測表現型 + 座位グリッド）が描画される"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, TestResult, generate_unified_html
+        d = DogProfile(
+            pet_name="Seven", registered_name="R", sex="Male",
+            breed="Toy Poodle", colour="Black",
+            trait_results=[
+                TestResult(category="形質", test_name="E Locus (Cream/Red/Yellow)",
+                           genotype="E/e", result_text="", status="trait"),
+                TestResult(category="形質", test_name="K Locus (Dominant Black)",
+                           genotype="KB/ky", result_text="", status="trait"),
+                TestResult(category="形質", test_name="B Locus (Brown)",
+                           genotype="BB", result_text="", status="trait"),
+                TestResult(category="形質", test_name="D (Dilute) Locus",
+                           genotype="D/D", result_text="", status="trait"),
+            ],
+        )
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html([d], [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        # E_ + KB_ + B_ + D_ → ブラックを予測
+        assert "毛色プロファイル" in html
+        assert "推測される表現型" in html
+        assert "ブラック" in html
+        # I 座位 / G 座位は未検査として表示される
+        assert "未対応" in html
+        # PDF 上の毛色記載も表示
+        assert "PDF 上の毛色記載" in html
+
+    def test_color_profile_ee_without_i_locus(self):
+        """ee 犬は I 座位未検査時に「クリーム〜レッド系」とまとめて扱う"""
+        from poodle_genetics import DogProfile, TestResult, _predict_phenotype, _collect_color_loci
+        d = DogProfile(
+            trait_results=[
+                TestResult(category="形質", test_name="E Locus (Cream/Red/Yellow)",
+                           genotype="e/e", result_text="", status="trait"),
+                TestResult(category="形質", test_name="K Locus (Dominant Black)",
+                           genotype="KB/KB", result_text="", status="trait"),
+                TestResult(category="形質", test_name="B Locus (Brown)",
+                           genotype="BB", result_text="", status="trait"),
+            ],
+        )
+        loci = _collect_color_loci(d)
+        assert loci["e"] == "e/e"
+        key, desc = _predict_phenotype(loci)
+        # I 座位なし → cream 扱い、説明に "Orivet 未対応" の注記
+        assert key == "cream"
+        assert "Orivet 未対応" in desc
+
+    def test_color_profile_phantom_black(self):
+        """ky/ky + at/at + B_ + D_ → ブラックタン（ファントム）"""
+        from poodle_genetics import _predict_phenotype
+        key, _ = _predict_phenotype({
+            "e": "E/E", "k": "ky/ky", "a": "at/at",
+            "b": "BB", "d": "D/D", "m": "m/m", "s": "S/S",
+        })
+        assert key == "phantom_black"
+
+    def test_color_profile_dilute_blue(self):
+        """KB_ + d/d → ブルー"""
+        from poodle_genetics import _predict_phenotype
+        key, _ = _predict_phenotype({
+            "e": "E/E", "k": "KB/KB", "a": "at/at",
+            "b": "BB", "d": "d/d", "m": "m/m", "s": "S/S",
+        })
+        assert key == "blue"
+
+    # ---- 繁殖シミュレーター: 補足入力（PDF 犬向け I 座位/G 座位 override） ----
+
+    def test_simulator_has_pdf_override_panel(self):
+        """PDF 犬向けの補足入力パネル（I 座位 / Greying 上書き）が存在"""
+        rv = client.get("/simulator")
+        body = rv.get_data(as_text=True)
+        assert 'id="overrides-sire"' in body
+        assert 'id="overrides-dam"' in body
+        assert 'id="ovr-sire-i"' in body
+        assert 'id="ovr-dam-i"' in body
+        assert 'id="ovr-sire-g"' in body
+        assert 'id="ovr-dam-g"' in body
+        # 上書きの注釈
+        assert "補足入力" in body or "追加情報" in body
+
 
 class TestSimulatorFunnel:
     """解析レポート → 繁殖シミュレーターへの導線"""

@@ -281,6 +281,30 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
         </div>
       </div>
 
+      <!-- PDF 犬向け補足入力: Orivet が検査していない座位を手動で追加できる -->
+      <div id="overrides-sire" style="display:none;background:#fef9c3;border:1px solid #fde68a;padding:14px 16px;border-radius:10px;margin-bottom:12px;">
+        <h3 style="margin:0 0 8px;color:#92400e;">📌 父犬の追加情報（任意）</h3>
+        <p style="font-size:0.85em;color:#78350f;margin:0 0 10px;">Orivet 標準パネルに含まれない座位を手動で追加できます。空欄のままなら未検査扱い。</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>I Locus (MFSD12 / 赤・黄色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label>
+            <select id="ovr-sire-i" onchange="runColorSim()">
+              <option value="" selected>未検査 / 不明</option>
+              <option value="II">I/I — レッド/ディープレッド</option>
+              <option value="Ii">I/i — アプリコット（中間）</option>
+              <option value="ii">i/i — クリーム/ホワイト</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>G Locus (Greying / 退色)<button type="button" class="kb-help" onclick="showLocusInfo('g')" aria-label="G座位の解説">?</button></label>
+            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
+              <input type="checkbox" id="ovr-sire-g" onchange="runColorSim()">
+              Greying 因子を持つ（G/g 想定）
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Custom genotype inputs (hidden by default) -->
       <div id="custom-sire" style="display:none;" class="card" style="background:#f9fafb;">
         <h3>父犬カスタム遺伝子型</h3>
@@ -308,6 +332,30 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
         </div>
         <div class="form-row">
           <div class="form-group"><label>I Locus (MFSD12 / 赤・黄色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label><select id="cs-i" onchange="runColorSim()"><option value="" selected>未検査 / 不明（Orivet 未対応）</option><option value="II">I/I — レッド/ディープレッド</option><option value="Ii">I/i — アプリコット（中間）</option><option value="ii">i/i — クリーム/ホワイト</option></select></div>
+        </div>
+      </div>
+
+      <!-- PDF 犬向け補足入力: 母犬版 -->
+      <div id="overrides-dam" style="display:none;background:#fef9c3;border:1px solid #fde68a;padding:14px 16px;border-radius:10px;margin-bottom:12px;">
+        <h3 style="margin:0 0 8px;color:#92400e;">📌 母犬の追加情報（任意）</h3>
+        <p style="font-size:0.85em;color:#78350f;margin:0 0 10px;">Orivet 標準パネルに含まれない座位を手動で追加できます。空欄のままなら未検査扱い。</p>
+        <div class="form-row">
+          <div class="form-group">
+            <label>I Locus (MFSD12 / 赤・黄色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label>
+            <select id="ovr-dam-i" onchange="runColorSim()">
+              <option value="" selected>未検査 / 不明</option>
+              <option value="II">I/I — レッド/ディープレッド</option>
+              <option value="Ii">I/i — アプリコット（中間）</option>
+              <option value="ii">i/i — クリーム/ホワイト</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>G Locus (Greying / 退色)<button type="button" class="kb-help" onclick="showLocusInfo('g')" aria-label="G座位の解説">?</button></label>
+            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;color:#374151;font-size:0.9em;padding-top:6px;">
+              <input type="checkbox" id="ovr-dam-g" onchange="runColorSim()">
+              Greying 因子を持つ（G/g 想定）
+            </label>
+          </div>
         </div>
       </div>
 
@@ -774,6 +822,12 @@ function runColorSim() {
   document.getElementById('custom-sire').style.display = sireKey === 'custom' ? 'block' : 'none';
   document.getElementById('custom-dam').style.display = damKey === 'custom' ? 'block' : 'none';
 
+  // PDF 犬を選んだときだけ「📌 追加情報」パネルを表示（custom 時はカスタム入力に含まれているため隠す）
+  const ovrSire = document.getElementById('overrides-sire');
+  const ovrDam  = document.getElementById('overrides-dam');
+  if (ovrSire) ovrSire.style.display = (sireKey && sireKey !== 'custom') ? 'block' : 'none';
+  if (ovrDam)  ovrDam.style.display  = (damKey  && damKey  !== 'custom') ? 'block' : 'none';
+
   // G座位 (Greying) チェックボックス: チェック = G/g（ヘテロ）と仮定
   // ホモG/G にしたい場合は将来 select 化を検討
   const sireG = (document.getElementById('cs-g') || {}).checked ? 'Gg' : 'gg';
@@ -790,12 +844,19 @@ function runColorSim() {
     if (sireI) sire.i = sireI;
   } else {
     sire = Object.assign({ g: 'gg' }, DOGS[sireKey].color);
+    // PDF 犬向け追加情報（I 座位 / Greying）を上書き適用
+    const ovrSireI = (document.getElementById('ovr-sire-i') || {}).value;
+    if (ovrSireI) sire.i = ovrSireI;
+    if ((document.getElementById('ovr-sire-g') || {}).checked) sire.g = 'Gg';
   }
   if (damKey === 'custom') {
     dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s'), g: damG };
     if (damI) dam.i = damI;
   } else {
     dam = Object.assign({ g: 'gg' }, DOGS[damKey].color);
+    const ovrDamI = (document.getElementById('ovr-dam-i') || {}).value;
+    if (ovrDamI) dam.i = ovrDamI;
+    if ((document.getElementById('ovr-dam-g') || {}).checked) dam.g = 'Gg';
   }
 
   const eResult = cross(sire.e, dam.e);
