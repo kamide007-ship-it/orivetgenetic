@@ -940,6 +940,63 @@ function runColorSim() {
   // Calculate color outcomes
   const results = [];
 
+  // ============================================================
+  // E座位ヘテロによる「墨色トーン」分離ヘルパー
+  // ============================================================
+  // ユーザー要望: 「EE と Ee でも黒だが、色は黒と墨色になる。分かるように」
+  // → E_ 由来の表現型は E/E と E/e で 2 行に分けて表示し、
+  //   E/E は元の濃色（純黒など）、E/e はやや明るくグレー寄りの「墨色」で
+  //   描画する。色味の差は実犬では知覚困難だが、UI 上で「内部の遺伝子型」を
+  //   視覚化する目的で使用する（凡例で説明）。
+  function _hexToRgbN(hex) {
+    return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+  }
+  function _rgbToHexN(r,g,b) {
+    const clamp = x => Math.max(0, Math.min(255, Math.round(x)));
+    return '#' + [clamp(r),clamp(g),clamp(b)].map(x => x.toString(16).padStart(2,'0')).join('');
+  }
+  // ベース色を中央 grey に向けて 30% 寄せ、E/e ヘテロ由来の "墨色" トーンに
+  function _sumiTone(baseHex) {
+    const [r, g, b] = _hexToRgbN(baseHex);
+    return _rgbToHexN(r + (128 - r) * 0.30, g + (128 - g) * 0.30, b + (128 - b) * 0.30);
+  }
+  // 各表現型のトーン修飾語（E/E 由来 vs E/e 由来）
+  const _PURITY_LABEL = {
+    black:           { homo: '純黒',                het: '墨色' },
+    brown:           { homo: 'ピュア茶',            het: '墨茶' },
+    blue:            { homo: 'ピュアブルー',        het: '墨青' },
+    lilac:           { homo: 'ピュアライラック',    het: '墨ライラック' },
+    silver:          { homo: 'ピュアシルバー',      het: '墨シルバー' },
+    silver_beige:    { homo: 'ピュアシルバービーグ', het: '墨シルバービーグ' },
+    fawn:            { homo: 'ピュアフォーン',      het: '墨フォーン' },
+    wild_sable:      { homo: 'ピュアセーブル',      het: '墨セーブル' },
+    phantom_black:   { homo: 'ピュアファントム',    het: '墨ファントム' },
+    phantom_brown:   { homo: 'ピュアファントム(茶)', het: '墨ファントム(茶)' },
+    recessive_black: { homo: 'ピュアリセッシブ黒',  het: '墨リセッシブ黒' },
+    brindle:         { homo: 'ピュアブリンドル',    het: '墨ブリンドル' },
+  };
+  // E_ 由来の push を 2 行 (E/E と E/e) に分割する
+  function pushE(color, totalProb, baseLabel, comboSuffix) {
+    if (pE_ < 1e-9) return;
+    const baseHex = COLOR_MAP[color] ? COLOR_MAP[color].hex : '#9ca3af';
+    const sumi = _sumiTone(baseHex);
+    const labels = _PURITY_LABEL[color] || { homo: '純', het: '墨色' };
+    if (pEE > 0) {
+      results.push({
+        color, shadeHex: baseHex, toneLabel: labels.homo,
+        prob: totalProb * (pEE / pE_),
+        note: `${baseLabel}（${labels.homo}）(E/E + ${comboSuffix})`,
+      });
+    }
+    if (pEe > 0) {
+      results.push({
+        color, shadeHex: sumi, toneLabel: labels.het,
+        prob: totalProb * (pEe / pE_),
+        note: `${baseLabel}（${labels.het}）(E/e + ${comboSuffix})`,
+      });
+    }
+  }
+
   // 1. ee dogs — I座位(KITLG)で クリーム/アプリコット/レッド に分岐
   // 遺伝学的事実: e/e は coat に eumelanin を作れない。B 座（黒vs茶）も D 座（希釈）も
   // coat 色には影響せず、鼻・パッド・アイリムの色素にのみ影響する。
@@ -952,29 +1009,30 @@ function runColorSim() {
   // 2. E_ + KB_ → Solid black or brown（G_ なら成犬で退色 → silver / silver beige）
   // 子犬出生色は G の有無に関わらず同じ。G_ は成犬期に eumelanin を退色させる。
   // pgg / pG_ で確率を分割し、ベース色とシルバー系を別エントリで提示する。
+  // E/E と E/e は pushE で 2 行に分離（純色トーン vs 墨色トーン）。
   if (pE_ > 0 && pKB_ > 0) {
     const solidProb = pE_ * pKB_;
     if (pB_ > 0 && pD_ > 0) {
       const p = solidProb * pB_ * pD_;
-      if (pgg > 0) results.push({ color:"black", prob: p * pgg, note:"ブラック (E_, KB_, B_, D_, gg)" });
-      if (pG_ > 0) results.push({ color:"silver", prob: p * pG_, note:"シルバー (E_, KB_, B_, D_, G_: 成犬で退色)" });
+      if (pgg > 0) pushE("black", p * pgg, "ブラック", "KB_, B_, D_, gg");
+      if (pG_ > 0) pushE("silver", p * pG_, "シルバー", "KB_, B_, D_, G_: 成犬で退色");
     }
     if (pB_ > 0 && pdd > 0) {
       const p = solidProb * pB_ * pdd;
-      if (pgg > 0) results.push({ color:"blue", prob: p * pgg, note:"ブルー (E_, KB_, B_, dd, gg)" });
-      if (pG_ > 0) results.push({ color:"silver", prob: p * pG_, note:"シルバー（淡） (E_, KB_, B_, dd, G_: 成犬で退色)" });
+      if (pgg > 0) pushE("blue", p * pgg, "ブルー", "KB_, B_, dd, gg");
+      if (pG_ > 0) pushE("silver", p * pG_, "シルバー（淡）", "KB_, B_, dd, G_: 成犬で退色");
     }
     if (pbb > 0 && pD_ > 0) {
       const p = solidProb * pbb * pD_;
-      if (pgg > 0) results.push({ color:"brown", prob: p * pgg, note:"ブラウン/チョコ (E_, KB_, bb, D_, gg)" });
-      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"カフェオレ（シルバービーグ） (E_, KB_, bb, D_, G_: 成犬で退色)" });
+      if (pgg > 0) pushE("brown", p * pgg, "ブラウン/チョコ", "KB_, bb, D_, gg");
+      if (pG_ > 0) pushE("silver_beige", p * pG_, "カフェオレ（シルバービーグ）", "KB_, bb, D_, G_: 成犬で退色");
     }
     if (pbb > 0 && pdd > 0) {
       const p = solidProb * pbb * pdd;
       // 参考: bb + dd は遺伝学上「ライラック/イザベラ」(diluted brown)。
       // カフェオレ（シルバービーグ）表記は本来 bb + Greying（成犬で退色）の方
-      if (pgg > 0) results.push({ color:"lilac", prob: p * pgg, note:"ライラック/イザベラ (E_, KB_, bb, dd, gg)" });
-      if (pG_ > 0) results.push({ color:"silver_beige", prob: p * pG_, note:"カフェオレ（シルバービーグ／淡） (E_, KB_, bb, dd, G_: 成犬で退色)" });
+      if (pgg > 0) pushE("lilac", p * pgg, "ライラック/イザベラ", "KB_, bb, dd, gg");
+      if (pG_ > 0) pushE("silver_beige", p * pG_, "カフェオレ（シルバービーグ／淡）", "KB_, bb, dd, G_: 成犬で退色");
     }
   }
 
@@ -984,23 +1042,23 @@ function runColorSim() {
   if (pE_ > 0 && pkyky > 0) {
     const agoutiProb = pE_ * pkyky;
     // フォーン/セーブル (ay_)
-    if (pay_ > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"fawn", prob: agoutiProb * pay_ * pB_ * pD_, note:"フォーン/セーブル (E_, ky/ky, ay_, B_, D_)" });
-    if (pay_ > 0 && pbb > 0 && pD_ > 0) results.push({ color:"fawn", prob: agoutiProb * pay_ * pbb * pD_, note:"フォーン/セーブル (ブラウン色素) (E_, ky/ky, ay_, bb, D_)" });
+    if (pay_ > 0 && pB_ > 0 && pD_ > 0) pushE("fawn", agoutiProb * pay_ * pB_ * pD_, "フォーン/セーブル", "ky/ky, ay_, B_, D_");
+    if (pay_ > 0 && pbb > 0 && pD_ > 0) pushE("fawn", agoutiProb * pay_ * pbb * pD_, "フォーン/セーブル(ブラウン色素)", "ky/ky, ay_, bb, D_");
     // ワイルドセーブル (aw_)
-    if (paw_ > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"wild_sable", prob: agoutiProb * paw_ * pB_ * pD_, note:"ワイルドセーブル (E_, ky/ky, aw_, B_, D_)" });
-    if (paw_ > 0 && pbb > 0 && pD_ > 0) results.push({ color:"wild_sable", prob: agoutiProb * paw_ * pbb * pD_, note:"ワイルドセーブル (ブラウン色素) (E_, ky/ky, aw_, bb, D_)" });
+    if (paw_ > 0 && pB_ > 0 && pD_ > 0) pushE("wild_sable", agoutiProb * paw_ * pB_ * pD_, "ワイルドセーブル", "ky/ky, aw_, B_, D_");
+    if (paw_ > 0 && pbb > 0 && pD_ > 0) pushE("wild_sable", agoutiProb * paw_ * pbb * pD_, "ワイルドセーブル(ブラウン色素)", "ky/ky, aw_, bb, D_");
     // ブラックタン/トライカラー (at_) — at/at と at/a を含む（a/a は除外）
-    if (pat_ > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"phantom_black", prob: agoutiProb * pat_ * pB_ * pD_, note:"ブラックタン/トライカラー (E_, ky/ky, at_, B_, D_)" });
-    if (pat_ > 0 && pbb > 0 && pD_ > 0) results.push({ color:"phantom_brown", prob: agoutiProb * pat_ * pbb * pD_, note:"ブラックタン/トライカラー(ブラウン) (E_, ky/ky, at_, bb, D_)" });
+    if (pat_ > 0 && pB_ > 0 && pD_ > 0) pushE("phantom_black", agoutiProb * pat_ * pB_ * pD_, "ブラックタン/トライカラー", "ky/ky, at_, B_, D_");
+    if (pat_ > 0 && pbb > 0 && pD_ > 0) pushE("phantom_brown", agoutiProb * pat_ * pbb * pD_, "ブラックタン/トライカラー(ブラウン)", "ky/ky, at_, bb, D_");
     // リセッシブブラック (a/a) — at_ と分離
-    if (pa_a > 0 && pB_ > 0 && pD_ > 0) results.push({ color:"recessive_black", prob: agoutiProb * pa_a * pB_ * pD_, note:"リセッシブブラック (E_, ky/ky, a/a, B_, D_)" });
-    if (pa_a > 0 && pbb > 0 && pD_ > 0) results.push({ color:"brown", prob: agoutiProb * pa_a * pbb * pD_, note:"リセッシブブラウン (E_, ky/ky, a/a, bb, D_)" });
+    if (pa_a > 0 && pB_ > 0 && pD_ > 0) pushE("recessive_black", agoutiProb * pa_a * pB_ * pD_, "リセッシブブラック", "ky/ky, a/a, B_, D_");
+    if (pa_a > 0 && pbb > 0 && pD_ > 0) pushE("brown", agoutiProb * pa_a * pbb * pD_, "リセッシブブラウン", "ky/ky, a/a, bb, D_");
   }
 
   // 4. Brindle (kbr)
   if (pE_ > 0 && (pkbrky + pkbrkbr) > 0) {
     const brProb = pE_ * (pkbrky + pkbrkbr);
-    if (brProb > 0) results.push({ color:"brindle", prob: brProb, note:"ブリンドル (E_, kbr_)" });
+    if (brProb > 0) pushE("brindle", brProb, "ブリンドル", "kbr_");
   }
 
   // 5. Merle modifier
@@ -1018,36 +1076,62 @@ function runColorSim() {
   // Filter and sort
   const filtered = results.filter(r => r.prob > 0.001).sort((a,b) => b.prob - a.prob);
 
-  // Consolidate similar
+  // Consolidate by (color, shadeHex) so E/E と E/e の同じ表現型が別行で残る。
+  // ユーザー要望: 「EE と Ee でも黒だが、色は黒と墨色になる。分かるように」。
   const consolidated = {};
   for (const r of filtered) {
-    if (!consolidated[r.color]) consolidated[r.color] = { prob:0, notes:[] };
-    consolidated[r.color].prob += r.prob;
-    consolidated[r.color].notes.push(`${(r.prob*100).toFixed(1)}% — ${r.note}`);
+    // shadeHex があれば key に含めて分離、無ければベース color のみで集約。
+    const key = r.shadeHex ? `${r.color}__${r.shadeHex}` : r.color;
+    if (!consolidated[key]) {
+      consolidated[key] = {
+        baseColor: r.color,
+        shadeHex: r.shadeHex,
+        toneLabel: r.toneLabel,
+        prob: 0,
+        notes: [],
+      };
+    }
+    consolidated[key].prob += r.prob;
+    consolidated[key].notes.push(`${(r.prob*100).toFixed(1)}% — ${r.note}`);
   }
 
   // Render
   let html = '<div class="color-bar" style="height:50px;margin-bottom:16px;">';
   const totalProb = Object.values(consolidated).reduce((s,c) => s + c.prob, 0) || 1;
-  for (const [key, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
-    const cm = COLOR_MAP[key];
+  for (const [, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
+    const cm = COLOR_MAP[data.baseColor];
+    const swatchHex = data.shadeHex || cm.hex;
     const pct = (data.prob / totalProb * 100).toFixed(1);
-    const textColor = ['cream','apricot','parti','silver','silver_beige','cafe_au_lait'].includes(key) ? '#333' : 'white';
-    html += `<div style="width:${pct}%;background:${cm.hex};color:${textColor}">${pct}%</div>`;
+    const lightCheck = ['cream','apricot','parti','silver','silver_beige','cafe_au_lait'].includes(data.baseColor);
+    const textColor = lightCheck ? '#333' : 'white';
+    html += `<div style="width:${pct}%;background:${swatchHex};color:${textColor}">${pct}%</div>`;
   }
   html += '</div>';
 
   html += '<table><tr><th>毛色</th><th>確率</th><th>遺伝子型の詳細</th></tr>';
-  for (const [key, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
-    const cm = COLOR_MAP[key];
+  for (const [, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
+    const cm = COLOR_MAP[data.baseColor];
+    const swatchHex = data.shadeHex || cm.hex;
     const pct = (data.prob / totalProb * 100).toFixed(1);
-    html += `<tr><td><span class="color-swatch" style="background:${cm.hex}"></span>${cm.name}</td>`;
+    // 表現型名にトーン修飾語を付ける（例: 「ブラック (純黒)」「ブラック (墨色)」）
+    const displayName = data.toneLabel ? `${cm.name}（${data.toneLabel}）` : cm.name;
+    html += `<tr><td><span class="color-swatch" style="background:${swatchHex}"></span>${displayName}</td>`;
     html += `<td style="font-weight:700;font-size:1.1em">${pct}%</td>`;
     // 各 note の遺伝子型表記をクリッカブル化（座位ヘルプモーダルへ）
     const wrappedNotes = data.notes.map(wrapLocusReferences).join('<br>');
     html += `<td style="font-size:0.82em">${wrappedNotes}</td></tr>`;
   }
   html += '</table>';
+
+  // 「純色トーン」「墨色トーン」の意味を説明する小さい凡例
+  if (Object.values(consolidated).some(d => d.toneLabel)) {
+    html += `<div style="margin-top:8px;padding:10px 14px;background:#fef9c3;border-left:3px solid #f59e0b;border-radius:6px;font-size:0.82em;color:#78350f;line-height:1.6;">
+      <strong>📖 「純色 / 墨色」のトーンについて</strong><br>
+      E/E 由来は「<strong>純色トーン</strong>」（深い色）、E/e ヘテロ由来は「<strong>墨色トーン</strong>」（やや薄い色）で描画しています。
+      実際の犬では完全優性により見た目は同じですが、UI 上で<strong>「子犬が E キャリアかどうか」が一目で分かる</strong>ように
+      色味を変えています。例: <code>E/E</code> 由来のブラックは純黒、<code>E/e</code> 由来のブラックは墨色（ややグレー寄り）。
+    </div>`;
+  }
 
   // ============================================================
   // アレル単位の色マップと 2 アレルドット表示ヘルパー

@@ -1111,6 +1111,22 @@ class TestHeterozygosityParser:
         # シグネチャー色の説明
         assert "シグネチャー" in body or "座位ごと" in body
 
+    def test_simulator_splits_phenotype_by_e_genotype(self):
+        """毛色予測結果が E/E 由来と E/e 由来をトーン違いで分けて表示する。
+        ユーザー要望: 「EE と Ee でも黒だが、色は黒と墨色になる」"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # pushE ヘルパーで E_ 由来 push を分割している
+        assert "function pushE" in body or "pushE(" in body
+        # _PURITY_LABEL マップで純色/墨色の修飾語を定義
+        assert "_PURITY_LABEL" in body
+        # ブラック（純黒/墨色）
+        assert "純黒" in body
+        assert "墨色" in body
+        # 墨色トーン生成関数
+        assert "_sumiTone" in body or "function _sumiTone" in body
+        # 凡例（純色/墨色の意味の説明）
+        assert "純色 / 墨色" in body or "純色トーン" in body
+
 
 class TestSimulatorFunnel:
     """解析レポート → 繁殖シミュレーターへの導線"""
