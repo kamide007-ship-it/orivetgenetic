@@ -10,7 +10,7 @@
 // ⚠️ Service Worker のスコープはこのファイルの配置パスで決まる。
 //    /sw.js から配信することでサイト全体を制御可能。
 
-const CACHE_VERSION = 'orivet-v2';
+const CACHE_VERSION = 'orivet-v3';
 const CACHE_NAME = `app-shell-${CACHE_VERSION}`;
 
 // オフラインでも閲覧したい最小コアアセット
@@ -20,8 +20,10 @@ const APP_SHELL = [
   '/guides',
   '/sample',
   '/manifest.json',
+  '/static/favicon.svg',
   '/static/icon-192.svg',
   '/static/icon-512.svg',
+  '/static/apple-touch-icon.svg',
 ];
 
 self.addEventListener('install', (event) => {

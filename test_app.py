@@ -1299,8 +1299,9 @@ class TestIndexCacheHeaders:
     def test_service_worker_excludes_root_from_cache_first(self):
         """SW は / を network-first 扱いし、APP_SHELL の cache-first リストから外す"""
         sw = client.get("/sw.js").get_data(as_text=True)
-        # キャッシュバージョン更新で旧キャッシュを無効化
-        assert "orivet-v2" in sw
+        # キャッシュバージョンが定義されている（バージョン番号は更新で上がる）
+        import re
+        assert re.search(r"CACHE_VERSION\s*=\s*'orivet-v\d+'", sw)
         # / 専用の network-first 分岐が存在
         assert "url.pathname === '/'" in sw
 
@@ -2704,6 +2705,46 @@ class TestPWA:
         assert rv.status_code == 200
         body = rv.get_data(as_text=True)
         assert "<svg" in body
+
+    def test_static_favicon_served(self):
+        """新規 favicon.svg が配信される"""
+        rv = client.get("/static/favicon.svg")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "<svg" in body
+        assert 'viewBox="0 0 64 64"' in body
+
+    def test_static_apple_touch_icon_served(self):
+        """apple-touch-icon.svg が配信される"""
+        rv = client.get("/static/apple-touch-icon.svg")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert 'viewBox="0 0 180 180"' in body
+
+    def test_static_og_image_served(self):
+        """og-image.svg が配信される（1200x630）"""
+        rv = client.get("/static/og-image.svg")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert 'viewBox="0 0 1200 630"' in body
+
+    def test_index_links_new_favicon_and_og(self):
+        """ホームページが新規 favicon と OG 画像をリンクしている"""
+        body = client.get("/").get_data(as_text=True)
+        assert '/static/favicon.svg' in body
+        assert '/static/apple-touch-icon.svg' in body
+        assert '/static/og-image.svg' in body
+        assert 'og:image' in body
+
+    def test_manifest_includes_favicon(self):
+        """manifest.json に favicon.svg が含まれる"""
+        import json
+        rv = client.get("/manifest.json")
+        data = json.loads(rv.get_data(as_text=True))
+        srcs = [icon["src"] for icon in data["icons"]]
+        assert "/static/favicon.svg" in srcs
+        assert "/static/icon-192.svg" in srcs
+        assert "/static/icon-512.svg" in srcs
 
     def test_index_has_manifest_link(self):
         rv = client.get("/")
