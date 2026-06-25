@@ -990,6 +990,23 @@ class TestHeterozygosityParser:
         assert "見た目はホモと同じ" in body
         assert "劣性形質" in body or "劣性ホモ" in body
 
+    def test_simulator_has_genotype_combination_detail_table(self):
+        """「🔬 遺伝子型コンビネーション詳細」テーブルとブレンド色関数が含まれる。
+        各ユニークな遺伝子型コンビが行として展開され、それぞれにブレンドシェード
+        スウォッチを持つ。"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # 詳細セクションの見出し
+        assert "🔬 遺伝子型コンビネーション詳細" in body
+        # blendShade と _CARRIER_TINT が定義されている
+        assert "function blendShade" in body
+        assert "_CARRIER_TINT" in body
+        # 説明文（遺伝子型が異なれば色味が変わる）
+        assert "遺伝子型が異なると" in body
+        # 各キャリアの tint hex がある
+        assert "[251, 206, 177]" in body  # アプリコット tint
+        assert "[139,  69,  19]" in body or "[139, 69, 19]" in body  # ブラウン tint
+        assert "[ 74, 111, 165]" in body or "[74, 111, 165]" in body  # ブルー tint
+
     def test_simulator_carrier_panel_has_shade_swatches(self):
         """キャリアパネルの各セルに色味スウォッチ（hex 値）が含まれる。
         EE と Ee が視覚的に区別できるよう、ホモ→ヘテロ→劣性ホモで段階的に

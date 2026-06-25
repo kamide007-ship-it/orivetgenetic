@@ -1222,6 +1222,188 @@ function runColorSim() {
   }
   html += '</table>';
 
+  // ================================================================
+  // 🔬 遺伝子型コンビネーション詳細
+  // 各ユニークな遺伝子型コンビネーション（E×K×B×D×G の組み合わせ）を
+  // 別行で展開し、それぞれにブレンドされたシェード色を割り当てる。
+  // 「遺伝子型が異なれば色味の表現も全て変わる」をユーザーに視認させる。
+  // ================================================================
+  // ベース hex → RGB → 加味色（劣性表現型の色）でブレンドするヘルパー
+  function _hexToRgb(hex) {
+    return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+  }
+  function _rgbToHex(r,g,b) {
+    const clamp = x => Math.max(0, Math.min(255, Math.round(x)));
+    return '#' + [clamp(r),clamp(g),clamp(b)].map(x => x.toString(16).padStart(2,'0')).join('');
+  }
+  // 各座位のキャリア・劣性表現型に対応する tint 色（劣性ホモが表現する色）
+  const _CARRIER_TINT = {
+    Ee: [251, 206, 177],  // ee → アプリコット/クリーム
+    Bb: [139,  69,  19],  // bb → ブラウン
+    Dd: [ 74, 111, 165],  // dd → ブルー
+    KBky:  [200, 160,  80],  // ky → アグーチ茶
+    KBkbr: [139, 115,  85],  // kbr → ブリンドル
+    Mm:    [159, 182, 205],  // M_ → マール柄
+    Gg:    [192, 192, 192],  // G_ → シルバー退色
+  };
+  function blendShade(baseHex, combo) {
+    // baseHex を combo の各キャリアに応じてブレンド
+    let [r, g, b] = _hexToRgb(baseHex);
+    const blend = (tint, weight) => {
+      r += (tint[0] - r) * weight;
+      g += (tint[1] - g) * weight;
+      b += (tint[2] - b) * weight;
+    };
+    if (combo.e === 'Ee') blend(_CARRIER_TINT.Ee, 0.10);
+    if (combo.b === 'Bb') blend(_CARRIER_TINT.Bb, 0.10);
+    if (combo.d === 'Dd') blend(_CARRIER_TINT.Dd, 0.12);
+    if (combo.k === 'KBky')  blend(_CARRIER_TINT.KBky,  0.06);
+    if (combo.k === 'KBkbr') blend(_CARRIER_TINT.KBkbr, 0.08);
+    return _rgbToHex(r, g, b);
+  }
+
+  // 各座位の表示用ラベル（コンビネーション表の遺伝子型カラム用、コンパクト）
+  function _label(key, g) {
+    return (_LOCUS_LABELS[key] && _LOCUS_LABELS[key][g]) || g;
+  }
+
+  // 遺伝子型コンビネーションを展開し、表現型と確率を計算
+  const combos = [];
+  const E_GENO = [['EE', pEE], ['Ee', pEe], ['ee', pee]];
+  const K_GENO_KB = [['KBKB', pKBKB], ['KBky', pKBky], ['KBkbr', pKBkbr]];
+  const B_GENO = [['BB', pBB], ['Bb', pBb], ['bb', pbb]];
+  const D_GENO = [['DD', pDD], ['Dd', pDd], ['dd', pdd]];
+  const G_GENO = [['gg', pgg], ['Gg/GG', pG_]];
+
+  for (const [eG, pE] of E_GENO) {
+    if (pE < 0.001) continue;
+    for (const [bG, pB] of B_GENO) {
+      if (pB < 0.001) continue;
+      for (const [dG, pD] of D_GENO) {
+        if (pD < 0.001) continue;
+        for (const [gG, pG] of G_GENO) {
+          if (pG < 0.001) continue;
+
+          // ee 枝: I 座位未指定なら「クリーム系」にまとめる
+          if (eG === 'ee') {
+            const pBase = pE * pB * pD * pG;
+            // I 座位指定があれば red/apricot/cream に分岐
+            let phenoKey = 'cream';
+            let iDesc = '（I 座位未検査）';
+            if (sire.i && dam.i) {
+              const iR = cross(sire.i, dam.i);
+              for (const [iG, pI] of Object.entries(iR)) {
+                if (pI < 0.001) continue;
+                const sub = pBase * pI;
+                const pk = (iG === 'II') ? 'red' : (iG === 'Ii') ? 'apricot' : 'cream';
+                combos.push({
+                  phenoKey: pk,
+                  shade: blendShade(COLOR_MAP[pk].hex, { e:eG, b:bG, d:dG }),
+                  prob: sub,
+                  genoText: `${_label('e',eG)} + ${_label('b',bG)} + ${_label('d',dG)} + I:${iG} + G:${gG}`,
+                });
+              }
+              continue;
+            }
+            combos.push({
+              phenoKey,
+              shade: blendShade(COLOR_MAP[phenoKey].hex, { e:eG, b:bG, d:dG }),
+              prob: pBase,
+              genoText: `${_label('e',eG)} + ${_label('b',bG)} + ${_label('d',dG)} ${iDesc} + G:${gG}`,
+            });
+            continue;
+          }
+
+          // E_ + KB_ → 単色系（ブラック/ブラウン/ブルー/ライラック）+ Greying でシルバー系
+          for (const [kG, pK] of K_GENO_KB) {
+            if (pK < 0.001) continue;
+            const p = pE * pK * pB * pD * pG;
+            if (p < 0.0005) continue;
+            let phenoKey;
+            if (bG === 'bb' && dG === 'dd') phenoKey = 'lilac';
+            else if (bG === 'bb') phenoKey = 'brown';
+            else if (dG === 'dd') phenoKey = 'blue';
+            else phenoKey = 'black';
+            // Greying で退色
+            if (gG !== 'gg') {
+              phenoKey = (phenoKey === 'black' || phenoKey === 'blue') ? 'silver' : 'silver_beige';
+            }
+            const shade = blendShade(COLOR_MAP[phenoKey].hex, { e:eG, k:kG, b:bG, d:dG });
+            combos.push({
+              phenoKey, shade, prob: p,
+              genoText: `${_label('e',eG)} + ${_label('k',kG)} + ${_label('b',bG)} + ${_label('d',dG)} + G:${gG}`,
+            });
+          }
+          // E_ + ky/ky → A 座位の表現型（A 詳細は割愛、表示はアグーチで集約）
+          if (pkyky >= 0.001) {
+            const p = pE * pkyky * pB * pD * pG;
+            if (p >= 0.0005) {
+              // 簡略化: アグーチ系として「アグーチ表現（A 座位による）」と表示
+              let phenoKey;
+              if (bG === 'bb') phenoKey = 'brown';
+              else if (dG === 'dd') phenoKey = 'blue';
+              else phenoKey = 'phantom_black';
+              if (gG !== 'gg') {
+                phenoKey = (phenoKey === 'phantom_black' || phenoKey === 'blue') ? 'silver' : 'silver_beige';
+              }
+              const shade = blendShade(COLOR_MAP[phenoKey].hex, { e:eG, k:'kyky', b:bG, d:dG });
+              combos.push({
+                phenoKey, shade, prob: p,
+                genoText: `${_label('e',eG)} + ky/ky + ${_label('b',bG)} + ${_label('d',dG)} + G:${gG} <span style="color:#6b7280;">※A 座位の模様が表出</span>`,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 確率順にソートして表示
+  combos.sort((a, b) => b.prob - a.prob);
+  // 0.05% 未満の極小コンビネーションは折りたたみ対象
+  const visibleCombos = combos.filter(c => c.prob >= 0.0005);
+  if (visibleCombos.length > 0) {
+    let comboRows = '';
+    let totalDisplayed = 0;
+    for (const c of visibleCombos) {
+      const cm = COLOR_MAP[c.phenoKey] || COLOR_MAP.unknown;
+      const pct = (c.prob * 100).toFixed(2);
+      totalDisplayed += c.prob;
+      const textColor = ['cream','apricot','parti','silver','silver_beige','cafe_au_lait'].includes(c.phenoKey) ? '#1f2937' : '#fff';
+      comboRows += `<tr>
+        <td style="padding:8px 10px;">
+          <span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${c.shade};border:1px solid rgba(0,0,0,0.18);vertical-align:middle;margin-right:8px;"></span>
+          <span style="font-family:Menlo,Consolas,monospace;font-size:0.82em;color:#4c1d95;">${c.genoText}</span>
+        </td>
+        <td style="padding:8px 10px;">
+          <span style="display:inline-block;padding:3px 10px;border-radius:6px;background:${cm.hex};color:${textColor};font-size:0.82em;font-weight:600;">${cm.name}</span>
+        </td>
+        <td style="padding:8px 10px;text-align:right;font-weight:700;color:#5b21b6;">${pct}%</td>
+      </tr>`;
+    }
+    html += `<details style="margin-top:20px;background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:14px 18px;">
+      <summary style="cursor:pointer;font-weight:700;color:#5b21b6;font-size:1.05em;list-style:none;">
+        🔬 遺伝子型コンビネーション詳細（${visibleCombos.length} 通り）
+        <span style="font-size:0.85em;color:#6b7280;font-weight:500;margin-left:8px;">▾ クリックで展開</span>
+      </summary>
+      <p style="font-size:0.85em;color:#6b7280;margin:10px 0;line-height:1.6;">
+        <strong>遺伝子型が異なると、表現型は同じでも内部の遺伝構成が変わります。</strong>
+        各行は子犬に出現しうるユニークな遺伝子型コンビネーションです。
+        左の色丸は「ベース表現型色 + 各キャリアの劣性表現色を混ぜたシェード」を示し、
+        ホモとヘテロキャリアの色味の差を視覚化しています。
+        ※同じ表現型（例: ブラック）でも遺伝子型が違えば微妙に色味が変わるイメージです。
+      </p>
+      <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
+        <tr style="background:#ede9fe;">
+          <th style="padding:8px 10px;text-align:left;font-size:0.82em;color:#5b21b6;">遺伝子型コンビネーション</th>
+          <th style="padding:8px 10px;text-align:left;font-size:0.82em;color:#5b21b6;">表現型</th>
+          <th style="padding:8px 10px;text-align:right;font-size:0.82em;color:#5b21b6;">確率</th>
+        </tr>
+        ${comboRows}
+      </table>
+    </details>`;
+  }
+
   // Warnings
   if ((pMm + pMM) > 0 && pMM > 0) {
     html += '<div class="warn-box"><strong>警告: ダブルマール (M/M) リスク</strong><br>M/M の子犬が生まれる確率が ' + (pMM*100).toFixed(1) + '% あります。ダブルマールは聴覚・視覚障害のリスクが非常に高いため、この交配は推奨されません。</div>';
