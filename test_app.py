@@ -1100,8 +1100,8 @@ class TestHeterozygosityParser:
         assert "b: '#7B3F00'" in body          # B座位: 濃チョコ
         assert "D: '#1E40AF'" in body          # D座位: ロイヤルブルー
         assert "d: '#93C5FD'" in body          # D座位: 水色
-        assert "KB: '#6B21A8'" in body         # K座位: 鮮やかパープル
-        assert "ky: '#EAB308'" in body         # K座位: ゴールド
+        assert "KB: '#0a0a0a'" in body         # K座位: 黒（ドミナントブラック）
+        assert "ky: '#A0522D'" in body         # K座位: ファントム タン（シエナ）
         assert "m: '#0E7490'" in body          # M座位: ダークシアン
         assert "M: '#22D3EE'" in body          # M座位: 明るいシアン
         assert "S: '#15803D'" in body          # S座位: フォレストグリーン
