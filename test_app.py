@@ -1121,6 +1121,28 @@ class TestHeterozygosityParser:
         # シグネチャー色の説明
         assert "シグネチャー" in body or "座位ごと" in body
 
+    def test_simulator_has_recessive_homozygous_panel(self):
+        """ホワイト/ブラウン/希釈の劣性ホモ化（単独・重複）の発現確率
+        パネルがある。ユーザー要望: ee+bb のような重複ホモ化で出る
+        特殊カラー（リバー、シャンパン、イザベラ）と % を明示する。"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # パネル見出し
+        assert "🎯 劣性ホモ化の発現確率" in body
+        # 単独ホモ
+        assert "e/e 劣性ホモ" in body
+        assert "b/b 劣性ホモ" in body
+        assert "d/d 劣性ホモ" in body
+        # 重複ホモ（特殊カラー）
+        assert "ee + bb 重複ホモ" in body
+        assert "ee + dd 重複ホモ" in body
+        assert "bb + dd 重複ホモ" in body
+        # 特殊カラー名
+        assert "リバーカラー" in body
+        assert "シャンパン" in body
+        assert "ライラック" in body or "イザベラ" in body
+        # ee バリアントごとに nose tone shadeHex を計算する関数
+        assert "noseToneFor" in body
+
     def test_simulator_splits_phenotype_by_e_genotype(self):
         """毛色予測結果が E/E 由来と E/e 由来をトーン違いで分けて表示する。
         ユーザー要望: 「EE と Ee でも黒だが、色は黒と墨色になる」"""
