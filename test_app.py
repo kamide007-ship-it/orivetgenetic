@@ -872,6 +872,43 @@ class TestHeterozygosityParser:
         # PDF 上の毛色記載も表示
         assert "PDF 上の毛色記載" in html
 
+    def test_color_profile_shows_carrier_shades_and_summary(self):
+        """毛色プロファイルが各座位にシェードドットとステータスバッジ、
+        さらに「キャリア・劣性発現サマリー」を描画する"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, TestResult, generate_unified_html
+        # E/e（eキャリア）+ Bb（bキャリア）+ KB/KB + DD の犬
+        d = DogProfile(
+            pet_name="Carrier", registered_name="R", sex="Male", breed="Toy Poodle",
+            trait_results=[
+                TestResult(category="形質", test_name="E Locus (Cream/Red/Yellow)",
+                           genotype="E/e", result_text="", status="trait"),
+                TestResult(category="形質", test_name="K Locus (Dominant Black)",
+                           genotype="KB/KB", result_text="", status="trait"),
+                TestResult(category="形質", test_name="B Locus (Brown)",
+                           genotype="Bb", result_text="", status="trait"),
+                TestResult(category="形質", test_name="D (Dilute) Locus",
+                           genotype="D/D", result_text="", status="trait"),
+            ],
+        )
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html([d], [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        # ステータスバッジ
+        assert "ノンキャリア" in html
+        assert "キャリア" in html
+        # サマリーパネル
+        assert "キャリア・劣性発現サマリー" in html
+        assert "🟡 キャリア（保因犬）の座位" in html
+        # シェードドット用の hex
+        assert "#0a0a0a" in html  # E/E or BB ホモ
+        assert "#2b2118" in html  # E/e ヘテロ
+        assert "#2a1a0a" in html  # Bb ヘテロ
+
     def test_color_profile_ee_without_i_locus(self):
         """ee 犬は I 座位未検査時に「クリーム〜レッド系」とまとめて扱う"""
         from poodle_genetics import DogProfile, TestResult, _predict_phenotype, _collect_color_loci
