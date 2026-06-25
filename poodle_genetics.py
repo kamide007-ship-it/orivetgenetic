@@ -6243,9 +6243,27 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
         alerts_html = '<div class="breed-warn" style="background:#dcfce7;border-color:#86efac;"><div class="warn-title" style="color:#166534;" data-i18n="all_clear">全頭クリア</div><p data-i18n="all_clear_desc">全ての健康検査項目でノーマル（変異なし）でした。</p></div>'
 
     # ── Overview table rows ──
+    # 各行を <tr class="dog-overview-row"> にしてクリックでその犬の詳細タブへジャンプ。
+    # safe_id は dog_tab 生成時と同じロジック（pet_name → registered_name → 犬{idx+1}）。
     overview_table_rows = ""
-    for d in dogs:
-        overview_table_rows += f"<tr><td><strong>{_h(d.pet_name)}</strong></td><td>{_h(d.registered_name)}</td><td>{_h(d.breed)}</td><td>{_h(d.sex)}</td><td>{_h(d.dob)}</td><td>{_h(d.case_number)}</td></tr>\n"
+    for idx, d in enumerate(dogs):
+        name_for_id = d.pet_name or d.registered_name or f"犬{idx+1}"
+        safe_id = re.sub(r'[^a-zA-Z0-9]', '_', name_for_id.lower())
+        overview_table_rows += (
+            f'<tr class="dog-overview-row" onclick="showTab(\'{safe_id}\')" '
+            f'style="cursor:pointer;transition:background 0.15s;" '
+            f'onmouseover="this.style.background=\'#f3e8ff\'" '
+            f'onmouseout="this.style.background=\'\'" '
+            f'title="クリックしてこの犬の詳細を見る">'
+            f"<td><strong>{_h(d.pet_name)}</strong></td>"
+            f"<td>{_h(d.registered_name)}</td>"
+            f"<td>{_h(d.breed)}</td>"
+            f"<td>{_h(d.sex)}</td>"
+            f"<td>{_h(d.dob)}</td>"
+            f"<td>{_h(d.case_number)}</td>"
+            f'<td style="text-align:right;color:#7c3aed;font-weight:600;font-size:0.9em;">詳細を見る →</td>'
+            f"</tr>\n"
+        )
 
     # ── Pedigree section ──
     pedigree_tab_button = ""
@@ -6399,7 +6417,21 @@ def generate_unified_html(dogs: list, pedigrees: list, output_path: str):
     overview_tab_button = '<div class="tab active" onclick="showTab(\'overview\')"><span data-i18n="tab_overview">全体サマリー</span></div>' if has_orivet else ''
 
     if has_orivet:
-        overview_table_html = '<div class="dog-card"><h2 class="section-title" data-i18n="test_subjects">検査対象一覧</h2><table class="results-table"><tr><th data-i18n="th_pet_name">ペット名</th><th data-i18n="th_reg_name">登録名</th><th data-i18n="lbl_breed">犬種</th><th data-i18n="lbl_sex">性別</th><th data-i18n="lbl_dob">生年月日</th><th data-i18n="th_case_no">ケース番号</th></tr>' + overview_table_rows + '</table></div>'
+        overview_table_html = (
+            '<div class="dog-card"><h2 class="section-title" data-i18n="test_subjects">検査対象一覧</h2>'
+            '<p style="font-size:0.88em;color:#6b7280;margin:-6px 0 12px;" data-i18n="overview_click_hint">'
+            '💡 行をクリックするとその犬の詳細結果（健康・毛色プロファイル）へジャンプします。'
+            '</p>'
+            '<table class="results-table">'
+            '<tr><th data-i18n="th_pet_name">ペット名</th>'
+            '<th data-i18n="th_reg_name">登録名</th>'
+            '<th data-i18n="lbl_breed">犬種</th>'
+            '<th data-i18n="lbl_sex">性別</th>'
+            '<th data-i18n="lbl_dob">生年月日</th>'
+            '<th data-i18n="th_case_no">ケース番号</th>'
+            '<th></th></tr>'
+            + overview_table_rows + '</table></div>'
+        )
         alerts_section = '<div class="dog-card"><h2 class="section-title" data-i18n="alerts_title">要注意事項</h2>' + alerts_html + '</div>'
         overview_section = '<!-- Overview Tab -->\n  <div id="overview" class="tab-content active">\n  ' + overview_table_html + '\n  ' + alerts_section + '\n  </div>'
     else:
