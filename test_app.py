@@ -872,13 +872,11 @@ class TestHeterozygosityParser:
         # PDF 上の毛色記載も表示
         assert "PDF 上の毛色記載" in html
 
-    def test_color_profile_shows_carrier_shades_and_summary(self):
-        """毛色プロファイルが各座位にシェードドットとステータスバッジ、
-        さらに「キャリア・劣性発現サマリー」を描画する。
-        Mendelian-correct: E/E と E/e、BB と Bb は同じ色丸（実際に見た目同じ）。"""
+    def test_color_profile_shows_genotype_terms_and_allele_dots(self):
+        """毛色プロファイルが Mendelian な用語（優性ホモ・ヘテロ・劣性ホモ）と
+        2 アレル分の色丸を描画する。Bb なら黒丸 + 茶丸、E/e なら黒丸 + クリーム丸。"""
         import tempfile, os
-        from poodle_genetics import DogProfile, TestResult, generate_unified_html, _GENOTYPE_SHADE
-        # E/e（eキャリア）+ Bb（bキャリア）+ KB/KB + DD の犬
+        from poodle_genetics import DogProfile, TestResult, generate_unified_html
         d = DogProfile(
             pet_name="Carrier", registered_name="R", sex="Male", breed="Toy Poodle",
             trait_results=[
@@ -899,17 +897,33 @@ class TestHeterozygosityParser:
             html = open(path, encoding="utf-8").read()
         finally:
             os.unlink(path)
-        # ステータスバッジ
-        assert "ノンキャリア" in html
-        assert "キャリア" in html
-        # サマリーパネル
-        assert "キャリア・劣性発現サマリー" in html
-        assert "🟡 キャリア（保因犬）の座位" in html
-        # シェードドット用の hex (E/E ホモも E/e キャリアも同じ #0a0a0a)
-        assert "#0a0a0a" in html
-        # メンデル遺伝説明文
-        assert "完全優性" in html
-        assert "同じ色丸" in html
+        # Mendelian な用語（旧「キャリア」/「ノンキャリア」は廃止）
+        assert "優性ホモ" in html
+        assert "ヘテロ" in html
+        assert "劣性ホモ" in html
+        assert "ノンキャリア" not in html
+        # サマリーパネルが新タイトルに
+        assert "遺伝子型サマリー" in html
+        assert "🟡 ヘテロ（保因）の座位" in html
+        # 2 アレルドットの色 hex（B/B = 黒×2, Bb = 黒+茶, E/e = 黒+クリーム）
+        assert "#0a0a0a" in html  # 黒（E/B のドミナント側）
+        assert "#8B4513" in html  # 茶（b アレル）
+        assert "#FFF8DC" in html  # クリーム（e アレル）
+
+    def test_allele_dots_helper(self):
+        """_allele_dots_html が 2 アレル分の色丸 HTML を返す"""
+        from poodle_genetics import _allele_dots_html, _split_genotype
+        # genotype 分解
+        assert _split_genotype("E/E") == ["E", "E"]
+        assert _split_genotype("Bb") == ["B", "b"]
+        assert _split_genotype("KB/ky") == ["KB", "ky"]
+        # ドット HTML
+        html = _allele_dots_html("Bb")
+        assert "#0a0a0a" in html  # B アレル
+        assert "#8B4513" in html  # b アレル
+        html = _allele_dots_html("E/e")
+        assert "#0a0a0a" in html  # E
+        assert "#FFF8DC" in html  # e
 
     def test_genotype_shade_homo_and_carrier_match(self):
         """E/B/D/K の優性ホモとヘテロキャリアは同じ hex を持つ（Mendelian-correct）。
@@ -998,21 +1012,25 @@ class TestHeterozygosityParser:
         assert '"silver_beige": { hex:"#BFA37A"' in body
         assert "カフェオレ（シルバービーグ／成犬で退色）" in body
 
-    def test_simulator_shows_carrier_breakdown(self):
-        """シミュレーターに「キャリア確率まとめ」パネルと
-        ホモ/ヘテロ/劣性ホモの明示ラベルが含まれる"""
+    def test_simulator_shows_genotype_breakdown_panel(self):
+        """シミュレーターに「遺伝子型まとめ」パネルと Mendelian な用語が含まれる。
+        「キャリア」「ノンキャリア」のような曖昧な表記は廃止し、優性ホモ/ヘテロ/
+        劣性ホモを使用する。"""
         body = client.get("/simulator").get_data(as_text=True)
-        # キャリアまとめパネル
-        assert "🧬 子犬のキャリア確率まとめ" in body
-        # 座位ラベル定義
-        assert "E/E ホモ・ノンキャリア" in body
-        assert "E/e ヘテロ・eキャリア" in body
-        assert "Bb ヘテロ・bキャリア" in body
-        assert "D/d ヘテロ・dキャリア" in body
-        assert "M/m ヘテロ・マール発現" in body
-        # ユーザー説明（見た目は同じだが子に劣性が出る可能性）
-        assert "見た目はホモと同じ" in body
-        assert "劣性形質" in body or "劣性ホモ" in body
+        # パネル見出し
+        assert "🧬 子犬の遺伝子型まとめ" in body
+        # Mendelian な用語が使われている
+        assert "E/E 優性ホモ" in body
+        assert "E/e ヘテロ" in body
+        assert "Bb ヘテロ" in body
+        assert "D/d ヘテロ" in body
+        assert "M/m ヘテロ" in body
+        # 旧表記は廃止されている
+        assert "ホモ・ノンキャリア" not in body
+        assert "ヘテロ・eキャリア" not in body
+        # ユーザー説明
+        assert "見た目は優性ホモと同じ" in body
+        assert "25%" in body  # 劣性発現確率
 
     def test_simulator_has_genotype_combination_detail_table(self):
         """「🔬 遺伝子型コンビネーション詳細」テーブルが含まれる。
@@ -1029,23 +1047,25 @@ class TestHeterozygosityParser:
         # キャリア状態の内訳を確認できる用途で展開していることを明示
         assert "キャリア状態の内訳" in body
 
-    def test_simulator_carrier_panel_is_mendelian_correct(self):
-        """キャリアパネルの色丸は Mendelian-correct（メンデル遺伝に忠実）。
-        E/B/D/K 座位は完全優性のため、優性ホモとヘテロキャリアは同じ hex を持つ。
-        劣性ホモのみ実際の表現型色（クリーム / ブラウン / 希釈）に。
-        M 座位は半優性のため M/m は別色（マール柄）。"""
+    def test_simulator_uses_allele_dots(self):
+        """シミュレーターは 2 アレルドット方式で色丸を表示する。
+        遺伝子型を構成する 2 つのアレル各々に対応する色丸を並べる
+        （Bb なら黒丸 + 茶丸、E/e なら黒丸 + クリーム丸）。"""
         body = client.get("/simulator").get_data(as_text=True)
-        # E 座位: ホモ と ヘテロは同色（両方とも黒）。劣性ホモのみアプリコット
-        assert "e: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#FBCEB1' }" in body
-        # B 座位: ホモ と ヘテロは同色。劣性ホモのみブラウン
-        assert "b: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#8B4513' }" in body
-        # D 座位: ホモ と ヘテロは同色。劣性ホモのみブルー
-        assert "d: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#4a6fa5' }" in body
-        # M 座位は半優性なので 3 色とも別
-        assert "m: { homo:'#1a1a1a', het:'#9FB6CD', rec:'#ef4444' }" in body
-        # メンデル遺伝の説明文
-        assert "メンデル遺伝" in body or "完全優性" in body
-        assert "見た目も同じ" in body or "実際に見た目も同じ" in body
+        # _ALLELE_COLOR マップとヘルパー
+        assert "_ALLELE_COLOR" in body
+        assert "function _splitGenotype" in body or "_splitGenotype(geno)" in body
+        assert "function _alleleDots" in body or "_alleleDots(geno" in body
+        # 各アレルの hex
+        assert "E: '#0a0a0a'" in body  # 黒（eumelanin 産生可）
+        assert "e: '#FFF8DC'" in body  # クリーム
+        assert "B: '#0a0a0a'" in body  # 黒（黒色素）
+        assert "b: '#8B4513'" in body  # 茶
+        assert "I: '#CD5C5C'" in body  # レッド
+        # 2 アレル方式の説明
+        assert "2 つのアレル" in body or "2 アレル" in body
+        # 例示
+        assert "黒丸" in body or "茶丸" in body
 
 
 class TestSimulatorFunnel:
