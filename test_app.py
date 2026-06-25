@@ -929,6 +929,40 @@ class TestHeterozygosityParser:
         assert _ALLELE_COLOR["D"] in html
         assert _ALLELE_COLOR["D"] == "#1c2540"  # not pure black
 
+    def test_overview_table_rows_are_clickable(self):
+        """検査対象一覧の各行が clickable で、その犬の詳細タブへジャンプする。"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, TestResult, generate_unified_html
+        dogs = [
+            DogProfile(pet_name="Seven", registered_name="SMASH JP SEVEN NIGHT",
+                       sex="Intact Male", breed="Toy Poodle", dob="14th Apr 2025",
+                       case_number="25RU75102"),
+            DogProfile(pet_name="Angel Of Music", registered_name="BEATRIX JP ANGEL OF MUSIC",
+                       sex="Female", breed="Toy Poodle", dob="9th Nov 2024",
+                       case_number="25RU75103"),
+        ]
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html(dogs, [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        # 各犬の safe_id (lowercase, non-alnum → _) を計算
+        # "Seven" → "seven"
+        # "Angel Of Music" → "angel_of_music"
+        assert "showTab('seven')" in html
+        assert "showTab('angel_of_music')" in html
+        # 行が clickable（cursor:pointer + onclick）
+        assert 'class="dog-overview-row"' in html
+        assert "cursor:pointer" in html
+        # ホバー時のフィードバック
+        assert "onmouseover" in html
+        # 「詳細を見る →」のヒント
+        assert "詳細を見る" in html
+        # ユーザー向けの説明
+        assert "行をクリック" in html or "クリックするとその犬の詳細" in html
+
     def test_genotype_shade_homo_and_carrier_match(self):
         """E/B/D/K の優性ホモとヘテロキャリアは同じ hex を持つ（Mendelian-correct）。
         劣性ホモのみ実際の表現型色になる。"""
