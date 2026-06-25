@@ -1052,29 +1052,37 @@ function runColorSim() {
   // ============================================================
   // アレル単位の色マップと 2 アレルドット表示ヘルパー
   // ============================================================
-  // 各アレルが「何の色素を担う」かを 1 アレル = 1 色丸で視覚化する。
-  // 例: Bb = 黒丸 + 茶丸（B アレルが黒色素、b アレルが茶色素を担う）
-  //     E/e = 黒丸 + クリーム丸（e はフェオメラニン側）
-  //     I/i = 赤丸 + クリーム丸（中間 = アプリコット）
+  // 各アレルが担う色素・性質を 1 アレル = 1 色丸で視覚化する。
+  // 各座位ごとに「シグネチャー色」を割り当て、優性ホモが集まったときでも
+  // 座位の違いが視覚的に分かるようにしている。
+  // - E座位: 黒/クリーム（MC1R extension）
+  // - B座位: 黒/茶（eumelanin の色）
+  // - D座位: ネイビー/水色（希釈、ブルー系で識別）
+  // - K座位: パープル黒/ゴールド（ドミナントブラックは紫味で識別）
+  // - M座位: ティール/スカイブルー（マールパターン）
+  // - A座位: タン系
+  // - S座位: 緑黒/白（白斑パターン、緑系で識別）
+  // - I座位: クリムゾン/クリーム（赤強度）
+  // - G座位: 黒/シルバー
   const _ALLELE_COLOR = {
-    // E座位 (MC1R): E=eumelanin 産生可（黒）, e=クリーム/レッド側
-    E: '#0a0a0a',   e: '#FFF8DC',
-    // B座位 (TYRP1): B=黒, b=茶
-    B: '#0a0a0a',   b: '#8B4513',
-    // D座位 (MLPH): D=濃色, d=希釈
-    D: '#0a0a0a',   d: '#9ca3af',
-    // K座位 (CBD103): KB=ドミナントブラック, ky=アグーチ, kbr=ブリンドル
-    KB: '#0a0a0a',  K: '#0a0a0a',  ky: '#9b7e48',  kbr: '#8B7355',
-    // M座位 (PMEL): m=単色, M=マール
-    m: '#1a1a1a',   M: '#9FB6CD',
+    // E座位 (MC1R)
+    E: '#0a0a0a',     e: '#FFF8DC',
+    // B座位 (TYRP1) — eumelanin の色そのもの
+    B: '#1a1a1a',     b: '#8B4513',
+    // D座位 (MLPH) — ネイビー系で「D 座位らしさ」を表現
+    D: '#1c2540',     d: '#7BA7C7',
+    // K座位 (CBD103) — パープル黒（ドミナントブラックの "blocking"）
+    KB: '#2b1638',    K: '#2b1638',  ky: '#DAA520',  kbr: '#8B5A3C',
+    // M座位 (PMEL) — ティール系（マールパターンの cyan/blue tone）
+    m: '#1a3838',     M: '#87CEEB',
     // A座位 (ASIP)
-    ay: '#E5AA70',  aw: '#9B7E48',  at: '#2d2d2d',  a: '#0a0a0a',
-    // S座位 (MITF)
-    S: '#1a1a1a',   sp: '#ffffff',
-    // I座位 (MFSD12): I=レッド, i=クリーム/ホワイト
-    I: '#CD5C5C',   i: '#FFF8DC',
+    ay: '#DEB887',    aw: '#8B7355',  at: '#3d2914',  a: '#0a0a0a',
+    // S座位 (MITF) — グリーン系で「solid pattern」を象徴
+    S: '#1d3825',     sp: '#FFFFFF',
+    // I座位 (MFSD12)
+    I: '#DC143C',     i: '#FFF8DC',
     // G座位 (Greying)
-    g: '#0a0a0a',   G: '#C0C0C0',
+    g: '#2a2a2a',     G: '#C0C0C0',
   };
   // genotype 文字列を 2 つのアレルに分解（"BB"→[B,B], "KB/ky"→[KB,ky]）
   function _splitGenotype(geno) {
@@ -1173,11 +1181,27 @@ function runColorSim() {
         ヘテロ（例: E/e, Bb, Dd）の子犬は見た目は優性ホモと同じですが、
         次の代に劣性形質を 25% 産む可能性があります。
       </p>
-      <p style="font-size:0.78em;color:#9ca3af;margin-bottom:12px;line-height:1.5;">
+      <p style="font-size:0.78em;color:#9ca3af;margin-bottom:8px;line-height:1.5;">
         ※E / B / D / K 座位は完全優性のため、見た目は優性ホモとヘテロで同じです。
         アレルドットの違いは「内部の遺伝子型」を視覚化したもの。
         M / S 座位は半優性で、実際にヘテロが特有の表現型を持ちます。
       </p>
+      <details style="margin-bottom:10px;font-size:0.8em;color:#4b5563;">
+        <summary style="cursor:pointer;font-weight:600;color:#5b21b6;list-style:none;">
+          📖 色丸の凡例（座位ごとのシグネチャー色）
+        </summary>
+        <div style="margin-top:8px;padding:10px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;line-height:1.9;">
+          ${_alleleDots('EE')} <code>E</code> 黒 / <code>e</code> クリーム（E座位 MC1R）<br>
+          ${_alleleDots('BB')} <code>B</code> 黒 / <code>b</code> 茶（B座位 TYRP1）<br>
+          ${_alleleDots('DD')} <code>D</code> ネイビー / <code>d</code> 水色（D座位 MLPH、希釈で識別）<br>
+          ${_alleleDots('KBKB')} <code>KB</code> パープル黒 / <code>ky</code> ゴールド / <code>kbr</code> 茶（K座位 CBD103）<br>
+          ${_alleleDots('mm')} <code>m</code> ティール / <code>M</code> スカイブルー（M座位 PMEL、マールの cyan/blue）<br>
+          ${_alleleDots('atat')} <code>ay</code> フォーン / <code>aw</code> ウルフセーブル / <code>at</code> ダークタン / <code>a</code> 黒（A座位 ASIP）<br>
+          ${_alleleDots('SS')} <code>S</code> 緑黒 / <code>sp</code> 白（S座位 MITF、白斑）<br>
+          ${_alleleDots('II')} <code>I</code> クリムゾン / <code>i</code> クリーム（I座位 MFSD12、赤強度）<br>
+          ${_alleleDots('gg')} <code>g</code> 黒 / <code>G</code> シルバー（G座位、退色）
+        </div>
+      </details>
       <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
         <tr style="background:#ede9fe;">
           <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">座位</th>

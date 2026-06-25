@@ -912,18 +912,22 @@ class TestHeterozygosityParser:
 
     def test_allele_dots_helper(self):
         """_allele_dots_html が 2 アレル分の色丸 HTML を返す"""
-        from poodle_genetics import _allele_dots_html, _split_genotype
+        from poodle_genetics import _allele_dots_html, _split_genotype, _ALLELE_COLOR
         # genotype 分解
         assert _split_genotype("E/E") == ["E", "E"]
         assert _split_genotype("Bb") == ["B", "b"]
         assert _split_genotype("KB/ky") == ["KB", "ky"]
-        # ドット HTML
+        # ドット HTML — 各アレルのシグネチャー hex が含まれる
         html = _allele_dots_html("Bb")
-        assert "#0a0a0a" in html  # B アレル
-        assert "#8B4513" in html  # b アレル
+        assert _ALLELE_COLOR["B"] in html
+        assert _ALLELE_COLOR["b"] in html
         html = _allele_dots_html("E/e")
-        assert "#0a0a0a" in html  # E
-        assert "#FFF8DC" in html  # e
+        assert _ALLELE_COLOR["E"] in html
+        assert _ALLELE_COLOR["e"] in html
+        # D 座位はネイビー（識別用）
+        html = _allele_dots_html("D/D")
+        assert _ALLELE_COLOR["D"] in html
+        assert _ALLELE_COLOR["D"] == "#1c2540"  # not pure black
 
     def test_genotype_shade_homo_and_carrier_match(self):
         """E/B/D/K の優性ホモとヘテロキャリアは同じ hex を持つ（Mendelian-correct）。
@@ -1049,23 +1053,29 @@ class TestHeterozygosityParser:
 
     def test_simulator_uses_allele_dots(self):
         """シミュレーターは 2 アレルドット方式で色丸を表示する。
-        遺伝子型を構成する 2 つのアレル各々に対応する色丸を並べる
-        （Bb なら黒丸 + 茶丸、E/e なら黒丸 + クリーム丸）。"""
+        各座位ごとにシグネチャー色を割り当て、優性ホモが集まったときでも
+        座位の違いが視覚的に分かるように設計されている。"""
         body = client.get("/simulator").get_data(as_text=True)
         # _ALLELE_COLOR マップとヘルパー
         assert "_ALLELE_COLOR" in body
         assert "function _splitGenotype" in body or "_splitGenotype(geno)" in body
         assert "function _alleleDots" in body or "_alleleDots(geno" in body
-        # 各アレルの hex
-        assert "E: '#0a0a0a'" in body  # 黒（eumelanin 産生可）
-        assert "e: '#FFF8DC'" in body  # クリーム
-        assert "B: '#0a0a0a'" in body  # 黒（黒色素）
-        assert "b: '#8B4513'" in body  # 茶
-        assert "I: '#CD5C5C'" in body  # レッド
+        # 各座位のシグネチャー hex（E/B 以外は全て locus 固有のトーン）
+        assert "E: '#0a0a0a'" in body          # E座位: 黒
+        assert "e: '#FFF8DC'" in body          # E座位: クリーム
+        assert "b: '#8B4513'" in body          # B座位: 茶
+        assert "D: '#1c2540'" in body          # D座位: ネイビー（識別用）
+        assert "d: '#7BA7C7'" in body          # D座位: 水色
+        assert "KB: '#2b1638'" in body         # K座位: パープル黒
+        assert "ky: '#DAA520'" in body         # K座位: ゴールド
+        assert "m: '#1a3838'" in body          # M座位: ティール
+        assert "M: '#87CEEB'" in body          # M座位: スカイブルー
+        assert "S: '#1d3825'" in body          # S座位: 緑黒
+        assert "I: '#DC143C'" in body          # I座位: クリムゾン
         # 2 アレル方式の説明
         assert "2 つのアレル" in body or "2 アレル" in body
-        # 例示
-        assert "黒丸" in body or "茶丸" in body
+        # シグネチャー色の説明
+        assert "シグネチャー" in body or "座位ごと" in body
 
 
 class TestSimulatorFunnel:
