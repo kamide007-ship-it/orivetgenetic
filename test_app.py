@@ -412,6 +412,16 @@ class TestSeoInternalLinking:
         assert 'hreflang="en"' in body
 
     # --- ホームページ Organization / WebSite / ディレクトリ ---
+    def test_homepage_warns_about_dnap_pdfs(self):
+        """ホームページのアップロード説明に「DNAP 非対応」の警告が含まれる。"""
+        body = client.get("/").get_data(as_text=True)
+        # DNAP 非対応の説明
+        assert "DNAプロファイル" in body
+        assert "DNAP" in body
+        assert "親子鑑定" in body or "DNA 指紋" in body
+        # 本体レポートを使ってもらう案内
+        assert "本体レポート" in body
+
     def test_homepage_has_organization_jsonld(self):
         body = client.get("/").get_data(as_text=True)
         assert '"@type": "Organization"' in body

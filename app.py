@@ -323,8 +323,18 @@ def analyze():
                     dog = parse_pdf(path)
                     if dog:
                         dogs.append(dog)
-                    elif is_dnap or is_guide:
-                        # DNAプロファイル・説明ファイルは静かにスキップ
+                    elif is_dnap:
+                        # DNAプロファイル PDF は健康・形質結果を含まないため非対応。
+                        # 旧版は静かにスキップしていたが、ユーザーが理由を把握できる
+                        # ようインフォメッセージを表示する。
+                        flash(
+                            f"{f.filename}: これは Orivet の DNAプロファイル（DNAP）PDF です。"
+                            "ISAGマーカーによる親子鑑定用の DNA 指紋のみで、健康・形質検査の結果は含まれません。"
+                            "本アプリで解析するには、Orivet 本体の遺伝子検査レポート PDF（DNAP ではない方）をアップロードしてください。",
+                            "info",
+                        )
+                    elif is_guide:
+                        # 説明・見方ガイドは静かにスキップ（明らかに検査結果ではないため）
                         pass
                     else:
                         # Orivet遺伝子検査PDFでない場合、血統書PDFとして解析を試みる
@@ -353,6 +363,25 @@ def analyze():
                     if not _is_valid_pdf(path):
                         os.remove(path)
                         ocr_errors.append(f"{f.filename}: PDFファイルとして認識できませんでした（ファイルが壊れているか形式が異なります）")
+                        continue
+                    # DNAプロファイル（DNAP）／見方ガイドの事前判定
+                    # → 本体レポートではないため、専用メッセージで案内する。
+                    fname_upper = (f.filename or "").upper()
+                    is_dnap_ped = "DNAP" in fname_upper or "DNA PROFILE" in fname_upper
+                    is_guide_ped = "見方" in (f.filename or "") or "説明" in (f.filename or "")
+                    if is_dnap_ped:
+                        ocr_errors.append(
+                            f"{f.filename}: これは Orivet の DNAプロファイル（DNAP）PDF です。"
+                            "ISAGマーカーによる親子鑑定用の DNA 指紋のみが記載されており、"
+                            "健康・形質検査の結果は含まれません。"
+                            "本アプリで解析するには、Orivet 本体の遺伝子検査レポート PDF "
+                            "（DNAP ではない方）をアップロードしてください。"
+                        )
+                        continue
+                    if is_guide_ped:
+                        ocr_errors.append(
+                            f"{f.filename}: これは説明・見方ガイドの PDF です。検査結果ではないためスキップしました。"
+                        )
                         continue
                     try:
                         ped = parse_pedigree_pdf(path)
