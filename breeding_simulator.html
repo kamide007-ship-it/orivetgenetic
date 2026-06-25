@@ -1071,8 +1071,10 @@ function runColorSim() {
     B: '#1a1a1a',     b: '#7B3F00',
     // D座位 (MLPH) — 鮮やか青系で識別
     D: '#1E40AF',     d: '#93C5FD',
-    // K座位 (CBD103) — 鮮やか紫系（ドミナントブラックの "blocking"）
-    KB: '#6B21A8',    K: '#6B21A8',  ky: '#EAB308',  kbr: '#A16207',
+    // K座位 (CBD103) — KB=ドミナントブラック（実際の黒）、ky=ファントム（タン）。
+    // ユーザー要望: 「KB/ky は黒とファントムの色」。ky/ky + at/at で
+    // ファントム（タンポイント）が表出するため、ky をファントム タン色で示す。
+    KB: '#0a0a0a',    K: '#0a0a0a',  ky: '#A0522D',  kbr: '#A16207',
     // M座位 (PMEL) — ターコイズ系
     m: '#0E7490',     M: '#22D3EE',
     // A座位 (ASIP) — 暖色系（タン）
@@ -1195,7 +1197,7 @@ function runColorSim() {
           ${_alleleDots('EE')} <code>E</code> 黒 / <code>e</code> クリーム（E座位 MC1R）<br>
           ${_alleleDots('BB')} <code>B</code> 黒 / <code>b</code> 濃チョコ（B座位 TYRP1）<br>
           ${_alleleDots('DD')} <code>D</code> <span style="color:#1E40AF;font-weight:600;">ロイヤルブルー</span> / <code>d</code> 水色（D座位 MLPH）<br>
-          ${_alleleDots('KBKB')} <code>KB</code> <span style="color:#6B21A8;font-weight:600;">パープル</span> / <code>ky</code> ゴールド / <code>kbr</code> 茶（K座位 CBD103）<br>
+          ${_alleleDots('KBKB')} <code>KB</code> 黒（ドミナントブラック） / <code>ky</code> <span style="color:#A0522D;font-weight:600;">ファントム タン</span> / <code>kbr</code> ブリンドル茶（K座位 CBD103）<br>
           ${_alleleDots('mm')} <code>m</code> <span style="color:#0E7490;font-weight:600;">ダークシアン</span> / <code>M</code> 明るいシアン（M座位 PMEL、マール）<br>
           ${_alleleDots('atat')} <code>ay</code> <span style="color:#F59E0B;font-weight:600;">アンバー</span> / <code>aw</code> ウルフタン / <code>at</code> <span style="color:#7C2D12;font-weight:600;">バーガンディ</span> / <code>a</code> 黒（A座位 ASIP）<br>
           ${_alleleDots('SS')} <code>S</code> <span style="color:#15803D;font-weight:600;">フォレストグリーン</span> / <code>sp</code> 白（S座位 MITF、白斑）<br>
