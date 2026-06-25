@@ -363,41 +363,47 @@ _LOCUS_FROM_TEST = {
 
 # 遺伝子型 → (status_key, 日本語ラベル, 色味スウォッチ HEX)
 # status_key: "homo" / "carrier" / "recessive" / "neutral"
-# 色味は「ホモ → ヘテロキャリア → 劣性ホモ」の段階を視覚化するためのもの。
-# シミュレーター breeding_simulator.html の _SHADE と同じスケールに揃える。
+#
+# Mendelian-correct shade policy:
+#   E/B/D/K の各座位は完全優性のため、優性ホモとヘテロキャリアは
+#   実際に同じコート色になる → スウォッチも同じ hex を使用。
+#   劣性ホモのみ実際の表現型色を表示する。
+#   M/S は半優性のため M/m や S/sp はそれぞれ別表現を持つ → 別色。
 _GENOTYPE_SHADE = {
     "e": {
         "E/E": ("homo",      "E/E ホモ・ノンキャリア",          "#0a0a0a"),
-        "E/e": ("carrier",   "E/e ヘテロ・eキャリア",            "#2b2118"),
+        "E/e": ("carrier",   "E/e ヘテロ・eキャリア（見た目は E/E と同じ）", "#0a0a0a"),
         "e/e": ("recessive", "e/e 劣性ホモ（クリーム系発現）",  "#FBCEB1"),
     },
     "b": {
         "BB":  ("homo",      "BB ホモ・ノンキャリア",            "#0a0a0a"),
-        "Bb":  ("carrier",   "Bb ヘテロ・bキャリア",             "#2a1a0a"),
+        "Bb":  ("carrier",   "Bb ヘテロ・bキャリア（見た目は BB と同じ）", "#0a0a0a"),
         "bb":  ("recessive", "bb 劣性ホモ（ブラウン発現）",      "#8B4513"),
     },
     "d": {
         "D/D": ("homo",      "D/D ホモ・ノンキャリア",           "#0a0a0a"),
-        "D/d": ("carrier",   "D/d ヘテロ・dキャリア",            "#1c2030"),
+        "D/d": ("carrier",   "D/d ヘテロ・dキャリア（見た目は D/D と同じ）", "#0a0a0a"),
         "d/d": ("recessive", "d/d 劣性ホモ（希釈発現）",         "#4a6fa5"),
     },
     "m": {
+        # M 座位は半優性: M/m は実際にマール柄を発現する（例外）
         "m/m": ("homo",      "m/m ホモ・ノンキャリア",           "#1a1a1a"),
-        "M/m": ("carrier",   "M/m マール発現",                   "#9FB6CD"),
+        "M/m": ("carrier",   "M/m マール発現（半優性で実際に違う見た目）", "#9FB6CD"),
         "M/M": ("recessive", "M/M ダブルマール ⚠️ 健康リスク",   "#ef4444"),
     },
     "k": {
         "KB/KB":   ("homo",      "KB/KB ホモ・ドミナントブラック", "#0a0a0a"),
         "K/K":     ("homo",      "K/K ホモ・ドミナントブラック",   "#0a0a0a"),
-        "KB/ky":   ("carrier",   "KB/ky ヘテロ・kyキャリア",       "#3a3a3a"),
-        "KB/kbr":  ("carrier",   "KB/kbr ヘテロ・ブリンドルキャリア", "#5a4030"),
+        "KB/ky":   ("carrier",   "KB/ky ヘテロ・kyキャリア（見た目は KB/KB と同じ）", "#0a0a0a"),
+        "KB/kbr":  ("carrier",   "KB/kbr ヘテロ・ブリンドルキャリア（見た目は KB/KB と同じ）", "#0a0a0a"),
         "ky/ky":   ("recessive", "ky/ky 劣性ホモ（アグーチ発現）", "#9b7e48"),
         "kbr/ky":  ("recessive", "kbr/ky ブリンドル発現",          "#8B7355"),
         "kbr/kbr": ("recessive", "kbr/kbr 劣性ホモ・ブリンドル",  "#8B7355"),
     },
     "s": {
+        # S 座位も半優性: S/sp は実際にわずかな白斑を発現
         "S/S":   ("homo",      "S/S 白斑なし",                    "#1a1a1a"),
-        "S/sp":  ("carrier",   "S/sp わずかな白斑",               "#cccccc"),
+        "S/sp":  ("carrier",   "S/sp わずかな白斑（半優性）",     "#cccccc"),
         "sp/sp": ("recessive", "sp/sp パーティカラー",            "#ffffff"),
     },
 }
@@ -680,6 +686,15 @@ def build_color_profile_html(dog) -> str:
         '• <strong>I 座位 (MFSD12)</strong>: ee 犬のレッド/アプリコット/クリームの内訳を決める。Orivet 標準パネルでは未検査のため、ee の犬は「クリーム〜レッド系」とまとめて扱います。<br>'
         '• <strong>G 座位 (Greying)</strong>: 成犬期の退色（プードルのシルバー等）を決める。Orivet では未対応のため、上記表現型は G/g 想定をしていません。<br>'
         '繁殖シミュレーターでは、これらの座位を「補足入力」で手動指定できます。'
+        '</div>'
+        '<div style="margin-top:8px;padding:10px 14px;background:#f3f4f6;'
+        'border-left:3px solid #6b7280;border-radius:6px;font-size:0.82em;'
+        'color:#374151;line-height:1.6;">'
+        '<strong>📖 色丸の見方（メンデル遺伝に忠実な表示）</strong><br>'
+        '• E / B / D / K 座位は完全優性のため、<strong>優性ホモとヘテロキャリアは同じ色丸</strong>です'
+        '（実際の犬の見た目も同じ）。例: E/E も E/e も両方とも黒く生まれます。<br>'
+        '• 劣性ホモ（ee / bb / dd / ky/ky）でのみ実際に違う色味（クリーム / ブラウン / 希釈 / アグーチ）が出ます。<br>'
+        '• 例外として M 座位は半優性で M/m が実際にマール柄を発現するため別色で示しています。'
         '</div>'
     )
 
