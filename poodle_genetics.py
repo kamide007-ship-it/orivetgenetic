@@ -361,6 +361,61 @@ _LOCUS_FROM_TEST = {
     "Pied":                         "s",
 }
 
+# 遺伝子型 → (status_key, 日本語ラベル, 色味スウォッチ HEX)
+# status_key: "homo" / "carrier" / "recessive" / "neutral"
+#
+# Mendelian-correct shade policy:
+#   E/B/D/K の各座位は完全優性のため、優性ホモとヘテロキャリアは
+#   実際に同じコート色になる → スウォッチも同じ hex を使用。
+#   劣性ホモのみ実際の表現型色を表示する。
+#   M/S は半優性のため M/m や S/sp はそれぞれ別表現を持つ → 別色。
+_GENOTYPE_SHADE = {
+    "e": {
+        "E/E": ("homo",      "E/E ホモ・ノンキャリア",          "#0a0a0a"),
+        "E/e": ("carrier",   "E/e ヘテロ・eキャリア（見た目は E/E と同じ）", "#0a0a0a"),
+        "e/e": ("recessive", "e/e 劣性ホモ（クリーム系発現）",  "#FBCEB1"),
+    },
+    "b": {
+        "BB":  ("homo",      "BB ホモ・ノンキャリア",            "#0a0a0a"),
+        "Bb":  ("carrier",   "Bb ヘテロ・bキャリア（見た目は BB と同じ）", "#0a0a0a"),
+        "bb":  ("recessive", "bb 劣性ホモ（ブラウン発現）",      "#8B4513"),
+    },
+    "d": {
+        "D/D": ("homo",      "D/D ホモ・ノンキャリア",           "#0a0a0a"),
+        "D/d": ("carrier",   "D/d ヘテロ・dキャリア（見た目は D/D と同じ）", "#0a0a0a"),
+        "d/d": ("recessive", "d/d 劣性ホモ（希釈発現）",         "#4a6fa5"),
+    },
+    "m": {
+        # M 座位は半優性: M/m は実際にマール柄を発現する（例外）
+        "m/m": ("homo",      "m/m ホモ・ノンキャリア",           "#1a1a1a"),
+        "M/m": ("carrier",   "M/m マール発現（半優性で実際に違う見た目）", "#9FB6CD"),
+        "M/M": ("recessive", "M/M ダブルマール ⚠️ 健康リスク",   "#ef4444"),
+    },
+    "k": {
+        "KB/KB":   ("homo",      "KB/KB ホモ・ドミナントブラック", "#0a0a0a"),
+        "K/K":     ("homo",      "K/K ホモ・ドミナントブラック",   "#0a0a0a"),
+        "KB/ky":   ("carrier",   "KB/ky ヘテロ・kyキャリア（見た目は KB/KB と同じ）", "#0a0a0a"),
+        "KB/kbr":  ("carrier",   "KB/kbr ヘテロ・ブリンドルキャリア（見た目は KB/KB と同じ）", "#0a0a0a"),
+        "ky/ky":   ("recessive", "ky/ky 劣性ホモ（アグーチ発現）", "#9b7e48"),
+        "kbr/ky":  ("recessive", "kbr/ky ブリンドル発現",          "#8B7355"),
+        "kbr/kbr": ("recessive", "kbr/kbr 劣性ホモ・ブリンドル",  "#8B7355"),
+    },
+    "s": {
+        # S 座位も半優性: S/sp は実際にわずかな白斑を発現
+        "S/S":   ("homo",      "S/S 白斑なし",                    "#1a1a1a"),
+        "S/sp":  ("carrier",   "S/sp わずかな白斑（半優性）",     "#cccccc"),
+        "sp/sp": ("recessive", "sp/sp パーティカラー",            "#ffffff"),
+    },
+}
+
+# ステータス → バッジ色（背景・文字）
+_STATUS_BADGE = {
+    "homo":      ("#dcfce7", "#166534", "ノンキャリア"),
+    "carrier":   ("#fef3c7", "#92400e", "キャリア"),
+    "recessive": ("#fee2e2", "#991b1b", "劣性発現"),
+    "neutral":   ("#f3f4f6", "#374151", "—"),
+}
+
 # 各表現型の日本語名と表示用カラースウォッチ（HEX）
 _PHENO_SWATCH = {
     "black":           ("ブラック",                   "#1a1a1a"),
@@ -493,6 +548,9 @@ def build_color_profile_html(dog) -> str:
     ]
 
     rows = ""
+    # この犬がキャリアの座位を集めて後の「キャリア一覧」サマリーに使う
+    carrier_summary = []
+    recessive_summary = []
     for key, name, role in display_loci:
         if key in ("g", "i"):
             geno = None
@@ -500,8 +558,32 @@ def build_color_profile_html(dog) -> str:
         else:
             geno = loci.get(key)
             not_tested_label = "（未検査）"
+        # シェードドットとステータスバッジ
+        shade_html = ""
+        status_html = ""
         if geno:
+            shade_entry = _GENOTYPE_SHADE.get(key, {}).get(geno)
+            if shade_entry:
+                status_key, label_ja, shade_hex = shade_entry
+                shade_html = (
+                    f'<span style="display:inline-block;width:14px;height:14px;'
+                    f'border-radius:50%;background:{shade_hex};'
+                    f'border:1px solid rgba(0,0,0,0.18);vertical-align:middle;'
+                    f'margin-right:8px;flex-shrink:0;"></span>'
+                )
+                bg, fg, badge_label = _STATUS_BADGE[status_key]
+                status_html = (
+                    f'<span style="display:inline-block;padding:2px 8px;'
+                    f'border-radius:10px;font-size:0.72em;font-weight:700;'
+                    f'background:{bg};color:{fg};">{badge_label}</span>'
+                )
+                # キャリア / 劣性ホモのサマリー収集
+                if status_key == "carrier":
+                    carrier_summary.append((name, label_ja))
+                elif status_key == "recessive":
+                    recessive_summary.append((name, label_ja))
             geno_cell = (
+                f'{shade_html}'
                 f'<span style="font-family:Menlo,Consolas,monospace;font-weight:700;'
                 f'color:#4c1d95;">{_h(geno)}</span>'
             )
@@ -514,7 +596,61 @@ def build_color_profile_html(dog) -> str:
             f'<td style="padding:6px 10px;color:#374151;font-weight:600;">{name}</td>'
             f'<td style="padding:6px 10px;color:#6b7280;font-size:0.85em;">{role}</td>'
             f'<td style="padding:6px 10px;">{geno_cell}</td>'
+            f'<td style="padding:6px 10px;">{status_html}</td>'
             f'</tr>'
+        )
+
+    # キャリア / 劣性発現のサマリーパネル
+    carrier_panel_html = ""
+    if carrier_summary or recessive_summary:
+        carrier_items = ""
+        for locus_name, label_ja in carrier_summary:
+            carrier_items += (
+                f'<li style="margin:4px 0;">'
+                f'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;'
+                f'background:#f59e0b;vertical-align:middle;margin-right:6px;"></span>'
+                f'<strong>{locus_name}</strong>: {_h(label_ja)}'
+                f'</li>'
+            )
+        recessive_items = ""
+        for locus_name, label_ja in recessive_summary:
+            recessive_items += (
+                f'<li style="margin:4px 0;">'
+                f'<span style="display:inline-block;width:10px;height:10px;border-radius:50%;'
+                f'background:#ef4444;vertical-align:middle;margin-right:6px;"></span>'
+                f'<strong>{locus_name}</strong>: {_h(label_ja)}'
+                f'</li>'
+            )
+        sections = ""
+        if carrier_items:
+            sections += (
+                '<div style="margin-bottom:8px;">'
+                '<div style="font-weight:700;color:#92400e;margin-bottom:4px;font-size:0.9em;">'
+                '🟡 キャリア（保因犬）の座位:'
+                '</div>'
+                f'<ul style="margin:0;padding-left:4px;list-style:none;font-size:0.88em;color:#374151;">{carrier_items}</ul>'
+                '<div style="margin-top:4px;font-size:0.78em;color:#78350f;">'
+                '※ 見た目は優性ホモと同じですが、繁殖時にキャリア同士の交配で劣性形質が出る可能性があります。'
+                '</div>'
+                '</div>'
+            )
+        if recessive_items:
+            sections += (
+                '<div style="margin-top:8px;">'
+                '<div style="font-weight:700;color:#991b1b;margin-bottom:4px;font-size:0.9em;">'
+                '🔴 劣性ホモ（表現型として発現）の座位:'
+                '</div>'
+                f'<ul style="margin:0;padding-left:4px;list-style:none;font-size:0.88em;color:#374151;">{recessive_items}</ul>'
+                '</div>'
+            )
+        carrier_panel_html = (
+            '<div style="margin:12px 0 14px;padding:14px 16px;background:#fff;'
+            'border-radius:10px;border:1px solid #e5e7eb;">'
+            '<div style="font-weight:700;color:#5b21b6;margin-bottom:8px;">'
+            '🧬 この子のキャリア・劣性発現サマリー'
+            '</div>'
+            + sections +
+            '</div>'
         )
 
     # PDF 上の自己申告毛色
@@ -551,6 +687,15 @@ def build_color_profile_html(dog) -> str:
         '• <strong>G 座位 (Greying)</strong>: 成犬期の退色（プードルのシルバー等）を決める。Orivet では未対応のため、上記表現型は G/g 想定をしていません。<br>'
         '繁殖シミュレーターでは、これらの座位を「補足入力」で手動指定できます。'
         '</div>'
+        '<div style="margin-top:8px;padding:10px 14px;background:#f3f4f6;'
+        'border-left:3px solid #6b7280;border-radius:6px;font-size:0.82em;'
+        'color:#374151;line-height:1.6;">'
+        '<strong>📖 色丸の見方（メンデル遺伝に忠実な表示）</strong><br>'
+        '• E / B / D / K 座位は完全優性のため、<strong>優性ホモとヘテロキャリアは同じ色丸</strong>です'
+        '（実際の犬の見た目も同じ）。例: E/E も E/e も両方とも黒く生まれます。<br>'
+        '• 劣性ホモ（ee / bb / dd / ky/ky）でのみ実際に違う色味（クリーム / ブラウン / 希釈 / アグーチ）が出ます。<br>'
+        '• 例外として M 座位は半優性で M/m が実際にマール柄を発現するため別色で示しています。'
+        '</div>'
     )
 
     return (
@@ -558,11 +703,13 @@ def build_color_profile_html(dog) -> str:
         '<div style="background:#f9fafb;border-radius:12px;padding:16px 18px;margin-bottom:16px;border:1px solid #e5e7eb;">'
         + pdf_color_html
         + pheno_html
+        + carrier_panel_html
         + '<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">'
         + '<tr style="background:#ede9fe;">'
         + '<th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">座位</th>'
         + '<th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">役割</th>'
         + '<th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">遺伝子型</th>'
+        + '<th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">ステータス</th>'
         + '</tr>'
         + rows
         + '</table>'

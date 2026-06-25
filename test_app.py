@@ -872,6 +872,67 @@ class TestHeterozygosityParser:
         # PDF 上の毛色記載も表示
         assert "PDF 上の毛色記載" in html
 
+    def test_color_profile_shows_carrier_shades_and_summary(self):
+        """毛色プロファイルが各座位にシェードドットとステータスバッジ、
+        さらに「キャリア・劣性発現サマリー」を描画する。
+        Mendelian-correct: E/E と E/e、BB と Bb は同じ色丸（実際に見た目同じ）。"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, TestResult, generate_unified_html, _GENOTYPE_SHADE
+        # E/e（eキャリア）+ Bb（bキャリア）+ KB/KB + DD の犬
+        d = DogProfile(
+            pet_name="Carrier", registered_name="R", sex="Male", breed="Toy Poodle",
+            trait_results=[
+                TestResult(category="形質", test_name="E Locus (Cream/Red/Yellow)",
+                           genotype="E/e", result_text="", status="trait"),
+                TestResult(category="形質", test_name="K Locus (Dominant Black)",
+                           genotype="KB/KB", result_text="", status="trait"),
+                TestResult(category="形質", test_name="B Locus (Brown)",
+                           genotype="Bb", result_text="", status="trait"),
+                TestResult(category="形質", test_name="D (Dilute) Locus",
+                           genotype="D/D", result_text="", status="trait"),
+            ],
+        )
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html([d], [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        # ステータスバッジ
+        assert "ノンキャリア" in html
+        assert "キャリア" in html
+        # サマリーパネル
+        assert "キャリア・劣性発現サマリー" in html
+        assert "🟡 キャリア（保因犬）の座位" in html
+        # シェードドット用の hex (E/E ホモも E/e キャリアも同じ #0a0a0a)
+        assert "#0a0a0a" in html
+        # メンデル遺伝説明文
+        assert "完全優性" in html
+        assert "同じ色丸" in html
+
+    def test_genotype_shade_homo_and_carrier_match(self):
+        """E/B/D/K の優性ホモとヘテロキャリアは同じ hex を持つ（Mendelian-correct）。
+        劣性ホモのみ実際の表現型色になる。"""
+        from poodle_genetics import _GENOTYPE_SHADE
+        # E座位
+        assert _GENOTYPE_SHADE["e"]["E/E"][2] == _GENOTYPE_SHADE["e"]["E/e"][2]
+        assert _GENOTYPE_SHADE["e"]["e/e"][2] != _GENOTYPE_SHADE["e"]["E/E"][2]
+        # B座位
+        assert _GENOTYPE_SHADE["b"]["BB"][2] == _GENOTYPE_SHADE["b"]["Bb"][2]
+        assert _GENOTYPE_SHADE["b"]["bb"][2] != _GENOTYPE_SHADE["b"]["BB"][2]
+        # D座位
+        assert _GENOTYPE_SHADE["d"]["D/D"][2] == _GENOTYPE_SHADE["d"]["D/d"][2]
+        assert _GENOTYPE_SHADE["d"]["d/d"][2] != _GENOTYPE_SHADE["d"]["D/D"][2]
+        # K座位
+        assert _GENOTYPE_SHADE["k"]["KB/KB"][2] == _GENOTYPE_SHADE["k"]["KB/ky"][2]
+        assert _GENOTYPE_SHADE["k"]["ky/ky"][2] != _GENOTYPE_SHADE["k"]["KB/KB"][2]
+        # M座位は半優性なので 3 つとも別色
+        m = _GENOTYPE_SHADE["m"]
+        assert m["m/m"][2] != m["M/m"][2]
+        assert m["M/m"][2] != m["M/M"][2]
+        assert m["m/m"][2] != m["M/M"][2]
+
     def test_color_profile_ee_without_i_locus(self):
         """ee 犬は I 座位未検査時に「クリーム〜レッド系」とまとめて扱う"""
         from poodle_genetics import DogProfile, TestResult, _predict_phenotype, _collect_color_loci
@@ -952,6 +1013,39 @@ class TestHeterozygosityParser:
         # ユーザー説明（見た目は同じだが子に劣性が出る可能性）
         assert "見た目はホモと同じ" in body
         assert "劣性形質" in body or "劣性ホモ" in body
+
+    def test_simulator_has_genotype_combination_detail_table(self):
+        """「🔬 遺伝子型コンビネーション詳細」テーブルが含まれる。
+        各ユニークな遺伝子型コンビが行として展開される。
+        Option B (Mendelian-correct) では同じ表現型なら色丸も同じ hex を返す。"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # 詳細セクションの見出し
+        assert "🔬 遺伝子型コンビネーション詳細" in body
+        # blendShade は同じ表現型なら同じ色を返す（メンデル遺伝に忠実）
+        assert "function blendShade" in body
+        # 説明文（同じ表現型なら色丸も同じ）
+        assert "表現型が同じなら色丸も同じ" in body
+        assert "メンデル遺伝" in body
+        # キャリア状態の内訳を確認できる用途で展開していることを明示
+        assert "キャリア状態の内訳" in body
+
+    def test_simulator_carrier_panel_is_mendelian_correct(self):
+        """キャリアパネルの色丸は Mendelian-correct（メンデル遺伝に忠実）。
+        E/B/D/K 座位は完全優性のため、優性ホモとヘテロキャリアは同じ hex を持つ。
+        劣性ホモのみ実際の表現型色（クリーム / ブラウン / 希釈）に。
+        M 座位は半優性のため M/m は別色（マール柄）。"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # E 座位: ホモ と ヘテロは同色（両方とも黒）。劣性ホモのみアプリコット
+        assert "e: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#FBCEB1' }" in body
+        # B 座位: ホモ と ヘテロは同色。劣性ホモのみブラウン
+        assert "b: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#8B4513' }" in body
+        # D 座位: ホモ と ヘテロは同色。劣性ホモのみブルー
+        assert "d: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#4a6fa5' }" in body
+        # M 座位は半優性なので 3 色とも別
+        assert "m: { homo:'#1a1a1a', het:'#9FB6CD', rec:'#ef4444' }" in body
+        # メンデル遺伝の説明文
+        assert "メンデル遺伝" in body or "完全優性" in body
+        assert "見た目も同じ" in body or "実際に見た目も同じ" in body
 
 
 class TestSimulatorFunnel:
