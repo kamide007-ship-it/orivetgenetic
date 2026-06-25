@@ -419,29 +419,30 @@ _STATUS_BADGE = {
 
 # 各アレルが担う色素・性質を 1 アレル = 1 色丸で視覚化するための色マップ。
 # 各座位ごとに「シグネチャー色」を割り当て、優性ホモが集まったときでも
-# 座位の違いが視覚的に分かるようにする。
-# E=黒/クリーム、B=黒/茶、D=ネイビー/水色、K=パープル黒/ゴールド、
-# M=ティール/スカイブルー、A=タン系、S=緑黒/白、I=赤/クリーム、G=黒/シルバー。
+# 座位の違いが一目で識別できるよう **高彩度の鮮やかな色**を使用。
+# E=黒/クリーム、B=黒/濃チョコ、D=ロイヤルブルー/水色、K=パープル/ゴールド、
+# M=ダークシアン/明るいシアン、A=暖色タン系、S=フォレストグリーン/白、
+# I=鮮やか赤/クリーム、G=チャコール/シルバー。
 # 繁殖シミュレーター側 _ALLELE_COLOR と同じ値を維持する。
 _ALLELE_COLOR = {
     # E座位 (MC1R)
-    "E":  "#0a0a0a",  "e":  "#FFF8DC",
+    "E":  "#0a0a0a",  "e":  "#FFE4B5",
     # B座位 (TYRP1)
-    "B":  "#1a1a1a",  "b":  "#8B4513",
-    # D座位 (MLPH) — ネイビー系で識別
-    "D":  "#1c2540",  "d":  "#7BA7C7",
-    # K座位 (CBD103) — パープル黒
-    "KB": "#2b1638",  "K":  "#2b1638",  "ky": "#DAA520",  "kbr": "#8B5A3C",
-    # M座位 (PMEL) — ティール系
-    "m":  "#1a3838",  "M":  "#87CEEB",
-    # A座位 (ASIP) — タン系
-    "ay": "#DEB887",  "aw": "#8B7355",  "at": "#3d2914",  "a":  "#0a0a0a",
-    # S座位 (MITF) — グリーン系で solid pattern を象徴
-    "S":  "#1d3825",  "sp": "#FFFFFF",
+    "B":  "#1a1a1a",  "b":  "#7B3F00",
+    # D座位 (MLPH) — 鮮やか青系
+    "D":  "#1E40AF",  "d":  "#93C5FD",
+    # K座位 (CBD103) — 鮮やか紫系
+    "KB": "#6B21A8",  "K":  "#6B21A8",  "ky": "#EAB308",  "kbr": "#A16207",
+    # M座位 (PMEL) — ターコイズ系
+    "m":  "#0E7490",  "M":  "#22D3EE",
+    # A座位 (ASIP) — 暖色タン系
+    "ay": "#F59E0B",  "aw": "#A16207",  "at": "#7C2D12",  "a":  "#171717",
+    # S座位 (MITF) — 鮮やか緑系
+    "S":  "#15803D",  "sp": "#FFFFFF",
     # I座位 (MFSD12)
-    "I":  "#DC143C",  "i":  "#FFF8DC",
+    "I":  "#DC2626",  "i":  "#FEF3C7",
     # G座位 (Greying)
-    "g":  "#2a2a2a",  "G":  "#C0C0C0",
+    "g":  "#262626",  "G":  "#D4D4D8",
 }
 
 
@@ -457,8 +458,9 @@ def _split_genotype(geno: str) -> list:
     return [geno]
 
 
-def _allele_dots_html(geno: str, dot_size: int = 12) -> str:
-    """2 アレル分の色丸 HTML を返す。"""
+def _allele_dots_html(geno: str, dot_size: int = 16) -> str:
+    """2 アレル分の色丸 HTML を返す。色味の差を識別しやすくするため
+    既定 16px と少し大きめ + drop-shadow で立体感を出している。"""
     alleles = _split_genotype(geno)
     if not alleles:
         return ""
@@ -468,8 +470,9 @@ def _allele_dots_html(geno: str, dot_size: int = 12) -> str:
         dots.append(
             f'<span style="display:inline-block;width:{dot_size}px;height:{dot_size}px;'
             f'border-radius:50%;background:{hex_color};'
-            f'border:1px solid rgba(0,0,0,0.25);vertical-align:middle;'
-            f'margin-right:2px;flex-shrink:0;"></span>'
+            f'border:1px solid rgba(0,0,0,0.3);vertical-align:middle;'
+            f'margin-right:3px;flex-shrink:0;'
+            f'box-shadow:0 1px 2px rgba(0,0,0,0.15);"></span>'
         )
     return "".join(dots)
 

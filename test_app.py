@@ -905,10 +905,10 @@ class TestHeterozygosityParser:
         # サマリーパネルが新タイトルに
         assert "遺伝子型サマリー" in html
         assert "🟡 ヘテロ（保因）の座位" in html
-        # 2 アレルドットの色 hex（B/B = 黒×2, Bb = 黒+茶, E/e = 黒+クリーム）
-        assert "#0a0a0a" in html  # 黒（E/B のドミナント側）
-        assert "#8B4513" in html  # 茶（b アレル）
-        assert "#FFF8DC" in html  # クリーム（e アレル）
+        # 2 アレルドットの色 hex（B/B = 黒×2, Bb = 黒+濃チョコ, E/e = 黒+クリーム）
+        assert "#0a0a0a" in html  # 黒（E のドミナント側）
+        assert "#7B3F00" in html  # 濃チョコ（b アレル、高彩度版）
+        assert "#FFE4B5" in html  # モカシンクリーム（e アレル、高彩度版）
 
     def test_allele_dots_helper(self):
         """_allele_dots_html が 2 アレル分の色丸 HTML を返す"""
@@ -924,10 +924,10 @@ class TestHeterozygosityParser:
         html = _allele_dots_html("E/e")
         assert _ALLELE_COLOR["E"] in html
         assert _ALLELE_COLOR["e"] in html
-        # D 座位はネイビー（識別用）
+        # D 座位はロイヤルブルー（鮮やかで識別しやすい）
         html = _allele_dots_html("D/D")
         assert _ALLELE_COLOR["D"] in html
-        assert _ALLELE_COLOR["D"] == "#1c2540"  # not pure black
+        assert _ALLELE_COLOR["D"] == "#1E40AF"  # royal blue, not pure black
 
     def test_overview_table_rows_are_clickable(self):
         """検査対象一覧の各行が clickable で、その犬の詳細タブへジャンプする。"""
@@ -1094,18 +1094,18 @@ class TestHeterozygosityParser:
         assert "_ALLELE_COLOR" in body
         assert "function _splitGenotype" in body or "_splitGenotype(geno)" in body
         assert "function _alleleDots" in body or "_alleleDots(geno" in body
-        # 各座位のシグネチャー hex（E/B 以外は全て locus 固有のトーン）
+        # 各座位の高彩度シグネチャー hex
         assert "E: '#0a0a0a'" in body          # E座位: 黒
-        assert "e: '#FFF8DC'" in body          # E座位: クリーム
-        assert "b: '#8B4513'" in body          # B座位: 茶
-        assert "D: '#1c2540'" in body          # D座位: ネイビー（識別用）
-        assert "d: '#7BA7C7'" in body          # D座位: 水色
-        assert "KB: '#2b1638'" in body         # K座位: パープル黒
-        assert "ky: '#DAA520'" in body         # K座位: ゴールド
-        assert "m: '#1a3838'" in body          # M座位: ティール
-        assert "M: '#87CEEB'" in body          # M座位: スカイブルー
-        assert "S: '#1d3825'" in body          # S座位: 緑黒
-        assert "I: '#DC143C'" in body          # I座位: クリムゾン
+        assert "e: '#FFE4B5'" in body          # E座位: クリーム
+        assert "b: '#7B3F00'" in body          # B座位: 濃チョコ
+        assert "D: '#1E40AF'" in body          # D座位: ロイヤルブルー
+        assert "d: '#93C5FD'" in body          # D座位: 水色
+        assert "KB: '#6B21A8'" in body         # K座位: 鮮やかパープル
+        assert "ky: '#EAB308'" in body         # K座位: ゴールド
+        assert "m: '#0E7490'" in body          # M座位: ダークシアン
+        assert "M: '#22D3EE'" in body          # M座位: 明るいシアン
+        assert "S: '#15803D'" in body          # S座位: フォレストグリーン
+        assert "I: '#DC2626'" in body          # I座位: 鮮やか赤
         # 2 アレル方式の説明
         assert "2 つのアレル" in body or "2 アレル" in body
         # シグネチャー色の説明

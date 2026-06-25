@@ -1054,35 +1054,35 @@ function runColorSim() {
   // ============================================================
   // 各アレルが担う色素・性質を 1 アレル = 1 色丸で視覚化する。
   // 各座位ごとに「シグネチャー色」を割り当て、優性ホモが集まったときでも
-  // 座位の違いが視覚的に分かるようにしている。
+  // 座位の違いが一目で識別できるよう **高彩度の鮮やかな色**を使用。
   // - E座位: 黒/クリーム（MC1R extension）
-  // - B座位: 黒/茶（eumelanin の色）
-  // - D座位: ネイビー/水色（希釈、ブルー系で識別）
-  // - K座位: パープル黒/ゴールド（ドミナントブラックは紫味で識別）
-  // - M座位: ティール/スカイブルー（マールパターン）
-  // - A座位: タン系
-  // - S座位: 緑黒/白（白斑パターン、緑系で識別）
-  // - I座位: クリムゾン/クリーム（赤強度）
-  // - G座位: 黒/シルバー
+  // - B座位: 黒/チョコ（eumelanin の色）
+  // - D座位: 鮮やかロイヤルブルー/ライトブルー（希釈、青系）
+  // - K座位: 鮮やかパープル/ゴールド（ドミナントブラック、紫系）
+  // - M座位: ダークシアン/明るいシアン（マール、ティール系）
+  // - A座位: アンバー/ウルフタン/バーガンディ/黒（アグーチ、暖色系）
+  // - S座位: フォレストグリーン/白（白斑、緑系）
+  // - I座位: 鮮やか赤/クリーム（赤強度）
+  // - G座位: チャコール/シルバー
   const _ALLELE_COLOR = {
-    // E座位 (MC1R)
-    E: '#0a0a0a',     e: '#FFF8DC',
-    // B座位 (TYRP1) — eumelanin の色そのもの
-    B: '#1a1a1a',     b: '#8B4513',
-    // D座位 (MLPH) — ネイビー系で「D 座位らしさ」を表現
-    D: '#1c2540',     d: '#7BA7C7',
-    // K座位 (CBD103) — パープル黒（ドミナントブラックの "blocking"）
-    KB: '#2b1638',    K: '#2b1638',  ky: '#DAA520',  kbr: '#8B5A3C',
-    // M座位 (PMEL) — ティール系（マールパターンの cyan/blue tone）
-    m: '#1a3838',     M: '#87CEEB',
-    // A座位 (ASIP)
-    ay: '#DEB887',    aw: '#8B7355',  at: '#3d2914',  a: '#0a0a0a',
-    // S座位 (MITF) — グリーン系で「solid pattern」を象徴
-    S: '#1d3825',     sp: '#FFFFFF',
+    // E座位 (MC1R) — 黒/クリーム（eumelanin extension）
+    E: '#0a0a0a',     e: '#FFE4B5',
+    // B座位 (TYRP1) — 黒/濃チョコ
+    B: '#1a1a1a',     b: '#7B3F00',
+    // D座位 (MLPH) — 鮮やか青系で識別
+    D: '#1E40AF',     d: '#93C5FD',
+    // K座位 (CBD103) — 鮮やか紫系（ドミナントブラックの "blocking"）
+    KB: '#6B21A8',    K: '#6B21A8',  ky: '#EAB308',  kbr: '#A16207',
+    // M座位 (PMEL) — ターコイズ系
+    m: '#0E7490',     M: '#22D3EE',
+    // A座位 (ASIP) — 暖色系（タン）
+    ay: '#F59E0B',    aw: '#A16207',  at: '#7C2D12',  a: '#171717',
+    // S座位 (MITF) — 鮮やか緑系
+    S: '#15803D',     sp: '#FFFFFF',
     // I座位 (MFSD12)
-    I: '#DC143C',     i: '#FFF8DC',
+    I: '#DC2626',     i: '#FEF3C7',
     // G座位 (Greying)
-    g: '#2a2a2a',     G: '#C0C0C0',
+    g: '#262626',     G: '#D4D4D8',
   };
   // genotype 文字列を 2 つのアレルに分解（"BB"→[B,B], "KB/ky"→[KB,ky]）
   function _splitGenotype(geno) {
@@ -1096,13 +1096,14 @@ function runColorSim() {
     if (m) return [m[1], m[2]];
     return [geno];
   }
-  // アレル列のドット表示（2 個のドット並び）
+  // アレル列のドット表示（2 個のドット並び）。色味の差を見やすくする
+  // ため少し大きめ（既定 14px）にしている。
   function _alleleDots(geno, dotSize) {
-    const size = dotSize || 12;
+    const size = dotSize || 14;
     const alleles = _splitGenotype(geno);
     return alleles.map(a => {
       const hex = _ALLELE_COLOR[a] || '#9ca3af';
-      return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${hex};border:1px solid rgba(0,0,0,0.25);vertical-align:middle;margin-right:2px;flex-shrink:0;"></span>`;
+      return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${hex};border:1px solid rgba(0,0,0,0.3);vertical-align:middle;margin-right:3px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.12);"></span>`;
     }).join('');
   }
   // 既存 API 互換（単発ドット、極稀に使用）
@@ -1192,14 +1193,14 @@ function runColorSim() {
         </summary>
         <div style="margin-top:8px;padding:10px;background:#fff;border-radius:8px;border:1px solid #e5e7eb;line-height:1.9;">
           ${_alleleDots('EE')} <code>E</code> 黒 / <code>e</code> クリーム（E座位 MC1R）<br>
-          ${_alleleDots('BB')} <code>B</code> 黒 / <code>b</code> 茶（B座位 TYRP1）<br>
-          ${_alleleDots('DD')} <code>D</code> ネイビー / <code>d</code> 水色（D座位 MLPH、希釈で識別）<br>
-          ${_alleleDots('KBKB')} <code>KB</code> パープル黒 / <code>ky</code> ゴールド / <code>kbr</code> 茶（K座位 CBD103）<br>
-          ${_alleleDots('mm')} <code>m</code> ティール / <code>M</code> スカイブルー（M座位 PMEL、マールの cyan/blue）<br>
-          ${_alleleDots('atat')} <code>ay</code> フォーン / <code>aw</code> ウルフセーブル / <code>at</code> ダークタン / <code>a</code> 黒（A座位 ASIP）<br>
-          ${_alleleDots('SS')} <code>S</code> 緑黒 / <code>sp</code> 白（S座位 MITF、白斑）<br>
-          ${_alleleDots('II')} <code>I</code> クリムゾン / <code>i</code> クリーム（I座位 MFSD12、赤強度）<br>
-          ${_alleleDots('gg')} <code>g</code> 黒 / <code>G</code> シルバー（G座位、退色）
+          ${_alleleDots('BB')} <code>B</code> 黒 / <code>b</code> 濃チョコ（B座位 TYRP1）<br>
+          ${_alleleDots('DD')} <code>D</code> <span style="color:#1E40AF;font-weight:600;">ロイヤルブルー</span> / <code>d</code> 水色（D座位 MLPH）<br>
+          ${_alleleDots('KBKB')} <code>KB</code> <span style="color:#6B21A8;font-weight:600;">パープル</span> / <code>ky</code> ゴールド / <code>kbr</code> 茶（K座位 CBD103）<br>
+          ${_alleleDots('mm')} <code>m</code> <span style="color:#0E7490;font-weight:600;">ダークシアン</span> / <code>M</code> 明るいシアン（M座位 PMEL、マール）<br>
+          ${_alleleDots('atat')} <code>ay</code> <span style="color:#F59E0B;font-weight:600;">アンバー</span> / <code>aw</code> ウルフタン / <code>at</code> <span style="color:#7C2D12;font-weight:600;">バーガンディ</span> / <code>a</code> 黒（A座位 ASIP）<br>
+          ${_alleleDots('SS')} <code>S</code> <span style="color:#15803D;font-weight:600;">フォレストグリーン</span> / <code>sp</code> 白（S座位 MITF、白斑）<br>
+          ${_alleleDots('II')} <code>I</code> <span style="color:#DC2626;font-weight:600;">鮮やか赤</span> / <code>i</code> クリーム（I座位 MFSD12）<br>
+          ${_alleleDots('gg')} <code>g</code> チャコール / <code>G</code> シルバー（G座位、退色）
         </div>
       </details>
       <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
