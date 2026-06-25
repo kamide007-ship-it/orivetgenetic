@@ -1,20 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- PWA プレースホルダーアイコン (512x512)
-       Orivet ブランドロゴ受領後に差し替えてください -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Orivet Genetic - 犬の遺伝子検査アプリ">
+  <!--
+    Generic DNA + paw motif (512x512).
+    オリジナル制作: 犬の遺伝子検査アプリ向け汎用アイコン。
+  -->
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#4a1a7a"/>
-      <stop offset="100%" stop-color="#e6007e"/>
+    <linearGradient id="bg512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5b21b6"/>
+      <stop offset="60%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#ec4899"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <!-- DNA らせんモチーフ -->
-  <g stroke="#fff" stroke-width="16" fill="none" stroke-linecap="round">
-    <path d="M 160 110 Q 256 180 160 270 Q 256 360 160 430" opacity="0.85"/>
-    <path d="M 352 110 Q 256 180 352 270 Q 256 360 352 430" opacity="0.85"/>
-    <line x1="180" y1="150" x2="332" y2="150"/>
-    <line x1="180" y1="230" x2="332" y2="230"/>
-    <line x1="180" y1="310" x2="332" y2="310"/>
-    <line x1="180" y1="390" x2="332" y2="390"/>
+  <rect width="512" height="512" rx="100" ry="100" fill="url(#bg512)"/>
+
+  <!-- DNA らせん -->
+  <g transform="translate(256 256)">
+    <g stroke="#ffffff" stroke-width="17" fill="none" stroke-linecap="round" opacity="0.95">
+      <path d="M -76 -158 C 58 -114, 58 -28, -76 16 C -210 60, -210 144, -76 188"/>
+      <path d="M  76 -158 C -58 -114, -58 -28, 76 16 C 210 60, 210 144, 76 188"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="13" stroke-linecap="round">
+      <line x1="-60" y1="-146" x2="60" y2="-146"/>
+      <line x1="-70" y1=" -92" x2="70" y2=" -92"/>
+      <line x1="-66" y1=" -34" x2="66" y2=" -34"/>
+      <line x1="-60" y1="  26" x2="60" y2="  26"/>
+      <line x1="-70" y1="  82" x2="70" y2="  82"/>
+      <line x1="-66" y1=" 138" x2="66" y2=" 138"/>
+    </g>
+    <g fill="#ffffff">
+      <circle cx="-76" cy="-158" r="12"/>
+      <circle cx=" 76" cy="-158" r="12"/>
+      <circle cx="-76" cy=" 188" r="12"/>
+      <circle cx=" 76" cy=" 188" r="12"/>
+    </g>
+  </g>
+
+  <!-- 犬の足跡（右下） -->
+  <g transform="translate(376 396)" fill="#ffffff" opacity="0.88">
+    <ellipse cx="0"   cy="16" rx="36" ry="28"/>
+    <ellipse cx="-40" cy="-20" rx="13" ry="16"/>
+    <ellipse cx="-14" cy="-38" rx="12" ry="16"/>
+    <ellipse cx=" 14" cy="-38" rx="12" ry="16"/>
+    <ellipse cx=" 40" cy="-20" rx="13" ry="16"/>
   </g>
 </svg>

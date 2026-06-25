@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180" role="img" aria-label="DNA genetic test app">
+  <!--
+    Apple Touch Icon (180x180). iOS のホーム画面ショートカット用。
+    Safari は角丸を自動付与するため rx は控えめ。
+  -->
+  <defs>
+    <linearGradient id="bgAT" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5b21b6"/>
+      <stop offset="60%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="180" height="180" rx="36" ry="36" fill="url(#bgAT)"/>
+  <g transform="translate(90 90)">
+    <g stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.95">
+      <path d="M -26 -54 C 20 -40, 20 -10, -26 6 C -72 22, -72 50, -26 66"/>
+      <path d="M  26 -54 C -20 -40, -20 -10, 26 6 C 72 22, 72 50, 26 66"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="4.5" stroke-linecap="round">
+      <line x1="-20" y1="-50" x2="20" y2="-50"/>
+      <line x1="-24" y1="-32" x2="24" y2="-32"/>
+      <line x1="-22" y1="-12" x2="22" y2="-12"/>
+      <line x1="-20" y1=" 10" x2="20" y2=" 10"/>
+      <line x1="-24" y1=" 28" x2="24" y2=" 28"/>
+      <line x1="-22" y1=" 48" x2="22" y2=" 48"/>
+    </g>
+    <g fill="#ffffff">
+      <circle cx="-26" cy="-54" r="4"/>
+      <circle cx=" 26" cy="-54" r="4"/>
+      <circle cx="-26" cy=" 66" r="4"/>
+      <circle cx=" 26" cy=" 66" r="4"/>
+    </g>
+  </g>
+  <g transform="translate(130 138)" fill="#ffffff" opacity="0.88">
+    <ellipse cx="0"   cy="6"   rx="13" ry="10"/>
+    <ellipse cx="-14" cy="-7"  rx="5"  ry="6"/>
+    <ellipse cx="-5"  cy="-13" rx="4"  ry="5.5"/>
+    <ellipse cx="5"   cy="-13" rx="4"  ry="5.5"/>
+    <ellipse cx="14"  cy="-7"  rx="5"  ry="6"/>
+  </g>
+</svg>

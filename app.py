@@ -939,14 +939,14 @@ def robots_txt():
 
 @app.route("/manifest.json")
 def manifest_json():
-    """PWA manifest — モバイル『ホーム画面に追加』対応
+    """PWA manifest — モバイル『ホーム画面に追加』対応。
 
-    アイコンは絵文字ベースの SVG プレースホルダー。
-    Orivet ブランドアイコン受領後に置き換えてください (icons[].src)。
+    アイコンは DNA + 犬の足跡を組み合わせたオリジナル SVG。
+    特定企業のロゴを模倣しないニュートラルなデザイン。
     """
     manifest = {
-        "name": "Orivet 遺伝子解析",
-        "short_name": "Orivet 遺伝子",
+        "name": "犬の遺伝子検査解析",
+        "short_name": "犬遺伝子",
         "description": "犬の遺伝子検査PDFから健康・毛色・血統を解析",
         "start_url": "/",
         "display": "standalone",
@@ -954,6 +954,12 @@ def manifest_json():
         "theme_color": "#7c3aed",
         "lang": "ja",
         "icons": [
+            {
+                "src": "/static/favicon.svg",
+                "sizes": "any",
+                "type": "image/svg+xml",
+                "purpose": "any",
+            },
             {
                 "src": "/static/icon-192.svg",
                 "sizes": "192x192",
