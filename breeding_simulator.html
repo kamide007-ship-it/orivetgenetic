@@ -1049,107 +1049,140 @@ function runColorSim() {
   }
   html += '</table>';
 
-  // ヘテロ接合（キャリア）確率まとめ
-  // 「見た目は同じでも子の代に劣性が出るかもしれない子犬」を一目で把握するためのパネル。
-  // 表現型テーブルは E/E と E/e を同じ色（黒など）にまとめて表示してしまうため、
-  // ここで明示的にホモ vs ヘテロ・キャリアの割合を出す。
-  //
-  // 色味スウォッチ（Mendelian-correct 版）:
-  //   E座位 / B座位 / D座位 / K座位 は完全優性のため、優性ホモ と ヘテロキャリア は
-  //   実際に同じコート色になる → スウォッチも同じ hex を使用（メンデル遺伝に忠実）。
-  //   劣性ホモ（ee, bb, dd, ky/ky）は実際の表現型色を表示。
-  //   M座位は半優性のため M/m はマール柄、M/M はダブルマール警告（色味を分ける）。
-  //   S座位も半優性で S/sp はわずかな白斑を表示。
-  const _SHADE = {
-    e: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#FBCEB1' },  // E/E と E/e は同一（メンデル優性）
-    b: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#8B4513' },  // BB と Bb は同一
-    d: { homo:'#0a0a0a', het:'#0a0a0a', rec:'#4a6fa5' },  // DD と Dd は同一
-    m: { homo:'#1a1a1a', het:'#9FB6CD', rec:'#ef4444' },  // M 座位は半優性: M/m はマール発現
+  // ============================================================
+  // アレル単位の色マップと 2 アレルドット表示ヘルパー
+  // ============================================================
+  // 各アレルが「何の色素を担う」かを 1 アレル = 1 色丸で視覚化する。
+  // 例: Bb = 黒丸 + 茶丸（B アレルが黒色素、b アレルが茶色素を担う）
+  //     E/e = 黒丸 + クリーム丸（e はフェオメラニン側）
+  //     I/i = 赤丸 + クリーム丸（中間 = アプリコット）
+  const _ALLELE_COLOR = {
+    // E座位 (MC1R): E=eumelanin 産生可（黒）, e=クリーム/レッド側
+    E: '#0a0a0a',   e: '#FFF8DC',
+    // B座位 (TYRP1): B=黒, b=茶
+    B: '#0a0a0a',   b: '#8B4513',
+    // D座位 (MLPH): D=濃色, d=希釈
+    D: '#0a0a0a',   d: '#9ca3af',
+    // K座位 (CBD103): KB=ドミナントブラック, ky=アグーチ, kbr=ブリンドル
+    KB: '#0a0a0a',  K: '#0a0a0a',  ky: '#9b7e48',  kbr: '#8B7355',
+    // M座位 (PMEL): m=単色, M=マール
+    m: '#1a1a1a',   M: '#9FB6CD',
+    // A座位 (ASIP)
+    ay: '#E5AA70',  aw: '#9B7E48',  at: '#2d2d2d',  a: '#0a0a0a',
+    // S座位 (MITF)
+    S: '#1a1a1a',   sp: '#ffffff',
+    // I座位 (MFSD12): I=レッド, i=クリーム/ホワイト
+    I: '#CD5C5C',   i: '#FFF8DC',
+    // G座位 (Greying)
+    g: '#0a0a0a',   G: '#C0C0C0',
   };
+  // genotype 文字列を 2 つのアレルに分解（"BB"→[B,B], "KB/ky"→[KB,ky]）
+  function _splitGenotype(geno) {
+    if (!geno) return [];
+    if (geno.includes('/')) return geno.split('/').map(s => s.trim());
+    // 1 文字目大文字、2 文字目同文字 or 小文字 (BB, Bb, bb, EE, Ee, ee, DD, Dd, dd)
+    // 多文字対応のため slash 付きを優先
+    if (geno.length === 2) return [geno[0], geno[1]];
+    // 連結された "KBky" 等のフォールバック (cross() 出力)
+    const m = geno.match(/^(KB|kbr|ky|ay|aw|at|sp|m|M|S|E|e|B|b|D|d|G|g|I|i|a)(KB|kbr|ky|ay|aw|at|sp|m|M|S|E|e|B|b|D|d|G|g|I|i|a)$/);
+    if (m) return [m[1], m[2]];
+    return [geno];
+  }
+  // アレル列のドット表示（2 個のドット並び）
+  function _alleleDots(geno, dotSize) {
+    const size = dotSize || 12;
+    const alleles = _splitGenotype(geno);
+    return alleles.map(a => {
+      const hex = _ALLELE_COLOR[a] || '#9ca3af';
+      return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${hex};border:1px solid rgba(0,0,0,0.25);vertical-align:middle;margin-right:2px;flex-shrink:0;"></span>`;
+    }).join('');
+  }
+  // 既存 API 互換（単発ドット、極稀に使用）
   const _dot = (hex, big) => {
     const size = big ? 14 : 12;
     return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${hex};border:1px solid rgba(0,0,0,0.18);vertical-align:middle;margin-right:6px;flex-shrink:0;"></span>`;
   };
 
+  // ============================================================
+  // 🧬 子犬の遺伝子型まとめ（優性ホモ・ヘテロ・劣性ホモ）
+  // 「キャリア」用語は廃止し、Mendelian な正しい用語を使用。
+  // 各セルは 2 アレル分のドットを並べて表示する。
+  // ============================================================
   const carrierLoci = [
-    { key:'e', name:'E座位 (クリーム/レッド)',  hetKey:'Ee', recKey:'ee', result: eResult,
+    { key:'e', name:'E座位 (クリーム/レッド)',  homoKey:'EE', hetKey:'Ee', recKey:'ee', result: eResult,
       recPheno:'クリーム/アプリコット/レッド (ee)' },
-    { key:'b', name:'B座位 (ブラウン)',          hetKey:'Bb', recKey:'bb', result: bResult,
+    { key:'b', name:'B座位 (ブラウン)',          homoKey:'BB', hetKey:'Bb', recKey:'bb', result: bResult,
       recPheno:'ブラウン/チョコ (bb)' },
-    { key:'d', name:'D座位 (希釈)',              hetKey:'Dd', recKey:'dd', result: dResult,
+    { key:'d', name:'D座位 (希釈)',              homoKey:'DD', hetKey:'Dd', recKey:'dd', result: dResult,
       recPheno:'ブルー/ライラック (dd)' },
   ];
   let carrierRows = '';
   for (const c of carrierLoci) {
-    const homoNonCarrier = Object.entries(c.result)
-      .filter(([g, _]) => g !== c.hetKey && g !== c.recKey)
-      .reduce((s, [, p]) => s + p, 0);
+    const homoDom = c.result[c.homoKey] || 0;
     const het = c.result[c.hetKey] || 0;
     const rec = c.result[c.recKey] || 0;
-    if (het + rec < 0.001) continue;  // どちらも 0% なら省略
-    const homoPct = (homoNonCarrier * 100).toFixed(1);
+    if (het + rec < 0.001) continue;
+    const homoPct = (homoDom * 100).toFixed(1);
     const hetPct  = (het * 100).toFixed(1);
     const recPct  = (rec * 100).toFixed(1);
-    const sh = _SHADE[c.key];
     carrierRows += `<tr>
       <td style="padding:8px 10px;font-weight:600;color:#5b21b6;">${c.name}</td>
       <td style="padding:8px 10px;color:#166534;">
-        ${_dot(sh.homo)}<strong>${homoPct}%</strong>
-        <div style="margin-left:18px;font-size:0.82em;color:#6b7280;">ホモ・ノンキャリア</div>
+        ${_alleleDots(c.homoKey)} <strong>${homoPct}%</strong>
+        <div style="margin-left:30px;font-size:0.82em;color:#6b7280;">${c.homoKey} 優性ホモ</div>
       </td>
       <td style="padding:8px 10px;color:#92400e;background:#fef3c7;">
-        ${_dot(sh.het)}<strong>${hetPct}%</strong>
-        <div style="margin-left:18px;font-size:0.82em;color:#78350f;">ヘテロ・${c.recKey[0]}キャリア</div>
+        ${_alleleDots(c.hetKey)} <strong>${hetPct}%</strong>
+        <div style="margin-left:30px;font-size:0.82em;color:#78350f;">${c.hetKey} ヘテロ（保因）</div>
       </td>
       <td style="padding:8px 10px;color:#991b1b;">
-        ${_dot(sh.rec)}<strong>${recPct}%</strong>
-        <div style="margin-left:18px;font-size:0.82em;color:#7f1d1d;">劣性ホモ（${c.recPheno} 発現）</div>
+        ${_alleleDots(c.recKey)} <strong>${recPct}%</strong>
+        <div style="margin-left:30px;font-size:0.82em;color:#7f1d1d;">${c.recKey} 劣性ホモ（${c.recPheno}）</div>
       </td>
     </tr>`;
   }
-  // M座位（マール）も同様に表示。ヘテロは「マール発現」、ホモは「ダブルマール ⚠️」
+  // M座位（半優性）
   {
     const homoMm = mResult['mm'] || 0;
     const hetMm  = mResult['Mm'] || 0;
     const homoMM = mResult['MM'] || 0;
     if (hetMm + homoMM > 0.001) {
-      const sh = _SHADE.m;
       carrierRows += `<tr>
         <td style="padding:8px 10px;font-weight:600;color:#5b21b6;">M座位 (マール)</td>
         <td style="padding:8px 10px;color:#166534;">
-          ${_dot(sh.homo)}<strong>${(homoMm*100).toFixed(1)}%</strong>
-          <div style="margin-left:18px;font-size:0.82em;color:#6b7280;">m/m ノンキャリア</div>
+          ${_alleleDots('mm')} <strong>${(homoMm*100).toFixed(1)}%</strong>
+          <div style="margin-left:30px;font-size:0.82em;color:#6b7280;">m/m 優性ホモ</div>
         </td>
         <td style="padding:8px 10px;color:#92400e;background:#fef3c7;">
-          ${_dot(sh.het)}<strong>${(hetMm*100).toFixed(1)}%</strong>
-          <div style="margin-left:18px;font-size:0.82em;color:#78350f;">M/m マール発現（聴覚・視覚は概ね正常）</div>
+          ${_alleleDots('Mm')} <strong>${(hetMm*100).toFixed(1)}%</strong>
+          <div style="margin-left:30px;font-size:0.82em;color:#78350f;">M/m ヘテロ（半優性でマール柄が発現）</div>
         </td>
         <td style="padding:8px 10px;color:#991b1b;background:#fee2e2;">
-          ${_dot(sh.rec)}<strong>${(homoMM*100).toFixed(1)}%</strong>
-          <div style="margin-left:18px;font-size:0.82em;color:#7f1d1d;">M/M ダブルマール ⚠️ 健康リスク</div>
+          ${_alleleDots('MM')} <strong>${(homoMM*100).toFixed(1)}%</strong>
+          <div style="margin-left:30px;font-size:0.82em;color:#7f1d1d;">M/M 劣性ホモ（ダブルマール ⚠️）</div>
         </td>
       </tr>`;
     }
   }
   if (carrierRows) {
     html += `<div style="margin-top:24px;padding:18px;background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;">
-      <h3 style="margin:0 0 8px;color:#5b21b6;">🧬 子犬のキャリア確率まとめ</h3>
+      <h3 style="margin:0 0 8px;color:#5b21b6;">🧬 子犬の遺伝子型まとめ（優性ホモ・ヘテロ・劣性ホモ）</h3>
       <p style="font-size:0.9em;color:#6b7280;margin-bottom:6px;line-height:1.6;">
-        <strong>ヘテロキャリア</strong>（例: E/e, Bb, Dd）の子犬は<strong>見た目はホモと同じ</strong>ですが、
-        次の代に劣性形質（クリーム・ブラウン・希釈など）の子を産む可能性があります。
-        繁殖計画では、ここの「キャリア」列で<strong>どれだけヘテロが生まれるか</strong>を確認してください。
+        各セルの<strong>左 2 つのドットは「2 つのアレル」</strong>を表します。
+        例: <code>Bb</code> = 黒丸（B アレル：黒色素）+ 茶丸（b アレル：茶色素）。
+        ヘテロ（例: E/e, Bb, Dd）の子犬は見た目は優性ホモと同じですが、
+        次の代に劣性形質を 25% 産む可能性があります。
       </p>
       <p style="font-size:0.78em;color:#9ca3af;margin-bottom:12px;line-height:1.5;">
-        ※左の小さな色丸は「実際のコート色」を表現しています。E / B / D / K 座位は完全優性のため、
-        <strong>優性ホモとヘテロキャリアは同じ色丸（実際に見た目も同じ）</strong>。
-        劣性ホモ列のみ実際に違う表現型として描画されます。M 座位は半優性で M/m が
-        マール柄を発現するため別色（中央のブルーグレー）で示しています。
+        ※E / B / D / K 座位は完全優性のため、見た目は優性ホモとヘテロで同じです。
+        アレルドットの違いは「内部の遺伝子型」を視覚化したもの。
+        M / S 座位は半優性で、実際にヘテロが特有の表現型を持ちます。
       </p>
       <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
         <tr style="background:#ede9fe;">
           <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#5b21b6;">座位</th>
           <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#166534;">優性ホモ</th>
-          <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#92400e;">ヘテロ・キャリア</th>
+          <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#92400e;">ヘテロ（保因）</th>
           <th style="padding:8px 10px;text-align:left;font-size:0.85em;color:#991b1b;">劣性ホモ</th>
         </tr>
         ${carrierRows}
@@ -1158,49 +1191,50 @@ function runColorSim() {
   }
 
   // Genotype detail table
-  // 各遺伝子座のホモ vs ヘテロを言葉で明示する（ユーザー要望: 「キャリアが分かる」）。
+  // 各遺伝子座のホモ vs ヘテロを Mendelian な用語で明示。
+  // 「キャリア」用語は廃止し、「優性ホモ / ヘテロ / 劣性ホモ」を使用。
   const _LOCUS_LABELS = {
     e: {
-      'EE': 'E/E ホモ・ノンキャリア',
-      'Ee': 'E/e ヘテロ・eキャリア',
+      'EE': 'E/E 優性ホモ',
+      'Ee': 'E/e ヘテロ',
       'ee': 'e/e 劣性ホモ（クリーム系発現）',
     },
     b: {
-      'BB': 'BB ホモ・ノンキャリア',
-      'Bb': 'Bb ヘテロ・bキャリア',
+      'BB': 'BB 優性ホモ',
+      'Bb': 'Bb ヘテロ',
       'bb': 'bb 劣性ホモ（ブラウン発現）',
     },
     d: {
-      'DD': 'D/D ホモ・ノンキャリア',
-      'Dd': 'D/d ヘテロ・dキャリア',
+      'DD': 'D/D 優性ホモ',
+      'Dd': 'D/d ヘテロ',
       'dd': 'd/d 劣性ホモ（希釈発現）',
     },
     k: {
-      'KBKB': 'KB/KB ホモ・ドミナントブラック',
-      'KBky': 'KB/ky ヘテロ・kyキャリア',
-      'KBkbr': 'KB/kbr ヘテロ・ブリンドルキャリア',
-      'kyky': 'ky/ky ホモ（アグーチ発現）',
-      'kbrky': 'kbr/ky ブリンドル発現',
-      'kbrkbr': 'kbr/kbr ホモ・ブリンドル発現',
+      'KBKB': 'KB/KB 優性ホモ・ドミナントブラック',
+      'KBky': 'KB/ky ヘテロ',
+      'KBkbr': 'KB/kbr ヘテロ',
+      'kyky': 'ky/ky 劣性ホモ（アグーチ発現）',
+      'kbrky': 'kbr/ky 劣性ホモ（ブリンドル発現）',
+      'kbrkbr': 'kbr/kbr 劣性ホモ（ブリンドル）',
     },
     m: {
-      'mm': 'm/m ホモ・ノンキャリア',
-      'Mm': 'M/m ヘテロ・マール発現',
-      'MM': 'M/M ダブルマール ⚠️ 健康リスク',
+      'mm': 'm/m 優性ホモ',
+      'Mm': 'M/m ヘテロ（半優性でマール柄発現）',
+      'MM': 'M/M 劣性ホモ（ダブルマール ⚠️）',
     },
     s: {
-      'SS': 'S/S 白斑なし',
-      'Ssp': 'S/sp わずかな白斑',
-      'spsp': 'sp/sp パーティカラー',
+      'SS': 'S/S 優性ホモ（白斑なし）',
+      'Ssp': 'S/sp ヘテロ（半優性でわずかな白斑）',
+      'spsp': 'sp/sp 劣性ホモ（パーティカラー）',
     },
     g: {
-      'gg': 'g/g 退色なし',
-      'Gg': 'G/g 成犬で退色',
-      'GG': 'G/G 成犬で退色',
+      'gg': 'g/g 優性ホモ（退色なし）',
+      'Gg': 'G/g ヘテロ（成犬で退色）',
+      'GG': 'G/G 劣性ホモ（成犬で退色）',
     },
   };
   html += '<h3 style="margin-top:20px;">各遺伝子座の交配結果</h3>';
-  html += '<p style="font-size:0.85em;color:#6b7280;margin-bottom:10px;">ホモ・ヘテロ・劣性ホモを明記しています。ヘテロは「キャリア」（保因犬）です。</p><table>';
+  html += '<p style="font-size:0.85em;color:#6b7280;margin-bottom:10px;">遺伝子型の左に並ぶ 2 つの色丸は<strong>「2 つのアレル」</strong>です（例: <code>Bb</code> = 黒丸 + 茶丸）。ヘテロは見た目は優性ホモと同じですが、子の代に劣性表現を 25% 産む可能性があります。</p><table>';
   html += '<tr><th>遺伝子座</th><th>父犬</th><th>母犬</th><th>子犬の遺伝子型確率</th></tr>';
   const loci = [
     {name:"E Locus", key:"e", s:sire.e, d:dam.e},
@@ -1217,11 +1251,15 @@ function runColorSim() {
     const labels = _LOCUS_LABELS[l.key] || {};
     const detail = Object.entries(cx).map(([g,p]) => {
       const labeled = labels[g] || g;
-      return `${labeled}: <strong>${(p*100).toFixed(0)}%</strong>`;
+      // 2 アレルドット + ラベル + 確率
+      return `${_alleleDots(g)} ${labeled}: <strong>${(p*100).toFixed(0)}%</strong>`;
     }).join('<br>');
+    // 親遺伝子型もアレルドット付きで表示
+    const sireCell = `${_alleleDots(l.s)} ${wrapLocusReferences(l.s)}`;
+    const damCell = `${_alleleDots(l.d)} ${wrapLocusReferences(l.d)}`;
     // 遺伝子座名・親遺伝子型・子確率の全てをクリッカブル化
     const locusBtn = `<button type="button" class="locus-cell-link" onclick="showLocusInfo('${l.key}')" title="${l.name} の解説">${l.name} 📖</button>`;
-    html += `<tr><td>${locusBtn}</td><td>${wrapLocusReferences(l.s)}</td><td>${wrapLocusReferences(l.d)}</td><td style="font-size:0.85em;line-height:1.7;">${detail}</td></tr>`;
+    html += `<tr><td>${locusBtn}</td><td>${sireCell}</td><td>${damCell}</td><td style="font-size:0.85em;line-height:1.7;">${detail}</td></tr>`;
   }
   html += '</table>';
 

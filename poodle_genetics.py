@@ -371,50 +371,95 @@ _LOCUS_FROM_TEST = {
 #   M/S は半優性のため M/m や S/sp はそれぞれ別表現を持つ → 別色。
 _GENOTYPE_SHADE = {
     "e": {
-        "E/E": ("homo",      "E/E ホモ・ノンキャリア",          "#0a0a0a"),
-        "E/e": ("carrier",   "E/e ヘテロ・eキャリア（見た目は E/E と同じ）", "#0a0a0a"),
+        "E/E": ("homo",      "E/E 優性ホモ",                    "#0a0a0a"),
+        "E/e": ("carrier",   "E/e ヘテロ（見た目は E/E と同じ）", "#0a0a0a"),
         "e/e": ("recessive", "e/e 劣性ホモ（クリーム系発現）",  "#FBCEB1"),
     },
     "b": {
-        "BB":  ("homo",      "BB ホモ・ノンキャリア",            "#0a0a0a"),
-        "Bb":  ("carrier",   "Bb ヘテロ・bキャリア（見た目は BB と同じ）", "#0a0a0a"),
+        "BB":  ("homo",      "BB 優性ホモ",                    "#0a0a0a"),
+        "Bb":  ("carrier",   "Bb ヘテロ（見た目は BB と同じ）", "#0a0a0a"),
         "bb":  ("recessive", "bb 劣性ホモ（ブラウン発現）",      "#8B4513"),
     },
     "d": {
-        "D/D": ("homo",      "D/D ホモ・ノンキャリア",           "#0a0a0a"),
-        "D/d": ("carrier",   "D/d ヘテロ・dキャリア（見た目は D/D と同じ）", "#0a0a0a"),
+        "D/D": ("homo",      "D/D 優性ホモ",                   "#0a0a0a"),
+        "D/d": ("carrier",   "D/d ヘテロ（見た目は D/D と同じ）", "#0a0a0a"),
         "d/d": ("recessive", "d/d 劣性ホモ（希釈発現）",         "#4a6fa5"),
     },
     "m": {
         # M 座位は半優性: M/m は実際にマール柄を発現する（例外）
-        "m/m": ("homo",      "m/m ホモ・ノンキャリア",           "#1a1a1a"),
-        "M/m": ("carrier",   "M/m マール発現（半優性で実際に違う見た目）", "#9FB6CD"),
-        "M/M": ("recessive", "M/M ダブルマール ⚠️ 健康リスク",   "#ef4444"),
+        "m/m": ("homo",      "m/m 優性ホモ",                    "#1a1a1a"),
+        "M/m": ("carrier",   "M/m ヘテロ（半優性でマール柄が発現）", "#9FB6CD"),
+        "M/M": ("recessive", "M/M 劣性ホモ（ダブルマール ⚠️ 健康リスク）", "#ef4444"),
     },
     "k": {
-        "KB/KB":   ("homo",      "KB/KB ホモ・ドミナントブラック", "#0a0a0a"),
-        "K/K":     ("homo",      "K/K ホモ・ドミナントブラック",   "#0a0a0a"),
-        "KB/ky":   ("carrier",   "KB/ky ヘテロ・kyキャリア（見た目は KB/KB と同じ）", "#0a0a0a"),
-        "KB/kbr":  ("carrier",   "KB/kbr ヘテロ・ブリンドルキャリア（見た目は KB/KB と同じ）", "#0a0a0a"),
+        "KB/KB":   ("homo",      "KB/KB 優性ホモ・ドミナントブラック", "#0a0a0a"),
+        "K/K":     ("homo",      "K/K 優性ホモ・ドミナントブラック",   "#0a0a0a"),
+        "KB/ky":   ("carrier",   "KB/ky ヘテロ（見た目は KB/KB と同じ）", "#0a0a0a"),
+        "KB/kbr":  ("carrier",   "KB/kbr ヘテロ（見た目は KB/KB と同じ）", "#0a0a0a"),
         "ky/ky":   ("recessive", "ky/ky 劣性ホモ（アグーチ発現）", "#9b7e48"),
-        "kbr/ky":  ("recessive", "kbr/ky ブリンドル発現",          "#8B7355"),
-        "kbr/kbr": ("recessive", "kbr/kbr 劣性ホモ・ブリンドル",  "#8B7355"),
+        "kbr/ky":  ("recessive", "kbr/ky 劣性ホモ（ブリンドル発現）", "#8B7355"),
+        "kbr/kbr": ("recessive", "kbr/kbr 劣性ホモ（ブリンドル）",  "#8B7355"),
     },
     "s": {
         # S 座位も半優性: S/sp は実際にわずかな白斑を発現
-        "S/S":   ("homo",      "S/S 白斑なし",                    "#1a1a1a"),
-        "S/sp":  ("carrier",   "S/sp わずかな白斑（半優性）",     "#cccccc"),
-        "sp/sp": ("recessive", "sp/sp パーティカラー",            "#ffffff"),
+        "S/S":   ("homo",      "S/S 優性ホモ（白斑なし）",        "#1a1a1a"),
+        "S/sp":  ("carrier",   "S/sp ヘテロ（半優性でわずかな白斑）", "#cccccc"),
+        "sp/sp": ("recessive", "sp/sp 劣性ホモ（パーティカラー）", "#ffffff"),
     },
 }
 
 # ステータス → バッジ色（背景・文字）
+# Mendelian な正しい用語を使用: 優性ホモ / ヘテロ / 劣性ホモ
 _STATUS_BADGE = {
-    "homo":      ("#dcfce7", "#166534", "ノンキャリア"),
-    "carrier":   ("#fef3c7", "#92400e", "キャリア"),
-    "recessive": ("#fee2e2", "#991b1b", "劣性発現"),
+    "homo":      ("#dcfce7", "#166534", "優性ホモ"),
+    "carrier":   ("#fef3c7", "#92400e", "ヘテロ"),
+    "recessive": ("#fee2e2", "#991b1b", "劣性ホモ"),
     "neutral":   ("#f3f4f6", "#374151", "—"),
 }
+
+# 各アレルが担う色素・性質を 1 アレル = 1 色丸で視覚化するための色マップ。
+# 例: Bb = 黒丸 + 茶丸（B が黒色素、b が茶色素を担う）。
+# 繁殖シミュレーター側 _ALLELE_COLOR と同じ値を維持する。
+_ALLELE_COLOR = {
+    "E": "#0a0a0a",  "e": "#FFF8DC",
+    "B": "#0a0a0a",  "b": "#8B4513",
+    "D": "#0a0a0a",  "d": "#9ca3af",
+    "KB": "#0a0a0a", "K": "#0a0a0a", "ky": "#9b7e48", "kbr": "#8B7355",
+    "m": "#1a1a1a",  "M": "#9FB6CD",
+    "ay": "#E5AA70", "aw": "#9B7E48", "at": "#2d2d2d", "a": "#0a0a0a",
+    "S": "#1a1a1a",  "sp": "#ffffff",
+    "I": "#CD5C5C",  "i": "#FFF8DC",
+    "g": "#0a0a0a",  "G": "#C0C0C0",
+}
+
+
+def _split_genotype(geno: str) -> list:
+    """遺伝子型文字列を 2 つのアレルに分解。
+    "E/E" → ["E", "E"], "Bb" → ["B", "b"], "KB/ky" → ["KB", "ky"]."""
+    if not geno:
+        return []
+    if "/" in geno:
+        return [s.strip() for s in geno.split("/")]
+    if len(geno) == 2:
+        return [geno[0], geno[1]]
+    return [geno]
+
+
+def _allele_dots_html(geno: str, dot_size: int = 12) -> str:
+    """2 アレル分の色丸 HTML を返す。"""
+    alleles = _split_genotype(geno)
+    if not alleles:
+        return ""
+    dots = []
+    for a in alleles:
+        hex_color = _ALLELE_COLOR.get(a, "#9ca3af")
+        dots.append(
+            f'<span style="display:inline-block;width:{dot_size}px;height:{dot_size}px;'
+            f'border-radius:50%;background:{hex_color};'
+            f'border:1px solid rgba(0,0,0,0.25);vertical-align:middle;'
+            f'margin-right:2px;flex-shrink:0;"></span>'
+        )
+    return "".join(dots)
 
 # 各表現型の日本語名と表示用カラースウォッチ（HEX）
 _PHENO_SWATCH = {
@@ -564,28 +609,24 @@ def build_color_profile_html(dog) -> str:
         if geno:
             shade_entry = _GENOTYPE_SHADE.get(key, {}).get(geno)
             if shade_entry:
-                status_key, label_ja, shade_hex = shade_entry
-                shade_html = (
-                    f'<span style="display:inline-block;width:14px;height:14px;'
-                    f'border-radius:50%;background:{shade_hex};'
-                    f'border:1px solid rgba(0,0,0,0.18);vertical-align:middle;'
-                    f'margin-right:8px;flex-shrink:0;"></span>'
-                )
+                status_key, label_ja, _shade_hex = shade_entry
                 bg, fg, badge_label = _STATUS_BADGE[status_key]
                 status_html = (
                     f'<span style="display:inline-block;padding:2px 8px;'
                     f'border-radius:10px;font-size:0.72em;font-weight:700;'
                     f'background:{bg};color:{fg};">{badge_label}</span>'
                 )
-                # キャリア / 劣性ホモのサマリー収集
+                # ヘテロ / 劣性ホモのサマリー収集
                 if status_key == "carrier":
                     carrier_summary.append((name, label_ja))
                 elif status_key == "recessive":
                     recessive_summary.append((name, label_ja))
+            # 2 アレル分の色丸 + 遺伝子型表記
+            allele_dots = _allele_dots_html(geno, dot_size=14)
             geno_cell = (
-                f'{shade_html}'
+                f'{allele_dots}'
                 f'<span style="font-family:Menlo,Consolas,monospace;font-weight:700;'
-                f'color:#4c1d95;">{_h(geno)}</span>'
+                f'color:#4c1d95;margin-left:6px;">{_h(geno)}</span>'
             )
         else:
             geno_cell = (
@@ -626,11 +667,11 @@ def build_color_profile_html(dog) -> str:
             sections += (
                 '<div style="margin-bottom:8px;">'
                 '<div style="font-weight:700;color:#92400e;margin-bottom:4px;font-size:0.9em;">'
-                '🟡 キャリア（保因犬）の座位:'
+                '🟡 ヘテロ（保因）の座位:'
                 '</div>'
                 f'<ul style="margin:0;padding-left:4px;list-style:none;font-size:0.88em;color:#374151;">{carrier_items}</ul>'
                 '<div style="margin-top:4px;font-size:0.78em;color:#78350f;">'
-                '※ 見た目は優性ホモと同じですが、繁殖時にキャリア同士の交配で劣性形質が出る可能性があります。'
+                '※ 見た目は優性ホモと同じですが、繁殖時にヘテロ同士の交配で劣性形質が 25% 出る可能性があります。'
                 '</div>'
                 '</div>'
             )
@@ -647,7 +688,7 @@ def build_color_profile_html(dog) -> str:
             '<div style="margin:12px 0 14px;padding:14px 16px;background:#fff;'
             'border-radius:10px;border:1px solid #e5e7eb;">'
             '<div style="font-weight:700;color:#5b21b6;margin-bottom:8px;">'
-            '🧬 この子のキャリア・劣性発現サマリー'
+            '🧬 この子の遺伝子型サマリー（優性ホモ・ヘテロ・劣性ホモ）'
             '</div>'
             + sections +
             '</div>'
