@@ -1121,6 +1121,63 @@ class TestHeterozygosityParser:
         # シグネチャー色の説明
         assert "シグネチャー" in body or "座位ごと" in body
 
+    def test_simulator_multi_tone_phenotype_backgrounds(self):
+        """マルチカラー表現型（ファントム・パーティ・ブリンドル・マール・
+        セーブル・シルバー）が CSS gradient で多色表現されている。
+        ユーザー要望: 「パーティカラーになる遺伝子は発現する遺伝子の色を
+        入れてマルチカラーであることが分かりやすいようにしましょう」"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # _multiToneBg ヘルパー
+        assert "function _multiToneBg" in body
+        # ファントム: 2 色 linear-gradient + クリーム
+        assert "phantom_black" in body
+        assert "phantom_brown" in body
+        assert "#FFF8DC" in body  # クリーム タン
+        # ブリンドル: 縞 (repeating-linear-gradient)
+        assert "repeating-linear-gradient" in body
+        # マール: パッチ (radial-gradient)
+        assert "radial-gradient" in body
+        # パーティ: ベース + 白
+        assert "case 'parti'" in body
+        # シルバー (退色): ベース → シルバーグラデ
+        assert "case 'silver'" in body
+
+    def test_report_phenotype_card_uses_multi_tone(self):
+        """レポートの推測表現型カードもマルチカラー gradient を適用する"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, TestResult, generate_unified_html, _multi_tone_bg
+        # ファントム表現型 (E_ + ky/ky + at/at) になる犬
+        d = DogProfile(
+            pet_name="Phantom", registered_name="R", sex="Male", breed="Toy Poodle",
+            trait_results=[
+                TestResult(category="形質", test_name="E Locus (Cream/Red/Yellow)",
+                           genotype="E/E", result_text="", status="trait"),
+                TestResult(category="形質", test_name="K Locus (Dominant Black)",
+                           genotype="ky/ky", result_text="", status="trait"),
+                TestResult(category="形質", test_name="A Locus (Agouti)",
+                           genotype="at/at", result_text="", status="trait"),
+                TestResult(category="形質", test_name="B Locus (Brown)",
+                           genotype="BB", result_text="", status="trait"),
+                TestResult(category="形質", test_name="D (Dilute) Locus",
+                           genotype="D/D", result_text="", status="trait"),
+            ],
+        )
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html([d], [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        # ファントム表現型カード swatch に gradient が入っている
+        assert "linear-gradient(135deg" in html
+        assert "#FFF8DC" in html  # クリーム タン
+        # ヘルパー単独テスト
+        assert "linear-gradient" in _multi_tone_bg("phantom_black", "#2d2d2d")
+        assert "repeating-linear-gradient" in _multi_tone_bg("brindle", "#8B7355")
+        assert "radial-gradient" in _multi_tone_bg("merle", "#9FB6CD")
+        assert _multi_tone_bg("black", "#1a1a1a") == "#1a1a1a"  # 単色は変更なし
+
     def test_simulator_has_recessive_homozygous_panel(self):
         """ホワイト/ブラウン/希釈の劣性ホモ化（単独・重複）の発現確率
         パネルがある。ユーザー要望: ee+bb のような重複ホモ化で出る

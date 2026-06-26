@@ -769,6 +769,41 @@ function _rgbToHexN(r,g,b) {
   return '#' + [clamp(r),clamp(g),clamp(b)].map(x => x.toString(16).padStart(2,'0')).join('');
 }
 
+// マルチカラー表現型のスウォッチ背景を生成するヘルパー。
+// パーティ・ファントム・ブリンドル・マール・セーブル等は単色では表現できない
+// パターンを持つため、CSS gradient で「実際のコート パターン」を視覚化する。
+// ユーザー要望: 「パーティカラーになる遺伝子は発現する遺伝子の色を入れて
+// マルチカラーであることが分かりやすいように」。
+function _multiToneBg(phenoKey, baseHex) {
+  switch (phenoKey) {
+    case 'phantom_black':
+    case 'phantom_brown':
+      // ファントム = ベース色（黒/茶） + クリーム タンの 2 色斜めスラッシュ
+      return `linear-gradient(135deg, ${baseHex} 0%, ${baseHex} 50%, #FFF8DC 50%, #FFF8DC 100%)`;
+    case 'brindle':
+      // ブリンドル: 黒の縞 on タン地
+      return `repeating-linear-gradient(60deg, ${baseHex} 0px, ${baseHex} 4px, #D2B48C 4px, #D2B48C 8px)`;
+    case 'merle':
+      // マール: 不規則なブルーグレーのパッチ
+      return `radial-gradient(circle at 25% 30%, #9FB6CD 0%, #9FB6CD 22%, ${baseHex} 28%, ${baseHex} 55%, #B0C4DE 60%, #B0C4DE 78%, ${baseHex} 82%)`;
+    case 'parti':
+      // パーティカラー: ベース + 白の斜めスラッシュ（白斑模様の象徴）
+      return `linear-gradient(135deg, ${baseHex} 0%, ${baseHex} 45%, #FFFFFF 55%, #FFFFFF 100%)`;
+    case 'fawn':
+      // フォーン/セーブル: タン地に黒い毛先（上が暗く下が明るい）
+      return `linear-gradient(180deg, #2d2d2d 0%, #2d2d2d 18%, ${baseHex} 38%, ${baseHex} 100%)`;
+    case 'wild_sable':
+      // ワイルドセーブル: アグーチ バンドの縞（タン↔ダーク交互）
+      return `linear-gradient(180deg, #2d2d2d 0%, ${baseHex} 25%, #2d2d2d 50%, ${baseHex} 75%, #2d2d2d 100%)`;
+    case 'silver':
+    case 'silver_beige':
+      // シルバー（成犬退色）: ベース色 → シルバーに退色するグラデーション
+      return `linear-gradient(135deg, ${baseHex} 0%, ${baseHex} 30%, #E8E8E8 90%)`;
+    default:
+      return baseHex;
+  }
+}
+
 // ee 表現型の coat 色ラベルと note を生成する関数。
 function computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam) {
   const out = [];
@@ -1156,10 +1191,11 @@ function runColorSim() {
   for (const [, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
     const cm = COLOR_MAP[data.baseColor];
     const swatchHex = data.shadeHex || cm.hex;
+    const swatchBg = _multiToneBg(data.baseColor, swatchHex);
     const pct = (data.prob / totalProb * 100).toFixed(1);
     const lightCheck = ['cream','apricot','parti','silver','silver_beige','cafe_au_lait'].includes(data.baseColor);
     const textColor = lightCheck ? '#333' : 'white';
-    html += `<div style="width:${pct}%;background:${swatchHex};color:${textColor}">${pct}%</div>`;
+    html += `<div style="width:${pct}%;background:${swatchBg};color:${textColor};text-shadow:0 1px 2px rgba(0,0,0,0.5);">${pct}%</div>`;
   }
   html += '</div>';
 
@@ -1167,10 +1203,11 @@ function runColorSim() {
   for (const [, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
     const cm = COLOR_MAP[data.baseColor];
     const swatchHex = data.shadeHex || cm.hex;
+    const swatchBg = _multiToneBg(data.baseColor, swatchHex);
     const pct = (data.prob / totalProb * 100).toFixed(1);
     // 表現型名にトーン修飾語を付ける（例: 「ブラック (純黒)」「ブラック (墨色)」）
     const displayName = data.toneLabel ? `${cm.name}（${data.toneLabel}）` : cm.name;
-    html += `<tr><td><span class="color-swatch" style="background:${swatchHex}"></span>${displayName}</td>`;
+    html += `<tr><td><span class="color-swatch" style="background:${swatchBg}"></span>${displayName}</td>`;
     html += `<td style="font-weight:700;font-size:1.1em">${pct}%</td>`;
     // 各 note の遺伝子型表記をクリッカブル化（座位ヘルプモーダルへ）
     const wrappedNotes = data.notes.map(wrapLocusReferences).join('<br>');
@@ -1607,14 +1644,16 @@ function runColorSim() {
       const cm = COLOR_MAP[c.phenoKey] || COLOR_MAP.unknown;
       const pct = (c.prob * 100).toFixed(2);
       totalDisplayed += c.prob;
+      const swatchBg = _multiToneBg(c.phenoKey, c.shade);
+      const badgeBg  = _multiToneBg(c.phenoKey, cm.hex);
       const textColor = ['cream','apricot','parti','silver','silver_beige','cafe_au_lait'].includes(c.phenoKey) ? '#1f2937' : '#fff';
       comboRows += `<tr>
         <td style="padding:8px 10px;">
-          <span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${c.shade};border:1px solid rgba(0,0,0,0.18);vertical-align:middle;margin-right:8px;"></span>
+          <span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${swatchBg};border:1px solid rgba(0,0,0,0.25);vertical-align:middle;margin-right:8px;box-shadow:0 1px 2px rgba(0,0,0,0.15);"></span>
           <span style="font-family:Menlo,Consolas,monospace;font-size:0.82em;color:#4c1d95;">${c.genoText}</span>
         </td>
         <td style="padding:8px 10px;">
-          <span style="display:inline-block;padding:3px 10px;border-radius:6px;background:${cm.hex};color:${textColor};font-size:0.82em;font-weight:600;">${cm.name}</span>
+          <span style="display:inline-block;padding:3px 10px;border-radius:6px;background:${badgeBg};color:${textColor};font-size:0.82em;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.4);">${cm.name}</span>
         </td>
         <td style="padding:8px 10px;text-align:right;font-weight:700;color:#5b21b6;">${pct}%</td>
       </tr>`;
