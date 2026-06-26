@@ -458,6 +458,52 @@ def _split_genotype(geno: str) -> list:
     return [geno]
 
 
+def _multi_tone_bg(pheno_key: str, base_hex: str) -> str:
+    """マルチカラー表現型のスウォッチ背景を CSS gradient で返す。
+
+    パーティ・ファントム・ブリンドル・マール・セーブル等は単色では
+    表現できないコートパターンを持つため、CSS gradient で実際のコート
+    パターンを視覚化する。
+    シミュレーター側 _multiToneBg と同じロジック。"""
+    if pheno_key in ("phantom_black", "phantom_brown"):
+        # ファントム = ベース + クリーム タンの 2 色斜めスラッシュ
+        return (
+            f"linear-gradient(135deg, {base_hex} 0%, {base_hex} 50%, "
+            f"#FFF8DC 50%, #FFF8DC 100%)"
+        )
+    if pheno_key == "brindle":
+        return (
+            f"repeating-linear-gradient(60deg, {base_hex} 0px, "
+            f"{base_hex} 4px, #D2B48C 4px, #D2B48C 8px)"
+        )
+    if pheno_key == "merle":
+        return (
+            f"radial-gradient(circle at 25% 30%, #9FB6CD 0%, #9FB6CD 22%, "
+            f"{base_hex} 28%, {base_hex} 55%, #B0C4DE 60%, #B0C4DE 78%, "
+            f"{base_hex} 82%)"
+        )
+    if pheno_key == "parti":
+        return (
+            f"linear-gradient(135deg, {base_hex} 0%, {base_hex} 45%, "
+            f"#FFFFFF 55%, #FFFFFF 100%)"
+        )
+    if pheno_key == "fawn":
+        return (
+            f"linear-gradient(180deg, #2d2d2d 0%, #2d2d2d 18%, "
+            f"{base_hex} 38%, {base_hex} 100%)"
+        )
+    if pheno_key == "wild_sable":
+        return (
+            f"linear-gradient(180deg, #2d2d2d 0%, {base_hex} 25%, "
+            f"#2d2d2d 50%, {base_hex} 75%, #2d2d2d 100%)"
+        )
+    if pheno_key in ("silver", "silver_beige"):
+        return (
+            f"linear-gradient(135deg, {base_hex} 0%, {base_hex} 30%, #E8E8E8 90%)"
+        )
+    return base_hex
+
+
 def _allele_dots_html(geno: str, dot_size: int = 16) -> str:
     """2 アレル分の色丸 HTML を返す。色味の差を識別しやすくするため
     既定 16px と少し大きめ + drop-shadow で立体感を出している。"""
@@ -718,13 +764,14 @@ def build_color_profile_html(dog) -> str:
             f'</div>'
         )
 
-    # 推測表現型カード
+    # 推測表現型カード（マルチカラー表現型は CSS gradient で実コートパターンを描画）
+    pheno_bg = _multi_tone_bg(pheno_key, pheno_hex)
     pheno_html = (
         f'<div style="display:flex;align-items:center;gap:14px;padding:14px 16px;'
         f'background:#fff;border-radius:10px;border:1px solid #e5e7eb;'
         f'box-shadow:0 1px 2px rgba(0,0,0,0.04);margin-bottom:14px;">'
-        f'<div style="width:44px;height:44px;border-radius:50%;background:{pheno_hex};'
-        f'border:2px solid rgba(0,0,0,0.12);flex-shrink:0;"></div>'
+        f'<div style="width:44px;height:44px;border-radius:50%;background:{pheno_bg};'
+        f'border:2px solid rgba(0,0,0,0.12);flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.12);"></div>'
         f'<div>'
         f'<div style="font-size:1.15em;font-weight:700;color:#1f2937;">🎨 推測される表現型: {pheno_ja}</div>'
         f'<div style="font-size:0.85em;color:#6b7280;margin-top:2px;">'
