@@ -1086,6 +1086,63 @@ class TestHeterozygosityParser:
 
     # ---- 繁殖シミュレーター: 補足入力（PDF 犬向け I 座位/G 座位 override） ----
 
+    def test_simulator_has_reset_button(self):
+        """シミュレーターに「リセット」ボタンと resetColorSim 関数がある"""
+        body = client.get("/simulator").get_data(as_text=True)
+        assert 'class="btn-reset"' in body
+        assert 'onclick="resetColorSim()"' in body
+        assert 'function resetColorSim' in body
+        # confirm 確認ダイアログ → 誤クリック防止
+        assert 'window.confirm' in body
+        # 補足入力 (override) もクリアする
+        assert "'ovr-sire-i'" in body
+        assert "'ovr-dam-i'" in body
+
+    def test_simulator_persists_overrides_in_localstorage(self):
+        """シミュレーターが補足入力 (I/G 座位) を localStorage に保存・復元する"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # 保存 key
+        assert "_OVR_STORAGE_KEY" in body
+        assert "'sim.overrides.v1'" in body
+        # 保存・復元・削除ヘルパー
+        assert "function _saveOverrides" in body
+        assert "function _restoreOverrides" in body
+        assert "function _clearOverrides" in body
+        # 各 override 入力の change で保存
+        assert "addEventListener('change', _saveOverrides)" in body
+        # DOMContentLoaded で復元
+        assert "_restoreOverrides()" in body
+
+    def test_simulator_has_print_stylesheet(self):
+        """シミュレーターに @media print ルールがある"""
+        body = client.get("/simulator").get_data(as_text=True)
+        assert "@media print" in body
+        # 印刷時に非表示の要素（インタラクティブ）
+        assert ".btn-reset" in body
+        # ページサイズ A4
+        assert "size:A4 portrait" in body or "size: A4 portrait" in body
+
+    def test_report_has_print_stylesheet(self):
+        """レポート HTML に印刷用 @page と @media print がある"""
+        import tempfile, os
+        from poodle_genetics import DogProfile, generate_unified_html
+        d = DogProfile(pet_name="X", registered_name="X", sex="Male", breed="Toy Poodle")
+        fd, path = tempfile.mkstemp(suffix=".html")
+        os.close(fd)
+        try:
+            generate_unified_html([d], [], path)
+            html = open(path, encoding="utf-8").read()
+        finally:
+            os.unlink(path)
+        # A4 縦・余白
+        assert "@page" in html
+        assert "A4 portrait" in html
+        # 印刷時に背景なし・ボックスシャドウ無効化
+        assert "background: #fff !important" in html
+        assert "box-shadow: none !important" in html
+        # 結果テーブルの page-break-inside
+        assert "page-break-inside" in html
+
     def test_simulator_has_pdf_override_panel(self):
         """PDF 犬向けの補足入力パネル（I 座位 / Greying 上書き）が存在"""
         rv = client.get("/simulator")
