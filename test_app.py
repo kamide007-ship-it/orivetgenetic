@@ -1181,7 +1181,7 @@ class TestHeterozygosityParser:
     def test_simulator_has_recessive_homozygous_panel(self):
         """ホワイト/ブラウン/希釈の劣性ホモ化（単独・重複）の発現確率
         パネルがある。ユーザー要望: ee+bb のような重複ホモ化で出る
-        特殊カラー（リバー、シャンパン、イザベラ）と % を明示する。"""
+        特殊カラー（レバー、シャンパン、イザベラ）と % を明示する。"""
         body = client.get("/simulator").get_data(as_text=True)
         # パネル見出し
         assert "🎯 劣性ホモ化の発現確率" in body
@@ -1194,7 +1194,7 @@ class TestHeterozygosityParser:
         assert "ee + dd 重複ホモ" in body
         assert "bb + dd 重複ホモ" in body
         # 特殊カラー名
-        assert "リバーカラー" in body
+        assert "レバーカラー" in body
         assert "シャンパン" in body
         assert "ライラック" in body or "イザベラ" in body
         # ee バリアントごとに nose tone shadeHex を計算する関数
