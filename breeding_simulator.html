@@ -1653,6 +1653,7 @@ function runColorSim() {
                   phenoKey: pk,
                   shade: blendShade(COLOR_MAP[pk].hex, { e:eG, b:bG, d:dG }),
                   prob: sub,
+                  e: eG, b: bG, d: dG, k: 'ee_path', g: gG, iLocus: iG,
                   genoText: `${_label('e',eG)} + ${_label('b',bG)} + ${_label('d',dG)} + I:${iG} + G:${gG}`,
                 });
               }
@@ -1662,6 +1663,7 @@ function runColorSim() {
               phenoKey,
               shade: blendShade(COLOR_MAP[phenoKey].hex, { e:eG, b:bG, d:dG }),
               prob: pBase,
+              e: eG, b: bG, d: dG, k: 'ee_path', g: gG,
               genoText: `${_label('e',eG)} + ${_label('b',bG)} + ${_label('d',dG)} ${iDesc} + G:${gG}`,
             });
             continue;
@@ -1684,6 +1686,7 @@ function runColorSim() {
             const shade = blendShade(COLOR_MAP[phenoKey].hex, { e:eG, k:kG, b:bG, d:dG });
             combos.push({
               phenoKey, shade, prob: p,
+              e: eG, b: bG, d: dG, k: kG, g: gG,
               genoText: `${_label('e',eG)} + ${_label('k',kG)} + ${_label('b',bG)} + ${_label('d',dG)} + G:${gG}`,
             });
           }
@@ -1702,6 +1705,7 @@ function runColorSim() {
               const shade = blendShade(COLOR_MAP[phenoKey].hex, { e:eG, k:'kyky', b:bG, d:dG });
               combos.push({
                 phenoKey, shade, prob: p,
+                e: eG, b: bG, d: dG, k: 'kyky', g: gG,
                 genoText: `${_label('e',eG)} + ky/ky + ${_label('b',bG)} + ${_label('d',dG)} + G:${gG} <span style="color:#6b7280;">※A 座位の模様が表出</span>`,
               });
             }
@@ -1709,6 +1713,83 @@ function runColorSim() {
         }
       }
     }
+  }
+
+  // 各コンビごとの「見た目の詳細」を生成するヘルパー
+  // - 鼻・パッドの色（ee 系で B/D により変化）
+  // - 純色 / 墨色トーン（E/E vs E/e）
+  // - キャリア状態（e/b/d/ky/kbr）
+  // - Greying による成犬退色
+  function _comboPhenoDescription(c) {
+    const phenoKey = c.phenoKey;
+    const eGen = c.e || '';
+    const bGen = c.b || '';
+    const dGen = c.d || '';
+    const kGen = c.k || '';
+    const gGen = c.g || 'gg';
+    const lines = [];
+
+    // ee 系: 鼻・パッドの色で外見が大きく変わる
+    if (phenoKey === 'cream' || phenoKey === 'apricot' || phenoKey === 'red') {
+      if (bGen === 'bb' && dGen === 'dd') {
+        lines.push('🟣 鼻・パッド: <strong>イザベラ(ラベンダー)</strong> ※シャンパン+リバー複合');
+      } else if (bGen === 'bb') {
+        lines.push('🟫 鼻・パッド: <strong>レバー(茶色)</strong> — <span style="color:#7B3F00;">リバーカラー</span>');
+      } else if (dGen === 'dd') {
+        lines.push('🔵 鼻・パッド: <strong>シャンパン(青系)</strong> — 希釈鼻');
+      } else if (bGen) {
+        lines.push('⚫ 鼻・パッド: <strong>黒</strong>');
+      }
+    }
+
+    // E_ 系（純黒/ブラウン/ブルー/ライラック）: E/E と E/e のトーン
+    if (phenoKey === 'black') {
+      if (eGen === 'EE') lines.push('🖤 <strong>純黒</strong>（eノンキャリア）');
+      else if (eGen === 'Ee') lines.push('🩶 <strong>墨色トーン</strong>（eキャリア、見た目は純黒と同じ）');
+    } else if (phenoKey === 'brown') {
+      if (eGen === 'EE') lines.push('🟤 <strong>ピュアブラウン</strong>（チョコレート）');
+      else if (eGen === 'Ee') lines.push('🟫 <strong>墨ブラウン</strong>（eキャリア）');
+    } else if (phenoKey === 'blue') {
+      lines.push('🔵 <strong>ブルー</strong>（黒の希釈、dd 由来）');
+      if (eGen === 'Ee') lines.push('<span style="color:#92400e;font-size:0.82em;">eキャリア</span>');
+    } else if (phenoKey === 'lilac') {
+      lines.push('💜 <strong>ライラック/イザベラ</strong>（茶 × 希釈で淡いラベンダー）');
+    } else if (phenoKey === 'silver') {
+      lines.push('🤍 <strong>シルバー</strong>（成犬期に黒/ブルーが退色）');
+    } else if (phenoKey === 'silver_beige') {
+      lines.push('🟤 <strong>カフェオレ／シルバービーグ</strong>（成犬期に茶が退色）');
+    } else if (phenoKey === 'phantom_black') {
+      lines.push('🖤 <strong>ファントム/タンポイント</strong>（at/at + ky/ky で黒コート + 眉・口・足にタン斑）');
+    } else if (phenoKey === 'phantom_brown') {
+      lines.push('🟤 <strong>ブラウン ファントム</strong>（at/at + bb で茶コート + タン斑）');
+    }
+
+    // キャリア状態（保因犬）
+    const carriers = [];
+    const carrierExclude = (phenoKey === 'cream' || phenoKey === 'apricot' || phenoKey === 'red');
+    if (eGen === 'Ee' && !carrierExclude && phenoKey !== 'black' && phenoKey !== 'brown' && phenoKey !== 'blue') {
+      carriers.push('e (クリーム系)');
+    }
+    if (bGen === 'Bb') carriers.push('b (ブラウン)');
+    if (dGen === 'Dd') carriers.push('d (希釈)');
+    if (kGen === 'KBky') carriers.push('ky (アグーチ/ファントム可能性)');
+    if (kGen === 'KBkbr') carriers.push('kbr (ブリンドル)');
+    if (carriers.length > 0) {
+      lines.push(`<span style="color:#92400e;font-size:0.85em;">⚠️ 保因: ${carriers.join(', ')}</span>`);
+    }
+
+    // Greying（成犬期退色）
+    if (gGen !== 'gg' && phenoKey !== 'silver' && phenoKey !== 'silver_beige') {
+      lines.push('<span style="color:#6b7280;font-size:0.85em;">✨ G_ により成犬期にシルバー系へ退色</span>');
+    }
+
+    // I 座位（ee 系で展開された場合）
+    if (c.iLocus) {
+      const iLabel = { II: 'I/I 高強度（深い赤）', Ii: 'I/i 中間（アプリコット）', ii: 'i/i 低強度（クリーム）' }[c.iLocus] || '';
+      if (iLabel) lines.push(`<span style="color:#5b21b6;font-size:0.82em;">🎨 ${iLabel}</span>`);
+    }
+
+    return lines.join('<br>');
   }
 
   // 確率順にソートして表示
@@ -1725,15 +1806,17 @@ function runColorSim() {
       const swatchBg = _multiToneBg(c.phenoKey, c.shade);
       const badgeBg  = _multiToneBg(c.phenoKey, cm.hex);
       const textColor = ['cream','apricot','parti','silver','silver_beige','cafe_au_lait'].includes(c.phenoKey) ? '#1f2937' : '#fff';
+      const phenoDesc = _comboPhenoDescription(c);
       comboRows += `<tr>
-        <td style="padding:8px 10px;">
+        <td style="padding:8px 10px;vertical-align:top;">
           <span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:${swatchBg};border:1px solid rgba(0,0,0,0.25);vertical-align:middle;margin-right:8px;box-shadow:0 1px 2px rgba(0,0,0,0.15);"></span>
           <span style="font-family:Menlo,Consolas,monospace;font-size:0.82em;color:#4c1d95;">${c.genoText}</span>
         </td>
-        <td style="padding:8px 10px;">
-          <span style="display:inline-block;padding:3px 10px;border-radius:6px;background:${badgeBg};color:${textColor};font-size:0.82em;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.4);">${cm.name}</span>
+        <td style="padding:8px 10px;vertical-align:top;">
+          <div style="display:inline-block;padding:3px 10px;border-radius:6px;background:${badgeBg};color:${textColor};font-size:0.82em;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,0.4);margin-bottom:5px;">${cm.name}</div>
+          ${phenoDesc ? `<div style="font-size:0.82em;color:#374151;line-height:1.6;margin-top:4px;">${phenoDesc}</div>` : ''}
         </td>
-        <td style="padding:8px 10px;text-align:right;font-weight:700;color:#5b21b6;">${pct}%</td>
+        <td style="padding:8px 10px;vertical-align:top;text-align:right;font-weight:700;color:#5b21b6;">${pct}%</td>
       </tr>`;
     }
     html += `<details style="margin-top:20px;background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:14px 18px;">
