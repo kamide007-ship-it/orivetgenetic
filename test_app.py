@@ -1312,6 +1312,28 @@ class TestHeterozygosityParser:
         assert "radial-gradient" in _multi_tone_bg("merle", "#9FB6CD")
         assert _multi_tone_bg("black", "#1a1a1a") == "#1a1a1a"  # 単色は変更なし
 
+    def test_combo_table_has_rich_phenotype_description(self):
+        """遺伝子型コンビネーション詳細テーブルに、見た目の詳細
+        （鼻・パッド色、純色/墨色トーン、キャリア状態、Greying 退色など）が
+        含まれている。ユーザー要望: 「色は細かく見た目どうなるか細かく記載」"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # 詳細記述ヘルパー
+        assert "function _comboPhenoDescription" in body
+        # 主要記述キーワード
+        assert "鼻・パッド" in body
+        assert "レバー(茶色)" in body
+        assert "シャンパン(青系)" in body
+        assert "イザベラ(ラベンダー)" in body
+        assert "純黒" in body
+        assert "墨色トーン" in body
+        # キャリア注記
+        assert "保因:" in body
+        assert "アグーチ/ファントム可能性" in body
+        # Greying 注記
+        assert "成犬期にシルバー系へ退色" in body
+        # ファントム表記
+        assert "ファントム/タンポイント" in body
+
     def test_simulator_has_recessive_homozygous_panel(self):
         """ホワイト/ブラウン/希釈の劣性ホモ化（単独・重複）の発現確率
         パネルがある。ユーザー要望: ee+bb のような重複ホモ化で出る
