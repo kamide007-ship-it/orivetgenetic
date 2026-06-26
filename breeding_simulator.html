@@ -43,6 +43,9 @@ select:focus, input:focus { outline:none; border-color:var(--purple); }
 .btn-reset { background:#fff; color:var(--gray); border:1.5px solid #d1d5db; padding:11px 18px; border-radius:10px; cursor:pointer; font-weight:600; font-size:0.92em; transition:all 0.15s; }
 .btn-reset:hover { background:#f3f4f6; border-color:var(--purple); color:var(--purple); }
 .btn-reset:focus-visible { outline:2px solid var(--purple); outline-offset:2px; }
+.btn-export { background:#f3e8ff; color:#5b21b6; border:1px solid #c4b5fd; padding:7px 14px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85em; transition:all 0.15s; }
+.btn-export:hover { background:#ddd6fe; }
+.btn-export:focus-visible { outline:2px solid var(--purple); outline-offset:2px; }
 
 /* ============================================================
    印刷スタイル (シミュレーション結果を繁殖計画書として配布する用途)
@@ -441,8 +444,16 @@ header .container { position:relative; }
     </div>
 
     <div id="color-results" class="card" style="display:none;">
-      <h2 data-i18n="color_result_title">毛色予測結果</h2>
-      <div id="color-output"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <h2 data-i18n="color_result_title" style="margin:0;">毛色予測結果</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn-export" onclick="exportColorCsv()"
+                  data-i18n="btn_export_csv" title="毛色予測結果を CSV でダウンロード">⬇ CSV</button>
+          <button type="button" class="btn-export" onclick="copyShareLink()"
+                  data-i18n="btn_share" title="この交配シナリオの共有リンクをコピー">🔗 共有リンク</button>
+        </div>
+      </div>
+      <div id="color-output" style="margin-top:14px;"></div>
     </div>
   </div>
 
@@ -1849,9 +1860,162 @@ function runColorSim() {
     html += '<div class="warn-box"><strong>警告: ダブルマール (M/M) リスク</strong><br>M/M の子犬が生まれる確率が ' + (pMM*100).toFixed(1) + '% あります。ダブルマールは聴覚・視覚障害のリスクが非常に高いため、この交配は推奨されません。</div>';
   }
 
+  // export 用に結果（consolidated）と入力（sire/dam）を保持
+  _lastColorSim = {
+    consolidated,
+    totalProb,
+    combos: visibleCombos,
+    sire: Object.assign({}, sire),
+    dam: Object.assign({}, dam),
+    sireKey, damKey,
+  };
+
   document.getElementById('color-results').style.display = 'block';
   document.getElementById('color-output').innerHTML = html;
 }
+
+// ================================================================
+// EXPORT / SHARE: CSV ダウンロード + 共有リンク
+// ================================================================
+let _lastColorSim = null;
+
+// CSV 用のフィールドエスケープ（カンマ・改行・引用符対応）
+function _csvCell(s) {
+  s = String(s == null ? '' : s);
+  if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+
+function exportColorCsv() {
+  if (!_lastColorSim) {
+    alert('先にシミュレーションを実行してください。');
+    return;
+  }
+  const { consolidated, totalProb } = _lastColorSim;
+  const rows = [];
+  // ヘッダー（メタ情報）
+  rows.push(['毛色予測結果（繁殖シミュレーター）']);
+  rows.push(['父犬遺伝子型', Object.entries(_lastColorSim.sire).map(([k,v]) => `${k}:${v}`).join(' ')]);
+  rows.push(['母犬遺伝子型', Object.entries(_lastColorSim.dam).map(([k,v]) => `${k}:${v}`).join(' ')]);
+  rows.push([]);
+  rows.push(['毛色', '確率(%)', '遺伝子型の詳細']);
+  const entries = Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob);
+  for (const [, data] of entries) {
+    const cm = COLOR_MAP[data.baseColor] || COLOR_MAP.unknown;
+    const name = data.toneLabel ? `${cm.name}（${data.toneLabel}）` : cm.name;
+    const pct = (data.prob / totalProb * 100).toFixed(1);
+    // note の HTML タグを除去してプレーンテキスト化
+    const detail = (data.notes || []).map(n => n.replace(/<[^>]+>/g, '')).join(' / ');
+    rows.push([name, pct, detail]);
+  }
+  const csv = '﻿' + rows.map(r => r.map(_csvCell).join(',')).join('\r\n');  // BOM 付き（Excel 日本語対策）
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'coat_color_prediction.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// 現在の交配シナリオを URL クエリにエンコードして共有リンクを生成
+function _buildShareUrl() {
+  const params = new URLSearchParams();
+  const sireKey = (document.getElementById('sire-color') || {}).value;
+  const damKey  = (document.getElementById('dam-color')  || {}).value;
+  if (sireKey) params.set('sire', sireKey);
+  if (damKey)  params.set('dam', damKey);
+  // custom 入力時は各座位も保存
+  if (sireKey === 'custom') {
+    ['e','k','a','b','d','m','s'].forEach(loc => {
+      const el = document.getElementById('cs-' + loc);
+      if (el) params.set('cs_' + loc, el.value);
+    });
+    if ((document.getElementById('cs-g') || {}).checked) params.set('cs_g', '1');
+  }
+  if (damKey === 'custom') {
+    ['e','k','a','b','d','m','s'].forEach(loc => {
+      const el = document.getElementById('cd-' + loc);
+      if (el) params.set('cd_' + loc, el.value);
+    });
+    if ((document.getElementById('cd-g') || {}).checked) params.set('cd_g', '1');
+  }
+  // 補足入力（I/G 座位 override）
+  const ovr = {
+    osi: (document.getElementById('ovr-sire-i') || {}).value,
+    odi: (document.getElementById('ovr-dam-i')  || {}).value,
+    osg: (document.getElementById('ovr-sire-g') || {}).checked ? '1' : '',
+    odg: (document.getElementById('ovr-dam-g')  || {}).checked ? '1' : '',
+  };
+  Object.entries(ovr).forEach(([k, v]) => { if (v) params.set(k, v); });
+  const base = window.location.origin + window.location.pathname;
+  return base + '?' + params.toString();
+}
+
+function copyShareLink() {
+  const url = _buildShareUrl();
+  const done = () => {
+    const btn = document.querySelector('.btn-export[onclick="copyShareLink()"]');
+    if (btn) {
+      const orig = btn.textContent;
+      btn.textContent = '✅ コピーしました';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(() => window.prompt('以下のリンクをコピーしてください:', url));
+  } else {
+    window.prompt('以下のリンクをコピーしてください:', url);
+  }
+}
+
+// URL クエリから交配シナリオを復元（ページ読み込み時）
+function _restoreFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  if (![...params.keys()].length) return false;
+  let restored = false;
+  const sireKey = params.get('sire');
+  const damKey  = params.get('dam');
+  const sireSel = document.getElementById('sire-color');
+  const damSel  = document.getElementById('dam-color');
+  // option が存在する場合のみ設定
+  const hasOption = (sel, val) => sel && [...sel.options].some(o => o.value === val);
+  if (sireKey && hasOption(sireSel, sireKey)) { sireSel.value = sireKey; restored = true; }
+  if (damKey && hasOption(damSel, damKey))   { damSel.value = damKey;   restored = true; }
+  // custom 座位
+  if (sireKey === 'custom') {
+    ['e','k','a','b','d','m','s'].forEach(loc => {
+      const v = params.get('cs_' + loc); const el = document.getElementById('cs-' + loc);
+      if (v && el && [...el.options].some(o => o.value === v)) el.value = v;
+    });
+    const g = document.getElementById('cs-g'); if (g) g.checked = params.get('cs_g') === '1';
+  }
+  if (damKey === 'custom') {
+    ['e','k','a','b','d','m','s'].forEach(loc => {
+      const v = params.get('cd_' + loc); const el = document.getElementById('cd-' + loc);
+      if (v && el && [...el.options].some(o => o.value === v)) el.value = v;
+    });
+    const g = document.getElementById('cd-g'); if (g) g.checked = params.get('cd_g') === '1';
+  }
+  // 補足入力
+  const setIfOpt = (id, v) => { const el = document.getElementById(id); if (v && el && [...el.options].some(o => o.value === v)) el.value = v; };
+  setIfOpt('ovr-sire-i', params.get('osi'));
+  setIfOpt('ovr-dam-i',  params.get('odi'));
+  const osg = document.getElementById('ovr-sire-g'); if (osg) osg.checked = params.get('osg') === '1';
+  const odg = document.getElementById('ovr-dam-g');  if (odg) odg.checked = params.get('odg') === '1';
+  return restored;
+}
+
+// ページ読込時に URL クエリのシナリオを復元して即実行
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    if (_restoreFromQuery() && typeof runColorSim === 'function') {
+      runColorSim();
+    }
+  } catch (e) { /* 復元失敗は無視 */ }
+});
 
 function v(id) { return document.getElementById(id).value; }
 
@@ -2707,6 +2871,8 @@ const _SIM_I18N = {
     custom_dam_title:    '母犬カスタム遺伝子型',
     btn_run:             'シミュレーション実行',
     btn_reset:           '↺ リセット',
+    btn_export_csv:      '⬇ CSV',
+    btn_share:           '🔗 共有リンク',
     color_result_title:  '毛色予測結果',
     health_title:        '健康リスク繁殖シミュレーション',
   },
@@ -2731,6 +2897,8 @@ const _SIM_I18N = {
     custom_dam_title:    'Dam custom genotype',
     btn_run:             'Run simulation',
     btn_reset:           '↺ Reset',
+    btn_export_csv:      '⬇ CSV',
+    btn_share:           '🔗 Share link',
     color_result_title:  'Coat color prediction',
     health_title:        'Health risk breeding simulation',
   },

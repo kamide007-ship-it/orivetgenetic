@@ -1086,6 +1086,40 @@ class TestHeterozygosityParser:
 
     # ---- 繁殖シミュレーター: 補足入力（PDF 犬向け I 座位/G 座位 override） ----
 
+    def test_simulator_has_csv_export(self):
+        """シミュレーターに CSV エクスポート機能がある"""
+        body = client.get("/simulator").get_data(as_text=True)
+        assert 'onclick="exportColorCsv()"' in body
+        assert "function exportColorCsv" in body
+        # BOM 付き UTF-8（Excel 日本語対策）
+        assert "text/csv;charset=utf-8" in body
+        # CSV セルのエスケープヘルパー
+        assert "function _csvCell" in body
+        # ダウンロードファイル名
+        assert "coat_color_prediction.csv" in body
+
+    def test_simulator_has_share_link(self):
+        """シミュレーターに共有リンク（URL permalink）機能がある"""
+        body = client.get("/simulator").get_data(as_text=True)
+        assert 'onclick="copyShareLink()"' in body
+        assert "function copyShareLink" in body
+        assert "function _buildShareUrl" in body
+        # クエリパラメータに sire/dam を含める
+        assert "params.set('sire'" in body
+        assert "params.set('dam'" in body
+        # clipboard API 利用
+        assert "navigator.clipboard" in body
+
+    def test_simulator_restores_scenario_from_query(self):
+        """シミュレーターが URL クエリから交配シナリオを復元する"""
+        body = client.get("/simulator").get_data(as_text=True)
+        assert "function _restoreFromQuery" in body
+        # 復元後に runColorSim を実行
+        assert "_restoreFromQuery()" in body
+        # 補足入力 (override) の復元キー
+        assert "params.get('osi')" in body
+        assert "params.get('odi')" in body
+
     def test_simulator_has_reset_button(self):
         """シミュレーターに「リセット」ボタンと resetColorSim 関数がある"""
         body = client.get("/simulator").get_data(as_text=True)
