@@ -1113,6 +1113,32 @@ class TestHeterozygosityParser:
         # DOMContentLoaded で復元
         assert "_restoreOverrides()" in body
 
+    def test_simulator_has_english_toggle(self):
+        """シミュレーターに EN/JA 言語切替トグルがある"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # 言語切替ボタン
+        assert 'id="langToggle"' in body
+        assert 'onclick="toggleLang()"' in body
+        # 翻訳辞書 + helper
+        assert "_SIM_I18N" in body
+        assert "function toggleLang" in body
+        assert "function _applySimLang" in body
+        # 主要キーが ja/en 両方に存在
+        for key in ("title", "tab_color", "tab_health", "tab_coi",
+                    "lbl_sire", "lbl_dam", "btn_run", "btn_reset",
+                    "ovr_sire_title", "ovr_dam_title"):
+            assert f"{key}:" in body or f"'{key}'" in body, f"missing i18n key {key}"
+        # 英訳キーワード
+        assert "Coat color" in body
+        assert "Health risk" in body
+        assert "Inbreeding" in body
+        # data-i18n 属性が静的ラベルに付与されている
+        assert 'data-i18n="lbl_sire"' in body
+        assert 'data-i18n="lbl_dam"' in body
+        assert 'data-i18n="btn_run"' in body
+        # appLang を localStorage で永続化（インデックスと共通キー）
+        assert "'appLang'" in body
+
     def test_simulator_has_print_stylesheet(self):
         """シミュレーターに @media print ルールがある"""
         body = client.get("/simulator").get_data(as_text=True)

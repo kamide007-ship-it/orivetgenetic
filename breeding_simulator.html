@@ -224,21 +224,39 @@ dialog.kb-modal .kb-modal-body .refs a {
   border-radius:14px; font-size:0.85em;
 }
 dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
+
+/* 言語切替トグル（インデックスと統一スタイル） */
+header .container { position:relative; }
+#langToggle {
+  position:absolute; top:14px; right:14px;
+  background:linear-gradient(135deg, #7c3aed, #a855f7);
+  color:#fff; border:none; padding:6px 14px; border-radius:999px;
+  cursor:pointer; font-size:0.78em; font-weight:600;
+  box-shadow:0 2px 6px rgba(124,58,237,0.3);
+  transition:transform 0.12s, box-shadow 0.12s; z-index:10;
+}
+#langToggle:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(124,58,237,0.4); }
+#langToggle:active { transform:translateY(0); }
+#langToggle:focus-visible { outline:2px solid #fff; outline-offset:2px; }
+@media (max-width: 480px) {
+  #langToggle { top:10px; right:10px; font-size:0.74em; padding:5px 12px; min-height:30px; }
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="container">
+    <button type="button" id="langToggle" onclick="toggleLang()" aria-label="言語切替">English</button>
     <div>
-      <h1>Orivet 遺伝子解析シミュレーター</h1>
-      <p>全犬種対応 — 毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出</p>
+      <h1 data-i18n="title">Orivet 遺伝子解析シミュレーター</h1>
+      <p data-i18n="subtitle">全犬種対応 — 毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出</p>
     </div>
     <div class="nav-buttons">
-      <a href="javascript:history.back()">戻る</a>
-      <a href="/" id="nav-home">新しい解析</a>
-      <a href="/glossary" id="nav-glossary">📖 辞書</a>
-      <a href="/" id="nav-report" style="display:none;">レポートに戻る</a>
+      <a href="javascript:history.back()" data-i18n="nav_back">戻る</a>
+      <a href="/" id="nav-home" data-i18n="nav_home">新しい解析</a>
+      <a href="/glossary" id="nav-glossary" data-i18n="nav_glossary">📖 辞書</a>
+      <a href="/" id="nav-report" style="display:none;" data-i18n="nav_report">レポートに戻る</a>
     </div>
   </div>
 </header>
@@ -271,9 +289,9 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
   </details>
 
   <div class="tabs" role="tablist">
-    <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="color" onclick="showTab('color')">毛色シミュレーション</div>
-    <div class="tab" role="tab" tabindex="0" aria-selected="false" aria-controls="health" onclick="showTab('health')">健康リスク分析</div>
-    <div class="tab" role="tab" tabindex="0" aria-selected="false" aria-controls="coi" onclick="showTab('coi')">近親交配係数 (COI)</div>
+    <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="color" onclick="showTab('color')" data-i18n="tab_color">毛色シミュレーション</div>
+    <div class="tab" role="tab" tabindex="0" aria-selected="false" aria-controls="health" onclick="showTab('health')" data-i18n="tab_health">健康リスク分析</div>
+    <div class="tab" role="tab" tabindex="0" aria-selected="false" aria-controls="coi" onclick="showTab('coi')" data-i18n="tab_coi">近親交配係数 (COI)</div>
   </div>
 
   <!-- ================================================================ -->
@@ -281,12 +299,12 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
   <!-- ================================================================ -->
   <div id="color" class="tab-content active">
     <div class="card">
-      <h2>交配ペア選択 — 毛色配合シミュレーション</h2>
+      <h2 data-i18n="color_pair_title">交配ペア選択 — 毛色配合シミュレーション</h2>
       <div class="form-row">
         <div class="form-group">
-          <label>父犬 (Sire)</label>
+          <label data-i18n="lbl_sire">父犬 (Sire)</label>
           <select id="sire-color" onchange="runColorSim()">
-            <option value="custom">カスタム入力...</option>
+            <option value="custom" data-i18n="opt_custom">カスタム入力...</option>
             <option value="exA">トイプードル ♂ ブラック (E/e, KB/ky, at/at, Bb)</option>
             <option value="exC">ラブラドール ♂ チョコレート (E/E, KB/KB, ay/ay, bb)</option>
             <option value="exE">柴犬 ♂ 赤 (E/E, ky/ky, ay/ay, BB)</option>
@@ -295,9 +313,9 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
           </select>
         </div>
         <div class="form-group">
-          <label>母犬 (Dam)</label>
+          <label data-i18n="lbl_dam">母犬 (Dam)</label>
           <select id="dam-color" onchange="runColorSim()">
-            <option value="custom">カスタム入力...</option>
+            <option value="custom" data-i18n="opt_custom">カスタム入力...</option>
             <option value="exB">トイプードル ♀ クリーム (e/e, KB/KB, at/at, Bb)</option>
             <option value="exD">ラブラドール ♀ イエロー (e/e, KB/KB, ay/ay, Bb)</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール (E/E, ky/ky, at/at, M/m)</option>
@@ -308,8 +326,8 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
 
       <!-- PDF 犬向け補足入力: Orivet が検査していない座位を手動で追加できる -->
       <div id="overrides-sire" style="display:none;background:#fef9c3;border:1px solid #fde68a;padding:14px 16px;border-radius:10px;margin-bottom:12px;">
-        <h3 style="margin:0 0 8px;color:#92400e;">📌 父犬の追加情報（任意）</h3>
-        <p style="font-size:0.85em;color:#78350f;margin:0 0 10px;">Orivet 標準パネルに含まれない座位を手動で追加できます。空欄のままなら未検査扱い。</p>
+        <h3 style="margin:0 0 8px;color:#92400e;" data-i18n="ovr_sire_title">📌 父犬の追加情報（任意）</h3>
+        <p style="font-size:0.85em;color:#78350f;margin:0 0 10px;" data-i18n="ovr_desc">Orivet 標準パネルに含まれない座位を手動で追加できます。空欄のままなら未検査扱い。</p>
         <div class="form-row">
           <div class="form-group">
             <label>I Locus (MFSD12 / 赤・黄色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label>
@@ -332,7 +350,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
 
       <!-- Custom genotype inputs (hidden by default) -->
       <div id="custom-sire" style="display:none;" class="card" style="background:#f9fafb;">
-        <h3>父犬カスタム遺伝子型</h3>
+        <h3 data-i18n="custom_sire_title">父犬カスタム遺伝子型</h3>
         <div class="form-row">
           <div class="form-group"><label>E Locus<button type="button" class="kb-help" onclick="showLocusInfo('e')" aria-label="E座位の解説">?</button></label><select id="cs-e"><option value="EE">E/E</option><option value="Ee" selected>E/e</option><option value="ee">e/e</option></select></div>
           <div class="form-group"><label>K Locus<button type="button" class="kb-help" onclick="showLocusInfo('k')" aria-label="K座位の解説">?</button></label><select id="cs-k"><option value="KBKB">KB/KB</option><option value="KBky" selected>KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
@@ -362,8 +380,8 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
 
       <!-- PDF 犬向け補足入力: 母犬版 -->
       <div id="overrides-dam" style="display:none;background:#fef9c3;border:1px solid #fde68a;padding:14px 16px;border-radius:10px;margin-bottom:12px;">
-        <h3 style="margin:0 0 8px;color:#92400e;">📌 母犬の追加情報（任意）</h3>
-        <p style="font-size:0.85em;color:#78350f;margin:0 0 10px;">Orivet 標準パネルに含まれない座位を手動で追加できます。空欄のままなら未検査扱い。</p>
+        <h3 style="margin:0 0 8px;color:#92400e;" data-i18n="ovr_dam_title">📌 母犬の追加情報（任意）</h3>
+        <p style="font-size:0.85em;color:#78350f;margin:0 0 10px;" data-i18n="ovr_desc">Orivet 標準パネルに含まれない座位を手動で追加できます。空欄のままなら未検査扱い。</p>
         <div class="form-row">
           <div class="form-group">
             <label>I Locus (MFSD12 / 赤・黄色濃度)<button type="button" class="kb-help" onclick="showLocusInfo('i')" aria-label="I座位の解説">?</button></label>
@@ -385,7 +403,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
       </div>
 
       <div id="custom-dam" style="display:none;" class="card">
-        <h3>母犬カスタム遺伝子型</h3>
+        <h3 data-i18n="custom_dam_title">母犬カスタム遺伝子型</h3>
         <div class="form-row">
           <div class="form-group"><label>E Locus<button type="button" class="kb-help" onclick="showLocusInfo('e')" aria-label="E座位の解説">?</button></label><select id="cd-e"><option value="EE">E/E</option><option value="Ee">E/e</option><option value="ee" selected>e/e</option></select></div>
           <div class="form-group"><label>K Locus<button type="button" class="kb-help" onclick="showLocusInfo('k')" aria-label="K座位の解説">?</button></label><select id="cd-k"><option value="KBKB" selected>KB/KB</option><option value="KBky">KB/ky</option><option value="KBkbr">KB/kbr</option><option value="kyky">ky/ky</option><option value="kbrky">kbr/ky</option><option value="kbrkbr">kbr/kbr</option></select></div>
@@ -414,15 +432,16 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
       </div>
 
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <button class="btn" onclick="runColorSim()">シミュレーション実行</button>
+        <button class="btn" onclick="runColorSim()" data-i18n="btn_run">シミュレーション実行</button>
         <button type="button" class="btn-reset" onclick="resetColorSim()"
                 title="父犬/母犬の選択と補足入力をすべて初期化します"
-                aria-label="シミュレーションをリセット">↺ リセット</button>
+                aria-label="シミュレーションをリセット"
+                data-i18n="btn_reset">↺ リセット</button>
       </div>
     </div>
 
     <div id="color-results" class="card" style="display:none;">
-      <h2>毛色予測結果</h2>
+      <h2 data-i18n="color_result_title">毛色予測結果</h2>
       <div id="color-output"></div>
     </div>
   </div>
@@ -432,7 +451,7 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
   <!-- ================================================================ -->
   <div id="health" class="tab-content">
     <div class="card">
-      <h2>健康リスク繁殖シミュレーション</h2>
+      <h2 data-i18n="health_title">健康リスク繁殖シミュレーション</h2>
       <div class="form-row">
         <div class="form-group">
           <label>父犬 (Sire)</label>
@@ -2576,6 +2595,94 @@ async function showDiseaseInfo(diseaseKey) {
   if (typeof modal.showModal === 'function') modal.showModal();
   else modal.setAttribute('open', '');
 }
+
+// ================================================================
+// i18n: 日本語 / English 言語切替
+// ================================================================
+// 主要な静的 UI ラベルを EN/JA で切り替える。動的に生成される予測結果
+// テキスト（毛色予測ノート、キャリア %, 遺伝子型コンビなど）は当面
+// 日本語のまま（フォローアップで多言語化）。
+const _SIM_I18N = {
+  ja: {
+    title:               'Orivet 遺伝子解析シミュレーター',
+    subtitle:            '全犬種対応 — 毛色配合予測 ・ 健康リスク分析 ・ 近親交配係数(COI)算出',
+    nav_back:            '戻る',
+    nav_home:            '新しい解析',
+    nav_glossary:        '📖 辞書',
+    nav_report:          'レポートに戻る',
+    tab_color:           '毛色シミュレーション',
+    tab_health:          '健康リスク分析',
+    tab_coi:             '近親交配係数 (COI)',
+    color_pair_title:    '交配ペア選択 — 毛色配合シミュレーション',
+    lbl_sire:            '父犬 (Sire)',
+    lbl_dam:             '母犬 (Dam)',
+    opt_custom:          'カスタム入力...',
+    ovr_sire_title:      '📌 父犬の追加情報（任意）',
+    ovr_dam_title:       '📌 母犬の追加情報（任意）',
+    ovr_desc:            'Orivet 標準パネルに含まれない座位を手動で追加できます。空欄のままなら未検査扱い。',
+    custom_sire_title:   '父犬カスタム遺伝子型',
+    custom_dam_title:    '母犬カスタム遺伝子型',
+    btn_run:             'シミュレーション実行',
+    btn_reset:           '↺ リセット',
+    color_result_title:  '毛色予測結果',
+    health_title:        '健康リスク繁殖シミュレーション',
+  },
+  en: {
+    title:               'Orivet Genetic Simulator',
+    subtitle:            'All breeds — coat color prediction · health risk · COI',
+    nav_back:            'Back',
+    nav_home:            'New analysis',
+    nav_glossary:        '📖 Glossary',
+    nav_report:          'Back to report',
+    tab_color:           'Coat color',
+    tab_health:          'Health risk',
+    tab_coi:             'Inbreeding (COI)',
+    color_pair_title:    'Pair selection — Coat color prediction',
+    lbl_sire:            'Sire',
+    lbl_dam:             'Dam',
+    opt_custom:          'Custom input...',
+    ovr_sire_title:      '📌 Sire — additional info (optional)',
+    ovr_dam_title:       '📌 Dam — additional info (optional)',
+    ovr_desc:            'Add loci not covered by the Orivet standard panel. Leave blank to treat as untested.',
+    custom_sire_title:   'Sire custom genotype',
+    custom_dam_title:    'Dam custom genotype',
+    btn_run:             'Run simulation',
+    btn_reset:           '↺ Reset',
+    color_result_title:  'Coat color prediction',
+    health_title:        'Health risk breeding simulation',
+  },
+};
+let _simLang = 'ja';
+function _applySimLang(lang) {
+  const dict = _SIM_I18N[lang]; if (!dict) return;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (dict[k] !== undefined) el.innerHTML = dict[k];
+  });
+  document.documentElement.lang = lang;
+  const tgl = document.getElementById('langToggle');
+  if (tgl) tgl.textContent = lang === 'ja' ? 'English' : '日本語';
+  document.title = lang === 'en'
+    ? 'Orivet Genetic Simulator'
+    : 'Orivet 遺伝子解析シミュレーター';
+}
+function toggleLang() {
+  _simLang = _simLang === 'ja' ? 'en' : 'ja';
+  try { localStorage.setItem('appLang', _simLang); } catch (e) {}
+  _applySimLang(_simLang);
+}
+// 初期化: localStorage の言語設定（インデックスと共通 'appLang' キー）を反映
+(function() {
+  try {
+    const saved = localStorage.getItem('appLang');
+    if (saved === 'en' || saved === 'ja') _simLang = saved;
+  } catch (e) {}
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => _applySimLang(_simLang));
+  } else {
+    _applySimLang(_simLang);
+  }
+})();
 </script>
 
 <!-- 座位ヘルプモーダル -->
