@@ -504,21 +504,69 @@ def _multi_tone_bg(pheno_key: str, base_hex: str) -> str:
     return base_hex
 
 
+# 各アレルの人間向け説明（a11y: aria-label / title 用）。
+# 色覚特性に配慮し、ドット内側にアレル記号も併記する冗長エンコーディング。
+_ALLELE_DESC = {
+    "E":  "eumelanin 産生可（黒/茶を発色）",
+    "e":  "eumelanin 不可（クリーム/レッド側）",
+    "B":  "黒色素 (TYRP1)",
+    "b":  "茶色素 (TYRP1)",
+    "D":  "濃色 (MLPH)",
+    "d":  "希釈 (MLPH)",
+    "KB": "ドミナントブラック",
+    "K":  "ドミナントブラック",
+    "ky": "アグーチ表現を許容",
+    "kbr": "ブリンドル",
+    "m":  "単色 (PMEL)",
+    "M":  "マール柄 (PMEL)",
+    "ay": "フォーン/セーブル (ASIP)",
+    "aw": "ワイルドセーブル (ASIP)",
+    "at": "タンポイント (ASIP)",
+    "a":  "リセッシブブラック (ASIP)",
+    "S":  "白斑なし (MITF)",
+    "sp": "パーティカラー (MITF)",
+    "I":  "レッド強度 (MFSD12)",
+    "i":  "クリーム強度 (MFSD12)",
+    "g":  "退色なし",
+    "G":  "Greying 退色",
+}
+
+
+def _is_light_color(hex_color: str) -> bool:
+    """知覚輝度ベースで「文字を黒で乗せるか白で乗せるか」を判定。
+    0.299R + 0.587G + 0.114B（簡易ITU-R BT.601）で 0.55 超なら明色。"""
+    r = int(hex_color[1:3], 16)
+    g = int(hex_color[3:5], 16)
+    b = int(hex_color[5:7], 16)
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55
+
+
 def _allele_dots_html(geno: str, dot_size: int = 16) -> str:
-    """2 アレル分の色丸 HTML を返す。色味の差を識別しやすくするため
-    既定 16px と少し大きめ + drop-shadow で立体感を出している。"""
+    """2 アレル分の色丸 HTML を返す。
+    a11y: 各ドットに role="img"、aria-label、title、内側にアレル記号を併記して、
+    色覚特性および スクリーンリーダー利用者にも理解できる冗長エンコーディング。"""
     alleles = _split_genotype(geno)
     if not alleles:
         return ""
+    font_size = max(8, round(dot_size * 0.55))
     dots = []
     for a in alleles:
         hex_color = _ALLELE_COLOR.get(a, "#9ca3af")
+        desc = _ALLELE_DESC.get(a, a)
+        text_color = "#0f172a" if _is_light_color(hex_color) else "#ffffff"
+        label = f"{a} アレル: {desc}"
         dots.append(
-            f'<span style="display:inline-block;width:{dot_size}px;height:{dot_size}px;'
+            f'<span class="allele-dot" role="img" aria-label="{label}" '
+            f'title="{label}" tabindex="0" '
+            f'style="display:inline-flex;align-items:center;justify-content:center;'
+            f'width:{dot_size}px;height:{dot_size}px;'
             f'border-radius:50%;background:{hex_color};'
             f'border:1px solid rgba(0,0,0,0.3);vertical-align:middle;'
             f'margin-right:3px;flex-shrink:0;'
-            f'box-shadow:0 1px 2px rgba(0,0,0,0.15);"></span>'
+            f'box-shadow:0 1px 2px rgba(0,0,0,0.15);'
+            f'font-family:Menlo,Consolas,monospace;font-weight:700;'
+            f'font-size:{font_size}px;color:{text_color};line-height:1;'
+            f'letter-spacing:-0.5px;cursor:default;">{_h(a)}</span>'
         )
     return "".join(dots)
 
@@ -6598,6 +6646,8 @@ details.kb-detail .kb-refs a.kb-ref-link:hover {{ background:#ddd6fe; }}
   body {{ padding-bottom:env(safe-area-inset-bottom); }}
 }}
 @media print {{ .tabs,.print-btn,header {{ display:none!important; }} .tab-content {{ display:block!important; page-break-inside:avoid; }} .dog-card {{ break-inside:avoid; }} }}
+.allele-dot:focus-visible {{ outline:2px solid #7c3aed; outline-offset:2px; }}
+.allele-dot:hover {{ transform:scale(1.08); transition:transform 0.12s; }}
 </style>
 </head>
 <body>

@@ -154,6 +154,11 @@ select:focus-visible, input:focus-visible, .tab:focus-visible, .ped-node input:f
 .disease-link .kb-icon { opacity:0.55; font-size:0.85em; margin-left:2px; }
 .disease-link:focus-visible { outline:2px solid var(--purple); outline-offset:2px; border-radius:3px; }
 
+/* アレルドット (a11y): キーボードフォーカス可視化 + 微細なホバー強調。
+   色のみに依存せず、ドット内のアレル記号 (E, e, B, b 等) と aria-label でも識別可能。 */
+.allele-dot:focus-visible { outline:2px solid var(--purple); outline-offset:2px; }
+.allele-dot:hover { transform:scale(1.08); transition:transform 0.12s; }
+
 /* === 座位ヘルプボタン（理解できるコンセプト） === */
 .kb-help {
   display:inline-flex; align-items:center; justify-content:center;
@@ -1274,14 +1279,44 @@ function runColorSim() {
     if (m) return [m[1], m[2]];
     return [geno];
   }
-  // アレル列のドット表示（2 個のドット並び）。色味の差を見やすくする
-  // ため少し大きめ（既定 14px）にしている。
+  // 各アレルの人間向け説明。aria-label と title tooltip で使用。
+  // 色覚特性に配慮し、色味だけでなく「文字 + 説明」で冗長エンコーディング。
+  const _ALLELE_DESC = {
+    E: 'eumelanin 産生可（黒/茶を発色）', e: 'eumelanin 不可（クリーム/レッド側）',
+    B: '黒色素 (TYRP1)',                  b: '茶色素 (TYRP1)',
+    D: '濃色 (MLPH)',                     d: '希釈 (MLPH)',
+    KB: 'ドミナントブラック',             K: 'ドミナントブラック',
+    ky: 'アグーチ表現を許容',             kbr: 'ブリンドル',
+    m: '単色 (PMEL)',                     M: 'マール柄 (PMEL)',
+    ay: 'フォーン/セーブル (ASIP)',       aw: 'ワイルドセーブル (ASIP)',
+    at: 'タンポイント (ASIP)',            a: 'リセッシブブラック (ASIP)',
+    S: '白斑なし (MITF)',                 sp: 'パーティカラー (MITF)',
+    I: 'レッド強度 (MFSD12)',             i: 'クリーム強度 (MFSD12)',
+    g: '退色なし',                        G: 'Greying 退色',
+  };
+
+  // 色の明度判定（白文字 vs 黒文字をどちらにするかの決定用）
+  // 知覚輝度 (0.299R + 0.587G + 0.114B) で簡易判定。0.55 超なら明るい色。
+  function _isLightColor(hex) {
+    const [r, g, b] = _hexToRgbN(hex);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.55;
+  }
+
+  // アレル列のドット表示（2 個のドット並び）。
+  // a11y: aria-label + title でスクリーンリーダーとマウス hover に対応。
+  // 色覚特性向け: ドット内側にアレル記号（E, e, B, b など）をオーバーレイ。
+  // フォーカス: focus-visible で紫色のリングを表示（キーボード操作可視化）。
   function _alleleDots(geno, dotSize) {
-    const size = dotSize || 14;
+    const size = dotSize || 16;
     const alleles = _splitGenotype(geno);
     return alleles.map(a => {
       const hex = _ALLELE_COLOR[a] || '#9ca3af';
-      return `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;background:${hex};border:1px solid rgba(0,0,0,0.3);vertical-align:middle;margin-right:3px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.12);"></span>`;
+      const desc = _ALLELE_DESC[a] || a;
+      const textColor = _isLightColor(hex) ? '#0f172a' : '#ffffff';
+      const fontSize = Math.max(8, Math.round(size * 0.55));
+      const label = `${a} アレル: ${desc}`;
+      return `<span class="allele-dot" role="img" aria-label="${label}" title="${label}" tabindex="0"
+        style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:50%;background:${hex};border:1px solid rgba(0,0,0,0.3);vertical-align:middle;margin-right:3px;flex-shrink:0;box-shadow:0 1px 2px rgba(0,0,0,0.15);font-family:Menlo,Consolas,monospace;font-weight:700;font-size:${fontSize}px;color:${textColor};line-height:1;letter-spacing:-0.5px;cursor:default;">${a}</span>`;
     }).join('');
   }
   // 既存 API 互換（単発ドット、極稀に使用）

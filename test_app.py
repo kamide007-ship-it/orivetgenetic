@@ -920,6 +920,57 @@ class TestHeterozygosityParser:
         assert "#7B3F00" in html  # 濃チョコ（b アレル、高彩度版）
         assert "#FFE4B5" in html  # モカシンクリーム（e アレル、高彩度版）
 
+    def test_allele_dots_have_a11y_attributes(self):
+        """各アレルドットに role="img", aria-label, title, tabindex が付与され
+        スクリーンリーダー・キーボード操作・色覚特性に対応している。"""
+        from poodle_genetics import _allele_dots_html, _ALLELE_DESC
+        html = _allele_dots_html("Bb", dot_size=16)
+        # スクリーンリーダー対応: role="img", aria-label, title
+        assert 'role="img"' in html
+        assert 'aria-label="B アレル:' in html
+        assert 'aria-label="b アレル:' in html
+        assert 'title="B アレル:' in html
+        # キーボードフォーカス対応: tabindex
+        assert 'tabindex="0"' in html
+        # 色覚特性配慮: ドット内にアレル文字を併記（色だけに依存しない）
+        assert ">B</span>" in html or ">B<" in html
+        assert ">b</span>" in html or ">b<" in html
+        # クラス付与（CSS focus-visible / hover 用）
+        assert 'class="allele-dot"' in html
+        # 説明マップが必要なアレルをカバー
+        for a in ("E", "e", "B", "b", "D", "d", "KB", "ky", "kbr",
+                  "m", "M", "ay", "aw", "at", "a", "S", "sp", "I", "i", "g", "G"):
+            assert a in _ALLELE_DESC, f"_ALLELE_DESC missing description for allele '{a}'"
+
+    def test_allele_color_wcag_contrast_aa(self):
+        """各アレルの dot 背景色と内部文字色のコントラスト比が WCAG AA (4.5:1) 以上。
+        _is_light_color() が判定する白 or 黒の文字色で必ず AA を満たすこと。"""
+        from poodle_genetics import _ALLELE_COLOR, _is_light_color
+
+        def rgb_lin(c):
+            """sRGB -> 線形 RGB"""
+            c = c / 255
+            return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+        def luminance(hex_color):
+            r = rgb_lin(int(hex_color[1:3], 16))
+            g = rgb_lin(int(hex_color[3:5], 16))
+            b = rgb_lin(int(hex_color[5:7], 16))
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+        def contrast(hex1, hex2):
+            l1, l2 = luminance(hex1), luminance(hex2)
+            lighter, darker = max(l1, l2), min(l1, l2)
+            return (lighter + 0.05) / (darker + 0.05)
+
+        for allele, hex_color in _ALLELE_COLOR.items():
+            text_color = "#0f172a" if _is_light_color(hex_color) else "#ffffff"
+            ratio = contrast(hex_color, text_color)
+            assert ratio >= 4.5, (
+                f"Allele {allele!r} (bg={hex_color}, text={text_color}) "
+                f"contrast {ratio:.2f} < WCAG AA 4.5:1"
+            )
+
     def test_allele_dots_helper(self):
         """_allele_dots_html が 2 アレル分の色丸 HTML を返す"""
         from poodle_genetics import _allele_dots_html, _split_genotype, _ALLELE_COLOR
