@@ -817,12 +817,12 @@ function computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam) {
   // ユーザー要望: ホワイト + ブラウン（ee + bb）のように劣性ホモが
   // 重なった場合に発現する特殊カラーを別行 + % で表示する。
   // ベース毛色（クリーム/アプリコット/レッド）は同じだが、鼻・パッドの
-  // 色素が変わると外観の印象が変わる（リバー、シャンパン、イザベラ等）。
+  // 色素が変わると外観の印象が変わる（レバー、シャンパン、イザベラ等）。
   // shadeHex は base 色を nose-tone 方向に微妙に寄せた hex で、UI 上
   // 「どれが ee+bb 由来か」が一目で分かるようにする。
   const noseToneFor = (baseHex, isBb, isDd) => {
     // baseHex を nose-tone に向けて寄せる:
-    //   bb の場合: brown 方向 (リバー / イザベラ)
+    //   bb の場合: brown 方向 (レバー / イザベラ)
     //   dd の場合: blue 方向 (シャンパン / イザベラ)
     let [r, g, b] = _hexToRgbN(baseHex);
     if (isBb) {
@@ -865,7 +865,7 @@ function computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam) {
 
     if (pB_ > 0 && pD_ > 0) addIntensity(creamProb * pB_ * pD_, "B_ D_ 鼻・パッド: 黒",                "黒鼻",            false, false);
     if (pB_ > 0 && pdd > 0) addIntensity(creamProb * pB_ * pdd, "B_ dd 鼻・パッド: ブルー系 ※シャンパン", "シャンパン青鼻",  false, true);
-    if (pbb > 0 && pD_ > 0) addIntensity(creamProb * pbb * pD_, "bb D_ 鼻・パッド: リバー(ブラウン)",   "リバー(茶)鼻",    true,  false);
+    if (pbb > 0 && pD_ > 0) addIntensity(creamProb * pbb * pD_, "bb D_ 鼻・パッド: レバー(ブラウン)",   "レバー(茶)鼻",    true,  false);
     if (pbb > 0 && pdd > 0) addIntensity(creamProb * pbb * pdd, "bb dd 鼻・パッド: イザベラ(ライラック) ※シャンパン", "イザベラ鼻",      true,  true);
     return out;
   }
@@ -886,7 +886,7 @@ function computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam) {
   };
   if (pB_ > 0 && pD_ > 0) pushCream(creamProb * pB_ * pD_, "B_ D_", "黒色素",                          "黒鼻",         false, false);
   if (pB_ > 0 && pdd > 0) pushCream(creamProb * pB_ * pdd, "B_ dd", "希釈黒(ブルー系) ※シャンパン",     "シャンパン青鼻", false, true);
-  if (pbb > 0 && pD_ > 0) pushCream(creamProb * pbb * pD_, "bb D_", "リバー(ブラウン)",                 "リバー(茶)鼻",   true,  false);
+  if (pbb > 0 && pD_ > 0) pushCream(creamProb * pbb * pD_, "bb D_", "レバー(ブラウン)",                 "レバー(茶)鼻",   true,  false);
   if (pbb > 0 && pdd > 0) pushCream(creamProb * pbb * pdd, "bb dd", "イザベラ(ライラック) ※シャンパン", "イザベラ鼻",     true,  true);
   return out;
 }
@@ -1433,12 +1433,12 @@ function runColorSim() {
   // ============================================================
   // ユーザー要望: ホワイト (ee) や ブラウン (bb) を「ホモ化した場合、
   // 発現する色が変わるかもしれない」のため、各劣性ホモの単独/重複
-  // 確率と、その時に出現する特殊カラー（リバー、シャンパン、イザベラ等）を
+  // 確率と、その時に出現する特殊カラー（レバー、シャンパン、イザベラ等）を
   // 明示する。
   const pHomo_ee = pee;
   const pHomo_bb = pbb;
   const pHomo_dd = pdd;
-  const pBoth_eebb = pee * pbb;        // ee + bb（同時ホモ化）— リバーカラー
+  const pBoth_eebb = pee * pbb;        // ee + bb（同時ホモ化）— レバーカラー
   const pBoth_eedd = pee * pdd;        // ee + dd — シャンパン
   const pBoth_bbdd = pbb * pdd;        // bb + dd — ライラック/イザベラ
   const pTriple    = pee * pbb * pdd;  // ee + bb + dd — クリーム+イザベラ鼻
@@ -1447,7 +1447,7 @@ function runColorSim() {
   if (pHomo_ee > 0.001) homoRows.push({ label: 'e/e 劣性ホモ',           desc: 'クリーム/レッド系（コート色がフェオメラニンになる）', prob: pHomo_ee, hex: '#FFF8DC' });
   if (pHomo_bb > 0.001) homoRows.push({ label: 'b/b 劣性ホモ',           desc: 'ブラウン/チョコ（B 座位の eumelanin が茶に置換）',     prob: pHomo_bb, hex: '#8B4513' });
   if (pHomo_dd > 0.001) homoRows.push({ label: 'd/d 劣性ホモ',           desc: 'ブルー/希釈（メラニン顆粒が希釈）',                    prob: pHomo_dd, hex: '#4a6fa5' });
-  if (pBoth_eebb > 0.001) homoRows.push({ label: 'ee + bb 重複ホモ',     desc: '🌟 リバーカラー（クリーム毛 + 茶鼻・パッド）— 特殊',  prob: pBoth_eebb, hex: '#E8C39E', highlight: true });
+  if (pBoth_eebb > 0.001) homoRows.push({ label: 'ee + bb 重複ホモ',     desc: '🌟 レバーカラー（クリーム毛 + 茶鼻・パッド）— 特殊',  prob: pBoth_eebb, hex: '#E8C39E', highlight: true });
   if (pBoth_eedd > 0.001) homoRows.push({ label: 'ee + dd 重複ホモ',     desc: 'シャンパン（クリーム毛 + 青っぽい希釈鼻）',           prob: pBoth_eedd, hex: '#DEDFE3', highlight: true });
   if (pBoth_bbdd > 0.001) homoRows.push({ label: 'bb + dd 重複ホモ',     desc: 'ライラック/イザベラ（茶 × 希釈で淡いラベンダー）',     prob: pBoth_bbdd, hex: '#C8A2C8', highlight: true });
   if (pTriple > 0.001)    homoRows.push({ label: 'ee + bb + dd 三重ホモ', desc: '🌟 シャンパン・イザベラ（クリーム毛 + ラベンダー鼻）', prob: pTriple, hex: '#E0C5C8', highlight: true });
@@ -1466,7 +1466,7 @@ function runColorSim() {
         <strong>劣性ホモ</strong>（ee, bb, dd）が単独または<strong>同時に発現</strong>すると、
         通常とは異なる特殊なコート色や鼻・パッド色が現れます。
         例: <strong>ee + bb</strong> が同時にホモ化すると、毛色はクリームですが鼻・パッドが
-        茶色（リバーカラー）になります。
+        茶色（レバーカラー）になります。
         以下の表で「どの組み合わせが何 % の確率で出るか」が分かります。
       </p>
       <table style="width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
