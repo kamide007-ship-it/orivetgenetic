@@ -40,6 +40,25 @@ header .nav-buttons a:hover { background:rgba(255,255,255,0.3); }
 select, input { padding:10px 12px; border:2px solid #e5e7eb; border-radius:8px; font-size:0.95em; font-family:inherit; }
 select:focus, input:focus { outline:none; border-color:var(--purple); }
 .btn { background:var(--purple); color:white; border:none; padding:12px 24px; border-radius:10px; cursor:pointer; font-weight:700; font-size:1em; transition:all 0.2s; }
+.btn-reset { background:#fff; color:var(--gray); border:1.5px solid #d1d5db; padding:11px 18px; border-radius:10px; cursor:pointer; font-weight:600; font-size:0.92em; transition:all 0.15s; }
+.btn-reset:hover { background:#f3f4f6; border-color:var(--purple); color:var(--purple); }
+.btn-reset:focus-visible { outline:2px solid var(--purple); outline-offset:2px; }
+
+/* ============================================================
+   印刷スタイル (シミュレーション結果を繁殖計画書として配布する用途)
+   ============================================================ */
+@media print {
+  @page { size:A4 portrait; margin:14mm 12mm 16mm 12mm; }
+  body { background:#fff !important; color:#000 !important; font-size:10pt; line-height:1.4; }
+  header, .tabs, .btn, .btn-reset, .kb-help, .nav-buttons, details summary, #pdf-upload-form, #sim-pdf-form { display:none !important; }
+  .container { max-width:none !important; padding:0 !important; }
+  .card { box-shadow:none !important; border:1px solid #ddd !important; padding:10px !important; margin-bottom:10px !important; page-break-inside:avoid; }
+  table { font-size:9pt; page-break-inside:auto; }
+  tr { page-break-inside:avoid; }
+  th, td { border:1px solid #ccc !important; padding:4px 6px !important; }
+  /* 結果ブロックだけ表示してフォームを隠す */
+  #color-results, #health-results, #coi-results { display:block !important; }
+}
 .btn:hover { background:var(--pink); transform:translateY(-1px); }
 .btn-secondary { background:#6b7280; }
 .btn-secondary:hover { background:#4b5563; }
@@ -394,7 +413,12 @@ dialog.kb-modal .kb-modal-body .refs a:hover { background:#ddd6fe; }
         </div>
       </div>
 
-      <button class="btn" onclick="runColorSim()">シミュレーション実行</button>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button class="btn" onclick="runColorSim()">シミュレーション実行</button>
+        <button type="button" class="btn-reset" onclick="resetColorSim()"
+                title="父犬/母犬の選択と補足入力をすべて初期化します"
+                aria-label="シミュレーションをリセット">↺ リセット</button>
+      </div>
     </div>
 
     <div id="color-results" class="card" style="display:none;">
@@ -1728,6 +1752,94 @@ function runColorSim() {
 }
 
 function v(id) { return document.getElementById(id).value; }
+
+// ================================================================
+// LOCAL STORAGE: 補足入力 (I 座位 / G 座位) の永続化
+// ================================================================
+// PDF アップロード→シミュレーターのフローで、ユーザーが毎回 I 座位や
+// Greying を手入力するのを避けるため、localStorage に最後の選択を
+// 記憶する。ブラウザを閉じても次回 visit で復元される。
+const _OVR_STORAGE_KEY = 'sim.overrides.v1';
+function _saveOverrides() {
+  try {
+    const ovr = {
+      sireI: (document.getElementById('ovr-sire-i') || {}).value || '',
+      sireG: (document.getElementById('ovr-sire-g') || {}).checked || false,
+      damI:  (document.getElementById('ovr-dam-i')  || {}).value || '',
+      damG:  (document.getElementById('ovr-dam-g')  || {}).checked || false,
+    };
+    localStorage.setItem(_OVR_STORAGE_KEY, JSON.stringify(ovr));
+  } catch (e) { /* localStorage 利用不可（プライベートブラウズ等）は無視 */ }
+}
+function _restoreOverrides() {
+  try {
+    const raw = localStorage.getItem(_OVR_STORAGE_KEY);
+    if (!raw) return;
+    const ovr = JSON.parse(raw);
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    const check = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+    set('ovr-sire-i', ovr.sireI);
+    check('ovr-sire-g', ovr.sireG);
+    set('ovr-dam-i', ovr.damI);
+    check('ovr-dam-g', ovr.damG);
+  } catch (e) { /* 破損 JSON は無視 */ }
+}
+function _clearOverrides() {
+  try { localStorage.removeItem(_OVR_STORAGE_KEY); } catch (e) {}
+}
+
+// 補足入力の change を捕捉して保存（既存の onchange="runColorSim()" と併存）
+document.addEventListener('DOMContentLoaded', () => {
+  const ids = ['ovr-sire-i', 'ovr-sire-g', 'ovr-dam-i', 'ovr-dam-g'];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('change', _saveOverrides);
+  });
+  _restoreOverrides();
+  // 復元後にシミュレーターを再走させる（既に犬が選ばれていれば反映）
+  if (typeof runColorSim === 'function') {
+    try { runColorSim(); } catch (e) {}
+  }
+});
+
+// ================================================================
+// シミュレーションのリセット
+// ================================================================
+// 父犬/母犬の選択、カスタム入力、補足入力（I/G 座位）をすべて初期化。
+// localStorage の補足入力記憶もクリアする。
+function resetColorSim() {
+  const confirmed = window.confirm('シミュレーターの入力をすべて初期化します。よろしいですか？');
+  if (!confirmed) return;
+  // 親犬選択をデフォルト (custom) に戻す
+  const sire = document.getElementById('sire-color');
+  const dam  = document.getElementById('dam-color');
+  if (sire) sire.value = 'custom';
+  if (dam)  dam.value  = 'custom';
+  // カスタム遺伝子型 (cs-*, cd-*) をデフォルトの selected オプションに戻す
+  document.querySelectorAll('#custom-sire select, #custom-dam select').forEach(sel => {
+    const def = sel.querySelector('option[selected]');
+    sel.value = def ? def.value : (sel.options[0] && sel.options[0].value) || '';
+  });
+  // Greying チェックボックス（カスタム入力側）をオフに
+  ['cs-g', 'cd-g'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+  // 補足入力 (override) をクリア
+  ['ovr-sire-i', 'ovr-dam-i'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['ovr-sire-g', 'ovr-dam-g'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.checked = false;
+  });
+  _clearOverrides();
+  // 結果を再計算（カスタム入力が表示され、デフォルト遺伝子型での予測になる）
+  if (typeof runColorSim === 'function') {
+    try { runColorSim(); } catch (e) {}
+  }
+}
 
 // ================================================================
 // HEALTH SIMULATION

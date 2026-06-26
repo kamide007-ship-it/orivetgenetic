@@ -6645,6 +6645,54 @@ details.kb-detail .kb-refs a.kb-ref-link:hover {{ background:#ddd6fe; }}
   details.kb-detail .kb-refs a.kb-ref-link {{ padding:6px 12px; min-height:36px; display:inline-block; }}
   body {{ padding-bottom:env(safe-area-inset-bottom); }}
 }}
+/* ============================================================
+   印刷用スタイル (A4 縦・繁殖計画書として配布できる形)
+   ============================================================ */
+@media print {{
+  @page {{ size: A4 portrait; margin: 14mm 12mm 16mm 12mm; }}
+  /* インタラクティブ要素を非表示 */
+  .tabs, .print-btn, header, .lang-toggle,
+  button:not([data-print-keep]),
+  details summary, .kb-help,
+  .nav-buttons, .breed-warn-collapse {{
+    display: none !important;
+  }}
+  /* ヘッダー画像のグラデは紙では沈むので削除 */
+  body {{
+    background: #fff !important;
+    color: #000 !important;
+    font-size: 10pt;
+    line-height: 1.4;
+  }}
+  .dog-card {{
+    background: #fff !important;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }}
+  .tab-content {{ display: block !important; page-break-inside: avoid; }}
+  .section-title {{ font-size: 12pt; margin: 12px 0 8px; page-break-after: avoid; }}
+  .results-table, .compare-table {{
+    border-collapse: collapse;
+    font-size: 9pt;
+    page-break-inside: auto;
+  }}
+  .results-table tr, .compare-table tr {{ page-break-inside: avoid; }}
+  .results-table th, .results-table td {{
+    border: 1px solid #ccc !important;
+    padding: 4px 6px !important;
+  }}
+  /* リンクの URL を脚注的に併記（紙でも参照できる） */
+  a[href^="http"]:after {{ content: " (" attr(href) ")"; font-size: 8pt; color: #555; word-break: break-all; }}
+  /* details は印刷時すべて展開 */
+  details[open], details {{ display: block !important; }}
+  details > * {{ display: block !important; }}
+  /* 詳細ボタンや SVG ファビコンを隠す */
+  .dog-overview-row [style*="text-align:right"] {{ display: none !important; }}
+}}
 @media print {{ .tabs,.print-btn,header {{ display:none!important; }} .tab-content {{ display:block!important; page-break-inside:avoid; }} .dog-card {{ break-inside:avoid; }} }}
 .allele-dot:focus-visible {{ outline:2px solid #7c3aed; outline-offset:2px; }}
 .allele-dot:hover {{ transform:scale(1.08); transition:transform 0.12s; }}
