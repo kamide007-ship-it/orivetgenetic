@@ -945,6 +945,37 @@
                 });
             });
         }
+
+        // === グローバル JS エラー境界 ===
+        // 予期しない例外を /api/client-error に送信し、本番障害を追跡可能にする。
+        // 送信は best-effort（失敗しても UI をブロックしない）。
+        (function() {
+            let _reported = 0;
+            function report(message, source, line, col) {
+                if (_reported >= 5) return;  // 連鎖エラーで spam しない
+                _reported++;
+                try {
+                    fetch('/api/client-error', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: String(message || '').slice(0, 500),
+                            source: String(source || '').slice(0, 300),
+                            line: line, col: col,
+                            page: location.pathname + location.search,
+                        }),
+                        keepalive: true,
+                    }).catch(function() {});
+                } catch (e) {}
+            }
+            window.addEventListener('error', function(ev) {
+                report(ev.message, ev.filename, ev.lineno, ev.colno);
+            });
+            window.addEventListener('unhandledrejection', function(ev) {
+                const r = ev.reason;
+                report((r && r.message) || r || 'unhandledrejection', 'promise', 0, 0);
+            });
+        })();
     </script>
 </body>
 </html>
