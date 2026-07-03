@@ -1809,13 +1809,32 @@ class TestIndexCacheHeaders:
         assert "テストエラー" not in second
 
     def test_service_worker_excludes_root_from_cache_first(self):
-        """SW は / を network-first 扱いし、APP_SHELL の cache-first リストから外す"""
+        """SW は / を network-only（キャッシュしない）扱いにする"""
         sw = client.get("/sw.js").get_data(as_text=True)
         # キャッシュバージョンが定義されている（バージョン番号は更新で上がる）
         import re
         assert re.search(r"CACHE_VERSION\s*=\s*'orivet-v\d+'", sw)
-        # / 専用の network-first 分岐が存在
+        # / 専用の分岐が存在
         assert "url.pathname === '/'" in sw
+
+    def test_service_worker_never_caches_root(self):
+        """SW は '/' を絶対にキャッシュへ put しない（古い flash メッセージが
+        キャッシュに残って再表示される問題の根治）。"""
+        sw = client.get("/sw.js").get_data(as_text=True)
+        # '/' 分岐内で c.put(... '/') していないこと。network-only の証跡。
+        # '/' ブロックが `event.respondWith(fetch(event.request));` で完結している
+        assert "event.respondWith(fetch(event.request));" in sw
+        # flash をキャッシュしない旨のコメント
+        assert "flash" in sw and ("キャッシュしない" in sw or "network-only" in sw)
+
+    def test_index_flash_container_and_bfcache_guard(self):
+        """ホームページに flash-container と bfcache（pageshow）ガードがある。
+        戻る/進むで古い flash メッセージが再表示されないようにする。"""
+        body = client.get("/").get_data(as_text=True)
+        # pageshow で bfcache 復元を検知して flash を除去
+        assert "addEventListener('pageshow'" in body
+        assert "ev.persisted" in body
+        assert "flash-container" in body
 
 
 class TestSimulatorPdfUpload:
