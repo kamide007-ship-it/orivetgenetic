@@ -473,6 +473,30 @@ header .container { position:relative; }
       </div>
       <div id="color-output" class="beginner-mode" style="margin-top:14px;"></div>
     </div>
+
+    <!-- 2ペア比較: 同じ父犬 × 2頭の母犬候補を並べて相手選びを支援 -->
+    <details id="compare-panel" class="card" style="background:#f5f3ff;border:1px solid #ddd6fe;">
+      <summary style="cursor:pointer;font-weight:700;color:#5b21b6;font-size:1.05em;list-style:none;display:flex;align-items:center;gap:8px;" onclick="setTimeout(_syncCompareDropdowns,0)">
+        🆚 <span data-i18n="compare_title">母犬を2頭くらべて相手を選ぶ</span>
+        <span style="margin-left:auto;font-size:0.85em;color:#8b5cf6;font-weight:500;">▾</span>
+      </summary>
+      <p style="font-size:0.88em;color:#6b7280;margin:10px 0;line-height:1.6;" data-i18n="compare_desc">
+        いま選んでいる<strong>父犬</strong>に対して、<strong>2頭の母犬候補</strong>それぞれの子犬の毛色予測を並べて比較します。
+        どちらの相手だと望む毛色が出やすいか、ひと目で分かります。
+      </p>
+      <div class="form-row">
+        <div class="form-group">
+          <label data-i18n="compare_dam_a">母犬 A</label>
+          <select id="compare-dam-a" onchange="runCompare()"></select>
+        </div>
+        <div class="form-group">
+          <label data-i18n="compare_dam_b">母犬 B</label>
+          <select id="compare-dam-b" onchange="runCompare()"></select>
+        </div>
+      </div>
+      <button type="button" class="btn" onclick="runCompare()" data-i18n="compare_run">くらべる</button>
+      <div id="compare-output" style="margin-top:14px;"></div>
+    </details>
   </div>
 
   <!-- ================================================================ -->
@@ -986,6 +1010,203 @@ const COLOR_MAP = {
   "parti": { hex:"#ffffff", name:"パーティカラー" },
   "merle": { hex:"#9FB6CD", name:"マール" },
 };
+
+// ================================================================
+// 純粋な毛色予測コア（2ペア比較で再利用）
+// ================================================================
+// sire/dam の遺伝子型オブジェクトから results[] を返すピュア関数。
+// runColorSim 内のセクション 1〜6 と同じ遺伝ロジックをミラーしており、
+// 比較機能（_comparePairs）から呼び出す。
+// ⚠️ runColorSim の毛色計算ロジックを変更した場合は、この関数も同期すること。
+function _buildColorResults(sire, dam) {
+  const eResult = cross(sire.e, dam.e);
+  const kResult = cross(sire.k, dam.k);
+  const aResult = cross(sire.a, dam.a);
+  const bResult = cross(sire.b, dam.b);
+  const dResult = cross(sire.d, dam.d);
+  const mResult = cross(sire.m, dam.m);
+  const sResult = cross(sire.s, dam.s);
+  const gResult = cross(sire.g, dam.g);
+  const pG_ = (gResult["GG"] || 0) + (gResult["Gg"] || 0);
+  const pgg = gResult["gg"] || 0;
+  const pEE = eResult["EE"] || 0, pEe = eResult["Ee"] || 0, pee = eResult["ee"] || 0;
+  const pKBKB = kResult["KBKB"] || 0, pKBky = kResult["KBky"] || 0, pKBkbr = kResult["KBkbr"] || 0;
+  const pkyky = kResult["kyky"] || 0, pkbrky = kResult["kbrky"] || 0, pkbrkbr = kResult["kbrkbr"] || 0;
+  const pBB = bResult["BB"] || 0, pBb = bResult["Bb"] || 0, pbb = bResult["bb"] || 0;
+  const pB_ = pBB + pBb;
+  const pDD = dResult["DD"] || 0, pDd = dResult["Dd"] || 0, pdd = dResult["dd"] || 0;
+  const pD_ = pDD + pDd;
+  const pMm = mResult["Mm"] || 0, pMM = mResult["MM"] || 0;
+  const pspsp = sResult["spsp"] || 0;
+  // A 座位（cross() は alleles を sort してキー化するため sorted-form を使う）
+  const pay_ = (aResult["ayay"]||0) + (aResult["atay"]||0) + (aResult["away"]||0) + (aResult["aay"]||0);
+  const paw_ = (aResult["awaw"]||0) + (aResult["ataw"]||0) + (aResult["aaw"]||0);
+  const pat_ = (aResult["atat"]||0) + (aResult["aat"]||0);
+  const pa_a = aResult["aa"] || 0;
+  const pKB_ = pKBKB + pKBky + pKBkbr;
+  const pE_ = pEE + pEe;
+
+  const results = [];
+  const _sumiTone = (baseHex) => {
+    const [r, g, b] = _hexToRgbN(baseHex);
+    return _rgbToHexN(r + (128 - r) * 0.30, g + (128 - g) * 0.30, b + (128 - b) * 0.30);
+  };
+  const _PURITY_LABEL = {
+    black:{homo:'純黒',het:'墨色'}, brown:{homo:'ピュア茶',het:'墨茶'}, blue:{homo:'ピュアブルー',het:'墨青'},
+    lilac:{homo:'ピュアライラック',het:'墨ライラック'}, silver:{homo:'ピュアシルバー',het:'墨シルバー'},
+    silver_beige:{homo:'ピュアシルバービーグ',het:'墨シルバービーグ'}, fawn:{homo:'ピュアフォーン',het:'墨フォーン'},
+    wild_sable:{homo:'ピュアセーブル',het:'墨セーブル'}, phantom_black:{homo:'ピュアファントム',het:'墨ファントム'},
+    phantom_brown:{homo:'ピュアファントム(茶)',het:'墨ファントム(茶)'}, recessive_black:{homo:'ピュアリセッシブ黒',het:'墨リセッシブ黒'},
+    brindle:{homo:'ピュアブリンドル',het:'墨ブリンドル'},
+  };
+  const pushE = (color, totalProb, baseLabel, comboSuffix) => {
+    if (pE_ < 1e-9) return;
+    const baseHex = COLOR_MAP[color] ? COLOR_MAP[color].hex : '#9ca3af';
+    const sumi = _sumiTone(baseHex);
+    const labels = _PURITY_LABEL[color] || { homo: '純', het: '墨色' };
+    if (pEE > 0) results.push({ color, shadeHex: baseHex, toneLabel: labels.homo, prob: totalProb * (pEE / pE_), note: `${baseLabel}（${labels.homo}）(E/E + ${comboSuffix})` });
+    if (pEe > 0) results.push({ color, shadeHex: sumi, toneLabel: labels.het, prob: totalProb * (pEe / pE_), note: `${baseLabel}（${labels.het}）(E/e + ${comboSuffix})` });
+  };
+
+  if (pee > 0) { for (const p of computeEePhenotypes(pee, pB_, pdd, pD_, pbb, sire, dam)) results.push(p); }
+  if (pE_ > 0 && pKB_ > 0) {
+    const solidProb = pE_ * pKB_;
+    if (pB_ > 0 && pD_ > 0) { const p = solidProb * pB_ * pD_; if (pgg > 0) pushE("black", p * pgg, "ブラック", "KB_, B_, D_, gg"); if (pG_ > 0) pushE("silver", p * pG_, "シルバー", "KB_, B_, D_, G_: 成犬で退色"); }
+    if (pB_ > 0 && pdd > 0) { const p = solidProb * pB_ * pdd; if (pgg > 0) pushE("blue", p * pgg, "ブルー", "KB_, B_, dd, gg"); if (pG_ > 0) pushE("silver", p * pG_, "シルバー（淡）", "KB_, B_, dd, G_: 成犬で退色"); }
+    if (pbb > 0 && pD_ > 0) { const p = solidProb * pbb * pD_; if (pgg > 0) pushE("brown", p * pgg, "ブラウン/チョコ", "KB_, bb, D_, gg"); if (pG_ > 0) pushE("silver_beige", p * pG_, "カフェオレ（シルバービーグ）", "KB_, bb, D_, G_: 成犬で退色"); }
+    if (pbb > 0 && pdd > 0) { const p = solidProb * pbb * pdd; if (pgg > 0) pushE("lilac", p * pgg, "ライラック/イザベラ", "KB_, bb, dd, gg"); if (pG_ > 0) pushE("silver_beige", p * pG_, "カフェオレ（シルバービーグ／淡）", "KB_, bb, dd, G_: 成犬で退色"); }
+  }
+  if (pE_ > 0 && pkyky > 0) {
+    const agoutiProb = pE_ * pkyky;
+    if (pay_ > 0 && pB_ > 0 && pD_ > 0) pushE("fawn", agoutiProb * pay_ * pB_ * pD_, "フォーン/セーブル", "ky/ky, ay_, B_, D_");
+    if (pay_ > 0 && pbb > 0 && pD_ > 0) pushE("fawn", agoutiProb * pay_ * pbb * pD_, "フォーン/セーブル(ブラウン色素)", "ky/ky, ay_, bb, D_");
+    if (paw_ > 0 && pB_ > 0 && pD_ > 0) pushE("wild_sable", agoutiProb * paw_ * pB_ * pD_, "ワイルドセーブル", "ky/ky, aw_, B_, D_");
+    if (paw_ > 0 && pbb > 0 && pD_ > 0) pushE("wild_sable", agoutiProb * paw_ * pbb * pD_, "ワイルドセーブル(ブラウン色素)", "ky/ky, aw_, bb, D_");
+    if (pat_ > 0 && pB_ > 0 && pD_ > 0) pushE("phantom_black", agoutiProb * pat_ * pB_ * pD_, "ブラックタン/トライカラー", "ky/ky, at_, B_, D_");
+    if (pat_ > 0 && pbb > 0 && pD_ > 0) pushE("phantom_brown", agoutiProb * pat_ * pbb * pD_, "ブラックタン/トライカラー(ブラウン)", "ky/ky, at_, bb, D_");
+    if (pa_a > 0 && pB_ > 0 && pD_ > 0) pushE("recessive_black", agoutiProb * pa_a * pB_ * pD_, "リセッシブブラック", "ky/ky, a/a, B_, D_");
+    if (pa_a > 0 && pbb > 0 && pD_ > 0) pushE("brown", agoutiProb * pa_a * pbb * pD_, "リセッシブブラウン", "ky/ky, a/a, bb, D_");
+  }
+  if (pE_ > 0 && (pkbrky + pkbrkbr) > 0) { const brProb = pE_ * (pkbrky + pkbrkbr); if (brProb > 0) pushE("brindle", brProb, "ブリンドル", "kbr_"); }
+  if ((pMm + pMM) > 0) { results.push({ color:"merle", prob: (pMm + pMM) * pE_, note:"マールパターン (M_, E_) ※上記色にマールが加わる" }); }
+  if (pspsp > 0) { results.push({ color:"parti", prob: pspsp, note:"パーティカラー (sp/sp) ※上記色+白斑パターン" }); }
+  return results;
+}
+
+// results[] を baseColor で集約して {phenoKey: prob} の Map を返す（比較用に単純化）
+function _consolidateByBaseColor(results) {
+  const out = {};
+  for (const r of results) {
+    if (r.prob <= 0.001) continue;
+    out[r.color] = (out[r.color] || 0) + r.prob;
+  }
+  return out;
+}
+
+// ================================================================
+// 2ペア比較（同じ父犬 × 2頭の母犬候補）
+// ================================================================
+// 現在の父犬選択から遺伝子型オブジェクトを構築（runColorSim と同ロジック）
+function _currentSireGenotype() {
+  const sireKey = document.getElementById('sire-color').value;
+  const sireG = (document.getElementById('cs-g') || {}).checked ? 'Gg' : 'gg';
+  const sireI = v('cs-i');
+  let sire;
+  if (sireKey === 'custom') {
+    sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s'), g: sireG };
+    if (sireI) sire.i = sireI;
+  } else {
+    sire = Object.assign({ g: 'gg' }, DOGS[sireKey].color);
+    const ovrSireI = (document.getElementById('ovr-sire-i') || {}).value;
+    if (ovrSireI) sire.i = ovrSireI;
+    if ((document.getElementById('ovr-sire-g') || {}).checked) sire.g = 'Gg';
+  }
+  return sire;
+}
+// 母犬キー（DOGS のキー = PDF/サンプル）から遺伝子型を構築。custom は比較対象外。
+function _damGenotypeFromKey(key) {
+  if (!key || key === 'custom' || !DOGS[key]) return null;
+  return Object.assign({ g: 'gg' }, DOGS[key].color);
+}
+// dam-color の option をコピーして比較ドロップダウンに反映（custom は除外）
+function _syncCompareDropdowns() {
+  const src = document.getElementById('dam-color');
+  const a = document.getElementById('compare-dam-a');
+  const b = document.getElementById('compare-dam-b');
+  if (!src || !a || !b) return;
+  const opts = [...src.options].filter(o => o.value !== 'custom');
+  const prevA = a.value, prevB = b.value;
+  const build = (sel) => {
+    sel.innerHTML = '';
+    opts.forEach(o => sel.appendChild(new Option(o.text, o.value)));
+  };
+  build(a); build(b);
+  // 既存選択を維持、無ければ A=先頭、B=2番目（あれば）
+  if (opts.some(o => o.value === prevA)) a.value = prevA;
+  if (opts.some(o => o.value === prevB)) b.value = prevB;
+  else if (opts.length > 1 && a.value === opts[0].value) b.value = opts[1].value;
+}
+function _damOptionLabel(key) {
+  const src = document.getElementById('dam-color');
+  if (src) { const o = [...src.options].find(x => x.value === key); if (o) return o.text; }
+  return key;
+}
+// 1頭分の比較カラム（カラーバー + 上位色テーブル）を描画
+function _renderCompareColumn(label, res) {
+  const entries = Object.entries(res).sort((a, b) => b[1] - a[1]);
+  const total = entries.reduce((s, [, p]) => s + p, 0) || 1;
+  const isLight = k => ['cream','apricot','parti','silver','silver_beige','cafe_au_lait'].includes(k);
+  let bar = '<div class="color-bar" style="height:40px;margin-bottom:10px;">';
+  for (const [key, p] of entries) {
+    const cm = COLOR_MAP[key]; if (!cm) continue;
+    const pct = (p / total * 100).toFixed(1);
+    const bg = _multiToneBg(key, cm.hex);
+    const tc = isLight(key) ? '#333' : '#fff';
+    bar += `<div style="width:${pct}%;background:${bg};color:${tc};text-shadow:0 1px 2px rgba(0,0,0,0.5);">${pct}%</div>`;
+  }
+  bar += '</div>';
+  let rows = '';
+  for (const [key, p] of entries) {
+    const cm = COLOR_MAP[key]; if (!cm) continue;
+    const pct = (p / total * 100).toFixed(1);
+    const bg = _multiToneBg(key, cm.hex);
+    rows += `<tr><td style="padding:4px 8px;"><span class="color-swatch" style="background:${bg}"></span>${cm.name}</td><td style="padding:4px 8px;text-align:right;font-weight:700;color:#5b21b6;">${pct}%</td></tr>`;
+  }
+  return `<div style="flex:1;min-width:220px;">
+    <div style="font-weight:700;color:#5b21b6;margin-bottom:6px;">${escapeHtml(label)}</div>
+    ${bar}
+    <table style="width:100%;border-collapse:collapse;font-size:0.86em;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+      <tr style="background:#ede9fe;"><th style="padding:5px 8px;text-align:left;color:#5b21b6;">毛色</th><th style="padding:5px 8px;text-align:right;color:#5b21b6;">確率</th></tr>
+      ${rows}
+    </table>
+  </div>`;
+}
+function runCompare() {
+  const out = document.getElementById('compare-output');
+  if (!out) return;
+  const sire = _currentSireGenotype();
+  const aKey = (document.getElementById('compare-dam-a') || {}).value;
+  const bKey = (document.getElementById('compare-dam-b') || {}).value;
+  const damA = _damGenotypeFromKey(aKey);
+  const damB = _damGenotypeFromKey(bKey);
+  if (!damA || !damB) {
+    out.innerHTML = '<div class="warn-box">比較するには、PDF 解析済み または サンプルの母犬を2頭選んでください（カスタム入力は比較対象外です）。</div>';
+    return;
+  }
+  const resA = _consolidateByBaseColor(_buildColorResults(sire, damA));
+  const resB = _consolidateByBaseColor(_buildColorResults(sire, damB));
+  const sireLabel = _damOptionLabelForSire();
+  out.innerHTML = `<div style="font-size:0.85em;color:#6b7280;margin-bottom:8px;">父犬: <strong>${escapeHtml(sireLabel)}</strong> を固定して比較</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;">
+      ${_renderCompareColumn('🅰 ' + _damOptionLabel(aKey), resA)}
+      ${_renderCompareColumn('🅱 ' + _damOptionLabel(bKey), resB)}
+    </div>`;
+}
+function _damOptionLabelForSire() {
+  const src = document.getElementById('sire-color');
+  if (src) { const o = [...src.options].find(x => x.value === src.value); if (o) return o.text; }
+  return '父犬';
+}
 
 function runColorSim() {
   const sireKey = document.getElementById('sire-color').value;
@@ -2093,6 +2314,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (el) el.addEventListener('change', _saveOverrides);
   });
   _restoreOverrides();
+  // 比較ドロップダウンを初期化（サンプル母犬を反映）
+  try { _syncCompareDropdowns(); } catch (e) {}
   // 復元後にシミュレーターを再走させる（既に犬が選ばれていれば反映）
   if (typeof runColorSim === 'function') {
     try { runColorSim(); } catch (e) {}
@@ -2412,6 +2635,7 @@ function addDogsToSimulator(dogs, keyPrefix) {
   runColorSim();
   runHealthSim();
   renderHeterozygosityPanel();
+  _syncCompareDropdowns();  // PDF 投入犬を比較ドロップダウンにも反映
   return addedKeys;
 }
 
@@ -2932,6 +3156,11 @@ const _SIM_I18N = {
     btn_share:           '🔗 共有リンク',
     mode_beginner:       '🌱 かんたん',
     mode_advanced:       '🔬 詳細',
+    compare_title:       '母犬を2頭くらべて相手を選ぶ',
+    compare_desc:        'いま選んでいる<strong>父犬</strong>に対して、<strong>2頭の母犬候補</strong>それぞれの子犬の毛色予測を並べて比較します。どちらの相手だと望む毛色が出やすいか、ひと目で分かります。',
+    compare_dam_a:       '母犬 A',
+    compare_dam_b:       '母犬 B',
+    compare_run:         'くらべる',
     color_result_title:  '毛色予測結果',
     health_title:        '健康リスク繁殖シミュレーション',
   },
@@ -2960,6 +3189,11 @@ const _SIM_I18N = {
     btn_share:           '🔗 Share link',
     mode_beginner:       '🌱 Simple',
     mode_advanced:       '🔬 Detailed',
+    compare_title:       'Compare two dams to pick the mate',
+    compare_desc:        'For the currently selected <strong>sire</strong>, compare puppy coat color predictions for <strong>two candidate dams</strong> side by side. See at a glance which mate is more likely to produce the color you want.',
+    compare_dam_a:       'Dam A',
+    compare_dam_b:       'Dam B',
+    compare_run:         'Compare',
     color_result_title:  'Coat color prediction',
     health_title:        'Health risk breeding simulation',
   },

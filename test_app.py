@@ -1162,6 +1162,27 @@ class TestHeterozygosityParser:
 
     # ---- 繁殖シミュレーター: 補足入力（PDF 犬向け I 座位/G 座位 override） ----
 
+    def test_simulator_has_two_pair_compare(self):
+        """シミュレーターに 2ペア比較（同じ父犬 × 2頭の母犬）機能がある"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # 比較パネル
+        assert 'id="compare-panel"' in body
+        assert 'id="compare-dam-a"' in body
+        assert 'id="compare-dam-b"' in body
+        assert 'onclick="runCompare()"' in body
+        # ピュアな毛色予測コア（比較で再利用）
+        assert "function _buildColorResults" in body
+        assert "function _consolidateByBaseColor" in body
+        # 比較ロジック
+        assert "function runCompare" in body
+        assert "function _syncCompareDropdowns" in body
+        assert "function _currentSireGenotype" in body
+        # i18n（ja/en）
+        assert "母犬を2頭くらべて" in body
+        assert "Compare two dams" in body
+        # PDF 投入時に比較ドロップダウンも同期
+        assert "_syncCompareDropdowns()" in body
+
     def test_simulator_has_beginner_advanced_mode(self):
         """シミュレーターに 初級/詳細 モードトグルがある"""
         body = client.get("/simulator").get_data(as_text=True)
