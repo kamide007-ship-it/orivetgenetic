@@ -47,6 +47,18 @@ select:focus, input:focus { outline:none; border-color:var(--purple); }
 .btn-export:hover { background:#ddd6fe; }
 .btn-export:focus-visible { outline:2px solid var(--purple); outline-offset:2px; }
 
+/* 初級/詳細モードトグル（セグメント型スイッチ） */
+.mode-toggle { display:inline-flex; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:3px; gap:2px; }
+.mode-btn { background:transparent; color:var(--gray); border:none; padding:6px 14px; border-radius:999px; cursor:pointer; font-weight:600; font-size:0.85em; transition:all 0.15s; }
+.mode-btn.active { background:var(--purple); color:#fff; box-shadow:0 1px 3px rgba(124,58,237,0.35); }
+.mode-btn:not(.active):hover { color:var(--purple); }
+.mode-btn:focus-visible { outline:2px solid var(--purple); outline-offset:2px; }
+/* 初級モードでは詳細パネルを隠す */
+#color-output.beginner-mode .sim-advanced-block { display:none !important; }
+/* 詳細モードで表示されるヒント（初級モード時のみ表示するミニ案内） */
+.beginner-hint { display:none; }
+#color-output.beginner-mode .beginner-hint { display:block; }
+
 /* ============================================================
    印刷スタイル (シミュレーション結果を繁殖計画書として配布する用途)
    ============================================================ */
@@ -446,14 +458,20 @@ header .container { position:relative; }
     <div id="color-results" class="card" style="display:none;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <h2 data-i18n="color_result_title" style="margin:0;">毛色予測結果</h2>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <div class="mode-toggle" role="group" aria-label="表示モード">
+            <button type="button" id="mode-beginner" class="mode-btn active" onclick="setSimMode('beginner')"
+                    data-i18n="mode_beginner" title="要点だけをシンプルに表示">🌱 かんたん</button>
+            <button type="button" id="mode-advanced" class="mode-btn" onclick="setSimMode('advanced')"
+                    data-i18n="mode_advanced" title="遺伝子型の詳細分析も表示">🔬 詳細</button>
+          </div>
           <button type="button" class="btn-export" onclick="exportColorCsv()"
                   data-i18n="btn_export_csv" title="毛色予測結果を CSV でダウンロード">⬇ CSV</button>
           <button type="button" class="btn-export" onclick="copyShareLink()"
                   data-i18n="btn_share" title="この交配シナリオの共有リンクをコピー">🔗 共有リンク</button>
         </div>
       </div>
-      <div id="color-output" style="margin-top:14px;"></div>
+      <div id="color-output" class="beginner-mode" style="margin-top:14px;"></div>
     </div>
   </div>
 
@@ -1276,13 +1294,23 @@ function runColorSim() {
 
   // 「純色トーン」「墨色トーン」の意味を説明する小さい凡例
   if (Object.values(consolidated).some(d => d.toneLabel)) {
-    html += `<div style="margin-top:8px;padding:10px 14px;background:#fef9c3;border-left:3px solid #f59e0b;border-radius:6px;font-size:0.82em;color:#78350f;line-height:1.6;">
+    html += `<div class="sim-advanced-block" style="margin-top:8px;padding:10px 14px;background:#fef9c3;border-left:3px solid #f59e0b;border-radius:6px;font-size:0.82em;color:#78350f;line-height:1.6;">
       <strong>📖 「純色 / 墨色」のトーンについて</strong><br>
       E/E 由来は「<strong>純色トーン</strong>」（深い色）、E/e ヘテロ由来は「<strong>墨色トーン</strong>」（やや薄い色）で描画しています。
       実際の犬では完全優性により見た目は同じですが、UI 上で<strong>「子犬が E キャリアかどうか」が一目で分かる</strong>ように
       色味を変えています。例: <code>E/E</code> 由来のブラックは純黒、<code>E/e</code> 由来のブラックは墨色（ややグレー寄り）。
     </div>`;
   }
+
+  // 初級モード時のみ表示される「詳細モードへの案内」ヒント
+  html += `<div class="beginner-hint" style="margin-top:12px;padding:10px 14px;background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;font-size:0.85em;color:#3730a3;">
+    💡 もっと詳しく知りたいときは、右上の <strong>🔬 詳細</strong> に切り替えると、
+    キャリア確率・遺伝子型の内訳・特殊カラーの出現率などが表示されます。
+  </div>`;
+
+  // ここから下は「詳細モード」でのみ表示する高度な分析パネル群。
+  // 初級モード（デフォルト）では折りたたんで初心者の認知負荷を下げる。
+  html += '<div class="sim-advanced-block">';
 
   // ============================================================
   // アレル単位の色マップと 2 アレルドット表示ヘルパー
@@ -1855,7 +1883,10 @@ function runColorSim() {
     </details>`;
   }
 
-  // Warnings
+  // 詳細モード用の高度パネル群を閉じる
+  html += '</div>';
+
+  // Warnings（M/M ダブルマール警告は初級/詳細に関係なく常に表示 = 健康上重要）
   if ((pMm + pMM) > 0 && pMM > 0) {
     html += '<div class="warn-box"><strong>警告: ダブルマール (M/M) リスク</strong><br>M/M の子犬が生まれる確率が ' + (pMM*100).toFixed(1) + '% あります。ダブルマールは聴覚・視覚障害のリスクが非常に高いため、この交配は推奨されません。</div>';
   }
@@ -2067,6 +2098,32 @@ document.addEventListener('DOMContentLoaded', () => {
     try { runColorSim(); } catch (e) {}
   }
 });
+
+// ================================================================
+// 初級 / 詳細 表示モード
+// ================================================================
+// 初級モード（デフォルト）では詳細パネル（キャリア確率・遺伝子型内訳・
+// 特殊カラー・コンビ詳細）を隠し、要点だけを表示。詳細モードで全展開。
+// localStorage 'sim.mode' に保存し次回も維持。
+const _SIM_MODE_KEY = 'sim.mode';
+function setSimMode(mode) {
+  const out = document.getElementById('color-output');
+  const bBtn = document.getElementById('mode-beginner');
+  const aBtn = document.getElementById('mode-advanced');
+  const beginner = mode !== 'advanced';
+  if (out) out.classList.toggle('beginner-mode', beginner);
+  if (bBtn) { bBtn.classList.toggle('active', beginner); bBtn.setAttribute('aria-pressed', String(beginner)); }
+  if (aBtn) { aBtn.classList.toggle('active', !beginner); aBtn.setAttribute('aria-pressed', String(!beginner)); }
+  try { localStorage.setItem(_SIM_MODE_KEY, beginner ? 'beginner' : 'advanced'); } catch (e) {}
+}
+// 起動時に保存済みモードを反映（デフォルト beginner）
+(function() {
+  let mode = 'beginner';
+  try { const s = localStorage.getItem(_SIM_MODE_KEY); if (s === 'advanced') mode = 'advanced'; } catch (e) {}
+  const apply = () => setSimMode(mode);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
+})();
 
 // ================================================================
 // シミュレーションのリセット
@@ -2873,6 +2930,8 @@ const _SIM_I18N = {
     btn_reset:           '↺ リセット',
     btn_export_csv:      '⬇ CSV',
     btn_share:           '🔗 共有リンク',
+    mode_beginner:       '🌱 かんたん',
+    mode_advanced:       '🔬 詳細',
     color_result_title:  '毛色予測結果',
     health_title:        '健康リスク繁殖シミュレーション',
   },
@@ -2899,6 +2958,8 @@ const _SIM_I18N = {
     btn_reset:           '↺ Reset',
     btn_export_csv:      '⬇ CSV',
     btn_share:           '🔗 Share link',
+    mode_beginner:       '🌱 Simple',
+    mode_advanced:       '🔬 Detailed',
     color_result_title:  'Coat color prediction',
     health_title:        'Health risk breeding simulation',
   },
