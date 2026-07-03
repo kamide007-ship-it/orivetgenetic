@@ -1086,6 +1086,30 @@ class TestHeterozygosityParser:
 
     # ---- 繁殖シミュレーター: 補足入力（PDF 犬向け I 座位/G 座位 override） ----
 
+    def test_simulator_has_beginner_advanced_mode(self):
+        """シミュレーターに 初級/詳細 モードトグルがある"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # トグルボタン
+        assert 'id="mode-beginner"' in body
+        assert 'id="mode-advanced"' in body
+        assert 'onclick="setSimMode(\'beginner\')"' in body
+        assert 'onclick="setSimMode(\'advanced\')"' in body
+        assert "function setSimMode" in body
+        # デフォルトは初級モード（beginner-mode クラスが color-output に付与）
+        assert 'id="color-output" class="beginner-mode"' in body
+        # 初級モードで詳細ブロックを隠す CSS
+        assert "#color-output.beginner-mode .sim-advanced-block" in body
+        # 詳細パネルは sim-advanced-block でラップされている
+        assert "sim-advanced-block" in body
+        # localStorage 永続化
+        assert "'sim.mode'" in body or "_SIM_MODE_KEY" in body
+        # i18n（ja/en 両方）
+        assert "🌱 かんたん" in body
+        assert "🔬 詳細" in body
+        assert "Simple" in body and "Detailed" in body
+        # 初級モードの案内ヒント
+        assert "beginner-hint" in body
+
     def test_simulator_has_csv_export(self):
         """シミュレーターに CSV エクスポート機能がある"""
         body = client.get("/simulator").get_data(as_text=True)
