@@ -412,6 +412,7 @@ def analyze():
 
     # --- PDF files ---
     pdf_files = request.files.getlist("pdf_files")
+    dnap_skipped = []  # DNAP ファイル名を集めて最後に 1 件のメッセージに集約
     for f in pdf_files:
         if f and f.filename and allowed_file(f.filename, ALLOWED_PDF_EXT):
             safe_name = f"{uuid.uuid4().hex[:8]}_{secure_filename(f.filename) or 'upload.pdf'}"
@@ -437,14 +438,10 @@ def analyze():
                         dogs.append(dog)
                     elif is_dnap:
                         # DNAプロファイル PDF は健康・形質結果を含まないため非対応。
-                        # 旧版は静かにスキップしていたが、ユーザーが理由を把握できる
-                        # ようインフォメッセージを表示する。
-                        flash(
-                            f"{f.filename}: これは Orivet の DNAプロファイル（DNAP）PDF です。"
-                            "ISAGマーカーによる親子鑑定用の DNA 指紋のみで、健康・形質検査の結果は含まれません。"
-                            "本アプリで解析するには、Orivet 本体の遺伝子検査レポート PDF（DNAP ではない方）をアップロードしてください。",
-                            "info",
-                        )
+                        # 複数まとめてアップロードされることが多いので、ここでは
+                        # ファイル名だけ集めておき、ループ後に 1 件のメッセージへ集約する
+                        # （4 ファイルで 4 行の同一メッセージが出るのを防ぐ）。
+                        dnap_skipped.append(f.filename)
                     elif is_guide:
                         # 説明・見方ガイドは静かにスキップ（明らかに検査結果ではないため）
                         pass
@@ -458,6 +455,17 @@ def analyze():
                 except Exception as e:
                     eid = _log_exc("parse_pdf", f.filename, e, request_id)
                     flash(f"{f.filename}: PDF解析中にエラーが発生しました（{type(e).__name__} / error_id={eid}）", "warning")
+
+    # DNAP ファイルをまとめて 1 件のメッセージに集約（同一文言の氾濫を防ぐ）
+    if dnap_skipped:
+        n = len(dnap_skipped)
+        names = "、".join(dnap_skipped)
+        flash(
+            f"DNAプロファイル（DNAP）PDF を {n} 件スキップしました（{names}）。"
+            "これは親子鑑定用の DNA 指紋のみで、健康・形質検査の結果は含まれません。"
+            "解析するには Orivet 本体の遺伝子検査レポート PDF（ファイル名に DNAP が含まれない方）をアップロードしてください。",
+            "info",
+        )
 
     # --- Pedigree files (PDF + images) ---
     pedigree_files = request.files.getlist("pedigree_files")

@@ -10,7 +10,7 @@
 // ⚠️ Service Worker のスコープはこのファイルの配置パスで決まる。
 //    /sw.js から配信することでサイト全体を制御可能。
 
-const CACHE_VERSION = 'orivet-v3';
+const CACHE_VERSION = 'orivet-v4';
 const CACHE_NAME = `app-shell-${CACHE_VERSION}`;
 
 // オフラインでも閲覧したい最小コアアセット
@@ -72,19 +72,14 @@ self.addEventListener('fetch', (event) => {
     return;  // ブラウザに任せる
   }
 
-  // トップページ '/' は flash メッセージを含み得るので network-first。
-  // ネットワーク失敗時のみキャッシュへフォールバック（オフライン対応）。
+  // トップページ '/' は network-only（キャッシュしない）。
+  // flash メッセージ（DNAP 案内・エラー等）は一度きりの personalized 内容で、
+  // これをキャッシュするとネットワーク不調時に古い flash が再表示される
+  // （更新を押すと消えるが、キャッシュが残ると出続ける問題の根治）。
+  // よって '/' は絶対にキャッシュへ put しない。オフライン時はブラウザ既定に任せる
+  // （'/' はアップロード POST が前提でありネットワーク必須のため）。
   if (url.pathname === '/' || url.pathname === '/index' || url.pathname === '/index.html') {
-    event.respondWith(
-      fetch(event.request).then((response) => {
-        if (response.ok && response.status === 200) {
-          // 念のためキャッシュも更新（オフライン用フォールバック）
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((c) => c.put(event.request, clone)).catch(() => {});
-        }
-        return response;
-      }).catch(() => caches.match(event.request).then((c) => c || caches.match('/')))
-    );
+    event.respondWith(fetch(event.request));
     return;
   }
 

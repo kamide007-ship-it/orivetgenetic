@@ -568,9 +568,13 @@
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
-        {% for category, message in messages %}
-        <div class="flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
+        {% if messages %}
+        <div id="flash-container">
+          {% for category, message in messages %}
+          <div class="flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
         {% endwith %}
 
         <form id="analyzeForm" action="/analyze" method="post" enctype="multipart/form-data">
@@ -945,6 +949,18 @@
                 });
             });
         }
+
+        // === bfcache（戻る/進む・履歴復元）対策 ===
+        // flash メッセージ（DNAP 案内・エラー等）はサーバー側で一度きり消費される。
+        // しかしブラウザの back-forward cache がページのスナップショットを復元すると、
+        // 消費済みのはずの flash が DOM に残って再表示される。event.persisted で
+        // 復元を検知し、古い flash を除去する（更新を押すと消える現象の根治）。
+        window.addEventListener('pageshow', function(ev) {
+            if (ev.persisted) {
+                const fc = document.getElementById('flash-container');
+                if (fc) fc.remove();
+            }
+        });
 
         // === グローバル JS エラー境界 ===
         // 予期しない例外を /api/client-error に送信し、本番障害を追跡可能にする。
