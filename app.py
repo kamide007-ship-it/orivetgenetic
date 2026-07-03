@@ -107,6 +107,23 @@ def _log_exc(stage: str, filename: str, exc: Exception, request_id: str = "") ->
     return error_id
 
 
+def _log_json(event: str, level: str = "info", **fields) -> None:
+    """構造化ログ（JSON 一行）を出力する。
+
+    Render / Sentry / Datadog のログ画面で `event=` や任意フィールドで
+    grep・フィルタしやすくするため、key=value ではなく JSON で出す。
+    既存の app.logger.info(...) 形式とは併存（段階移行）。
+    """
+    payload = {"event": event}
+    payload.update(fields)
+    try:
+        msg = json.dumps(payload, ensure_ascii=False, default=str)
+    except (TypeError, ValueError):
+        msg = json.dumps({"event": event, "_serialize_error": True})
+    logfn = getattr(app.logger, level, app.logger.info)
+    logfn(msg)
+
+
 # Import analysis modules
 from poodle_genetics import (
     parse_pdf, parse_pedigree_pdf, KNOWN_PEDIGREES,
@@ -130,6 +147,60 @@ try:
     from poodle_genetics import try_ocr, parse_jkc_pedigree_text
 except ImportError:
     pass
+
+
+# ============================================================
+# PDF パース結果のインメモリ LRU キャッシュ
+# ============================================================
+# 同一バイト列の PDF を再アップロードしたとき、再パースをスキップして
+# 即座に結果を返す。プロセス内メモリ（再起動でクリア）に限定するため
+# ディスク上に犬データを残さず、プライバシー面でも安全。
+# 同一バイト列 = 同一犬の結果なので、ユーザー間で共有しても問題ない。
+import hashlib
+import copy as _copy
+from collections import OrderedDict
+
+_PDF_CACHE_MAX = 64
+_pdf_parse_cache = OrderedDict()  # content_sha256 -> DogProfile
+_pdf_cache_stats = {"hit": 0, "miss": 0}
+
+
+def _pdf_sha256(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 16), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def cached_parse_pdf(path: str):
+    """parse_pdf を content-hash でキャッシュするラッパー。
+
+    キャッシュヒット時は deepcopy を返し、呼び出し側での変更
+    （ヘテロ接合率マージ等）がキャッシュを汚さないようにする。
+    parse_pdf が None（Orivet PDF でない）を返す場合はキャッシュしない。
+    """
+    try:
+        digest = _pdf_sha256(path)
+    except OSError:
+        return parse_pdf(path)  # ハッシュ取得不可なら素通し
+
+    cached = _pdf_parse_cache.get(digest)
+    if cached is not None:
+        _pdf_parse_cache.move_to_end(digest)  # LRU: 直近使用を末尾へ
+        _pdf_cache_stats["hit"] += 1
+        _log_json("pdf_cache_hit", sha=digest[:12])
+        return _copy.deepcopy(cached)
+
+    _pdf_cache_stats["miss"] += 1
+    dog = parse_pdf(path)
+    if dog is not None:
+        _pdf_parse_cache[digest] = _copy.deepcopy(dog)
+        # LRU 上限超過分を古い順に破棄
+        while len(_pdf_parse_cache) > _PDF_CACHE_MAX:
+            _pdf_parse_cache.popitem(last=False)
+        _log_json("pdf_cache_miss", sha=digest[:12], cache_size=len(_pdf_parse_cache))
+    return dog
 
 
 def allowed_file(filename, extensions):
@@ -217,6 +288,46 @@ def healthz():
         "status": "ok",
         "pdfplumber": HAS_PDFPLUMBER,
         "ocr": HAS_OCR,
+    }), 200
+
+
+@app.route("/api/client-error", methods=["POST"])
+def client_error():
+    """ブラウザ側の予期しない JS 例外を受信して構造化ログに記録する。
+
+    フロントの window.onerror / unhandledrejection から呼ばれる。
+    本番障害の追跡可能性を上げるための軽量テレメトリ。
+    PII を避けるため message / source / line / col / userAgent のみ受信し、
+    長さも制限する。"""
+    data = request.get_json(silent=True) or {}
+
+    def _clip(val, n):
+        return str(val)[:n] if val is not None else ""
+
+    _log_json(
+        "client_error",
+        level="warning",
+        message=_clip(data.get("message"), 500),
+        source=_clip(data.get("source"), 300),
+        line=data.get("line"),
+        col=data.get("col"),
+        page=_clip(data.get("page"), 300),
+        ua=_clip(request.headers.get("User-Agent"), 300),
+    )
+    return jsonify({"ok": True}), 202
+
+
+@app.route("/api/cache-stats")
+def cache_stats():
+    """PDF パースキャッシュの統計（運用可視性用）。"""
+    total = _pdf_cache_stats["hit"] + _pdf_cache_stats["miss"]
+    hit_rate = (_pdf_cache_stats["hit"] / total) if total else 0.0
+    return jsonify({
+        "pdf_cache_size": len(_pdf_parse_cache),
+        "pdf_cache_max": _PDF_CACHE_MAX,
+        "hits": _pdf_cache_stats["hit"],
+        "misses": _pdf_cache_stats["miss"],
+        "hit_rate": round(hit_rate, 3),
     }), 200
 
 
@@ -320,7 +431,7 @@ def analyze():
 
             if HAS_PDFPLUMBER:
                 try:
-                    dog = parse_pdf(path)
+                    dog = cached_parse_pdf(path)
                     if dog:
                         dogs.append(dog)
                     elif is_dnap:
@@ -1056,7 +1167,7 @@ def api_simulator_parse():
                 errors.append({"file": f.filename, "message": "PDF として認識できませんでした"})
                 continue
             try:
-                dog = parse_pdf(path)
+                dog = cached_parse_pdf(path)
             except Exception as e:
                 eid = _log_exc("simulator_parse_pdf", f.filename, e, request_id)
                 errors.append({"file": f.filename, "message": f"PDF 解析中にエラーが発生しました（{type(e).__name__} / error_id={eid}）"})

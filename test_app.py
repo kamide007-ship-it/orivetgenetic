@@ -110,6 +110,82 @@ class TestHealthz:
         assert "ocr" in data
 
 
+class TestClientErrorEndpoint:
+    """ブラウザ JS エラー受信エンドポイント"""
+
+    def test_client_error_accepts_post(self):
+        rv = client.post("/api/client-error", json={
+            "message": "TypeError: x is undefined",
+            "source": "/simulator",
+            "line": 42, "col": 7,
+            "page": "/simulator?session=abc",
+        })
+        assert rv.status_code == 202
+        assert rv.get_json()["ok"] is True
+
+    def test_client_error_handles_empty_body(self):
+        rv = client.post("/api/client-error")
+        assert rv.status_code == 202
+
+    def test_client_error_clips_long_message(self):
+        # 過大な message でも 500 にならない（内部でクリップ）
+        rv = client.post("/api/client-error", json={"message": "x" * 5000})
+        assert rv.status_code == 202
+
+
+class TestPdfCacheStats:
+    """PDF パースキャッシュ統計エンドポイント"""
+
+    def test_cache_stats_returns_200(self):
+        rv = client.get("/api/cache-stats")
+        assert rv.status_code == 200
+        data = rv.get_json()
+        assert "pdf_cache_size" in data
+        assert "hits" in data
+        assert "misses" in data
+        assert "hit_rate" in data
+
+    def test_cached_parse_pdf_caches_by_hash(self):
+        """cached_parse_pdf が同一バイト列で 2 回目はキャッシュヒットする"""
+        import app as _appmod
+        import tempfile, os
+        # parse_pdf をモックして呼び出し回数をカウント
+        from poodle_genetics import DogProfile
+        calls = {"n": 0}
+        orig = _appmod.parse_pdf
+
+        def fake_parse(path):
+            calls["n"] += 1
+            return DogProfile(pet_name="Cached", registered_name="R", sex="Male")
+
+        _appmod.parse_pdf = fake_parse
+        # キャッシュをクリア
+        _appmod._pdf_parse_cache.clear()
+        try:
+            fd, path = tempfile.mkstemp(suffix=".pdf")
+            os.write(fd, b"%PDF-1.4 identical-bytes-for-cache-test")
+            os.close(fd)
+            d1 = _appmod.cached_parse_pdf(path)
+            d2 = _appmod.cached_parse_pdf(path)
+            os.unlink(path)
+            # parse_pdf は 1 回だけ呼ばれる（2 回目はキャッシュ）
+            assert calls["n"] == 1
+            assert d1.pet_name == "Cached"
+            assert d2.pet_name == "Cached"
+            # deepcopy なので別オブジェクト（キャッシュ汚染防止）
+            assert d1 is not d2
+        finally:
+            _appmod.parse_pdf = orig
+
+    def test_log_json_helper(self):
+        """_log_json が例外を投げずに構造化ログを出す"""
+        import app as _appmod
+        # 正常系
+        _appmod._log_json("test_event", level="info", foo="bar", n=1)
+        # シリアライズ不能オブジェクトでも落ちない（default=str）
+        _appmod._log_json("test_event2", obj=object())
+
+
 class TestVersion:
     def test_version_returns_200(self):
         rv = client.get("/version")
