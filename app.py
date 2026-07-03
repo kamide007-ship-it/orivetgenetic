@@ -5,6 +5,7 @@ Flask ベースの Web インターフェース
 """
 
 import os
+import re
 import time
 import uuid
 import json
@@ -670,6 +671,89 @@ def report(session_id):
                            genetics_tooltips=GENETICS_TOOLTIPS)
 
 
+from xml.sax.saxutils import escape as _xml_escape
+
+
+@app.route("/og/report/<session_id>.svg")
+def og_report_image(session_id):
+    """レポート個別の OG 画像（SVG、1200×630）を動的生成。
+
+    SNS シェア時に「犬名 + 犬種」を含むカードを表示し、汎用画像より
+    見栄えとクリック率を高める。dogs.json を読んで犬名・犬種を反映。
+    Pillow 不要（SVG テキスト合成）なのでどの環境でも動く。"""
+    if ".." in session_id or "/" in session_id:
+        return "invalid", 400
+    dogs_data = []
+    json_path = os.path.join(REPORT_FOLDER, session_id, "dogs.json")
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, "r", encoding="utf-8") as fj:
+                dogs_data = json.load(fj)
+        except (OSError, ValueError):
+            dogs_data = []
+
+    names = [str(d.get("name", "")).strip() for d in dogs_data
+             if isinstance(d, dict) and d.get("name")]
+    breeds = [str(d.get("breed", "")).strip() for d in dogs_data
+              if isinstance(d, dict) and d.get("breed")]
+    # 表示用に整形（最大 3 頭分＋残数）
+    if names:
+        shown = names[:3]
+        name_line = "・".join(_xml_escape(n) for n in shown)
+        if len(names) > 3:
+            name_line += f" 他{len(names) - 3}頭"
+    else:
+        name_line = "遺伝子解析レポート"
+    # 犬種（重複除去して最大 2 種）
+    uniq_breeds = []
+    for b in breeds:
+        if b and b not in uniq_breeds:
+            uniq_breeds.append(b)
+    breed_line = "・".join(_xml_escape(b) for b in uniq_breeds[:2]) if uniq_breeds else ""
+    count_line = f"検査 {len(names)} 頭" if names else "健康・毛色・血統を一括解析"
+
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="遺伝子解析レポート OG image">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b0764"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+    <linearGradient id="badge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5b21b6"/><stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(96 150)">
+    <rect width="300" height="300" rx="66" fill="url(#badge)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+    <g transform="translate(150 150)">
+      <g stroke="#ffffff" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.95">
+        <path d="M -46 -96 C 34 -70, 34 -18, -46 10 C -126 38, -126 90, -46 118"/>
+        <path d="M  46 -96 C -34 -70, -34 -18, 46 10 C 126 38, 126 90, 46 118"/>
+      </g>
+      <g stroke="#ffffff" stroke-width="9" stroke-linecap="round">
+        <line x1="-38" y1="-88" x2="38" y2="-88"/><line x1="-44" y1="-44" x2="44" y2="-44"/>
+        <line x1="-40" y1="-4" x2="40" y2="-4"/><line x1="-38" y1="38" x2="38" y2="38"/>
+        <line x1="-44" y1="80" x2="44" y2="80"/>
+      </g>
+    </g>
+    <g transform="translate(222 232)" fill="#ffffff" opacity="0.92">
+      <ellipse cx="0" cy="12" rx="24" ry="19"/>
+      <ellipse cx="-26" cy="-12" rx="8" ry="11"/><ellipse cx="-9" cy="-24" rx="7" ry="10"/>
+      <ellipse cx="9" cy="-24" rx="7" ry="10"/><ellipse cx="26" cy="-12" rx="8" ry="11"/>
+    </g>
+  </g>
+  <g transform="translate(452 210)" fill="#ffffff" font-family="'Hiragino Sans','Meiryo','Segoe UI',sans-serif">
+    <text x="0" y="0" font-size="40" font-weight="600" opacity="0.9">🐕 犬の遺伝子検査レポート</text>
+    <text x="0" y="82" font-size="60" font-weight="800" letter-spacing="-1">{name_line}</text>
+    {f'<text x="0" y="150" font-size="34" font-weight="500" opacity="0.9">{breed_line}</text>' if breed_line else ''}
+    <text x="0" y="212" font-size="30" font-weight="400" opacity="0.82">{_xml_escape(count_line)} — 健康リスク・毛色・血統を解析</text>
+  </g>
+</svg>"""
+    resp = make_response(svg)
+    resp.headers["Content-Type"] = "image/svg+xml; charset=utf-8"
+    resp.headers["Cache-Control"] = "public, max-age=3600"
+    return resp
+
+
 @app.route("/api/dogs/<session_id>")
 def api_dogs(session_id):
     """解析済みの犬の遺伝子型データをJSONで返す"""
@@ -824,6 +908,52 @@ def _localize_related(related_list, slug_index, lang):
     return out
 
 
+def _build_disease_faq_jsonld(entry: dict, lang: str) -> dict:
+    """疾患エントリから FAQPage 構造化データ（dict）を構築。
+
+    Google のリッチリザルト（FAQ アコーディオン）対象。summary/mechanism/
+    symptoms/advice の既存フィールドを Q&A に変換する。値がある項目のみ
+    含め、最低 2 問なければ None を返す（FAQPage は 2 問以上が実質要件）。"""
+    title = entry.get("title", "")
+    en = lang == "en"
+
+    def _clip(v, n=290):
+        s = str(v or "").strip()
+        # HTML タグを除去してプレーンテキストに
+        s = re.sub(r"<[^>]+>", "", s)
+        return s[:n]
+
+    qa = []
+    if entry.get("summary"):
+        q = f"What is {title}?" if en else f"{title}とは何ですか？"
+        qa.append((q, _clip(entry["summary"])))
+    if entry.get("mechanism"):
+        q = f"What causes {title}?" if en else f"{title}の原因は何ですか？"
+        qa.append((q, _clip(entry["mechanism"])))
+    if entry.get("symptoms"):
+        q = f"What are the symptoms of {title}?" if en else f"{title}の症状は何ですか？"
+        qa.append((q, _clip(entry["symptoms"])))
+    if entry.get("advice") or entry.get("management"):
+        q = f"How is {title} managed?" if en else f"{title}はどう対処すればよいですか？"
+        qa.append((q, _clip(entry.get("advice") or entry.get("management"))))
+
+    if len(qa) < 2:
+        return None
+    return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "inLanguage": "en" if en else "ja",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": q,
+                "acceptedAnswer": {"@type": "Answer", "text": a},
+            }
+            for q, a in qa
+        ],
+    }
+
+
 @app.route("/glossary/disease/<slug>")
 def disease_detail_page(slug):
     """疾患個別ページ（SEO 対応・schema.org 構造化データ付き）"""
@@ -859,6 +989,7 @@ def disease_detail_page(slug):
         original = DISEASE_SLUG_INDEX.get(slug, {})
         en_data = original.get("_en", {})
         en_reviewed = bool(en_data.get("reviewed"))
+    faq_jsonld = _build_disease_faq_jsonld(entry, lang)
     return render_template(
         "disease_detail.html",
         entry=entry,
@@ -873,6 +1004,7 @@ def disease_detail_page(slug):
         category_labels_en=CATEGORY_LABELS_EN,
         canonical=request.url_root.rstrip("/") + f"/glossary/disease/{slug}",
         lang=lang,
+        faq_jsonld=faq_jsonld,
     )
 
 

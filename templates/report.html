@@ -9,6 +9,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="apple-touch-icon" href="/static/apple-touch-icon.svg">
+    {# SNS シェア用: レポート個別の動的 OG 画像（犬名・犬種入り） #}
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="犬の遺伝子検査レポート — 健康リスク・毛色・血統">
+    <meta property="og:description" content="Orivet 遺伝子検査 PDF から生成した解析レポート。健康リスク・毛色予測・血統/COI をまとめて確認できます。">
+    <meta property="og:image" content="{{ request.url_root.rstrip('/') }}/og/report/{{ session_id }}.svg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ request.url_root.rstrip('/') }}/og/report/{{ session_id }}.svg">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {

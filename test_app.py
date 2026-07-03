@@ -91,6 +91,98 @@ class TestCleanup:
 # 2. /healthz エンドポイント
 # ===========================================================================
 
+class TestDynamicOgImage:
+    """レポート個別の動的 OG 画像（SVG）"""
+
+    def _make_session(self, sid, dogs):
+        import os, json
+        from app import REPORT_FOLDER
+        d = os.path.join(REPORT_FOLDER, sid)
+        os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, "dogs.json"), "w", encoding="utf-8") as f:
+            json.dump(dogs, f, ensure_ascii=False)
+        return d
+
+    def test_og_image_renders_dog_names(self):
+        import shutil
+        d = self._make_session("og_unit_1", [
+            {"name": "Seven", "breed": "Toy Poodle"},
+            {"name": "Angel", "breed": "Toy Poodle"},
+        ])
+        try:
+            rv = client.get("/og/report/og_unit_1.svg")
+            assert rv.status_code == 200
+            assert rv.headers["Content-Type"].startswith("image/svg+xml")
+            body = rv.get_data(as_text=True)
+            assert "<svg" in body
+            assert "Seven" in body and "Angel" in body
+            assert "Toy Poodle" in body
+            assert "検査 2 頭" in body
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+
+    def test_og_image_fallback_when_missing(self):
+        rv = client.get("/og/report/nonexistent_sid.svg")
+        assert rv.status_code == 200
+        assert "遺伝子解析レポート" in rv.get_data(as_text=True)
+
+    def test_og_image_rejects_path_traversal(self):
+        rv = client.get("/og/report/..%2f..svg")
+        # Flask は %2f を含む path を分割するため 404 になる（route にマッチしない）
+        assert rv.status_code in (400, 404)
+
+    def test_og_image_escapes_dog_name(self):
+        """犬名の XSS/SVG インジェクションが無害化される"""
+        import shutil
+        d = self._make_session("og_xss", [
+            {"name": "<script>x</script>", "breed": "Poodle"},
+            {"name": "B", "breed": "Poodle"},
+        ])
+        try:
+            body = client.get("/og/report/og_xss.svg").get_data(as_text=True)
+            assert "<script>x</script>" not in body
+            assert "&lt;script&gt;" in body
+        finally:
+            shutil.rmtree(d, ignore_errors=True)
+
+
+class TestDiseaseFaqJsonLd:
+    """疾患ページの FAQPage 構造化データ"""
+
+    def test_faq_present_on_disease_page(self):
+        rv = client.get("/glossary/disease/degenerative-myelopathy")
+        assert rv.status_code == 200
+        body = rv.get_data(as_text=True)
+        assert "FAQPage" in body
+        assert "Question" in body
+        assert "acceptedAnswer" in body
+
+    def test_faq_helper_needs_two_questions(self):
+        from app import _build_disease_faq_jsonld
+        # 2 問未満は None
+        assert _build_disease_faq_jsonld({"title": "X", "summary": "one"}, "ja") is None
+        # 2 問以上で FAQPage
+        faq = _build_disease_faq_jsonld(
+            {"title": "DM", "summary": "S", "mechanism": "M"}, "ja")
+        assert faq["@type"] == "FAQPage"
+        assert len(faq["mainEntity"]) == 2
+        assert faq["mainEntity"][0]["name"] == "DMとは何ですか？"
+
+    def test_faq_strips_html_tags(self):
+        from app import _build_disease_faq_jsonld
+        faq = _build_disease_faq_jsonld(
+            {"title": "T", "summary": "<b>bold</b> text", "symptoms": "<i>sym</i>"}, "ja")
+        answers = [q["acceptedAnswer"]["text"] for q in faq["mainEntity"]]
+        assert all("<" not in a for a in answers)
+
+    def test_faq_english_questions(self):
+        from app import _build_disease_faq_jsonld
+        faq = _build_disease_faq_jsonld(
+            {"title": "DM", "summary": "S", "mechanism": "M"}, "en")
+        assert faq["mainEntity"][0]["name"] == "What is DM?"
+        assert faq["inLanguage"] == "en"
+
+
 class TestHealthz:
     def test_returns_200(self):
         rv = client.get("/healthz")

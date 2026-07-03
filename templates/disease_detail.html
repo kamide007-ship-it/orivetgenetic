@@ -80,6 +80,11 @@
 }
 </script>
 
+{# --- JSON-LD FAQ (schema.org FAQPage) — Google リッチリザルト対象 --- #}
+{% if faq_jsonld %}
+<script type="application/ld+json">{{ faq_jsonld | tojson }}</script>
+{% endif %}
+
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif; background:#f8f9fa; color:#1f2937; line-height:1.7; }
