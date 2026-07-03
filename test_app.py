@@ -91,6 +91,58 @@ class TestCleanup:
 # 2. /healthz エンドポイント
 # ===========================================================================
 
+class TestKbSchemaValidation:
+    """DISEASE_KB / TRAIT_KB のスキーマ検証（CI で必須フィールド漏れ検出）"""
+
+    def test_real_kb_passes_validation(self):
+        """本番の疾患・形質 KB がスキーマ検証を通過する（フィールド漏れ・型ミス無し）"""
+        from poodle_genetics import DISEASE_KB, TRAIT_KB
+        from kb_validate import validate_kb
+        errors = validate_kb(DISEASE_KB, TRAIT_KB)
+        assert errors == [], "KB 検証エラー:\n" + "\n".join(errors[:30])
+
+    def test_validator_detects_missing_field(self):
+        from kb_validate import validate_kb
+        bad = [{"match": ["x"], "severity": "high", "summary": "s",
+                "mechanism": "m", "symptoms": "y", "inheritance": "i",
+                "advice": "a", "references": [], "_slug": "x"}]  # title 欠落
+        errors = validate_kb(bad, [])
+        assert any("title" in e for e in errors)
+
+    def test_validator_detects_bad_severity(self):
+        from kb_validate import validate_kb
+        bad = [{"title": "T", "match": ["x"], "severity": "critical",
+                "summary": "s", "mechanism": "m", "symptoms": "y",
+                "inheritance": "i", "advice": "a", "references": [], "_slug": "x"}]
+        errors = validate_kb(bad, [])
+        assert any("severity" in e for e in errors)
+
+    def test_validator_detects_duplicate_slug(self):
+        from kb_validate import validate_kb
+        base = {"title": "T", "match": ["x"], "severity": "high", "summary": "s",
+                "mechanism": "m", "symptoms": "y", "inheritance": "i",
+                "advice": "a", "references": []}
+        bad = [dict(base, _slug="dup"), dict(base, _slug="dup")]
+        errors = validate_kb(bad, [])
+        assert any("重複" in e for e in errors)
+
+    def test_validator_detects_bad_slug_format(self):
+        from kb_validate import validate_kb
+        bad = [{"title": "T", "match": ["x"], "severity": "high", "summary": "s",
+                "mechanism": "m", "symptoms": "y", "inheritance": "i",
+                "advice": "a", "references": [], "_slug": "Bad Slug!"}]
+        errors = validate_kb(bad, [])
+        assert any("URL-safe" in e for e in errors)
+
+    def test_validator_detects_empty_match(self):
+        from kb_validate import validate_kb
+        bad = [{"title": "T", "match": [], "severity": "high", "summary": "s",
+                "mechanism": "m", "symptoms": "y", "inheritance": "i",
+                "advice": "a", "references": [], "_slug": "x"}]
+        errors = validate_kb(bad, [])
+        assert any("match" in e for e in errors)
+
+
 class TestDynamicOgImage:
     """レポート個別の動的 OG 画像（SVG）"""
 
