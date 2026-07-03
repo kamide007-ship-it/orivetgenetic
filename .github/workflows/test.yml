@@ -28,3 +28,27 @@ jobs:
 
       - name: Translation lint (kb_en / guides_en)
         run: python translation_lint.py
+
+  e2e:
+    # Playwright による JS 実行を伴うブラウザ回帰テスト（毛色シミュレーターの
+    # 描画・アレル色丸 hex・モード切替・2ペア比較）。test ジョブとは独立。
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install flask werkzeug pytest playwright
+
+      - name: Install Chromium for Playwright
+        run: python -m playwright install --with-deps chromium
+
+      - name: Run E2E tests
+        run: pytest test_e2e.py -v --tb=short
