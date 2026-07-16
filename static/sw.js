@@ -2,15 +2,17 @@
 // バージョン: PR #59 で導入
 //
 // キャッシュ戦略:
-//   - app shell (HTML / 静的辞書 / アイコン): cache-first
-//   - /api/* / /analyze / /report: network-only (常に最新)
-//   - / (トップ): network-first (flash メッセージのキャッシュ汚染を防ぐ)
-//   - その他: network-first, fallback to cache
+//   - /api/* / /analyze / /report / /download: network-only (常に最新・PII 非キャッシュ)
+//   - / (トップ): network-only (flash メッセージのキャッシュ汚染を防ぐ)
+//   - HTML ページ (/simulator, /glossary, /guides, /sample, /glossary/*, /guides/*):
+//     network-first, fallback to cache (デプロイ後の修正を即座に反映。特にモバイルで
+//     古い壊れた JS が残る問題を防ぐ)
+//   - 静的アセット (/static/*): cache-first (stale-while-revalidate、高速表示優先)
 //
 // ⚠️ Service Worker のスコープはこのファイルの配置パスで決まる。
 //    /sw.js から配信することでサイト全体を制御可能。
 
-const CACHE_VERSION = 'orivet-v4';
+const CACHE_VERSION = 'orivet-v5';
 const CACHE_NAME = `app-shell-${CACHE_VERSION}`;
 
 // オフラインでも閲覧したい最小コアアセット
@@ -83,9 +85,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 静的辞書ページ・KB ページ等は cache-first
-  // - /, /glossary, /guides, /sample, /simulator, /static/*
-  // - /glossary/disease/*, /glossary/trait/*, /guides/*
+  // HTML ページ（/simulator, /glossary, /guides, /sample, /glossary/*, /guides/*）は
+  // network-first にする。
+  // 理由: cache-first（stale-while-revalidate）だと、デプロイ後もリロードするまで
+  // 古い HTML/JS がキャッシュから返され、修正が届かない。特にモバイルはリロード
+  // しないため「スマホでシミュレーターが動かない（古い壊れた版が残る）」問題が
+  // 起きていた。network-first で常に最新を取得し、オフライン時のみキャッシュへ
+  // フォールバックする。
+  const isHtmlNav = event.request.mode === 'navigate' ||
+    (event.request.headers.get('accept') || '').includes('text/html');
+  if (isHtmlNav) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        if (response.ok && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((c) => c.put(event.request, clone)).catch(() => {});
+        }
+        return response;
+      }).catch(() =>
+        caches.match(event.request).then((c) => c || caches.match('/simulator') || caches.match('/'))
+      )
+    );
+    return;
+  }
+
+  // 静的アセット（/static/* : SVG・JS 等）は cache-first（stale-while-revalidate）。
+  // これらは頻繁には変わらず、変わってもファイル内容の差分は軽微なため高速表示を優先。
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) {
@@ -104,10 +129,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((c) => c.put(event.request, clone));
         }
         return response;
-      }).catch(() => {
-        // オフライン時のフォールバック: トップページの cache を返す
-        return caches.match('/');
-      });
+      }).catch(() => caches.match('/'));
     })
   );
 });

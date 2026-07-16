@@ -1845,6 +1845,18 @@ class TestIndexCacheHeaders:
         # flash をキャッシュしない旨のコメント
         assert "flash" in sw and ("キャッシュしない" in sw or "network-only" in sw)
 
+    def test_service_worker_html_network_first(self):
+        """SW は HTML ページ（/simulator 等）を network-first にする。
+        cache-first だとデプロイ後もリロードまで古い壊れた JS が残り、特に
+        モバイルでシミュレーターが動かない原因になっていた。"""
+        sw = client.get("/sw.js").get_data(as_text=True)
+        # ナビゲーション/HTML 判定
+        assert "event.request.mode === 'navigate'" in sw
+        assert "text/html" in sw
+        # network-first の意図がコメントで明記されている
+        assert "network-first" in sw
+        assert "モバイル" in sw
+
     def test_index_flash_container_and_bfcache_guard(self):
         """ホームページに flash-container と bfcache（pageshow）ガードがある。
         戻る/進むで古い flash メッセージが再表示されないようにする。"""
