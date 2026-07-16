@@ -1306,6 +1306,24 @@ class TestHeterozygosityParser:
 
     # ---- 繁殖シミュレーター: 補足入力（PDF 犬向け I 座位/G 座位 override） ----
 
+    def test_simulator_guards_incomplete_genotype(self):
+        """PDF 解析で座位が欠落してもクラッシュしないガードが実装されている。
+        cross/splitAlleles の undefined ガード + 欠落座位の既定値補完 + 警告。"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # splitAlleles の undefined ガード
+        assert "if (gt == null || gt === '') return [];" in body
+        # cross の空分布ガード
+        assert "if (!a.length || !b.length) return {};" in body
+        # 欠落座位を既定値で補完するヘルパー
+        assert "function _fillGenotypeDefaults" in body
+        assert "_DEFAULT_COLOR_GENOTYPE" in body
+        assert "function _missingLociLabels" in body
+        # PDF 犬の sire/dam 構築で補完が適用される
+        assert "_fillGenotypeDefaults(DOGS[sireKey].color)" in body
+        assert "_fillGenotypeDefaults(DOGS[damKey].color)" in body
+        # 警告文言
+        assert "読み取れませんでした" in body
+
     def test_simulator_has_two_pair_compare(self):
         """シミュレーターに 2ペア比較（同じ父犬 × 2頭の母犬）機能がある"""
         body = client.get("/simulator").get_data(as_text=True)

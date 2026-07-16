@@ -811,6 +811,9 @@ function showTab(id) {
 function cross(a1a2, b1b2) {
   const a = splitAlleles(a1a2);
   const b = splitAlleles(b1b2);
+  // どちらかの遺伝子型が未検査/未定義（PDF 解析で座位が欠落）の場合は
+  // 空の分布を返す（クラッシュ防止）。呼び出し側は p* が 0 になるよう扱う。
+  if (!a.length || !b.length) return {};
   const results = {};
   for (const aa of a) {
     for (const bb of b) {
@@ -847,6 +850,9 @@ function splitAlleles(gt) {
     "II":["I","I"], "Ii":["I","i"], "ii":["i","i"],
     "NN":["N","N"], "PN":["P","N"], "PP":["P","P"],
   };
+  // 未検査/未定義の座位は空配列を返す（PDF 解析で一部座位が欠落しても
+  // クラッシュしないようガード）。
+  if (gt == null || gt === '') return [];
   return map[gt] || [gt[0], gt[1]];
 }
 
@@ -990,6 +996,22 @@ function computeEePhenotypes(creamProb, pB_, pdd, pD_, pbb, sire, dam) {
 // ================================================================
 // COLOR SIMULATION
 // ================================================================
+// PDF 解析で座位が一部欠落した犬（実データで頻発）でもシミュレーターが
+// クラッシュしないよう、欠けた座位をカスタム入力の既定値で補完する。
+// 既定値はカスタム遺伝子型パネルの selected オプションと一致させている。
+const _DEFAULT_COLOR_GENOTYPE = { e:'Ee', k:'KBky', a:'atat', b:'Bb', d:'DD', m:'mm', s:'SS' };
+const _LOCUS_LABEL_MAP = { e:'E', k:'K', a:'A', b:'B', d:'D', m:'M', s:'S' };
+// DOGS[key].color を既定値で補完（g/i は呼び出し側で扱う）
+function _fillGenotypeDefaults(color) {
+  return Object.assign({}, _DEFAULT_COLOR_GENOTYPE, color || {});
+}
+// 欠落していた座位（PDF から取れなかった座位）の表示ラベル配列を返す
+function _missingLociLabels(color) {
+  return Object.keys(_LOCUS_LABEL_MAP)
+    .filter(k => !(color && color[k]))
+    .map(k => _LOCUS_LABEL_MAP[k]);
+}
+
 const COLOR_MAP = {
   "black": { hex:"#1a1a1a", name:"ブラック" },
   "brown": { hex:"#8B4513", name:"ブラウン/チョコレート" },
@@ -1116,7 +1138,7 @@ function _currentSireGenotype() {
     sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s'), g: sireG };
     if (sireI) sire.i = sireI;
   } else {
-    sire = Object.assign({ g: 'gg' }, DOGS[sireKey].color);
+    sire = Object.assign({ g: 'gg' }, _fillGenotypeDefaults(DOGS[sireKey].color));
     const ovrSireI = (document.getElementById('ovr-sire-i') || {}).value;
     if (ovrSireI) sire.i = ovrSireI;
     if ((document.getElementById('ovr-sire-g') || {}).checked) sire.g = 'Gg';
@@ -1126,7 +1148,7 @@ function _currentSireGenotype() {
 // 母犬キー（DOGS のキー = PDF/サンプル）から遺伝子型を構築。custom は比較対象外。
 function _damGenotypeFromKey(key) {
   if (!key || key === 'custom' || !DOGS[key]) return null;
-  return Object.assign({ g: 'gg' }, DOGS[key].color);
+  return Object.assign({ g: 'gg' }, _fillGenotypeDefaults(DOGS[key].color));
 }
 // dam-color の option をコピーして比較ドロップダウンに反映（custom は除外）
 function _syncCompareDropdowns() {
@@ -1232,11 +1254,14 @@ function runColorSim() {
   const sireI = v('cs-i');
   const damI  = v('cd-i');
   let sire, dam;
+  // PDF 解析で欠落し既定値で補完した座位を集めて後で警告表示する
+  let assumedSire = [], assumedDam = [];
   if (sireKey === 'custom') {
     sire = { e:v('cs-e'), k:v('cs-k'), a:v('cs-a'), b:v('cs-b'), d:v('cs-d'), m:v('cs-m'), s:v('cs-s'), g: sireG };
     if (sireI) sire.i = sireI;
   } else {
-    sire = Object.assign({ g: 'gg' }, DOGS[sireKey].color);
+    assumedSire = _missingLociLabels(DOGS[sireKey].color);
+    sire = Object.assign({ g: 'gg' }, _fillGenotypeDefaults(DOGS[sireKey].color));
     // PDF 犬向け追加情報（I 座位 / Greying）を上書き適用
     const ovrSireI = (document.getElementById('ovr-sire-i') || {}).value;
     if (ovrSireI) sire.i = ovrSireI;
@@ -1246,7 +1271,8 @@ function runColorSim() {
     dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s'), g: damG };
     if (damI) dam.i = damI;
   } else {
-    dam = Object.assign({ g: 'gg' }, DOGS[damKey].color);
+    assumedDam = _missingLociLabels(DOGS[damKey].color);
+    dam = Object.assign({ g: 'gg' }, _fillGenotypeDefaults(DOGS[damKey].color));
     const ovrDamI = (document.getElementById('ovr-dam-i') || {}).value;
     if (ovrDamI) dam.i = ovrDamI;
     if ((document.getElementById('ovr-dam-g') || {}).checked) dam.g = 'Gg';
@@ -1484,7 +1510,19 @@ function runColorSim() {
   }
 
   // Render
-  let html = '<div class="color-bar" style="height:50px;margin-bottom:16px;">';
+  let html = '';
+  // PDF 解析で座位が欠落し既定値で仮定した場合、透明性のため冒頭に警告を出す
+  if (assumedSire.length || assumedDam.length) {
+    const parts = [];
+    if (assumedSire.length) parts.push(`父犬: ${assumedSire.join('・')} 座位`);
+    if (assumedDam.length) parts.push(`母犬: ${assumedDam.join('・')} 座位`);
+    html += `<div class="warn-box" style="margin-bottom:12px;">
+      ⚠️ <strong>一部の座位が PDF から読み取れませんでした</strong>（${parts.join(' / ')}）。
+      予測を続けるため既定値で仮定しています。正確な予測には、上の「カスタム入力」または
+      「📌 追加情報」で実際の遺伝子型を手動指定してください。
+    </div>`;
+  }
+  html += '<div class="color-bar" style="height:50px;margin-bottom:16px;">';
   const totalProb = Object.values(consolidated).reduce((s,c) => s + c.prob, 0) || 1;
   for (const [, data] of Object.entries(consolidated).sort((a,b) => b[1].prob - a[1].prob)) {
     const cm = COLOR_MAP[data.baseColor];

@@ -113,6 +113,35 @@ def test_simulator_runs_and_renders_colors(page, live_server):
     assert "%" in out
 
 
+def test_incomplete_genotype_does_not_crash(page, live_server):
+    """PDF 解析で一部の座位が欠落した犬でもシミュレーターがクラッシュしない。
+
+    実際の Orivet PDF は座位が欠けることがあり、以前は cross(undefined) で
+    TypeError を起こして runColorSim が停止（シミュレーション実行できない）
+    していた。欠けた座位は既定値で補完し、警告を出しつつ予測を継続する。"""
+    _open_sim(page, live_server)
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    # 座位が欠落した PDF 犬を投入（k/a/d/m/s や a/b/m/s が無い）
+    page.evaluate(
+        """() => {
+            addDogsToSimulator([
+              {name:'PartialSire', sex:'male', color:{e:'Ee', b:'Bb'}, health:{}},
+              {name:'PartialDam', sex:'female', color:{e:'ee', k:'KBKB', d:'DD'}, health:{}},
+            ], 'pdf_');
+        }"""
+    )
+    page.click("button:has-text('シミュレーション実行')")
+    page.wait_for_selector("#color-results", state="visible")
+    out = page.inner_text("#color-output")
+    # クラッシュせず結果が出る
+    assert "%" in out
+    # 欠落座位の警告が表示される
+    assert "読み取れませんでした" in out
+    # JS 例外が発生していない
+    assert errors == [], f"pageerror が発生: {errors}"
+
+
 def test_allele_dot_hex_rendered(page, live_server):
     """アレル色丸が期待通りの背景 hex で描画される（hex 回帰検出）。
     詳細モードに切り替え、E アレルの黒 (#0a0a0a) 丸が存在することを確認。"""
