@@ -2515,6 +2515,8 @@ function runHealthSim() {
   let hasCarrierRisk = false;
 
   let shownRows = 0;
+  const dangerDiseases = [];   // pPP > 20% の疾患名（日本語）
+  const cautionDiseases = [];  // 0 < pPP <= 20% の疾患名（日本語）
   for (const [disease, sireGT] of Object.entries(sire.health)) {
     const damGT = dam.health[disease];
     // 片方の親にその疾患のデータが無い場合は計算できないのでスキップ
@@ -2527,8 +2529,8 @@ function runHealthSim() {
     const pPP = (result["PP"] || 0);
 
     let badge = '';
-    if (pPP > 0.2) { badge = '<span style="color:#dc2626;font-weight:700;">危険</span>'; hasWarning = true; }
-    else if (pPP > 0) { badge = '<span style="color:#c2410c;font-weight:600;">注意</span>'; hasCarrierRisk = true; }
+    if (pPP > 0.2) { badge = '<span style="color:#dc2626;font-weight:700;">危険</span>'; hasWarning = true; dangerDiseases.push(jp); }
+    else if (pPP > 0) { badge = '<span style="color:#c2410c;font-weight:600;">注意</span>'; hasCarrierRisk = true; cautionDiseases.push(jp); }
     else if (pPN > 0) { badge = '<span style="color:#92400e;">キャリア可能性</span>'; }
     else { badge = '<span style="color:#166534;">安全</span>'; }
 
@@ -2558,9 +2560,14 @@ function runHealthSim() {
 
   // Summary
   if (hasWarning) {
-    html += '<div class="warn-box"><strong>警告:</strong> ポジティブ (P/P) の子犬が生まれる確率が高い項目があります。この交配は慎重に検討してください。繁殖相手のCDDY遺伝子型がN/Nの個体を探すことをお勧めします。</div>';
+    const names = escapeHtml(dangerDiseases.join('・'));
+    html += `<div class="warn-box"><strong>警告:</strong> <strong>${names}</strong> でポジティブ (P/P) の子犬が高確率で生まれます。`
+      + `発症リスクがあるため、この交配は慎重に検討してください。`
+      + `該当疾患について N/N（ノーマル）の繁殖相手を選ぶと、ポジティブの子犬を避けられます。</div>`;
   } else if (hasCarrierRisk) {
-    html += '<div class="info-box"><strong>注意:</strong> 一部の疾患でキャリアまたはポジティブの子犬が生まれる可能性があります。子犬の遺伝子検査を実施することをお勧めします。</div>';
+    const names = escapeHtml(cautionDiseases.join('・'));
+    html += `<div class="info-box"><strong>注意:</strong> <strong>${names}</strong> でポジティブまたはキャリアの子犬が生まれる可能性があります。`
+      + `子犬の遺伝子検査の実施をお勧めします。</div>`;
   } else {
     html += '<div class="ok-box"><strong>良好:</strong> この交配組み合わせでは、検査済み疾患について全ての子犬がノーマルまたはキャリアの予測です。</div>';
   }
