@@ -2302,6 +2302,45 @@ class TestClassifyResult:
     def test_case_insensitive(self):
         assert classify_result("normal (n/n)") == "normal"
 
+    # --- Embark 用語のサポート ---
+    def test_embark_clear_is_normal(self):
+        assert classify_result("Clear") == "normal"
+
+    def test_embark_at_risk_is_positive(self):
+        assert classify_result("At Risk") == "positive"
+        assert classify_result("At-Risk") == "positive"
+
+    def test_embark_not_detected_is_normal(self):
+        assert classify_result("Not Detected") == "normal"
+
+    def test_embark_carrier(self):
+        assert classify_result("Carrier") == "carrier"
+
+
+class TestDetectProvider:
+    """検査会社（プロバイダ）判定 — Orivet 以外の PDF 対応の起点"""
+
+    def test_detect_orivet(self):
+        from poodle_genetics import detect_provider
+        assert detect_provider("Orivet Genetic Summary Report") == "orivet"
+
+    def test_detect_embark(self):
+        from poodle_genetics import detect_provider
+        assert detect_provider("Embark Veterinary — Genetic Diversity Score 0.35") == "embark"
+
+    def test_detect_wisdom(self):
+        from poodle_genetics import detect_provider
+        assert detect_provider("Wisdom Panel Premium results") == "wisdom"
+
+    def test_detect_unknown(self):
+        from poodle_genetics import detect_provider
+        assert detect_provider("just some random text") == "unknown"
+
+    def test_detect_empty(self):
+        from poodle_genetics import detect_provider
+        assert detect_provider("") == "unknown"
+        assert detect_provider(None) == "unknown"
+
 
 @pytest.mark.skipif(not _HAS_PARSERS, reason="poodle_genetics parsers not importable")
 class TestDetectPedigreeFormat:

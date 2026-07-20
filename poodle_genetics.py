@@ -4561,24 +4561,56 @@ def parse_animal_details(text: str) -> dict:
 
 
 def classify_result(result_text: str) -> str:
-    """結果テキストからステータスを分類"""
+    """結果テキストからステータスを分類（Orivet / Embark 両対応）。
+
+    Orivet 用語: Normal (N/N) / Carrier (P/N) / Positive (P/P)
+    Embark 用語: Clear / Carrier / At Risk（+ At-Risk 表記ゆれ）
+    """
     text_upper = result_text.upper()
+    # --- 陽性（発症リスク） ---
     if "POSITIVE (P/P)" in text_upper or "TWO COPIES" in text_upper:
         return "positive"
-    elif "CARRIER (P/N)" in text_upper or "ONE COPY OF THE" in text_upper:
-        return "carrier"
-    elif "NORMAL (N/N)" in text_upper or "NO VARIANT DETECTED" in text_upper:
-        return "normal"
-    elif "POSITIVE HETEROZYGOUS" in text_upper:
-        return "carrier"
-    elif "POSITIVE" in text_upper and "P/P" in text_upper:
+    if "AT RISK" in text_upper or "AT-RISK" in text_upper:  # Embark
         return "positive"
-    elif "CARRIER" in text_upper:
+    # --- キャリア（保因） ---
+    if "CARRIER (P/N)" in text_upper or "ONE COPY OF THE" in text_upper:
         return "carrier"
-    elif "NORMAL" in text_upper:
+    if "POSITIVE HETEROZYGOUS" in text_upper:
+        return "carrier"
+    # --- ノーマル（変異なし） ---
+    if "NORMAL (N/N)" in text_upper or "NO VARIANT DETECTED" in text_upper:
         return "normal"
-    else:
-        return "trait"
+    if "CLEAR" in text_upper or "NOT DETECTED" in text_upper:  # Embark
+        return "normal"
+    # --- 単語ベースのフォールバック（順序に注意: carrier を positive より先に） ---
+    if "POSITIVE" in text_upper and "P/P" in text_upper:
+        return "positive"
+    if "CARRIER" in text_upper:
+        return "carrier"
+    if "NORMAL" in text_upper:
+        return "normal"
+    return "trait"
+
+
+# 遺伝子検査プロバイダ（検査会社）判定用マーカー
+_PROVIDER_MARKERS = {
+    "orivet": ("orivet", "genetic summary report", "isag profile"),
+    "embark": ("embark", "embarkvet", "embark veterinary",
+               "genetic diversity score", "coefficient of inbreeding"),
+    "wisdom": ("wisdom panel", "wisdompanel", "mars petcare"),
+}
+
+
+def detect_provider(text: str) -> str:
+    """PDF テキストから検査会社を推定。'orivet' / 'embark' / 'wisdom' / 'unknown'。
+
+    レポートの体裁が会社ごとに異なるため、まず会社を判定してから
+    それぞれの解析ロジックへ振り分ける拡張の起点。"""
+    low = (text or "").lower()
+    for provider, markers in _PROVIDER_MARKERS.items():
+        if any(m in low for m in markers):
+            return provider
+    return "unknown"
 
 
 def get_japanese_name(test_name: str) -> str:
@@ -5079,10 +5111,15 @@ def parse_pdf(pdf_path: str) -> Optional[DogProfile]:
         "遺伝子解析サマリー", "遺伝子検査サマリー",
         "遺伝子検査結果", "遺伝子解析レポート",
         "遺伝子検査レポート", "健康検査結果", "形質検査結果",
+        # Embark レポート
+        "Health Conditions", "Genetic Health", "Trait Results",
+        "Coat Color", "At A Glance", "Embark",
     )
     het_markers = (
         "Heterozygosity Details", "Heterozygosity Score",
         "ヘテロ接合率", "遺伝的多様性",
+        # Embark の遺伝的多様性指標
+        "Genetic Diversity Score", "Genetic Diversity",
     )
     has_main = any(m in text for m in main_markers)
     has_het = any(m in text for m in het_markers)
