@@ -235,6 +235,20 @@ class TestDiseaseFaqJsonLd:
         assert faq["inLanguage"] == "en"
 
 
+class TestFavicon:
+    """/favicon.ico の 404 解消（全ページのファビコン要求を SVG へ集約）"""
+
+    def test_favicon_ico_redirects_to_svg(self):
+        rv = client.get("/favicon.ico")
+        assert rv.status_code == 301
+        assert rv.headers["Location"].endswith("/static/favicon.svg")
+
+    def test_favicon_svg_served(self):
+        rv = client.get("/static/favicon.svg")
+        assert rv.status_code == 200
+        assert "<svg" in rv.get_data(as_text=True)
+
+
 class TestHealthz:
     def test_returns_200(self):
         rv = client.get("/healthz")

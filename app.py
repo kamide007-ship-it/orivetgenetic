@@ -282,6 +282,17 @@ def extract_sim_data(dog):
     }
 
 
+@app.route("/favicon.ico")
+def favicon():
+    """/favicon.ico を SVG ファビコンへリダイレクト。
+
+    一部のページ（guides / disease_detail / trait_detail 等）は
+    <link rel="icon"> を持たず、ブラウザが既定で /favicon.ico を要求する。
+    ルートで受けて SVG へ 301 リダイレクトすることで、全ページの
+    ファビコン 404 を一括で解消する。"""
+    return redirect("/static/favicon.svg", code=301)
+
+
 @app.route("/healthz")
 def healthz():
     """軽量ヘルスチェック（Render等の死活監視用、テンプレ描画なし）"""
