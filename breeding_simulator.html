@@ -528,10 +528,21 @@ header .container { position:relative; }
           </select>
         </div>
       </div>
-      <button class="btn" onclick="runHealthSim()">健康リスク分析</button>
+      <!-- カスタム健康入力（父犬/母犬いずれかで custom_h を選ぶと表示） -->
+      <div id="custom-health-sire" class="card" style="display:none;background:#f9fafb;margin-top:12px;">
+        <h3 data-i18n="custom_health_sire">父犬の疾患ステータス（カスタム入力）</h3>
+        <p style="font-size:0.85em;color:#6b7280;margin-bottom:8px;" data-i18n="custom_health_desc">各疾患の検査結果を選んでください（未検査/不明は N/N と同じ扱いで計算しません）。</p>
+        <div id="custom-health-sire-rows"></div>
+      </div>
+      <div id="custom-health-dam" class="card" style="display:none;background:#f9fafb;margin-top:12px;">
+        <h3 data-i18n="custom_health_dam">母犬の疾患ステータス（カスタム入力）</h3>
+        <p style="font-size:0.85em;color:#6b7280;margin-bottom:8px;" data-i18n="custom_health_desc">各疾患の検査結果を選んでください（未検査/不明は N/N と同じ扱いで計算しません）。</p>
+        <div id="custom-health-dam-rows"></div>
+      </div>
+      <button class="btn" onclick="runHealthSim()" data-i18n="btn_health_run">健康リスク分析</button>
     </div>
     <div id="health-results" class="card" style="display:none;">
-      <h2>子犬の健康リスク予測</h2>
+      <h2 data-i18n="health_result_title">子犬の健康リスク予測</h2>
       <div id="health-output"></div>
     </div>
   </div>
@@ -2428,28 +2439,87 @@ function resetColorSim() {
 // ================================================================
 // HEALTH SIMULATION
 // ================================================================
+// カスタム健康入力パネルを HEALTH_JP から動的生成（疾患ごとに N/N・P/N・P/P）
+function _buildCustomHealthPanels() {
+  const build = (containerId, prefix) => {
+    const c = document.getElementById(containerId);
+    if (!c || c.dataset.built) return;
+    let html = '';
+    for (const [disease, jp] of Object.entries(HEALTH_JP)) {
+      const safe = disease.replace(/[^a-zA-Z0-9]/g, '_');
+      html += `<div class="form-group" style="margin-bottom:8px;">
+        <label style="font-size:0.9em;">${jp} <span style="color:#9ca3af;font-size:0.85em;">(${disease})</span></label>
+        <select id="${prefix}-${safe}" onchange="runHealthSim()">
+          <option value="NN" selected>N/N（ノーマル）</option>
+          <option value="PN">P/N（キャリア）</option>
+          <option value="PP">P/P（ポジティブ）</option>
+        </select>
+      </div>`;
+    }
+    c.innerHTML = html;
+    c.dataset.built = '1';
+  };
+  build('custom-health-sire-rows', 'chs');
+  build('custom-health-dam-rows', 'chd');
+}
+
+// カスタム健康入力パネルから health 辞書 {disease: 'NN'|'PN'|'PP'} を組み立て
+function _readCustomHealth(prefix) {
+  const out = {};
+  for (const disease of Object.keys(HEALTH_JP)) {
+    const safe = disease.replace(/[^a-zA-Z0-9]/g, '_');
+    const el = document.getElementById(`${prefix}-${safe}`);
+    if (el) out[disease] = el.value;
+  }
+  return out;
+}
+
 function runHealthSim() {
   const sireKey = document.getElementById('sire-health').value;
   const damKey = document.getElementById('dam-health').value;
 
-  if (sireKey === 'custom_h' || damKey === 'custom_h') {
+  // カスタム入力パネルの表示切替（custom_h を選んだ側だけ表示）
+  const sireCustom = sireKey === 'custom_h';
+  const damCustom = damKey === 'custom_h';
+  if (sireCustom || damCustom) _buildCustomHealthPanels();
+  const cs = document.getElementById('custom-health-sire');
+  const cd = document.getElementById('custom-health-dam');
+  if (cs) cs.style.display = sireCustom ? 'block' : 'none';
+  if (cd) cd.style.display = damCustom ? 'block' : 'none';
+
+  // sire/dam の health 辞書と表示名を組み立て（DOGS or カスタム入力）
+  let sire, dam;
+  if (sireCustom) {
+    sire = { name: '父犬（カスタム）', health: _readCustomHealth('chs') };
+  } else if (DOGS[sireKey]) {
+    sire = DOGS[sireKey];
+  }
+  if (damCustom) {
+    dam = { name: '母犬（カスタム）', health: _readCustomHealth('chd') };
+  } else if (DOGS[damKey]) {
+    dam = DOGS[damKey];
+  }
+
+  if (!sire || !dam || !sire.health || !dam.health) {
     document.getElementById('health-results').style.display = 'block';
-    document.getElementById('health-output').innerHTML = '<div class="info-box">カスタム入力は今後追加予定です。<br>PDF解析データまたはサンプルデータから選択してください。</div>';
+    document.getElementById('health-output').innerHTML =
+      '<div class="info-box">父犬・母犬を選択してください（カスタム入力・PDF解析データ・サンプルのいずれか）。</div>';
     return;
   }
 
-  const sire = DOGS[sireKey];
-  const dam = DOGS[damKey];
-
-  let html = `<p style="margin-bottom:16px;"><strong>${sire.name}</strong> (父) × <strong>${dam.name}</strong> (母) の交配結果予測</p>`;
+  let html = `<p style="margin-bottom:16px;"><strong>${escapeHtml(sire.name)}</strong> (父) × <strong>${escapeHtml(dam.name)}</strong> (母) の交配結果予測</p>`;
 
   html += '<table><tr><th>疾患</th><th>父犬</th><th>母犬</th><th>ノーマル (N/N)</th><th>キャリア (P/N)</th><th>ポジティブ (P/P)</th><th>評価</th></tr>';
 
   let hasWarning = false;
   let hasCarrierRisk = false;
 
+  let shownRows = 0;
   for (const [disease, sireGT] of Object.entries(sire.health)) {
     const damGT = dam.health[disease];
+    // 片方の親にその疾患のデータが無い場合は計算できないのでスキップ
+    if (!sireGT || !damGT) continue;
+    shownRows++;
     const jp = HEALTH_JP[disease] || disease;
     const result = cross(sireGT, damGT);
     const pNN = (result["NN"] || 0);
@@ -2477,6 +2547,14 @@ function runHealthSim() {
     </tr>`;
   }
   html += '</table>';
+
+  // 共通して比較できる疾患が 1 つも無い場合
+  if (shownRows === 0) {
+    document.getElementById('health-results').style.display = 'block';
+    document.getElementById('health-output').innerHTML =
+      '<div class="info-box">父犬・母犬の両方に検査データがある疾患がありませんでした。カスタム入力で疾患ステータスを設定するか、両方に同じ検査項目を含む犬を選んでください。</div>';
+    return;
+  }
 
   // Summary
   if (hasWarning) {
@@ -3201,6 +3279,11 @@ const _SIM_I18N = {
     compare_run:         'くらべる',
     color_result_title:  '毛色予測結果',
     health_title:        '健康リスク繁殖シミュレーション',
+    health_result_title: '子犬の健康リスク予測',
+    btn_health_run:      '健康リスク分析',
+    custom_health_sire:  '父犬の疾患ステータス（カスタム入力）',
+    custom_health_dam:   '母犬の疾患ステータス（カスタム入力）',
+    custom_health_desc:  '各疾患の検査結果を選んでください（未検査/不明は N/N と同じ扱いで計算しません）。',
   },
   en: {
     title:               'Orivet Genetic Simulator',
@@ -3234,6 +3317,11 @@ const _SIM_I18N = {
     compare_run:         'Compare',
     color_result_title:  'Coat color prediction',
     health_title:        'Health risk breeding simulation',
+    health_result_title: 'Puppy health risk prediction',
+    btn_health_run:      'Analyze health risk',
+    custom_health_sire:  'Sire disease status (custom input)',
+    custom_health_dam:   'Dam disease status (custom input)',
+    custom_health_desc:  'Select each disease result (untested/unknown is treated as N/N and not computed).',
   },
 };
 let _simLang = 'ja';
