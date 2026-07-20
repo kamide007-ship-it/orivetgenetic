@@ -1359,6 +1359,24 @@ class TestHeterozygosityParser:
         # PDF 投入時に比較ドロップダウンも同期
         assert "_syncCompareDropdowns()" in body
 
+    def test_simulator_has_custom_health_input(self):
+        """健康リスク分析のカスタム入力が実装されている（「今後追加予定」の廃止）"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # プレースホルダーが撤去されている
+        assert "カスタム入力は今後追加予定です" not in body
+        # カスタム健康入力パネルとビルダー
+        assert 'id="custom-health-sire"' in body
+        assert 'id="custom-health-dam"' in body
+        assert "function _buildCustomHealthPanels" in body
+        assert "function _readCustomHealth" in body
+        # 疾患ごとに N/N・P/N・P/P を選ぶ設計
+        assert "N/N（ノーマル）" in body
+        assert "P/N（キャリア）" in body
+        assert "P/P（ポジティブ）" in body
+        # i18n（ja/en）
+        assert "父犬の疾患ステータス" in body
+        assert "Sire disease status" in body
+
     def test_simulator_has_beginner_advanced_mode(self):
         """シミュレーターに 初級/詳細 モードトグルがある"""
         body = client.get("/simulator").get_data(as_text=True)

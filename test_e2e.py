@@ -205,3 +205,28 @@ def test_two_pair_compare_renders(page, live_server):
     assert "父犬:" in out
     # 2 カラム（🅰 / 🅱）が描画される
     assert "🅰" in out and "🅱" in out
+
+
+def test_custom_health_input_computes(page, live_server):
+    """健康リスク分析のカスタム入力: 父P/N × 母P/N → 25% P/P を表示。
+
+    以前は「今後追加予定です」のプレースホルダーだった機能を実装。"""
+    _open_sim(page, live_server)
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.click(".tab:has-text('健康リスク')")
+    page.select_option("#sire-health", "custom_h")
+    page.select_option("#dam-health", "custom_h")
+    # カスタムパネルが表示される
+    page.wait_for_selector("#custom-health-sire", state="visible")
+    page.wait_for_selector("#custom-health-dam", state="visible")
+    # CDDY を両親 P/N に設定 → 子は 25% P/P
+    page.select_option("#chs-CDDY_IVDD", "PN")
+    page.select_option("#chd-CDDY_IVDD", "PN")
+    page.click("button:has-text('健康リスク分析')")
+    page.wait_for_selector("#health-results", state="visible")
+    out = page.inner_text("#health-output")
+    assert "%" in out
+    assert "25" in out  # P/P 25%
+    assert "今後追加予定" not in out
+    assert errors == [], f"pageerror: {errors}"
