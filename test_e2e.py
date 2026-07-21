@@ -207,6 +207,25 @@ def test_two_pair_compare_renders(page, live_server):
     assert "🅰" in out and "🅱" in out
 
 
+def test_health_warning_names_actual_disease(page, live_server):
+    """健康リスク警告は実際にリスクのある疾患名を表示する（CDDY 決め打ちの修正）。
+
+    DM を両親 P/P → 子 100% P/P。警告文が「変性性脊髄症」を挙げ、
+    無関係の「CDDY遺伝子型」を挙げないことを確認。"""
+    _open_sim(page, live_server)
+    page.click(".tab:has-text('健康リスク')")
+    page.select_option("#sire-health", "custom_h")
+    page.select_option("#dam-health", "custom_h")
+    page.wait_for_selector("#custom-health-sire", state="visible")
+    page.select_option("#chs-DM", "PP")
+    page.select_option("#chd-DM", "PP")
+    page.click("button:has-text('健康リスク分析')")
+    page.wait_for_selector("#health-results", state="visible")
+    out = page.inner_text("#health-output")
+    assert "変性性脊髄症" in out          # 実際の危険疾患が明記される
+    assert "CDDY遺伝子型" not in out       # 無関係な決め打ち文言が出ない
+
+
 def test_custom_health_input_computes(page, live_server):
     """健康リスク分析のカスタム入力: 父P/N × 母P/N → 25% P/P を表示。
 
