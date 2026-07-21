@@ -1119,6 +1119,16 @@ function _buildColorResults(sire, dam) {
     if (pat_ > 0 && pbb > 0 && pD_ > 0) pushE("phantom_brown", agoutiProb * pat_ * pbb * pD_, "ブラックタン/トライカラー(ブラウン)", "ky/ky, at_, bb, D_");
     if (pa_a > 0 && pB_ > 0 && pD_ > 0) pushE("recessive_black", agoutiProb * pa_a * pB_ * pD_, "リセッシブブラック", "ky/ky, a/a, B_, D_");
     if (pa_a > 0 && pbb > 0 && pD_ > 0) pushE("brown", agoutiProb * pa_a * pbb * pD_, "リセッシブブラウン", "ky/ky, a/a, bb, D_");
+    // 希釈 (dd) のアグーチ表現型 — 以前は pD_ のみで pdd を計上しておらず、
+    // ブルーファントム/イザベラタン等の確率が漏れて合計が 100% にならなかった。
+    if (pay_ > 0 && pB_ > 0 && pdd > 0) pushE("fawn", agoutiProb * pay_ * pB_ * pdd, "フォーン/セーブル(希釈ブルー系)", "ky/ky, ay_, B_, dd");
+    if (pay_ > 0 && pbb > 0 && pdd > 0) pushE("fawn", agoutiProb * pay_ * pbb * pdd, "フォーン/セーブル(イザベラ系)", "ky/ky, ay_, bb, dd");
+    if (paw_ > 0 && pB_ > 0 && pdd > 0) pushE("wild_sable", agoutiProb * paw_ * pB_ * pdd, "ワイルドセーブル(希釈)", "ky/ky, aw_, B_, dd");
+    if (paw_ > 0 && pbb > 0 && pdd > 0) pushE("wild_sable", agoutiProb * paw_ * pbb * pdd, "ワイルドセーブル(イザベラ系)", "ky/ky, aw_, bb, dd");
+    if (pat_ > 0 && pB_ > 0 && pdd > 0) pushE("phantom_black", agoutiProb * pat_ * pB_ * pdd, "ブルータン/トライ(希釈)", "ky/ky, at_, B_, dd");
+    if (pat_ > 0 && pbb > 0 && pdd > 0) pushE("phantom_brown", agoutiProb * pat_ * pbb * pdd, "イザベラタン/トライ(希釈)", "ky/ky, at_, bb, dd");
+    if (pa_a > 0 && pB_ > 0 && pdd > 0) pushE("blue", agoutiProb * pa_a * pB_ * pdd, "ブルー(希釈リセッシブ黒)", "ky/ky, a/a, B_, dd");
+    if (pa_a > 0 && pbb > 0 && pdd > 0) pushE("lilac", agoutiProb * pa_a * pbb * pdd, "ライラック(希釈リセッシブ茶)", "ky/ky, a/a, bb, dd");
   }
   if (pE_ > 0 && (pkbrky + pkbrkbr) > 0) { const brProb = pE_ * (pkbrky + pkbrkbr); if (brProb > 0) pushE("brindle", brProb, "ブリンドル", "kbr_"); }
   if ((pMm + pMM) > 0) { results.push({ color:"merle", prob: (pMm + pMM) * pE_, note:"マールパターン (M_, E_) ※上記色にマールが加わる" }); }

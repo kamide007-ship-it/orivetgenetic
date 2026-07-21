@@ -207,6 +207,29 @@ def test_two_pair_compare_renders(page, live_server):
     assert "🅰" in out and "🅱" in out
 
 
+def test_color_probabilities_sum_to_100_dilute_agouti(page, live_server):
+    """毛色予測の確率が合計 100% になる（希釈アグーチの計上漏れ回帰テスト）。
+
+    以前は E_ + ky/ky（アグーチ）経路が dd（希釈）を計上せず、ブルー
+    ファントム等の確率が漏れて合計 93.75% 等になっていた。"""
+    _open_sim(page, live_server)
+    total = page.evaluate(
+        """() => {
+            // ky/ky + Dd × Dd（希釈が 25% 出る）+ at/at（ファントム）
+            const sire = {e:'Ee', k:'kyky', a:'atat', b:'Bb', d:'Dd', m:'mm', s:'SS', g:'gg'};
+            const dam  = {e:'Ee', k:'kyky', a:'atat', b:'Bb', d:'Dd', m:'mm', s:'SS', g:'gg'};
+            const cons = _consolidateByBaseColor(_buildColorResults(sire, dam));
+            let sum = 0;
+            for (const [k, p] of Object.entries(cons)) {
+                if (k === 'merle' || k === 'parti') continue;  // 上乗せ修飾は除外
+                sum += p;
+            }
+            return sum;
+        }"""
+    )
+    assert abs(total - 1.0) < 0.01, f"毛色確率の合計が 100% でない: {total}"
+
+
 def test_health_warning_names_actual_disease(page, live_server):
     """健康リスク警告は実際にリスクのある疾患名を表示する（CDDY 決め打ちの修正）。
 
