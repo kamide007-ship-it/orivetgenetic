@@ -249,6 +249,49 @@ def test_health_warning_names_actual_disease(page, live_server):
     assert "CDDY遺伝子型" not in out       # 無関係な決め打ち文言が出ない
 
 
+def test_coi_full_sib_mating_is_25_percent(page, live_server):
+    """近親交配係数: 全兄妹交配 → COI 25%（Wright's F の教科書値）。
+
+    以前は指数を n₁+n₂+1 ではなく gen+gen+1 としており COI を 4 倍過小評価
+    （兄妹交配が 25% ではなく 6.25% と表示）していた。仔犬起点の世代
+    (父=1,祖父母=2) から親起点の世代 (gen-1) へ正しく変換する回帰テスト。
+
+    父犬と母犬が全兄妹 = 同じ両親を共有 → 仔の祖父母(gen2)が父方母方で一致。"""
+    _open_sim(page, live_server)
+    page.click(".tab:has-text('近親交配係数')")
+    page.fill("#p-sire", "SireDog")
+    page.fill("#p-dam", "DamDog")
+    # 全兄妹: 父方祖父母 = 母方祖父母（同一個体）
+    page.fill("#p-ss", "SharedGrandpa")
+    page.fill("#p-sd", "SharedGrandma")
+    page.fill("#p-ds", "SharedGrandpa")
+    page.fill("#p-dd", "SharedGrandma")
+    page.click("button:has-text('COI算出')")
+    page.wait_for_selector("#coi-results", state="visible")
+    out = page.inner_text("#coi-output")
+    assert "25.00%" in out, f"全兄妹交配の COI が 25% でない: {out[:200]}"
+    assert "極めて高リスク" in out
+
+
+def test_coi_first_cousin_mating_is_6_25_percent(page, live_server):
+    """近親交配係数: いとこ交配 → COI 6.25%（アプリの目安表と一致）。
+
+    父犬と母犬がいとこ = 曾祖父母(gen3)を父方母方で共有。"""
+    _open_sim(page, live_server)
+    page.click(".tab:has-text('近親交配係数')")
+    page.fill("#p-sire", "SireDog")
+    page.fill("#p-dam", "DamDog")
+    # いとこ: 父方曾祖父母1 = 母方曾祖父母1（同一個体）
+    page.fill("#p-sss", "SharedGGpa")
+    page.fill("#p-ssd", "SharedGGma")
+    page.fill("#p-dss", "SharedGGpa")
+    page.fill("#p-dsd", "SharedGGma")
+    page.click("button:has-text('COI算出')")
+    page.wait_for_selector("#coi-results", state="visible")
+    out = page.inner_text("#coi-output")
+    assert "6.25%" in out, f"いとこ交配の COI が 6.25% でない: {out[:200]}"
+
+
 def test_custom_health_input_computes(page, live_server):
     """健康リスク分析のカスタム入力: 父P/N × 母P/N → 25% P/P を表示。
 

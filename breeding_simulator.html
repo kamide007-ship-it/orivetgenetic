@@ -2637,7 +2637,11 @@ function calcCOI() {
     for (const da of damAncestors) {
       if (!da.name) continue;
       if (sa.name === da.name) {
-        const contribution = Math.pow(0.5, sa.gen + da.gen + 1);
+        // Wright's F = Σ (1/2)^(n₁+n₂+1)。n₁/n₂ は「親から共通祖先までの世代数」。
+        // sa.gen/da.gen は仔犬起点の世代（父=1, 祖父母=2, 曾祖父母=3）なので、
+        // 親起点の世代は gen-1。したがって指数は (gen-1)+(gen-1)+1 = gen+gen-1。
+        // 以前は +1 としており COI を 4 倍過小評価（兄妹交配が 25%→6.25% と表示）していた。
+        const contribution = Math.pow(0.5, sa.gen + da.gen - 1);
         coi += contribution;
         commonAncestors.push({
           name: sa.name,
@@ -2657,9 +2661,11 @@ function calcCOI() {
   // COI Gauge
   let gaugeColor = '#22c55e';
   let gaugeLabel = '良好';
-  if (coiPct > 25) { gaugeColor = '#dc2626'; gaugeLabel = '極めて高リスク'; }
-  else if (coiPct > 12.5) { gaugeColor = '#ef4444'; gaugeLabel = '高リスク'; }
-  else if (coiPct > 6.25) { gaugeColor = '#eab308'; gaugeLabel = '注意'; }
+  // 境界は「以上」で判定。兄妹交配=25%,半兄妹=12.5%,いとこ=6.25% が
+  // ちょうど境界値に載るため、これらが上位バンド（正しい警告）に入るようにする。
+  if (coiPct >= 25) { gaugeColor = '#dc2626'; gaugeLabel = '極めて高リスク'; }
+  else if (coiPct >= 12.5) { gaugeColor = '#ef4444'; gaugeLabel = '高リスク'; }
+  else if (coiPct >= 6.25) { gaugeColor = '#eab308'; gaugeLabel = '注意'; }
 
   html += `<div style="text-align:center;margin-bottom:20px;">
     <div style="font-size:2.5em;font-weight:800;color:${gaugeColor};">${coiPct.toFixed(2)}%</div>
@@ -2695,10 +2701,10 @@ function calcCOI() {
   }
 
   // Advice
-  if (coiPct > 12.5) {
-    html += '<div class="warn-box"><strong>推奨:</strong> COIが12.5%を超えています。免疫力低下、繁殖力低下、遺伝性疾患の発現リスクが高まります。別の交配相手を検討してください。</div>';
-  } else if (coiPct > 6.25) {
-    html += '<div class="info-box"><strong>注意:</strong> COIが6.25%を超えています。いとこ交配レベルです。健康状態を注意深く観察し、子犬の遺伝子検査を推奨します。</div>';
+  if (coiPct >= 12.5) {
+    html += '<div class="warn-box"><strong>推奨:</strong> COIが12.5%以上です。免疫力低下、繁殖力低下、遺伝性疾患の発現リスクが高まります。別の交配相手を検討してください。</div>';
+  } else if (coiPct >= 6.25) {
+    html += '<div class="info-box"><strong>注意:</strong> COIが6.25%以上です。いとこ交配レベルです。健康状態を注意深く観察し、子犬の遺伝子検査を推奨します。</div>';
   } else if (coiPct > 0) {
     html += '<div class="ok-box"><strong>良好:</strong> COIは許容範囲内です。ただし、遺伝的多様性を維持するため、引き続き血統管理を行うことをお勧めします。</div>';
   }
