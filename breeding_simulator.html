@@ -123,6 +123,20 @@ tr:hover td { background:#faf5ff; }
   .pedigree { flex-direction:column; }
   /* JS生成テーブル（毛色予測・健康リスク・COI寄与）の横スクロール対応 */
   .card { overflow-x:auto; }
+  /* タブを常に1行に収め、スクロール中も画面上部に固定（結果を読みながら切替可能） */
+  .tabs {
+    position:sticky; top:0; z-index:30;
+    flex-wrap:nowrap; gap:4px;
+    margin:0 -20px 16px; padding:8px 20px 0;
+    background:var(--bg);
+    box-shadow:0 3px 8px rgba(0,0,0,0.05);
+  }
+  .tab {
+    flex:1 1 0; min-width:0; text-align:center;
+    padding:12px 6px; font-size:0.8em; line-height:1.25;
+  }
+  /* 実行後スクロール時、固定タブ分のオフセットを確保して結果先頭が隠れないように */
+  #color-results, #health-results, #coi-results { scroll-margin-top:64px; }
 }
 
 /* === スマートフォン UX 集中改善 (PR #51) === */
@@ -149,6 +163,11 @@ tr:hover td { background:#faf5ff; }
   .coi-gauge { height:36px; }
   .coi-fill { padding-right:10px; font-size:0.85em; }
   .btn { padding:14px; min-height:48px; font-size:1em; }
+  /* 主要アクション（実行/分析/算出）は全幅で押しやすく */
+  .btn-run { width:100%; display:block; }
+  /* ヘッダー圧縮: 画面の縦を節約し、ツール本体を早く見せる */
+  header { padding:14px 0; margin-bottom:16px; }
+  header p { display:none; }
   /* iOS safe-area-inset (ノッチ・ホームバー) */
   body { padding-bottom:env(safe-area-inset-bottom); }
 }
@@ -458,7 +477,7 @@ header .container { position:relative; }
       </div>
 
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <button class="btn" onclick="runColorSim()" data-i18n="btn_run">シミュレーション実行</button>
+        <button class="btn btn-run" onclick="runColorSim();_scrollToResults('color-results')" data-i18n="btn_run">シミュレーション実行</button>
         <button type="button" class="btn-reset" onclick="resetColorSim()"
                 title="父犬/母犬の選択と補足入力をすべて初期化します"
                 aria-label="シミュレーションをリセット"
@@ -550,7 +569,7 @@ header .container { position:relative; }
         <p style="font-size:0.85em;color:#6b7280;margin-bottom:8px;" data-i18n="custom_health_desc">各疾患の検査結果を選んでください（未検査/不明は N/N と同じ扱いで計算しません）。</p>
         <div id="custom-health-dam-rows"></div>
       </div>
-      <button class="btn" onclick="runHealthSim()" data-i18n="btn_health_run">健康リスク分析</button>
+      <button class="btn btn-run" onclick="runHealthSim();_scrollToResults('health-results')" data-i18n="btn_health_run">健康リスク分析</button>
     </div>
     <div id="health-results" class="card" style="display:none;">
       <h2 data-i18n="health_result_title">子犬の健康リスク予測</h2>
@@ -629,7 +648,7 @@ header .container { position:relative; }
         </div>
       </div>
 
-      <button class="btn" onclick="calcCOI()">COI算出</button>
+      <button class="btn btn-run" onclick="calcCOI();_scrollToResults('coi-results')">COI算出</button>
     </div>
 
     <div id="coi-results" class="card" style="display:none;">
@@ -804,6 +823,18 @@ function showTab(id) {
     tab.classList.add('active');
     tab.setAttribute('aria-selected', 'true');
   }
+}
+
+// スマホで「実行/分析/算出」タップ後に結果へ自動スクロール（PC では何もしない）。
+// 入力フォームが縦に長いため、結果が画面外になりがちな問題を解消する。
+function _scrollToResults(id) {
+  try {
+    if (!window.matchMedia || !window.matchMedia('(max-width:768px)').matches) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    // 描画(innerHTML 反映)後にスクロール
+    setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  } catch (e) { /* scrollIntoView 非対応環境は無視 */ }
 }
 
 // ================================================================
@@ -3180,6 +3211,14 @@ document.addEventListener('DOMContentLoaded', () => {
   loadPedigreesFromSession();
   runColorSim();
   runHealthSim();
+  // スマホでは PDF 投入カードを既定で畳み、要点（総合サマリー・タブ）を先に見せる。
+  // PDF の主導線は index ページ側にあり、ここは補助的なため。ヘッダーで開閉可能。
+  try {
+    const pdfCard = document.getElementById('pdf-upload-card');
+    if (pdfCard && window.matchMedia && window.matchMedia('(max-width:768px)').matches) {
+      pdfCard.open = false;
+    }
+  } catch (e) { /* 無視 */ }
 });
 
 // === 座位ヘルプモーダル (KB) ===
