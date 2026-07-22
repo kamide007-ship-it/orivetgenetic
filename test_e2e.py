@@ -275,6 +275,60 @@ def test_no_horizontal_overflow_on_mobile(browser, live_server):
     assert errors == [], f"pageerror: {errors}"
 
 
+def test_mobile_tabs_sticky_and_single_row(browser, live_server):
+    """スマホでタブが1行に収まり、スクロールしても画面上部に固定される。"""
+    ctx = browser.new_context(viewport={"width": 360, "height": 780})
+    pg = ctx.new_page()
+    pg.goto(live_server + "/simulator", wait_until="networkidle")
+    pg.wait_for_selector(".tabs", state="visible")
+    info = pg.evaluate(
+        """() => {
+            const tabs = document.querySelector('.tabs');
+            const tops = [...document.querySelectorAll('.tab')].map(t => Math.round(t.getBoundingClientRect().top));
+            return { pos: getComputedStyle(tabs).position, oneRow: new Set(tops).size === 1 };
+        }"""
+    )
+    assert info["pos"] == "sticky", "タブが sticky になっていない"
+    assert info["oneRow"], "タブが1行に収まっていない"
+    # スクロールしてもタブが上部に固定される
+    pg.evaluate("window.scrollTo(0, 1200)")
+    top = pg.evaluate("() => Math.round(document.querySelector('.tabs').getBoundingClientRect().top)")
+    ctx.close()
+    assert top <= 2, f"スクロール後にタブが上部固定されていない: top={top}"
+
+
+def test_mobile_run_scrolls_results_into_view(browser, live_server):
+    """スマホで「健康リスク分析」タップ後、結果が画面内へ自動スクロールする。"""
+    ctx = browser.new_context(viewport={"width": 390, "height": 800})
+    pg = ctx.new_page()
+    pg.goto(live_server + "/simulator", wait_until="networkidle")
+    pg.click(".tab:has-text('健康リスク')")
+    pg.evaluate("window.scrollTo(0, 0)")
+    pg.click("button:has-text('健康リスク分析')")
+    pg.wait_for_timeout(400)
+    rtop = pg.evaluate("() => Math.round(document.getElementById('health-results').getBoundingClientRect().top)")
+    ctx.close()
+    assert rtop < 400, f"結果が画面内にスクロールされていない: top={rtop}"
+
+
+def test_mobile_pdf_card_collapsed_by_default(browser, live_server):
+    """スマホでは PDF 投入カードが既定で畳まれ、要点が先に見える。"""
+    mob = browser.new_context(viewport={"width": 375, "height": 800})
+    mp = mob.new_page()
+    mp.goto(live_server + "/simulator", wait_until="networkidle")
+    mp.wait_for_selector("#pair-summary", state="visible")
+    collapsed = mp.eval_on_selector("#pdf-upload-card", "el => el.open")
+    mob.close()
+    assert collapsed is False, "スマホで PDF カードが畳まれていない"
+    # PC では開いたまま（回帰防止）
+    desk = browser.new_context(viewport={"width": 1100, "height": 900})
+    dp = desk.new_page()
+    dp.goto(live_server + "/simulator", wait_until="networkidle")
+    open_desktop = dp.eval_on_selector("#pdf-upload-card", "el => el.open")
+    desk.close()
+    assert open_desktop is True, "PC で PDF カードが閉じてしまっている"
+
+
 def test_health_warning_names_actual_disease(page, live_server):
     """健康リスク警告は実際にリスクのある疾患名を表示する（CDDY 決め打ちの修正）。
 
