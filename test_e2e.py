@@ -230,6 +230,51 @@ def test_color_probabilities_sum_to_100_dilute_agouti(page, live_server):
     assert abs(total - 1.0) < 0.01, f"毛色確率の合計が 100% でない: {total}"
 
 
+def test_pairing_summary_renders_on_load(page, live_server):
+    """総合サマリーが初期表示（既定サンプル配合）で毛色と健康リスクを一望できる。
+
+    競合の Pairing Predictor 同様「1回選べば全部出る」ことの回帰テスト。
+    既定は exA(♂ブラック) × exB(♀クリーム)。両親 CDDY P/N → 子 25% P/P で高リスク。"""
+    _open_sim(page, live_server)
+    page.wait_for_selector("#pair-summary", state="visible")
+    summ = page.inner_text("#pair-summary-body")
+    assert "父" in summ and "%" in summ           # ペア名＋毛色%が出る
+    assert "クリーム" in summ or "ブラック" in summ  # 予測毛色チップ
+    assert "高リスク" in summ or "注意" in summ      # CDDY 健康リスクが集約表示される
+
+
+def test_pair_selection_syncs_across_tabs(page, live_server):
+    """父犬/母犬をどのタブで選んでも毛色・健康の両タブに同期する（配合ペア共通化）。"""
+    _open_sim(page, live_server)
+    # 毛色タブで母犬を変更 → 健康タブの母犬セレクトが追従
+    page.select_option("#dam-color", "exI")
+    assert page.eval_on_selector("#dam-health", "el => el.value") == "exI"
+    # 健康タブで父犬を変更 → 毛色タブの父犬セレクトが追従
+    page.click(".tab:has-text('健康リスク')")
+    page.select_option("#sire-health", "exC")
+    assert page.eval_on_selector("#sire-color", "el => el.value") == "exC"
+    # custom ↔ custom_h の対応
+    page.click(".tab:has-text('毛色')")
+    page.select_option("#sire-color", "custom")
+    assert page.eval_on_selector("#sire-health", "el => el.value") == "custom_h"
+
+
+def test_no_horizontal_overflow_on_mobile(browser, live_server):
+    """スマホ幅(375px)で横スクロール（はみ出し）が発生しない。"""
+    ctx = browser.new_context(viewport={"width": 375, "height": 800})
+    pg = ctx.new_page()
+    errors = []
+    pg.on("pageerror", lambda e: errors.append(str(e)))
+    pg.goto(live_server + "/simulator", wait_until="networkidle")
+    pg.wait_for_selector("#pair-summary", state="visible")
+    overflow = pg.evaluate(
+        "() => document.documentElement.scrollWidth - document.documentElement.clientWidth"
+    )
+    ctx.close()
+    assert overflow <= 2, f"モバイルで横方向にはみ出し: {overflow}px"
+    assert errors == [], f"pageerror: {errors}"
+
+
 def test_health_warning_names_actual_disease(page, live_server):
     """健康リスク警告は実際にリスクのある疾患名を表示する（CDDY 決め打ちの修正）。
 
