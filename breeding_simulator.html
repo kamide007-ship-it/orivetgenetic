@@ -303,6 +303,17 @@ header .container { position:relative; }
     </div>
   </details>
 
+  <!-- ================================================================ -->
+  <!-- 総合サマリー（競合の Pairing Predictor 相当：1回選べば毛色・健康を一望） -->
+  <!-- 常時表示。どのタブで父犬/母犬を変えても onPairChange 経由で更新される。 -->
+  <!-- ================================================================ -->
+  <div id="pair-summary" class="card" style="display:none;background:linear-gradient(135deg,#faf5ff,#eff6ff);border:1px solid #ddd6fe;margin-bottom:18px;">
+    <h2 style="margin-top:0;display:flex;align-items:center;gap:8px;font-size:1.2em;">
+      <span aria-hidden="true">📋</span><span data-i18n="summary_title">この配合の総合サマリー</span>
+    </h2>
+    <div id="pair-summary-body"></div>
+  </div>
+
   <div class="tabs" role="tablist">
     <div class="tab active" role="tab" tabindex="0" aria-selected="true" aria-controls="color" onclick="showTab('color')" data-i18n="tab_color">毛色シミュレーション</div>
     <div class="tab" role="tab" tabindex="0" aria-selected="false" aria-controls="health" onclick="showTab('health')" data-i18n="tab_health">健康リスク分析</div>
@@ -318,9 +329,9 @@ header .container { position:relative; }
       <div class="form-row">
         <div class="form-group">
           <label data-i18n="lbl_sire">父犬 (Sire)</label>
-          <select id="sire-color" onchange="runColorSim()">
+          <select id="sire-color" onchange="onPairChange('color')">
             <option value="custom" data-i18n="opt_custom">カスタム入力...</option>
-            <option value="exA">トイプードル ♂ ブラック (E/e, KB/ky, at/at, Bb)</option>
+            <option value="exA" selected>トイプードル ♂ ブラック (E/e, KB/ky, at/at, Bb)</option>
             <option value="exC">ラブラドール ♂ チョコレート (E/E, KB/KB, ay/ay, bb)</option>
             <option value="exE">柴犬 ♂ 赤 (E/E, ky/ky, ay/ay, BB)</option>
             <option value="exG">スタンダードプードル ♂ シルバー (G/g 退色)</option>
@@ -329,9 +340,9 @@ header .container { position:relative; }
         </div>
         <div class="form-group">
           <label data-i18n="lbl_dam">母犬 (Dam)</label>
-          <select id="dam-color" onchange="runColorSim()">
+          <select id="dam-color" onchange="onPairChange('color')">
             <option value="custom" data-i18n="opt_custom">カスタム入力...</option>
-            <option value="exB">トイプードル ♀ クリーム (e/e, KB/KB, at/at, Bb)</option>
+            <option value="exB" selected>トイプードル ♀ クリーム (e/e, KB/KB, at/at, Bb)</option>
             <option value="exD">ラブラドール ♀ イエロー (e/e, KB/KB, ay/ay, Bb)</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール (E/E, ky/ky, at/at, M/m)</option>
             <option value="exI">ラブラドール ♀ リセッシブブラック (a/a)</option>
@@ -508,9 +519,9 @@ header .container { position:relative; }
       <div class="form-row">
         <div class="form-group">
           <label>父犬 (Sire)</label>
-          <select id="sire-health" onchange="runHealthSim()">
+          <select id="sire-health" onchange="onPairChange('health')">
             <option value="custom_h">カスタム入力...</option>
-            <option value="exA">トイプードル ♂ ブラック</option>
+            <option value="exA" selected>トイプードル ♂ ブラック</option>
             <option value="exC">ラブラドール ♂ チョコレート</option>
             <option value="exE">柴犬 ♂ 赤</option>
             <option value="exG">スタンダードプードル ♂ シルバー</option>
@@ -519,9 +530,9 @@ header .container { position:relative; }
         </div>
         <div class="form-group">
           <label>母犬 (Dam)</label>
-          <select id="dam-health" onchange="runHealthSim()">
+          <select id="dam-health" onchange="onPairChange('health')">
             <option value="custom_h">カスタム入力...</option>
-            <option value="exB">トイプードル ♀ クリーム</option>
+            <option value="exB" selected>トイプードル ♀ クリーム</option>
             <option value="exD">ラブラドール ♀ イエロー</option>
             <option value="exF">ボーダーコリー ♀ ブルーマール</option>
             <option value="exI">ラブラドール ♀ リセッシブブラック</option>
@@ -2183,6 +2194,7 @@ function runColorSim() {
 
   document.getElementById('color-results').style.display = 'block';
   document.getElementById('color-output').innerHTML = html;
+  renderPairSummary();
 }
 
 // ================================================================
@@ -2584,6 +2596,153 @@ function runHealthSim() {
 
   document.getElementById('health-results').style.display = 'block';
   document.getElementById('health-output').innerHTML = html;
+  renderPairSummary();
+}
+
+// ================================================================
+// 配合ペアのタブ横断同期 ＋ 総合サマリー
+//   競合（Embark "Pairing Predictor" / Wisdom "Optimal Selection"）に倣い、
+//   父犬・母犬をどのタブで選んでも毛色・健康の両タブへ反映し、
+//   1枚のサマリーに毛色トップ3と健康リスクを集約する（1回選べば全部出る）。
+// ================================================================
+
+// color 選択キー ↔ health 選択キーの対応（custom のみ別名 custom_h）
+function _pairColorToHealth(k) { return k === 'custom' ? 'custom_h' : k; }
+function _pairHealthToColor(k) { return k === 'custom_h' ? 'custom' : k; }
+
+// 対象 option が存在する場合のみ値を設定（.value 代入は onchange を発火しないため無限ループしない）
+function _setSelectValue(id, val) {
+  const sel = document.getElementById(id);
+  if (sel && [...sel.options].some(o => o.value === val) && sel.value !== val) {
+    sel.value = val;
+  }
+}
+function _syncHealthFromColor() {
+  _setSelectValue('sire-health', _pairColorToHealth(document.getElementById('sire-color').value));
+  _setSelectValue('dam-health',  _pairColorToHealth(document.getElementById('dam-color').value));
+}
+function _syncColorFromHealth() {
+  _setSelectValue('sire-color', _pairHealthToColor(document.getElementById('sire-health').value));
+  _setSelectValue('dam-color',  _pairHealthToColor(document.getElementById('dam-health').value));
+}
+
+// ペア選択変更のエントリポイント（毛色/健康セレクトの onchange から呼ぶ）。
+// origin 側の選択を正として両タブへ反映し、両シミュを再計算する。
+function onPairChange(origin) {
+  if (origin === 'health') _syncColorFromHealth();
+  else _syncHealthFromColor();
+  runColorSim();
+  runHealthSim();
+}
+
+// 現在の母犬遺伝子型（_currentSireGenotype の母犬版）
+function _currentDamGenotype() {
+  const damKey = document.getElementById('dam-color').value;
+  const damG = (document.getElementById('cd-g') || {}).checked ? 'Gg' : 'gg';
+  const damI = v('cd-i');
+  let dam;
+  if (damKey === 'custom' || !DOGS[damKey]) {
+    dam = { e:v('cd-e'), k:v('cd-k'), a:v('cd-a'), b:v('cd-b'), d:v('cd-d'), m:v('cd-m'), s:v('cd-s'), g: damG };
+    if (damI) dam.i = damI;
+  } else {
+    dam = Object.assign({ g: 'gg' }, _fillGenotypeDefaults(DOGS[damKey].color));
+    const ovrDamI = (document.getElementById('ovr-dam-i') || {}).value;
+    if (ovrDamI) dam.i = ovrDamI;
+    if ((document.getElementById('ovr-dam-g') || {}).checked) dam.g = 'Gg';
+  }
+  return dam;
+}
+
+// 現在のペアの表示名
+function _pairNames() {
+  const sk = document.getElementById('sire-color').value;
+  const dk = document.getElementById('dam-color').value;
+  const sName = (sk !== 'custom' && DOGS[sk]) ? DOGS[sk].name : '父犬（カスタム）';
+  const dName = (dk !== 'custom' && DOGS[dk]) ? DOGS[dk].name : '母犬（カスタム）';
+  return { sName, dName };
+}
+
+// 健康リスク集約（runHealthSim と同じ閾値: P/P>20%=高リスク, >0=注意）
+// ⚠️ runHealthSim の判定ロジックを変更した場合はここも同期すること。
+function _collectHealthRisks() {
+  const sireKey = document.getElementById('sire-health').value;
+  const damKey = document.getElementById('dam-health').value;
+  let sire, dam;
+  if (sireKey === 'custom_h') sire = { health: _readCustomHealth('chs') };
+  else if (DOGS[sireKey]) sire = DOGS[sireKey];
+  if (damKey === 'custom_h') dam = { health: _readCustomHealth('chd') };
+  else if (DOGS[damKey]) dam = DOGS[damKey];
+  const danger = [], caution = [];
+  let comparable = 0;
+  if (sire && dam && sire.health && dam.health) {
+    for (const [disease, sGT] of Object.entries(sire.health)) {
+      const dGT = dam.health[disease];
+      if (!sGT || !dGT) continue;
+      comparable++;
+      const pPP = cross(sGT, dGT)["PP"] || 0;
+      const jp = HEALTH_JP[disease] || disease;
+      if (pPP > 0.2) danger.push(jp);
+      else if (pPP > 0) caution.push(jp);
+    }
+  }
+  return { danger, caution, comparable };
+}
+
+// 総合サマリーを描画（毛色トップ3 ＋ 健康リスク ＋ COI 導線）
+function renderPairSummary() {
+  const card = document.getElementById('pair-summary');
+  const body = document.getElementById('pair-summary-body');
+  if (!card || !body) return;
+  const { sName, dName } = _pairNames();
+
+  // --- 毛色トップ3（比較機能と同じ純粋関数を再利用） ---
+  let colorHtml = '';
+  try {
+    const cons = _consolidateByBaseColor(_buildColorResults(_currentSireGenotype(), _currentDamGenotype()));
+    const entries = Object.entries(cons).sort((a, b) => b[1] - a[1]);
+    const total = entries.reduce((s, [, p]) => s + p, 0) || 1;
+    if (entries.length) {
+      let bar = '<div class="color-bar" style="height:34px;margin:6px 0 10px;">';
+      for (const [key, p] of entries) {
+        const cm = COLOR_MAP[key]; if (!cm) continue;
+        const pct = p / total * 100;
+        if (pct < 0.5) continue;
+        bar += `<div style="width:${pct.toFixed(1)}%;background:${_multiToneBg(key, cm.hex)};">${pct >= 8 ? pct.toFixed(0) + '%' : ''}</div>`;
+      }
+      bar += '</div>';
+      let chips = '<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+      for (const [key, p] of entries.slice(0, 3)) {
+        const cm = COLOR_MAP[key]; if (!cm) continue;
+        const pct = (p / total * 100).toFixed(0);
+        chips += `<span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #e5e7eb;border-radius:20px;padding:4px 12px;font-size:0.9em;">`
+          + `<span class="color-swatch" style="width:18px;height:18px;margin:0;background:${_multiToneBg(key, cm.hex)}"></span>`
+          + `${escapeHtml(cm.name)} <strong style="color:#5b21b6;">${pct}%</strong></span>`;
+      }
+      chips += '</div>';
+      colorHtml = bar + chips;
+    }
+  } catch (e) { colorHtml = ''; }
+
+  // --- 健康リスク ---
+  const risks = _collectHealthRisks();
+  let healthHtml;
+  if (risks.comparable === 0) {
+    healthHtml = '<span style="color:#6b7280;">比較できる検査データがありません</span>';
+  } else if (risks.danger.length) {
+    healthHtml = `<span style="color:#dc2626;font-weight:700;">⚠ 高リスク: ${escapeHtml(risks.danger.join('・'))}</span>`;
+  } else if (risks.caution.length) {
+    healthHtml = `<span style="color:#c2410c;font-weight:600;">注意: ${escapeHtml(risks.caution.join('・'))}</span>`;
+  } else {
+    healthHtml = '<span style="color:#166534;font-weight:600;">✓ 検査済み疾患は全て安全域</span>';
+  }
+
+  body.innerHTML =
+    `<p style="margin:0 0 10px;font-size:0.95em;"><strong>${escapeHtml(sName)}</strong>(父) × <strong>${escapeHtml(dName)}</strong>(母)</p>`
+    + (colorHtml ? `<div style="margin-bottom:12px;"><div style="font-size:0.82em;color:#6b7280;margin-bottom:2px;">🎨 予測される毛色（上位）</div>${colorHtml}</div>` : '')
+    + `<div style="margin-bottom:10px;font-size:0.92em;">🩺 ${healthHtml}</div>`
+    + `<div style="font-size:0.85em;color:#6b7280;">🧬 近親交配係数(COI)は血統情報が必要です → `
+    + `<a href="javascript:void(0)" onclick="showTab('coi')" style="color:#7c3aed;font-weight:600;">COIタブで算出</a></div>`;
+  card.style.display = 'block';
 }
 
 // ================================================================
@@ -3274,6 +3433,7 @@ const _SIM_I18N = {
     tab_color:           '毛色シミュレーション',
     tab_health:          '健康リスク分析',
     tab_coi:             '近親交配係数 (COI)',
+    summary_title:       'この配合の総合サマリー',
     color_pair_title:    '交配ペア選択 — 毛色配合シミュレーション',
     lbl_sire:            '父犬 (Sire)',
     lbl_dam:             '母犬 (Dam)',
@@ -3312,6 +3472,7 @@ const _SIM_I18N = {
     tab_color:           'Coat color',
     tab_health:          'Health risk',
     tab_coi:             'Inbreeding (COI)',
+    summary_title:       'Pairing summary',
     color_pair_title:    'Pair selection — Coat color prediction',
     lbl_sire:            'Sire',
     lbl_dam:             'Dam',

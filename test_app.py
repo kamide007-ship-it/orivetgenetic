@@ -1377,6 +1377,26 @@ class TestHeterozygosityParser:
         assert "父犬の疾患ステータス" in body
         assert "Sire disease status" in body
 
+    def test_simulator_has_pairing_summary(self):
+        """総合サマリー（Pairing Predictor 相当）とタブ横断同期が実装されている"""
+        body = client.get("/simulator").get_data(as_text=True)
+        # 総合サマリーカードと描画関数
+        assert 'id="pair-summary"' in body
+        assert 'id="pair-summary-body"' in body
+        assert "function renderPairSummary" in body
+        # タブ横断のペア同期
+        assert "function onPairChange" in body
+        assert "onPairChange('color')" in body
+        assert "onPairChange('health')" in body
+        assert "function _syncHealthFromColor" in body
+        assert "function _syncColorFromHealth" in body
+        # 既定で実サンプル配合が選択され、初回から予測が出る
+        assert '<option value="exA" selected>' in body
+        assert '<option value="exB" selected>' in body
+        # i18n（ja/en）
+        assert "この配合の総合サマリー" in body
+        assert "Pairing summary" in body
+
     def test_simulator_has_beginner_advanced_mode(self):
         """シミュレーターに 初級/詳細 モードトグルがある"""
         body = client.get("/simulator").get_data(as_text=True)
